@@ -137,4 +137,19 @@
     <string name="speech_service_gemini">Gemini Audio Recognition</string>
     <string name="speech_service_openai_whisper">OpenAI Whisper</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
+    
+    <!-- Photo Transfer -->
+    <string name="photo_received">Photo received from glasses</string>
+    <string name="photo_processing_failed">Failed to process photo</string>
+    <string name="photo_transfer_failed">Photo transfer failed: %s</string>
+    <string name="analyzing_photo">Analyzing photo…</string>
+    <string name="ai_analysis_unavailable">AI image analysis not available</string>
+    <string name="photo_analysis_failed">Photo analysis failed: %s</string>
+    
+    <!-- Camera Capture -->
+    <string name="camera_capture">Glasses Camera</string>
+    <string name="camera_capture_hint">Capture photo from glasses and analyze with AI</string>
+    <string name="capture">Capture</string>
+    <string name="latest_photo">Latest Photo</string>
+    <string name="photo_not_found">Photo not found</string>
 </resources>

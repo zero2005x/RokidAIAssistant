@@ -10,6 +10,7 @@ import androidx.core.app.NotificationCompat
 import com.example.rokidcommon.Constants
 import com.example.rokidcommon.protocol.Message
 import com.example.rokidcommon.protocol.MessageType
+import com.example.rokidcommon.protocol.photo.PhotoTransferState
 import com.example.rokidphone.BuildConfig
 import com.example.rokidphone.MainActivity
 import com.example.rokidphone.R
@@ -19,6 +20,11 @@ import com.example.rokidphone.data.AvailableModels
 import com.example.rokidphone.data.SettingsRepository
 import com.example.rokidphone.service.ai.AiServiceFactory
 import com.example.rokidphone.service.ai.AiServiceProvider
+import com.example.rokidphone.service.cxr.CxrMobileManager
+import com.example.rokidphone.service.photo.PhotoData
+import com.example.rokidphone.service.photo.PhotoRepository
+import com.example.rokidphone.service.photo.ReceivedPhoto
+import com.rokid.cxr.client.utils.ValueUtil
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -50,8 +56,14 @@ class PhoneAIService : Service() {
     // TTS service
     private var ttsService: TextToSpeechService? = null
     
-    // Bluetooth manager
+    // Bluetooth manager (legacy SPP connection)
     private var bluetoothManager: BluetoothSppManager? = null
+    
+    // CXR-M SDK Manager (for Rokid glasses connection and photo capture)
+    private var cxrManager: CxrMobileManager? = null
+    
+    // Photo repository for managing received photos
+    private var photoRepository: PhotoRepository? = null
     
     private val _messageFlow = MutableSharedFlow<Message>()
     val messageFlow = _messageFlow.asSharedFlow()
@@ -83,6 +95,7 @@ class PhoneAIService : Service() {
         
         serviceScope.cancel()
         bluetoothManager?.disconnect()
+        cxrManager?.release()
         ttsService?.shutdown()
     }
     
@@ -142,6 +155,14 @@ class PhoneAIService : Service() {
                     
                     // Update notification
                     updateNotification(state)
+                    
+                    // Initialize CXR Bluetooth when SPP connected
+                    if (state == BluetoothConnectionState.CONNECTED) {
+                        bluetoothManager?.connectedDevice?.let { device ->
+                            Log.d(TAG, "Initializing CXR Bluetooth with device: ${device.name}")
+                            cxrManager?.initBluetooth(device)
+                        }
+                    }
                 }
             }
             
@@ -151,8 +172,181 @@ class PhoneAIService : Service() {
                     handleGlassesMessage(message)
                 }
             }
+            
+            // Initialize photo repository
+            photoRepository = PhotoRepository(this, serviceScope)
+            
+            // Listen for received photos from glasses
+            serviceScope.launch {
+                bluetoothManager?.receivedPhoto?.collect { receivedPhoto ->
+                    handleReceivedPhoto(receivedPhoto)
+                }
+            }
+            
+            // Monitor photo transfer state
+            serviceScope.launch {
+                bluetoothManager?.photoTransferState?.collect { state ->
+                    handlePhotoTransferState(state)
+                }
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error initializing Bluetooth manager", e)
+        }
+        
+        // Listen for capture photo requests from UI
+        serviceScope.launch {
+            ServiceBridge.capturePhotoFlow.collect {
+                Log.d(TAG, "Capture photo request from UI")
+                requestGlassesToCapturePhoto()
+            }
+        }
+        
+        // Initialize CXR-M SDK (for Rokid glasses photo capture)
+        initializeCxrSdk()
+    }
+    
+    /**
+     * Request glasses to capture and send photo via SPP
+     */
+    private suspend fun requestGlassesToCapturePhoto() {
+        if (bluetoothManager?.connectionState?.value != BluetoothConnectionState.CONNECTED) {
+            Log.w(TAG, "Cannot capture photo: not connected to glasses")
+            return
+        }
+        
+        Log.d(TAG, "Sending CAPTURE_PHOTO command to glasses")
+        bluetoothManager?.sendMessage(Message(type = MessageType.CAPTURE_PHOTO))
+    }
+    
+    /**
+     * Initialize CXR-M SDK for Rokid glasses connection
+     * This enables:
+     * - AI key event listening (long press on glasses)
+     * - Remote photo capture from glasses
+     */
+    private fun initializeCxrSdk() {
+        if (!CxrMobileManager.isSdkAvailable()) {
+            Log.w(TAG, "CXR-M SDK not available")
+            return
+        }
+        
+        try {
+            cxrManager = CxrMobileManager(this)
+            
+            // Set AI event listener for glasses key press
+            cxrManager?.setAiEventListener(
+                onKeyDown = {
+                    Log.d(TAG, "CXR: AI key pressed on glasses")
+                    // Trigger photo capture when AI key is pressed
+                    serviceScope.launch {
+                        capturePhotoFromGlasses()
+                    }
+                },
+                onKeyUp = {
+                    Log.d(TAG, "CXR: AI key released")
+                },
+                onExit = {
+                    Log.d(TAG, "CXR: AI scene exited")
+                }
+            )
+            
+            // Monitor CXR Bluetooth connection state
+            serviceScope.launch {
+                cxrManager?.bluetoothState?.collect { state ->
+                    Log.d(TAG, "CXR Bluetooth state: $state")
+                    when (state) {
+                        is CxrMobileManager.BluetoothState.Connected -> {
+                            Log.d(TAG, "CXR connected: ${state.macAddress}")
+                        }
+                        is CxrMobileManager.BluetoothState.Disconnected -> {
+                            Log.d(TAG, "CXR disconnected")
+                        }
+                        is CxrMobileManager.BluetoothState.Failed -> {
+                            Log.e(TAG, "CXR connection failed: ${state.error}")
+                        }
+                        else -> {}
+                    }
+                }
+            }
+            
+            Log.d(TAG, "CXR-M SDK initialized")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to initialize CXR-M SDK", e)
+        }
+    }
+    
+    /**
+     * Capture photo from glasses using CXR-M SDK
+     */
+    private suspend fun capturePhotoFromGlasses() {
+        val cxr = cxrManager ?: run {
+            Log.w(TAG, "CXR manager not available, using legacy photo transfer")
+            return
+        }
+        
+        if (!cxr.isBluetoothConnected()) {
+            Log.w(TAG, "CXR not connected to glasses")
+            bluetoothManager?.sendMessage(Message.aiError("眼镜未通过 CXR 连接"))
+            return
+        }
+        
+        Log.d(TAG, "Capturing photo from glasses via CXR SDK...")
+        
+        // Notify glasses: taking photo
+        cxr.sendTtsContent("正在拍照...")
+        
+        // Take photo using CXR SDK
+        val status = cxr.takePhoto(
+            width = 1280,
+            height = 720,
+            quality = 80
+        ) { resultStatus, photoData ->
+            serviceScope.launch {
+                when (resultStatus) {
+                    ValueUtil.CxrStatus.RESPONSE_SUCCEED -> {
+                        if (photoData != null && photoData.isNotEmpty()) {
+                            Log.d(TAG, "CXR photo received: ${photoData.size} bytes")
+                            handleCxrPhotoResult(photoData)
+                        } else {
+                            Log.e(TAG, "CXR photo is empty")
+                            bluetoothManager?.sendMessage(Message.aiError("拍照失败：照片为空"))
+                        }
+                    }
+                    ValueUtil.CxrStatus.RESPONSE_TIMEOUT -> {
+                        Log.e(TAG, "CXR photo timeout")
+                        bluetoothManager?.sendMessage(Message.aiError("拍照超时，请重试"))
+                    }
+                    else -> {
+                        Log.e(TAG, "CXR photo failed: $resultStatus")
+                        bluetoothManager?.sendMessage(Message.aiError("拍照失败: $resultStatus"))
+                    }
+                }
+            }
+        }
+        
+        Log.d(TAG, "CXR takePhoto request status: $status")
+    }
+    
+    /**
+     * Handle photo captured via CXR SDK
+     */
+    private suspend fun handleCxrPhotoResult(photoData: ByteArray) {
+        try {
+            Log.d(TAG, "Processing CXR photo: ${photoData.size} bytes")
+            
+            // Create a ReceivedPhoto object
+            val receivedPhoto = ReceivedPhoto(
+                data = photoData,
+                timestamp = System.currentTimeMillis(),
+                transferTimeMs = 0  // Direct capture, no transfer time
+            )
+            
+            // Process the photo
+            handleReceivedPhoto(receivedPhoto)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to process CXR photo", e)
+            bluetoothManager?.sendMessage(Message.aiError("处理照片失败: ${e.message}"))
         }
     }
     
@@ -181,6 +375,116 @@ class PhoneAIService : Service() {
             else -> { 
                 Log.d(TAG, "Unhandled message type: ${message.type}")
             }
+        }
+    }
+    
+    /**
+     * Handle received photo from glasses
+     */
+    private suspend fun handleReceivedPhoto(receivedPhoto: ReceivedPhoto) {
+        Log.d(TAG, "Received photo: ${receivedPhoto.data.size} bytes, transfer time: ${receivedPhoto.transferTimeMs}ms")
+        
+        // Process and store the photo
+        val photoData = photoRepository?.processReceivedPhoto(receivedPhoto)
+        
+        if (photoData != null) {
+            Log.d(TAG, "Photo saved: ${photoData.filePath}")
+            
+            // Notify UI about the photo path for display
+            ServiceBridge.emitLatestPhotoPath(photoData.filePath)
+            
+            // Notify UI that a photo was received
+            ServiceBridge.emitConversation(Message(
+                type = MessageType.AI_PROCESSING,
+                payload = getString(R.string.photo_received)
+            ))
+            
+            // Analyze the photo with AI
+            analyzePhotoWithAI(photoData)
+        } else {
+            Log.e(TAG, "Failed to process received photo")
+            bluetoothManager?.sendMessage(Message.aiError(getString(R.string.photo_processing_failed)))
+        }
+    }
+    
+    /**
+     * Handle photo transfer state changes
+     */
+    private fun handlePhotoTransferState(state: PhotoTransferState) {
+        when (state) {
+            is PhotoTransferState.Idle -> {
+                Log.d(TAG, "Photo transfer: Idle")
+            }
+            is PhotoTransferState.InProgress -> {
+                Log.d(TAG, "Photo transfer: ${state.currentChunk}/${state.totalChunks} " +
+                        "(${state.progressPercent.toInt()}%)")
+            }
+            is PhotoTransferState.Success -> {
+                Log.d(TAG, "Photo transfer: Success (${state.data.size} bytes)")
+            }
+            is PhotoTransferState.Error -> {
+                Log.e(TAG, "Photo transfer error: ${state.message}")
+                serviceScope.launch {
+                    bluetoothManager?.sendMessage(Message.aiError(
+                        getString(R.string.photo_transfer_failed, state.message)
+                    ))
+                }
+            }
+        }
+    }
+    
+    /**
+     * Analyze photo with AI and send results back to glasses
+     */
+    private suspend fun analyzePhotoWithAI(photoData: PhotoData) {
+        try {
+            // Get photo bytes for AI analysis
+            val photoBytes = photoRepository?.getPhotoBytes(photoData) ?: return
+            
+            Log.d(TAG, "Analyzing photo with AI: ${photoBytes.size} bytes")
+            
+            // Notify glasses: analyzing photo
+            bluetoothManager?.sendMessage(Message.aiProcessing(getString(R.string.analyzing_photo)))
+            
+            ServiceBridge.emitConversation(Message(
+                type = MessageType.AI_PROCESSING,
+                payload = getString(R.string.analyzing_photo)
+            ))
+            
+            // Use AI service to analyze the image (Chinese prompt)
+            val analysisResult = aiService?.analyzeImage(
+                photoBytes, 
+                "请详细描述这张图片中你所看到的内容。包括主要对象、场景、颜色等细节。用中文回答，简洁明了。"
+            ) ?: getString(R.string.ai_analysis_unavailable)
+            
+            // Clean markdown for glasses display
+            val cleanedResult = cleanMarkdown(analysisResult)
+            
+            Log.d(TAG, "Photo analysis result: $cleanedResult")
+            
+            // Update photo data with analysis result
+            photoData.analysisResult = cleanedResult
+            
+            // Send result to glasses
+            bluetoothManager?.sendMessage(Message(
+                type = MessageType.PHOTO_ANALYSIS_RESULT,
+                payload = cleanedResult
+            ))
+            
+            // Notify phone UI
+            ServiceBridge.emitConversation(Message(
+                type = MessageType.AI_RESPONSE_TEXT,
+                payload = cleanedResult
+            ))
+            
+            // TTS voice playback
+            ttsService?.speak(cleanedResult) { }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to analyze photo", e)
+            bluetoothManager?.sendMessage(Message.aiError(
+                getString(R.string.photo_analysis_failed, e.message ?: "")
+            ))
         }
     }
     

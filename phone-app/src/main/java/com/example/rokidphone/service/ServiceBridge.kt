@@ -1,5 +1,6 @@
 package com.example.rokidphone.service
 
+import android.util.Log
 import com.example.rokidcommon.protocol.Message
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -7,6 +8,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+
+private const val TAG = "ServiceBridge"
 
 /**
  * Bridge between Service and UI
@@ -30,6 +33,17 @@ object ServiceBridge {
     // API Key missing notification
     private val _apiKeyMissingFlow = MutableSharedFlow<Unit>(replay = 0)
     val apiKeyMissingFlow: SharedFlow<Unit> = _apiKeyMissingFlow.asSharedFlow()
+    
+    // Capture photo request from UI
+    private val _capturePhotoFlow = MutableSharedFlow<Unit>(replay = 0)
+    val capturePhotoFlow: SharedFlow<Unit> = _capturePhotoFlow.asSharedFlow()
+    
+    /**
+     * Request glasses to capture photo (called by UI/ViewModel)
+     */
+    suspend fun requestCapturePhoto() {
+        _capturePhotoFlow.emit(Unit)
+    }
     
     /**
      * Emit conversation message (called by Service)
@@ -64,5 +78,17 @@ object ServiceBridge {
      */
     suspend fun notifyApiKeyMissing() {
         _apiKeyMissingFlow.emit(Unit)
+    }
+    
+    // Latest received photo path for UI display
+    private val _latestPhotoPathFlow = MutableSharedFlow<String>(replay = 1)
+    val latestPhotoPathFlow: SharedFlow<String> = _latestPhotoPathFlow.asSharedFlow()
+    
+    /**
+     * Emit latest photo path (called by Service after saving photo)
+     */
+    suspend fun emitLatestPhotoPath(path: String) {
+        Log.d(TAG, "Emitting latest photo path: $path")
+        _latestPhotoPathFlow.emit(path)
     }
 }

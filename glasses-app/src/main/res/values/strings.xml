@@ -48,4 +48,16 @@
     <string name="swipe_for_more">Swipe up/down for more</string>
     <string name="swipe_up_previous">▲ Swipe up for previous</string>
     <string name="swipe_down_next">▼ Swipe down for next</string>
+    <string name="swipe_left_right_pages">← Swipe to see more pages →</string>
+    
+    <!-- Photo Capture -->
+    <string name="bluetooth_not_connected">Bluetooth not connected</string>
+    <string name="connect_phone_first">Please connect phone first</string>
+    <string name="capturing_photo">Capturing photo...</string>
+    <string name="compressing_photo">Compressing...</string>
+    <string name="transferring_photo">Transferring...</string>
+    <string name="photo_sent_waiting_ai">Sent, waiting for AI analysis...</string>
+    <string name="photo_analysis_no_result">Unable to analyze this photo</string>
+    <string name="capture_failed">Capture failed</string>
+    <string name="transfer_failed">Transfer failed: %s</string>
 </resources>

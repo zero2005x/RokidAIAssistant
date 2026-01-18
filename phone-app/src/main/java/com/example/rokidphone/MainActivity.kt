@@ -8,22 +8,27 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
 import com.example.rokidcommon.protocol.ConnectionState
 import com.example.rokidphone.data.AvailableModels
 import com.example.rokidphone.data.SettingsRepository
@@ -33,6 +38,7 @@ import com.example.rokidphone.service.PhoneAIService
 import com.example.rokidphone.ui.SettingsScreen
 import com.example.rokidphone.ui.theme.RokidPhoneTheme
 import com.example.rokidphone.viewmodel.PhoneViewModel
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
     
@@ -173,6 +179,21 @@ fun PhoneMainScreen(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
+                // Camera capture card - only visible when connected
+                if (uiState.connectionState == ConnectionState.CONNECTED) {
+                    CameraCaptureCard(
+                        onCapturePhoto = { viewModel.requestCapturePhoto() }
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+                
+                // Show latest captured photo if available
+                uiState.latestPhotoPath?.let { photoPath ->
+                    LatestPhotoCard(photoPath = photoPath)
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+                
                 // Service control card
                 ServiceControlCard(
                     isServiceRunning = uiState.isServiceRunning,
@@ -274,6 +295,120 @@ fun ConnectionStatusCard(
                     Button(onClick = onConnect) {
                         Text(stringResource(R.string.connect))
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CameraCaptureCard(
+    onCapturePhoto: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.CameraAlt,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.size(40.dp)
+            )
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.camera_capture),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = stringResource(R.string.camera_capture_hint),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            Button(
+                onClick = onCapturePhoto,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PhotoCamera,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(R.string.capture))
+            }
+        }
+    }
+}
+
+@Composable
+fun LatestPhotoCard(photoPath: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Image,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.latest_photo),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            // Display the photo
+            val file = remember(photoPath) { File(photoPath) }
+            if (file.exists()) {
+                Image(
+                    painter = rememberAsyncImagePainter(file),
+                    contentDescription = "Captured photo",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.photo_not_found),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }

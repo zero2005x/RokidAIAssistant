@@ -29,6 +29,16 @@ enum class MessageType(val code: Int) {
     DISPLAY_CLEAR(0x31),         // Phone -> Glasses: Clear display
     DISPLAY_STATUS(0x32),        // Phone -> Glasses: Status update
     
+    // Photo transfer (0x40-0x4F)
+    PHOTO_START(0x40),           // Glasses -> Phone: Start photo transfer
+    PHOTO_DATA(0x41),            // Glasses -> Phone: Photo chunk data
+    PHOTO_END(0x42),             // Glasses -> Phone: End photo transfer
+    PHOTO_ACK(0x43),             // Phone -> Glasses: Acknowledge chunk
+    PHOTO_RETRY(0x44),           // Phone -> Glasses: Request retransmit
+    PHOTO_CANCEL(0x45),          // Bidirectional: Cancel transfer
+    PHOTO_ANALYSIS_RESULT(0x46), // Phone -> Glasses: AI analysis result
+    CAPTURE_PHOTO(0x47),         // Phone -> Glasses: Request to capture photo
+    
     // System control (0xF0-0xFF)
     SYSTEM_STATUS(0xF0),         // Bidirectional: System status
     SYSTEM_CONFIG(0xF1),         // Phone -> Glasses: Config update

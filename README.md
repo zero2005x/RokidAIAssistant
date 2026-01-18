@@ -1,145 +1,159 @@
-# Rokid AI 助手
+# Rokid AI Assistant
 
-一款運行在 Android 手機上，與 Rokid 智能眼鏡配合使用的 AI 語音助手應用。
+An AI voice assistant app running on Android phones that works with Rokid smart glasses.
 
-## 功能特點
+## Features
 
-- 🔗 **藍牙連接**：自動掃描並連接 Rokid 眼鏡
-- 🎤 **語音交互**：透過眼鏡麥克風接收語音
-- 🤖 **AI 對話**：整合 Google Gemini API 提供智能對話
-- 📺 **AR 顯示**：將對話內容顯示在眼鏡螢幕上
+- 🔗 **Bluetooth Connection**: Automatically scan and connect to Rokid glasses
+- 🎤 **Voice Interaction**: Receive voice input through glasses microphone
+- 🤖 **AI Conversation**: Integrated with Google Gemini API for intelligent dialogue
+- 📺 **AR Display**: Display conversation content on glasses screen
+- 📷 **Photo Capture**: Capture photos through glasses camera for AI analysis
 
-## 技術架構
+## Technical Architecture
 
 ```
 ┌─────────────────────────────────────────┐
-│            手機端 (本應用)               │
+│           Phone App (phone-app)          │
 ├─────────────────────────────────────────┤
 │  Rokid CXR-M SDK                        │
-│  ├── 藍牙連接管理                        │
-│  ├── AI 事件監聽                         │
-│  └── 音頻流接收                          │
+│  ├── Bluetooth Connection Management    │
+│  ├── AI Event Listening                 │
+│  └── Audio Stream Reception             │
 ├─────────────────────────────────────────┤
-│  AI 服務層                               │
+│  AI Service Layer                        │
 │  ├── Speech-to-Text (Whisper API) ✅    │
-│  ├── Gemini API (已整合) ✅             │
+│  ├── Gemini API (Integrated) ✅         │
 │  └── Text-to-Speech (Edge TTS) ✅       │
 └─────────────────────────────────────────┘
                    │
-            Bluetooth
+            Bluetooth SPP
                    │
 ┌─────────────────────────────────────────┐
-│          Rokid 智能眼鏡                  │
-│  ├── 觸控板/語音喚醒                     │
-│  ├── 麥克風錄音                          │
-│  └── AR 字幕顯示                         │
+│          Glasses App (glasses-app)       │
+├─────────────────────────────────────────┤
+│  Rokid CXR-S SDK                        │
+│  ├── Touchpad / Voice Wake-up           │
+│  ├── Microphone Recording               │
+│  ├── Camera Capture (Camera2 API)       │
+│  └── AR Subtitle Display                │
 └─────────────────────────────────────────┘
 ```
 
-## 專案結構
+## Project Structure
 
 ```
-app/src/main/
-├── java/com/example/rokidaiassistant/
-│   ├── MainActivity.kt              # 入口，權限檢查
-│   ├── activities/
-│   │   ├── bluetooth/               # 藍牙連接模組
-│   │   │   ├── BluetoothInitActivity.kt
-│   │   │   └── BluetoothInitViewModel.kt
-│   │   └── aiassistant/             # AI 助手模組
-│   │       ├── AIAssistantActivity.kt
-│   │       └── AIAssistantViewModel.kt
-│   ├── services/
-│   │   ├── GeminiService.kt         # Gemini API 服務
-│   │   ├── SpeechToTextService.kt   # 語音識別 (Whisper)
-│   │   ├── TextToSpeechService.kt   # 語音合成 (Edge TTS)
-│   │   ├── EdgeTtsClient.kt         # Edge TTS WebSocket 客戶端
-│   │   └── AudioBufferManager.kt    # 音頻緩衝管理
-│   ├── data/
-│   │   └── Constants.kt             # 常數配置
-│   └── ui/theme/
-│       └── Theme.kt                 # Compose 主題
-├── res/
-│   ├── raw/
-│   │   └── sn_auth_file.lc          # SN 鑑權文件
-│   ├── values/
-│   │   ├── strings.xml
-│   │   └── themes.xml
-│   └── xml/
-│       └── network_security_config.xml
-└── AndroidManifest.xml
+RokidAIAssistant/
+├── glasses-app/                    # Glasses-side application
+│   └── src/main/java/.../
+│       ├── MainActivity.kt         # Main entry, key handling
+│       ├── viewmodel/
+│       │   └── GlassesViewModel.kt # UI state management
+│       └── service/
+│           ├── photo/
+│           │   ├── GlassesCameraManager.kt  # Camera2 API wrapper
+│           │   └── UnifiedCameraManager.kt  # Unified camera interface
+│           ├── BluetoothSppClient.kt        # Bluetooth SPP client
+│           ├── CxrServiceManager.kt         # CXR-S SDK manager
+│           └── WakeWordService.kt           # Voice wake-up detection
+│
+├── phone-app/                      # Phone-side application
+│   └── src/main/java/.../
+│       ├── MainActivity.kt         # Main entry
+│       ├── viewmodel/
+│       │   ├── PhoneViewModel.kt   # Main UI state
+│       │   └── ImageAnalysisViewModel.kt  # Image AI analysis
+│       └── service/
+│           ├── BluetoothSppManager.kt      # Bluetooth SPP server
+│           ├── GeminiSpeechService.kt      # Gemini Live API
+│           ├── PhoneAIService.kt           # AI orchestration
+│           ├── ServiceBridge.kt            # Service communication
+│           └── cxr/
+│               └── CxrMobileManager.kt     # CXR-M SDK manager
+│
+├── common/                         # Shared module
+│   └── src/main/java/.../
+│       ├── Constants.kt            # Shared constants
+│       └── protocol/
+│           └── MessageType.kt      # Bluetooth message protocol
+│
+└── app/                            # Legacy app module
 ```
 
-## 快速開始
+## Quick Start
 
-### 前置需求
+### Prerequisites
 
-- Android Studio Hedgehog (2023.1.1) 或更新版本
+- Android Studio Hedgehog (2023.1.1) or newer
 - Android SDK 34
 - Kotlin 1.9.22
-- Rokid 眼鏡設備 + SN 鑑權文件
+- Rokid glasses device + SN authentication file
 - Gemini API Key
 
-### 設定步驟
+### Setup Steps
 
-1. **克隆專案**
+1. **Clone the project**
 
    ```bash
    cd RokidAIAssistant
    ```
 
-2. **配置敏感資訊**
+2. **Configure sensitive information**
 
-   編輯 `local.properties`：
+   Edit `local.properties`:
 
    ```properties
-   sdk.dir=<你的 Android SDK 路徑>
-   ROKID_CLIENT_SECRET=<你的 Client Secret，去除連字號>
-   GEMINI_API_KEY=<你的 Gemini API Key>
-   OPENAI_API_KEY=<你的 OpenAI API Key，用於 Whisper STT>
+   sdk.dir=<your Android SDK path>
+   ROKID_CLIENT_SECRET=<your Client Secret, remove hyphens>
+   GEMINI_API_KEY=<your Gemini API Key>
+   OPENAI_API_KEY=<your OpenAI API Key for Whisper STT>
    ```
 
-3. **放置 SN 鑑權文件**
+3. **Place SN authentication file**
 
-   將 `.lc` 鑑權文件複製到：
+   Copy the `.lc` authentication file to:
 
    ```
    app/src/main/res/raw/sn_auth_file.lc
    ```
 
-4. **建置並運行**
+4. **Build and run**
    ```bash
    ./gradlew assembleDebug
-   # 或在 Android Studio 中點擊 Run
+   # Or click Run in Android Studio
    ```
 
-### 使用方式
+### Usage
 
-1. 開啟應用，點擊「掃描並連接眼鏡」
-2. 選擇您的 Rokid 眼鏡進行配對
-3. 連接成功後進入 AI 助手頁面
-4. **在眼鏡上**：長按觸控板 或 說「樂奇」
-5. 開始與 AI 對話！
+1. Install `glasses-app` on Rokid glasses
+2. Install `phone-app` on Android phone
+3. Open both apps and connect via Bluetooth
+4. **On glasses**: Press Enter key or say wake word
+5. **On phone**: Tap "Capture Photo" button to take photos
+6. Start conversing with AI!
 
-## 功能狀態
+## Feature Status
 
-### ✅ 已完成
+### ✅ Completed
 
-- [x] Speech-to-Text 整合 (OpenAI Whisper API)
-- [x] Text-to-Speech 整合 (Edge TTS + 系統 TTS 備選)
-- [x] Gemini AI 對話
-- [x] 藍牙連接與 CXR SDK 整合
+- [x] Speech-to-Text integration (OpenAI Whisper API)
+- [x] Text-to-Speech integration (Edge TTS + System TTS fallback)
+- [x] Gemini AI conversation
+- [x] Bluetooth connection with CXR SDK integration
+- [x] Photo capture via Camera2 API (YUV format)
+- [x] Photo transfer to phone via Bluetooth
+- [x] Image analysis with Gemini Vision
 
-### ⏳ 待完成
+### ⏳ To Do
 
-- [ ] 設定頁面 (API Key 管理、語音設定等)
-- [ ] 對話歷史持久化
-- [ ] 離線模式支援
-- [ ] 錯誤處理優化
+- [ ] Settings page (API Key management, voice settings, etc.)
+- [ ] Conversation history persistence
+- [ ] Offline mode support
+- [ ] Error handling optimization
 
-## 依賴版本
+## Dependencies
 
-| 依賴              | 版本       |
+| Dependency        | Version    |
 | ----------------- | ---------- |
 | Rokid CXR SDK     | 1.0.4      |
 | Kotlin            | 1.9.22     |
@@ -148,17 +162,13 @@ app/src/main/
 | Retrofit          | 2.9.0      |
 | OkHttp            | 4.12.0     |
 
-## 注意事項
+## Notes
 
-⚠️ **安全提醒**：
+⚠️ **Security Reminder**:
 
-- `local.properties` 包含敏感資訊，**請勿提交到 Git**
-- 已加入 `.gitignore` 排除
+- `local.properties` contains sensitive information, **do NOT commit to Git**
+- Already added to `.gitignore` exclusion
 
-## 授權
+## License
 
-私有專案，僅供內部使用。
-
----
-
-_如有問題，請參考 [IMPLEMENTATION_GUIDE.md](../IMPLEMENTATION_GUIDE.md)_
+Private project, for internal use only.

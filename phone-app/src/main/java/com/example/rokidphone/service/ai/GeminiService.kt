@@ -234,16 +234,36 @@ class GeminiService(
                     .post(requestJson.toString().toRequestBody("application/json".toMediaType()))
                     .build()
                 
-                client.newCall(request).execute().use { response ->
-                    val responseBody = response.body?.string()
-                    
-                    if (response.isSuccessful && responseBody != null) {
-                        val json = JSONObject(responseBody)
-                        extractTextFromResponse(json)
-                    } else {
-                        Log.e(TAG, "API error: ${response.code}, body: $responseBody")
-                        null
+                try {
+                    client.newCall(request).execute().use { response ->
+                        val responseBody = response.body?.string()
+                        
+                        if (response.isSuccessful && responseBody != null) {
+                            val json = JSONObject(responseBody)
+                            val text = extractTextFromResponse(json)
+                            if (text.isNullOrBlank()) {
+                                Log.w(TAG, "Empty response from Gemini, response: $responseBody")
+                                null
+                            } else {
+                                Log.d(TAG, "Image analysis successful, response length: ${text.length}")
+                                text
+                            }
+                        } else {
+                            Log.e(TAG, "API error: ${response.code}, body: $responseBody")
+                            // Parse error message if available
+                            try {
+                                val errorJson = JSONObject(responseBody ?: "{}")
+                                val errorMsg = errorJson.optJSONObject("error")?.optString("message")
+                                if (!errorMsg.isNullOrEmpty()) {
+                                    Log.e(TAG, "Gemini API error message: $errorMsg")
+                                }
+                            } catch (e: Exception) { /* ignore parse errors */ }
+                            null
+                        }
                     }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Network error during image analysis: ${e.message}", e)
+                    throw e // rethrow for retry logic
                 }
             }
             

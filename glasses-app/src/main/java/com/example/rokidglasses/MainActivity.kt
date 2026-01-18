@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rokidglasses.service.WakeWordService
+import com.example.rokidglasses.service.photo.CameraService
 import com.example.rokidglasses.ui.theme.RokidGlassesTheme
 import com.example.rokidglasses.viewmodel.GlassesViewModel
 
@@ -86,12 +87,25 @@ class MainActivity : ComponentActivity() {
     }
     
     /**
+     * Catch ALL key events at dispatch level for debugging
+     */
+    override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
+        event?.let {
+            android.util.Log.d("MainActivity", "dispatchKeyEvent: action=${it.action}, keyCode=${it.keyCode} (${KeyEvent.keyCodeToString(it.keyCode)}), scanCode=${it.scanCode}")
+        }
+        return super.dispatchKeyEvent(event)
+    }
+    
+    /**
      * Handle physical key events from Rokid touchpad
      * - DPAD_UP / Volume Up: Previous page
      * - DPAD_DOWN / Volume Down: Next page
-     * - DPAD_CENTER / Enter: Toggle recording or dismiss pagination
+     * - DPAD_CENTER / Enter: Toggle recording (tap) or capture photo (long press)
      */
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        // Debug: Log all key events to identify Rokid camera button keycode
+        android.util.Log.d("MainActivity", "onKeyDown: keyCode=$keyCode (${KeyEvent.keyCodeToString(keyCode)}), scanCode=${event?.scanCode}, repeat=${event?.repeatCount}")
+        
         val viewModel = glassesViewModel ?: return super.onKeyDown(keyCode, event)
         val uiState = viewModel.uiState.value
         
@@ -115,17 +129,63 @@ class MainActivity : ComponentActivity() {
                 }
             }
             // Tap on touchpad / Enter = Toggle recording or exit pagination
+            // Long press = Take photo (workaround for camera button)
             KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
-                if (uiState.isPaginated && uiState.currentPage == uiState.totalPages - 1) {
-                    // On last page, tap to start new recording
-                    viewModel.dismissPagination()
-                    viewModel.toggleRecording()
-                } else if (!uiState.isPaginated) {
-                    viewModel.toggleRecording()
+                if (event?.repeatCount == 1) {
+                    // First repeat = long press started, capture photo
+                    android.util.Log.d("MainActivity", "Long press center = capture photo")
+                    viewModel.captureAndSendPhoto()
+                    true
+                } else if (event?.repeatCount == 0) {
+                    // Normal tap handling (will only trigger if key released before repeat)
+                    true // Consume but wait for key up
+                } else {
+                    true // Consume subsequent repeats
+                }
+            }
+            // Camera button - take photo and send to phone for AI analysis
+            KeyEvent.KEYCODE_CAMERA, 27, 
+            KeyEvent.KEYCODE_FOCUS, // Some devices use focus key for camera
+            260, 261, 262, 263 -> { // Additional camera-related keycodes
+                android.util.Log.d("MainActivity", "Camera/Focus key pressed: $keyCode")
+                viewModel.captureAndSendPhoto()
+                true
+            }
+            // Long press back = take photo (alternative trigger)
+            KeyEvent.KEYCODE_BACK -> {
+                if (event?.repeatCount == 1) {
+                    android.util.Log.d("MainActivity", "Long press back = capture photo")
+                    viewModel.captureAndSendPhoto()
+                    true
+                } else {
+                    super.onKeyDown(keyCode, event)
+                }
+            }
+            else -> super.onKeyDown(keyCode, event)
+        }
+    }
+    
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        android.util.Log.d("MainActivity", "onKeyUp: keyCode=$keyCode (${KeyEvent.keyCodeToString(keyCode)})")
+        
+        val viewModel = glassesViewModel ?: return super.onKeyUp(keyCode, event)
+        val uiState = viewModel.uiState.value
+        
+        return when (keyCode) {
+            KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
+                // Only handle short tap (not long press which was already handled)
+                if (event?.eventTime?.minus(event.downTime) ?: 0 < 500) {
+                    // Short tap - toggle recording
+                    if (uiState.isPaginated && uiState.currentPage == uiState.totalPages - 1) {
+                        viewModel.dismissPagination()
+                        viewModel.toggleRecording()
+                    } else if (!uiState.isPaginated) {
+                        viewModel.toggleRecording()
+                    }
                 }
                 true
             }
-            else -> super.onKeyDown(keyCode, event)
+            else -> super.onKeyUp(keyCode, event)
         }
     }
     
@@ -142,7 +202,10 @@ class MainActivity : ComponentActivity() {
     }
     
     private fun checkPermissions() {
-        val permissions = mutableListOf(Manifest.permission.RECORD_AUDIO)
+        val permissions = mutableListOf(
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.CAMERA  // Camera permission for photo capture
+        )
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             permissions.addAll(listOf(
@@ -158,7 +221,23 @@ class MainActivity : ComponentActivity() {
         if (notGranted.isNotEmpty()) {
             permissionLauncher.launch(notGranted.toTypedArray())
         } else {
-            startWakeWordService()
+            startServices()
+        }
+    }
+    
+    private fun startServices() {
+        startWakeWordService()
+        startCameraService()
+    }
+    
+    private fun startCameraService() {
+        if (!CameraService.isRunning) {
+            val serviceIntent = Intent(this, CameraService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent)
+            } else {
+                startService(serviceIntent)
+            }
         }
     }
     

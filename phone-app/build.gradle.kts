@@ -95,11 +95,24 @@ dependencies {
     // Bluetooth
     implementation("androidx.bluetooth:bluetooth:1.0.0-alpha02")
     
+    // Rokid CXR-M SDK (手机端 Mobile SDK - via Maven)
+    // 用于连接眼镜、控制设备、获取照片
+    implementation("com.rokid.cxr:client-m:1.0.4")
+    
+    // CXR SDK required dependencies
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.1")
+    implementation("com.squareup.okio:okio:2.8.0")
+    
     // DataStore for preferences
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     
     // Security Crypto for encrypted SharedPreferences
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    
+    // Coil for image loading in Compose
+    implementation("io.coil-kt:coil-compose:2.5.0")
     
     // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")

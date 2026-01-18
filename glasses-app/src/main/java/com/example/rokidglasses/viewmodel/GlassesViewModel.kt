@@ -14,8 +14,15 @@ import com.example.rokidcommon.protocol.ConnectionState
 import com.example.rokidcommon.protocol.Message
 import com.example.rokidcommon.protocol.MessageType
 import com.example.rokidglasses.R
+import com.example.rokidglasses.sdk.CameraMode
+import com.example.rokidglasses.sdk.CxrServiceManager
+import com.example.rokidglasses.sdk.UnifiedCameraManager
 import com.example.rokidglasses.service.BluetoothClientState
 import com.example.rokidglasses.service.BluetoothSppClient
+import com.example.rokidglasses.service.photo.GlassesCameraManager
+import com.example.rokidglasses.service.photo.ImageCompressor
+import com.example.rokidglasses.service.photo.PhotoTransferProtocol
+import com.example.rokidglasses.service.photo.createPhotoTransferProtocol
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,7 +46,10 @@ data class GlassesUiState(
     // Bluetooth related
     val bluetoothState: BluetoothClientState = BluetoothClientState.DISCONNECTED,
     val connectedDeviceName: String? = null,
-    val availableDevices: List<BluetoothDevice> = emptyList()
+    val availableDevices: List<BluetoothDevice> = emptyList(),
+    // Photo capture state
+    val isCapturingPhoto: Boolean = false,
+    val photoTransferProgress: Float = 0f
 )
 
 /**
@@ -78,11 +88,74 @@ class GlassesViewModel(
     // Bluetooth SPP client - connects to phone
     private val bluetoothClient = BluetoothSppClient(context, viewModelScope)
     
+    // Camera manager for photo capture
+    // 眼镜端使用 Camera2 API 直接访问本地相机（不再使用 CXR-M SDK）
+    // CXR-M SDK 是手机端用来远程控制眼镜相机的
+    private var cameraManager: UnifiedCameraManager? = null
+    
+    // CXR-S SDK 服务管理器（用于与手机端通信）
+    private var cxrServiceManager: CxrServiceManager? = null
+    
+    // Photo transfer protocol
+    private var photoTransferProtocol: PhotoTransferProtocol? = null
+    
     // Audio buffer - collects recording data
     private val audioBuffer = ByteArrayOutputStream()
     
     init {
         initializeBluetooth()
+        initializeCamera()
+        initializeCxrService()
+    }
+    
+    /**
+     * 初始化 CXR-S SDK 服务（眼镜端）
+     * 用于接收手机端的消息和命令
+     */
+    private fun initializeCxrService() {
+        if (CxrServiceManager.isSdkAvailable()) {
+            cxrServiceManager = CxrServiceManager.getInstance()
+            val initialized = cxrServiceManager?.initialize() == true
+            Log.d(TAG, "CXR-S Service initialized: $initialized")
+            
+            if (initialized) {
+                // 监听连接状态
+                viewModelScope.launch {
+                    cxrServiceManager?.connectionState?.collect { state ->
+                        when (state) {
+                            is CxrServiceManager.ConnectionState.Connected -> {
+                                Log.d(TAG, "CXR connected to: ${state.deviceName}")
+                            }
+                            is CxrServiceManager.ConnectionState.Disconnected -> {
+                                Log.d(TAG, "CXR disconnected")
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            Log.w(TAG, "CXR-S SDK not available")
+        }
+    }
+    
+    private fun initializeCamera() {
+        viewModelScope.launch {
+            // 眼镜端直接使用 Camera2 API（不再依赖 CXR-M SDK）
+            // CXR-M SDK 的相机功能是给手机端用来远程控制眼镜相机的
+            cameraManager = UnifiedCameraManager(
+                context = context,
+                preferredMode = CameraMode.CAMERA2  // 直接使用本地 Camera2 API
+            )
+            
+            val result = cameraManager?.initialize()
+            
+            if (result?.isSuccess == true) {
+                val cameraType = cameraManager?.getCameraTypeName() ?: "Unknown"
+                Log.d(TAG, "Camera manager initialized: $cameraType")
+            } else {
+                Log.w(TAG, "Camera manager initialization failed: ${result?.exceptionOrNull()?.message}")
+            }
+        }
     }
     
     private fun initializeBluetooth() {
@@ -230,8 +303,19 @@ class GlassesViewModel(
                     ) }
                 }
             } finally {
-                audioRecord?.stop()
-                audioRecord?.release()
+                // Safely stop and release AudioRecord
+                try {
+                    if (audioRecord?.recordingState == android.media.AudioRecord.RECORDSTATE_RECORDING) {
+                        audioRecord?.stop()
+                    }
+                } catch (e: IllegalStateException) {
+                    Log.w(TAG, "AudioRecord stop failed (already stopped or invalid state)", e)
+                }
+                try {
+                    audioRecord?.release()
+                } catch (e: Exception) {
+                    Log.w(TAG, "AudioRecord release failed", e)
+                }
                 audioRecord = null
             }
         }
@@ -406,6 +490,43 @@ class GlassesViewModel(
                 }
             }
             
+            MessageType.CAPTURE_PHOTO -> {
+                // Phone requested to capture photo
+                Log.d(TAG, "Phone requested photo capture")
+                captureAndSendPhoto()
+            }
+            
+            MessageType.PHOTO_ANALYSIS_RESULT -> {
+                // Received photo analysis result from phone
+                Log.d(TAG, "Photo analysis result: ${message.payload}")
+                val analysisText = message.payload ?: context.getString(R.string.photo_analysis_no_result)
+                
+                // Clear capturing state and show result
+                _uiState.update { it.copy(
+                    isCapturingPhoto = false,
+                    photoTransferProgress = 0f,
+                    isProcessing = false
+                ) }
+                
+                // Display the analysis result (with pagination)
+                fullAiResponse = analysisText
+                responsePages = paginateText(analysisText)
+                val isPaginated = responsePages.size > 1
+                val pageIndicator = if (isPaginated) " (1/${responsePages.size})" else ""
+                val hintText = if (isPaginated) 
+                    context.getString(R.string.swipe_left_right_pages)
+                else 
+                    context.getString(R.string.tap_touchpad_start)
+                
+                _uiState.update { it.copy(
+                    displayText = responsePages[0] + pageIndicator,
+                    hintText = hintText,
+                    currentPage = 0,
+                    totalPages = responsePages.size,
+                    isPaginated = isPaginated
+                ) }
+            }
+            
             else -> { 
                 Log.d(TAG, "Unhandled message type: ${message.type}")
             }
@@ -550,6 +671,115 @@ class GlassesViewModel(
         recordingJob?.cancel()
         audioRecord?.release()
         bluetoothClient.disconnect()
+        cameraManager?.release()
+        cxrServiceManager?.release()
+    }
+    
+    // ==================== Photo Capture ====================
+    
+    /**
+     * Capture photo and send to phone for AI analysis.
+     * Triggered by camera key press or voice command.
+     */
+    fun captureAndSendPhoto() {
+        if (_uiState.value.isCapturingPhoto) {
+            Log.w(TAG, "Photo capture already in progress")
+            return
+        }
+        
+        if (_uiState.value.bluetoothState != BluetoothClientState.CONNECTED) {
+            Log.w(TAG, "Not connected to phone")
+            _uiState.update { it.copy(
+                displayText = context.getString(R.string.bluetooth_not_connected),
+                hintText = context.getString(R.string.connect_phone_first)
+            ) }
+            return
+        }
+        
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(
+                    isCapturingPhoto = true,
+                    isProcessing = true,
+                    displayText = "正在拍照...",
+                    hintText = "請稍候"
+                ) }
+                
+                // Step 1: Capture photo
+                val cameraType = cameraManager?.getCameraTypeName() ?: "Unknown"
+                Log.d(TAG, "Capturing photo using: $cameraType")
+                val rawImageData = cameraManager?.capturePhoto()
+                
+                if (rawImageData == null) {
+                    val cameraState = cameraManager?.cameraState?.value
+                    Log.e(TAG, "Failed to capture photo. Camera state: $cameraState")
+                    _uiState.update { it.copy(
+                        isCapturingPhoto = false,
+                        isProcessing = false,
+                        displayText = "拍照失敗",
+                        hintText = "相機可能被系統佔用，請稍後重試"
+                    ) }
+                    return@launch
+                }
+                
+                Log.d(TAG, "Photo captured: ${rawImageData.size} bytes using $cameraType")
+                
+                // Step 2: Compress photo
+                _uiState.update { it.copy(displayText = "正在壓縮...") }
+                val compressedData = withContext(Dispatchers.Default) {
+                    ImageCompressor.compressForTransfer(rawImageData)
+                }
+                Log.d(TAG, "Compressed: ${rawImageData.size} -> ${compressedData.size} bytes")
+                
+                // Step 3: Send to phone
+                _uiState.update { it.copy(
+                    displayText = "正在傳輸...",
+                    photoTransferProgress = 0f
+                ) }
+                
+                val socket = bluetoothClient.getSocket()
+                if (socket == null || !socket.isConnected) {
+                    throw IllegalStateException("Bluetooth socket not connected")
+                }
+                
+                photoTransferProtocol = socket.createPhotoTransferProtocol { current, total ->
+                    val progress = current.toFloat() / total
+                    _uiState.update { it.copy(photoTransferProgress = progress) }
+                }
+                
+                val result = photoTransferProtocol?.sendPhoto(compressedData)
+                
+                result?.fold(
+                    onSuccess = { stats ->
+                        Log.d(TAG, "Photo transfer complete: $stats")
+                        _uiState.update { it.copy(
+                            isCapturingPhoto = false,
+                            displayText = "已發送，等待 AI 分析...",
+                            hintText = "請稍候"
+                        ) }
+                        // Phone will send AI response via Bluetooth
+                    },
+                    onFailure = { error ->
+                        Log.e(TAG, "Photo transfer failed", error)
+                        _uiState.update { it.copy(
+                            isCapturingPhoto = false,
+                            isProcessing = false,
+                            displayText = "傳輸失敗: ${error.message}",
+                            hintText = "請重試"
+                        ) }
+                    }
+                )
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Photo capture error", e)
+                _uiState.update { it.copy(
+                    isCapturingPhoto = false,
+                    isProcessing = false,
+                    displayText = "錯誤: ${e.message}",
+                    hintText = "請重試"
+                ) }
+            }
+        }
     }
     
     /**

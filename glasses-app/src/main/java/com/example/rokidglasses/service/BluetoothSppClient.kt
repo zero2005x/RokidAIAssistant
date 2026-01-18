@@ -397,8 +397,25 @@ class BluetoothSppClient(
      * Parse and emit message
      */
     private suspend fun parseAndEmitMessage(jsonStr: String) {
+        // Skip non-JSON data (binary photo transfer ACKs, etc.)
+        val trimmed = jsonStr.trim()
+        
+        // Try to find JSON object in the string (may have binary prefix)
+        val jsonStart = trimmed.indexOf('{')
+        if (jsonStart < 0) {
+            // No JSON found, silently skip (likely binary data)
+            return
+        }
+        
+        val jsonContent = if (jsonStart > 0) {
+            // Extract JSON part, discard binary prefix
+            trimmed.substring(jsonStart)
+        } else {
+            trimmed
+        }
+        
         try {
-            val json = JSONObject(jsonStr)
+            val json = JSONObject(jsonContent)
             val typeValue = json.optInt("type", -1)
             val payload = if (json.has("payload")) json.getString("payload") else null
             
@@ -424,7 +441,12 @@ class BluetoothSppClient(
             }
             
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse message: $jsonStr", e)
+            // Only log if it looked like JSON but failed to parse
+            if (jsonContent.length < 500) {
+                Log.w(TAG, "Failed to parse JSON message: ${jsonContent.take(100)}")
+            } else {
+                Log.w(TAG, "Failed to parse large message (${jsonContent.length} chars)")
+            }
         }
     }
     
@@ -477,5 +499,17 @@ class BluetoothSppClient(
      */
     fun isBluetoothEnabled(): Boolean {
         return bluetoothAdapter?.isEnabled == true
+    }
+    
+    /**
+     * Get the underlying Bluetooth socket for photo transfer.
+     * Returns null if not connected.
+     */
+    fun getSocket(): BluetoothSocket? {
+        return if (_connectionState.value == BluetoothClientState.CONNECTED) {
+            socket
+        } else {
+            null
+        }
     }
 }

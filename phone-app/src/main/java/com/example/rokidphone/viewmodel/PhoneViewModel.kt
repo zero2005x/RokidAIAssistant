@@ -1,5 +1,6 @@
 package com.example.rokidphone.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.rokidcommon.protocol.ConnectionState
@@ -13,6 +14,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+private const val TAG = "PhoneViewModel"
+
 data class PhoneUiState(
     val connectionState: ConnectionState = ConnectionState.DISCONNECTED,
     val bluetoothState: BluetoothConnectionState = BluetoothConnectionState.DISCONNECTED,
@@ -22,7 +25,8 @@ data class PhoneUiState(
     val conversations: List<ConversationItem> = emptyList(),
     val isScanning: Boolean = false,
     val availableDevices: List<String> = emptyList(),
-    val showApiKeyWarning: Boolean = false  // Flag to show API key warning dialog
+    val showApiKeyWarning: Boolean = false,  // Flag to show API key warning dialog
+    val latestPhotoPath: String? = null      // Path to the latest received photo
 )
 
 class PhoneViewModel : ViewModel() {
@@ -61,6 +65,14 @@ class PhoneViewModel : ViewModel() {
         viewModelScope.launch {
             ServiceBridge.apiKeyMissingFlow.collect {
                 _uiState.update { it.copy(showApiKeyWarning = true) }
+            }
+        }
+        
+        // Listen to latest photo path for display
+        viewModelScope.launch {
+            ServiceBridge.latestPhotoPathFlow.collect { path ->
+                Log.d(TAG, "Received latest photo path: $path")
+                _uiState.update { it.copy(latestPhotoPath = path) }
             }
         }
         
@@ -125,5 +137,14 @@ class PhoneViewModel : ViewModel() {
     
     fun dismissApiKeyWarning() {
         _uiState.update { it.copy(showApiKeyWarning = false) }
+    }
+    
+    /**
+     * Request glasses to capture and send photo
+     */
+    fun requestCapturePhoto() {
+        viewModelScope.launch {
+            ServiceBridge.requestCapturePhoto()
+        }
     }
 }

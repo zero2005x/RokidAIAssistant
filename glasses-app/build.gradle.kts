@@ -62,7 +62,16 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
     }
+    
+    // Package local AAR files (for Rokid CXR SDK)
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
 }
+
+// Note: Local AAR repository configured in settings.gradle.kts
 
 dependencies {
     // Common module
@@ -95,8 +104,9 @@ dependencies {
     // Bluetooth
     implementation("androidx.bluetooth:bluetooth:1.0.0-alpha02")
     
-    // Rokid SDK (Mock - 實際SDK不可用)
-    // implementation("com.rokid.cxr:client-m:1.0.4")
+    // Rokid CXR-S SDK (眼镜端 Service SDK - via Maven)
+    // 用于接收手机端消息、发送数据
+    implementation("com.rokid.cxr:cxr-service-bridge:1.0-20250519.061355-45")
     
     // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")

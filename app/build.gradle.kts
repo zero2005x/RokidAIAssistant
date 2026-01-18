@@ -66,7 +66,7 @@ dependencies {
     // 注意：真正的 SDK 需要從 Rokid 官方獲取
     // 目前使用 app/src/main/java/.../sdk/CxrApi.kt 模擬實作
     // 取得真正 SDK 後，取消下行註釋並刪除模擬實作
-    // implementation("com.rokid.cxr:client-m:1.0.4")
+     implementation("com.rokid.cxr:client-m:1.0.4")
     
     // ========================================
     // 網路請求

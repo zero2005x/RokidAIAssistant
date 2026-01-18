@@ -15,10 +15,10 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        // Rokid Maven repository (must be first for CXR SDK)
+        maven { url = uri("https://maven.rokid.com/repository/maven-public/") }
         google()
         mavenCentral()
-        // Rokid Maven repository
-        maven { url = uri("https://maven.rokid.com/repository/maven-public/") }
         // Alibaba Cloud Mirror (Accelerated)
         maven { url = uri("https://maven.aliyun.com/repository/google") }
     }
