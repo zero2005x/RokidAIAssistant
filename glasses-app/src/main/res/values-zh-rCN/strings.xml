@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rokid AI</string>
+    
+    <!-- Status -->
+    <string name="listening">正在聆听...</string>
+    <string name="processing">处理中...</string>
+    <string name="ready">准备就绪</string>
+    <string name="connected">已连接</string>
+    <string name="disconnected">离线</string>
+    <string name="tap_to_speak">轻触开始说话</string>
+    <string name="tap_to_connect">轻触以连接</string>
+    <string name="recording">录音中</string>
+    
+    <!-- Device Selection -->
+    <string name="select_phone">选择手机</string>
+    <string name="no_paired_devices">找不到已配对的设备</string>
+    <string name="pair_device_hint">请在系统设置中配对您的手机</string>
+    <string name="unknown_device">未知设备</string>
+    <string name="cancel">取消</string>
+    
+    <!-- Display Messages -->
+    <string name="not_connected">未连接至手机\n请选择设备</string>
+    <string name="connecting_status">连接中...</string>
+    <string name="connected_ready">已连接，准备就绪</string>
+    <string name="please_connect_phone">请先连接手机</string>
+    <string name="please_wait">请稍候</string>
+    <string name="tap_touchpad_start">轻触触控板开始对话</string>
+    <string name="tap_stop_recording">再次轻触停止录音</string>
+    <string name="select_paired_device">选择已配对设备</string>
+    <string name="sending_audio">正在传送音频至手机...</string>
+    <string name="no_voice_detected">未检测到语音</string>
+    <string name="please_try_again">请再试一次</string>
+    <string name="sending">传送中...</string>
+    <string name="send_failed">传送失败\n请检查蓝牙连接</string>
+    <string name="reconnect_try_again">重新连接后再试</string>
+    <string name="waiting_phone">等待手机处理中...</string>
+    <string name="ai_thinking">AI 正在思考</string>
+    <string name="mic_permission_required">需要麦克风权限</string>
+    <string name="tap_continue">轻触触控板继续对话</string>
+    <string name="you_said">你说：%s\n\nAI 正在思考...</string>
+    <string name="error_prefix">错误：%s</string>
+    <string name="say_hey_rokid">说「Hey Rokid」开始对话</string>
+    <string name="tap_touchpad_record">轻触触控板开始录音</string>
+
+    <!-- Pagination -->
+    <string name="page_indicator">%1$d / %2$d</string>
+    <string name="swipe_for_more">上下滑动查看更多</string>
+    <string name="swipe_up_previous">▲ 向上滑动看上页</string>
+    <string name="swipe_down_next">▼ 向下滑动看下页</string>
+</resources>

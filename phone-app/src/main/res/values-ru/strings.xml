@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Info -->
+    <string name="app_name">Rokid AI Ассистент</string>
+    
+    <!-- Service Status -->
+    <string name="service_running">Сервис запущен</string>
+    <string name="service_stopped">Сервис остановлен</string>
+    
+    <!-- Connection Status -->
+    <string name="connected">Подключено</string>
+    <string name="disconnected">Отключено</string>
+    <string name="connecting">Подключение…</string>
+    
+    <!-- Actions -->
+    <string name="start_service">Запустить сервис</string>
+    <string name="stop_service">Остановить сервис</string>
+    <string name="connect">Подключить</string>
+    <string name="disconnect">Отключить</string>
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отмена</string>
+    <string name="back">Назад</string>
+    
+    <!-- Settings -->
+    <string name="settings">Настройки</string>
+    <string name="api_settings">Настройки API</string>
+    <string name="ai_service">Сервис ИИ</string>
+    <string name="ai_provider">Провайдер ИИ</string>
+    <string name="ai_model">Модель ИИ</string>
+    <string name="api_keys">Ключи API</string>
+    <string name="speech_recognition">Распознавание речи</string>
+    <string name="speech_service">Голосовой сервис</string>
+    <string name="advanced_settings">Расширенные настройки</string>
+    <string name="system_prompt">Системный промпт</string>
+    <string name="system_prompt_hint">Введите системный промпт ИИ…</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings">Язык</string>
+    <string name="select_language">Выбрать язык</string>
+    <string name="app_language">Язык приложения</string>
+    <string name="response_language">Язык ответа ИИ</string>
+    
+    <!-- Status Messages -->
+    <string name="settings_complete">Настройка завершена, готово к использованию</string>
+    <string name="please_enter_api_key">Пожалуйста, введите ключ API %s</string>
+    <string name="select_provider">Выбрать провайдера</string>
+    <string name="select_model">Выбрать модель</string>
+    
+    <!-- AI Processing -->
+    <string name="processing_voice">Обработка голоса…</string>
+    <string name="thinking">Думаю…</string>
+    <string name="voice_too_short">Голос слишком короткий, попробуйте снова</string>
+    <string name="cannot_recognize">Не удается распознать голос</string>
+    <string name="service_unavailable">Сервис ИИ временно недоступен</string>
+    <string name="network_error">Ошибка сетевого подключения, проверьте настройки</string>
+    <string name="connection_timeout">Время подключения истекло, попробуйте позже</string>
+    
+    <!-- Misc -->
+    <string name="show">Показать</string>
+    <string name="hide">Скрыть</string>
+    <string name="in_use">Используется</string>
+
+    <!-- Custom Provider Settings -->
+    <string name="deepseek_api_key">Ключ API DeepSeek</string>
+    <string name="groq_api_key">Ключ API Groq</string>
+    <string name="xai_api_key">Ключ API xAI</string>
+    <string name="alibaba_api_key">Ключ API Alibaba DashScope</string>
+    <string name="zhipu_api_key">Ключ API Zhipu AI</string>
+    <string name="baidu_api_key">Ключ API Baidu</string>
+    <string name="baidu_secret_key">Секретный ключ Baidu</string>
+    <string name="perplexity_api_key">Ключ API Perplexity</string>
+    <string name="custom_api_key">Пользовательский ключ API (необязательно)</string>
+    <string name="custom_provider_settings">Настройки пользовательского провайдера</string>
+    <string name="base_url">Базовый URL</string>
+    <string name="base_url_hint">напр., http://localhost:11434/v1/</string>
+    <string name="model_name">Название модели</string>
+    <string name="model_name_hint">напр., llama3.2, qwen2.5</string>
+    <string name="custom_model_name">Пользовательское название модели</string>
+    <string name="test_connection">Проверить соединение</string>
+    <string name="testing_connection">Проверка соединения…</string>
+    <string name="connection_success">Соединение успешно!</string>
+    <string name="connection_failed">Ошибка соединения: %s</string>
+    <string name="invalid_url">Неверный формат URL. Используйте http:// или https://</string>
+    <string name="api_key_optional">Ключ API необязателен для локальных моделей</string>
+    
+    <!-- AI Provider Names -->
+    <string name="provider_gemini">Google Gemini</string>
+    <string name="provider_openai">OpenAI</string>
+    <string name="provider_anthropic">Anthropic Claude</string>
+    <string name="provider_deepseek">DeepSeek</string>
+    <string name="provider_groq">Groq</string>
+    <string name="provider_xai">xAI (Grok)</string>
+    <string name="provider_alibaba">Alibaba Qwen</string>
+    <string name="provider_zhipu">Zhipu AI (ChatGLM)</string>
+    <string name="provider_baidu">Baidu Ernie</string>
+    <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_custom">Пользовательский / Самостоятельный хостинг</string>
+    
+    <!-- Speech Service Names -->
+    <string name="speech_service_gemini">Распознавание речи Gemini</string>
+    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_google_cloud">Google Cloud STT</string>
+</resources>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rokid AI</string>
+    
+    <!-- Status -->
+    <string name="listening">Listening...</string>
+    <string name="processing">Processing...</string>
+    <string name="ready">Ready</string>
+    <string name="connected">Connected</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="tap_to_speak">Tap to speak</string>
+    <string name="tap_to_connect">Tap to connect</string>
+    <string name="recording">Recording</string>
+    
+    <!-- Device Selection -->
+    <string name="select_phone">Select Phone</string>
+    <string name="no_paired_devices">No paired devices found</string>
+    <string name="pair_device_hint">Please pair your phone in system settings</string>
+    <string name="unknown_device">Unknown Device</string>
+    <string name="cancel">Cancel</string>
+    
+    <!-- Display Messages -->
+    <string name="not_connected">Not connected to phone\nPlease select device</string>
+    <string name="connecting_status">Connecting...</string>
+    <string name="connected_ready">Connected, ready</string>
+    <string name="please_connect_phone">Please connect phone first</string>
+    <string name="please_wait">Please wait</string>
+    <string name="tap_touchpad_start">Tap touchpad to start conversation</string>
+    <string name="tap_stop_recording">Tap again to stop recording</string>
+    <string name="select_paired_device">Select paired device</string>
+    <string name="sending_audio">Sending audio to phone...</string>
+    <string name="no_voice_detected">No voice detected</string>
+    <string name="please_try_again">Please try again</string>
+    <string name="sending">Sending...</string>
+    <string name="send_failed">Send failed\nPlease check Bluetooth connection</string>
+    <string name="reconnect_try_again">Reconnect and try again</string>
+    <string name="waiting_phone">Waiting for phone processing...</string>
+    <string name="ai_thinking">AI is thinking</string>
+    <string name="mic_permission_required">Microphone permission required</string>
+    <string name="tap_continue">Tap touchpad to continue conversation</string>
+    <string name="you_said">You said: %s\n\nAI is thinking...</string>
+    <string name="error_prefix">Error: %s</string>
+    <string name="say_hey_rokid">Say \'Hey Rokid\' to start conversation</string>
+    <string name="tap_touchpad_record">Tap touchpad to start recording</string>
+    
+    <!-- Pagination -->
+    <string name="page_indicator">%1$d / %2$d</string>
+    <string name="swipe_for_more">Swipe up/down for more</string>
+    <string name="swipe_up_previous">▲ Swipe up for previous</string>
+    <string name="swipe_down_next">▼ Swipe down for next</string>
+</resources>

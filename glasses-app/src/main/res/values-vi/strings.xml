@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rokid AI</string>
+    
+    <!-- Status -->
+    <string name="listening">Đang nghe...</string>
+    <string name="processing">Đang xử lý...</string>
+    <string name="ready">Sẵn sàng</string>
+    <string name="connected">Đã kết nối</string>
+    <string name="disconnected">Đã ngắt kết nối</string>
+    <string name="tap_to_speak">Chạm để nói</string>
+    <string name="tap_to_connect">Chạm để kết nối</string>
+    <string name="recording">Đang ghi âm</string>
+    
+    <!-- Device Selection -->
+    <string name="select_phone">Chọn điện thoại</string>
+    <string name="no_paired_devices">Không tìm thấy thiết bị đã ghép nối</string>
+    <string name="pair_device_hint">Vui lòng ghép nối điện thoại trong cài đặt hệ thống</string>
+    <string name="unknown_device">Thiết bị không xác định</string>
+    <string name="cancel">Hủy</string>
+    
+    <!-- Display Messages -->
+    <string name="not_connected">Chưa kết nối với điện thoại\nVui lòng chọn thiết bị</string>
+    <string name="connecting_status">Đang kết nối...</string>
+    <string name="connected_ready">Đã kết nối, sẵn sàng</string>
+    <string name="please_connect_phone">Vui lòng kết nối điện thoại trước</string>
+    <string name="please_wait">Vui lòng chờ</string>
+    <string name="tap_touchpad_start">Chạm bàn cảm ứng để bắt đầu hội thoại</string>
+    <string name="tap_stop_recording">Chạm lại để dừng ghi âm</string>
+    <string name="select_paired_device">Chọn thiết bị đã ghép nối</string>
+    <string name="sending_audio">Đang gửi âm thanh đến điện thoại...</string>
+    <string name="no_voice_detected">Không phát hiện giọng nói</string>
+    <string name="please_try_again">Vui lòng thử lại</string>
+    <string name="sending">Đang gửi...</string>
+    <string name="send_failed">Gửi thất bại\nVui lòng kiểm tra kết nối Bluetooth</string>
+    <string name="reconnect_try_again">Kết nối lại và thử lại</string>
+    <string name="waiting_phone">Đang chờ điện thoại xử lý...</string>
+    <string name="ai_thinking">AI đang suy nghĩ</string>
+    <string name="mic_permission_required">Cần quyền truy cập micrô</string>
+    <string name="tap_continue">Chạm bàn cảm ứng để tiếp tục hội thoại</string>
+    <string name="you_said">Bạn nói: %s\n\nAI đang suy nghĩ...</string>
+    <string name="error_prefix">Lỗi: %s</string>
+    <string name="say_hey_rokid">Nói \'Hey Rokid\' để bắt đầu hội thoại</string>
+    <string name="tap_touchpad_record">Chạm bàn cảm ứng để bắt đầu ghi âm</string>
+
+    <!-- Pagination -->
+    <string name="page_indicator">%1$d / %2$d</string>
+    <string name="swipe_for_more">Vuốt lên/xuống để xem thêm</string>
+    <string name="swipe_up_previous">▲ Vuốt lên - trang trước</string>
+    <string name="swipe_down_next">▼ Vuốt xuống - trang sau</string>
+</resources>

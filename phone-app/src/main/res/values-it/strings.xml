@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Info -->
+    <string name="app_name">Rokid AI Assistente</string>
+    
+    <!-- Service Status -->
+    <string name="service_running">Servizio in esecuzione</string>
+    <string name="service_stopped">Servizio fermato</string>
+    
+    <!-- Connection Status -->
+    <string name="connected">Connesso</string>
+    <string name="disconnected">Disconnesso</string>
+    <string name="connecting">Connessione in corso…</string>
+    
+    <!-- Actions -->
+    <string name="start_service">Avvia servizio</string>
+    <string name="stop_service">Ferma servizio</string>
+    <string name="connect">Connetti</string>
+    <string name="disconnect">Disconnetti</string>
+    <string name="save">Salva</string>
+    <string name="cancel">Annulla</string>
+    <string name="back">Indietro</string>
+    
+    <!-- Settings -->
+    <string name="settings">Impostazioni</string>
+    <string name="api_settings">Impostazioni API</string>
+    <string name="ai_service">Servizio IA</string>
+    <string name="ai_provider">Provider IA</string>
+    <string name="ai_model">Modello IA</string>
+    <string name="api_keys">Chiavi API</string>
+    <string name="speech_recognition">Riconoscimento vocale</string>
+    <string name="speech_service">Servizio vocale</string>
+    <string name="advanced_settings">Impostazioni avanzate</string>
+    <string name="system_prompt">Prompt di sistema</string>
+    <string name="system_prompt_hint">Inserisci il prompt di sistema dell\'IA…</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings">Lingua</string>
+    <string name="select_language">Seleziona lingua</string>
+    <string name="app_language">Lingua dell\'app</string>
+    <string name="response_language">Lingua di risposta dell\'IA</string>
+    
+    <!-- Status Messages -->
+    <string name="settings_complete">Configurazione completata, pronto all\'uso</string>
+    <string name="please_enter_api_key">Inserisci la chiave API %s</string>
+    <string name="select_provider">Seleziona provider</string>
+    <string name="select_model">Seleziona modello</string>
+    
+    <!-- AI Processing -->
+    <string name="processing_voice">Elaborazione voce…</string>
+    <string name="thinking">Sto pensando…</string>
+    <string name="voice_too_short">Voce troppo breve, riprova</string>
+    <string name="cannot_recognize">Impossibile riconoscere la voce</string>
+    <string name="service_unavailable">Servizio IA temporaneamente non disponibile</string>
+    <string name="network_error">Connessione di rete fallita, controlla le impostazioni</string>
+    <string name="connection_timeout">Timeout connessione, riprova più tardi</string>
+    
+    <!-- Misc -->
+    <string name="show">Mostra</string>
+    <string name="hide">Nascondi</string>
+    <string name="in_use">In uso</string>
+
+    <!-- Custom Provider Settings -->
+    <string name="deepseek_api_key">Chiave API DeepSeek</string>
+    <string name="groq_api_key">Chiave API Groq</string>
+    <string name="xai_api_key">Chiave API xAI</string>
+    <string name="alibaba_api_key">Chiave API Alibaba DashScope</string>
+    <string name="zhipu_api_key">Chiave API Zhipu AI</string>
+    <string name="baidu_api_key">Chiave API Baidu</string>
+    <string name="baidu_secret_key">Chiave segreta Baidu</string>
+    <string name="perplexity_api_key">Chiave API Perplexity</string>
+    <string name="custom_api_key">Chiave API personalizzata (opzionale)</string>
+    <string name="custom_provider_settings">Impostazioni provider personalizzato</string>
+    <string name="base_url">URL di base</string>
+    <string name="base_url_hint">es., http://localhost:11434/v1/</string>
+    <string name="model_name">Nome modello</string>
+    <string name="model_name_hint">es., llama3.2, qwen2.5</string>
+    <string name="custom_model_name">Nome modello personalizzato</string>
+    <string name="test_connection">Testa connessione</string>
+    <string name="testing_connection">Test connessione in corso…</string>
+    <string name="connection_success">Connessione riuscita!</string>
+    <string name="connection_failed">Connessione fallita: %s</string>
+    <string name="invalid_url">Formato URL non valido. Usa http:// o https://</string>
+    <string name="api_key_optional">La chiave API è opzionale per i modelli locali</string>
+    
+    <!-- AI Provider Names -->
+    <string name="provider_gemini">Google Gemini</string>
+    <string name="provider_openai">OpenAI</string>
+    <string name="provider_anthropic">Anthropic Claude</string>
+    <string name="provider_deepseek">DeepSeek</string>
+    <string name="provider_groq">Groq</string>
+    <string name="provider_xai">xAI (Grok)</string>
+    <string name="provider_alibaba">Alibaba Qwen</string>
+    <string name="provider_zhipu">Zhipu AI (ChatGLM)</string>
+    <string name="provider_baidu">Baidu Ernie</string>
+    <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_custom">Personalizzato / Self-Hosted</string>
+    
+    <!-- Speech Service Names -->
+    <string name="speech_service_gemini">Riconoscimento vocale Gemini</string>
+    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_google_cloud">Google Cloud STT</string>
+</resources>

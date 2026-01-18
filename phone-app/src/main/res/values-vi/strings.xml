@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Info -->
+    <string name="app_name">Rokid AI Assistant</string>
+    <string name="app_title">Rokid AI Assistant (Điện thoại)</string>
+    
+    <!-- Service Status -->
+    <string name="service_running">Dịch vụ đang chạy</string>
+    <string name="service_stopped">Dịch vụ đã dừng</string>
+    
+    <!-- Connection Status -->
+    <string name="connected">Đã kết nối</string>
+    <string name="disconnected">Đã ngắt kết nối</string>
+    <string name="connecting">Đang kết nối…</string>
+    <string name="reconnecting">Đang kết nối lại…</string>
+    <string name="connection_error">Lỗi kết nối</string>
+    
+    <!-- Actions -->
+    <string name="start_service">Khởi động dịch vụ</string>
+    <string name="stop_service">Dừng dịch vụ</string>
+    <string name="start">Bắt đầu</string>
+    <string name="stop">Dừng</string>
+    <string name="connect">Kết nối</string>
+    <string name="disconnect">Ngắt kết nối</string>
+    <string name="save">Lưu</string>
+    <string name="cancel">Hủy</string>
+    <string name="back">Quay lại</string>
+    
+    <!-- Settings -->
+    <string name="settings">Cài đặt</string>
+    <string name="api_settings">Cài đặt API</string>
+    <string name="ai_service">Dịch vụ AI</string>
+    <string name="ai_provider">Nhà cung cấp AI</string>
+    <string name="ai_model">Mô hình AI</string>
+    <string name="api_keys">Khóa API</string>
+    <string name="speech_recognition">Nhận dạng giọng nói</string>
+    <string name="speech_recognition_service">Dịch vụ nhận dạng giọng nói</string>
+    <string name="speech_service">Dịch vụ giọng nói</string>
+    <string name="advanced_settings">Cài đặt nâng cao</string>
+    <string name="system_prompt">Lời nhắc hệ thống</string>
+    <string name="system_prompt_hint">Nhập lời nhắc hệ thống cho AI…</string>
+    <string name="enter_system_prompt">Nhập lời nhắc hệ thống AI…</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings">Ngôn ngữ</string>
+    <string name="select_language">Chọn ngôn ngữ</string>
+    <string name="app_language">Ngôn ngữ ứng dụng</string>
+    <string name="response_language">Ngôn ngữ phản hồi AI</string>
+    
+    <!-- Status Messages -->
+    <string name="settings_complete">Cài đặt hoàn tất, sẵn sàng sử dụng</string>
+    <string name="please_enter_api_key">Vui lòng nhập khóa API %s</string>
+    <string name="select_provider">Chọn nhà cung cấp</string>
+    <string name="select_ai_provider">Chọn nhà cung cấp AI</string>
+    <string name="select_model">Chọn mô hình</string>
+    <string name="select_speech_service">Chọn dịch vụ nhận dạng giọng nói</string>
+    <string name="supports_audio">✓ Hỗ trợ âm thanh</string>
+    
+    <!-- AI Processing -->
+    <string name="processing_voice">Đang xử lý giọng nói…</string>
+    <string name="thinking">Đang suy nghĩ…</string>
+    <string name="voice_too_short">Giọng nói quá ngắn, vui lòng thử lại</string>
+    <string name="cannot_recognize">Không thể nhận dạng giọng nói</string>
+    <string name="service_unavailable">Dịch vụ AI tạm thời không khả dụng</string>
+    <string name="network_error">Kết nối mạng thất bại, vui lòng kiểm tra cài đặt</string>
+    <string name="connection_timeout">Hết thời gian kết nối, vui lòng thử lại</string>
+    <string name="ready">Sẵn sàng</string>
+    
+    <!-- Conversation -->
+    <string name="conversation_history">Lịch sử hội thoại</string>
+    <string name="no_conversation_history">Không có lịch sử hội thoại</string>
+    
+    <!-- Misc -->
+    <string name="show">Hiện</string>
+    <string name="hide">Ẩn</string>
+    <string name="in_use">Đang sử dụng</string>
+    
+    <!-- API Keys -->
+    <string name="gemini_api_key">Khóa API Gemini</string>
+    <string name="openai_api_key">Khóa API OpenAI</string>
+    <string name="anthropic_api_key">Khóa API Anthropic</string>
+    
+    <!-- Notification & Status -->
+    <string name="glasses_recording">Kính đang ghi âm...</string>
+    <string name="recognizing_speech">Đang nhận dạng giọng nói...</string>
+    <string name="processing_failed">Xử lý thất bại: %s</string>
+    <string name="waiting_glasses">Đang chờ kết nối kính...</string>
+    <string name="connected_glasses">Đã kết nối với kính</string>
+
+    <!-- Custom Provider Settings -->
+    <string name="deepseek_api_key">Khóa API DeepSeek</string>
+    <string name="groq_api_key">Khóa API Groq</string>
+    <string name="xai_api_key">Khóa API xAI</string>
+    <string name="alibaba_api_key">Khóa API Alibaba DashScope</string>
+    <string name="zhipu_api_key">Khóa API Zhipu AI</string>
+    <string name="baidu_api_key">Khóa API Baidu</string>
+    <string name="baidu_secret_key">Khóa bí mật Baidu</string>
+    <string name="perplexity_api_key">Khóa API Perplexity</string>
+    <string name="custom_api_key">Khóa API tùy chỉnh (Tùy chọn)</string>
+    <string name="custom_provider_settings">Cài đặt nhà cung cấp tùy chỉnh</string>
+    <string name="base_url">URL cơ sở</string>
+    <string name="base_url_hint">ví dụ: http://localhost:11434/v1/</string>
+    <string name="model_name">Tên mô hình</string>
+    <string name="model_name_hint">ví dụ: llama3.2, qwen2.5</string>
+    <string name="custom_model_name">Tên mô hình tùy chỉnh</string>
+    <string name="test_connection">Kiểm tra kết nối</string>
+    <string name="testing_connection">Đang kiểm tra kết nối…</string>
+    <string name="connection_success">Kết nối thành công!</string>
+    <string name="connection_failed">Kết nối thất bại: %s</string>
+    <string name="invalid_url">Định dạng URL không hợp lệ. Sử dụng http:// hoặc https://</string>
+    <string name="api_key_optional">Khóa API là tùy chọn cho các mô hình cục bộ</string>
+    
+    <!-- AI Provider Names -->
+    <string name="provider_gemini">Google Gemini</string>
+    <string name="provider_openai">OpenAI</string>
+    <string name="provider_anthropic">Anthropic Claude</string>
+    <string name="provider_deepseek">DeepSeek</string>
+    <string name="provider_groq">Groq</string>
+    <string name="provider_xai">xAI (Grok)</string>
+    <string name="provider_alibaba">Alibaba Qwen</string>
+    <string name="provider_zhipu">Zhipu AI (ChatGLM)</string>
+    <string name="provider_baidu">Baidu Ernie</string>
+    <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_custom">Tùy chỉnh / Tự lưu trữ</string>
+    
+    <!-- Speech Service Names -->
+    <string name="speech_service_gemini">Nhận dạng giọng nói Gemini</string>
+    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_google_cloud">Google Cloud STT</string>
+</resources>

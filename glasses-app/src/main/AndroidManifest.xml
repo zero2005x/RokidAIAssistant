@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 網路權限 (API 呼叫) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
+    <!-- 藍牙權限 (與手機通訊) -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    
+    <!-- 麥克風權限 (語音輸入) -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    
+    <!-- 螢幕常亮權限 -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    
+    <!-- 前景服務權限 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    
+    <!-- Rokid 系統權限 -->
+    <uses-permission android:name="com.rokid.permission.GLASS_CONTROL" />
+
+    <application
+        android:name=".GlassesApplication"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:largeHeap="false"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.RokidGlasses">
+        
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:keepScreenOn="true"
+            android:turnScreenOn="true"
+            android:showWhenLocked="true"
+            android:theme="@style/Theme.RokidGlasses">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <!-- 語音喚醒背景服務 -->
+        <service
+            android:name=".service.WakeWordService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
+        
+        <!-- Rokid 語音觸發服務 (備用) -->
+        <service
+            android:name=".service.VoiceTriggerService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.rokid.action.VOICE_COMMAND" />
+            </intent-filter>
+        </service>
+            
+    </application>
+
+</manifest>

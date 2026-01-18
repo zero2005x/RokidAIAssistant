@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rokid AI</string>
+    
+    <!-- Status -->
+    <string name="listening">Écoute en cours...</string>
+    <string name="processing">Traitement en cours...</string>
+    <string name="ready">Prêt</string>
+    <string name="connected">Connecté</string>
+    <string name="disconnected">Déconnecté</string>
+    <string name="tap_to_speak">Appuyez pour parler</string>
+    <string name="tap_to_connect">Appuyez pour connecter</string>
+    <string name="recording">Enregistrement</string>
+    
+    <!-- Device Selection -->
+    <string name="select_phone">Sélectionner le téléphone</string>
+    <string name="no_paired_devices">Aucun appareil jumelé trouvé</string>
+    <string name="pair_device_hint">Veuillez jumeler votre téléphone dans les paramètres système</string>
+    <string name="unknown_device">Appareil inconnu</string>
+    <string name="cancel">Annuler</string>
+    
+    <!-- Display Messages -->
+    <string name="not_connected">Non connecté au téléphone\nVeuillez sélectionner un appareil</string>
+    <string name="connecting_status">Connexion en cours...</string>
+    <string name="connected_ready">Connecté, prêt</string>
+    <string name="please_connect_phone">Veuillez d\'abord connecter le téléphone</string>
+    <string name="please_wait">Veuillez patienter</string>
+    <string name="tap_touchpad_start">Appuyez sur le pavé tactile pour démarrer la conversation</string>
+    <string name="tap_stop_recording">Appuyez à nouveau pour arrêter l\'enregistrement</string>
+    <string name="select_paired_device">Sélectionner l\'appareil jumelé</string>
+    <string name="sending_audio">Envoi de l\'audio au téléphone...</string>
+    <string name="no_voice_detected">Aucune voix détectée</string>
+    <string name="please_try_again">Veuillez réessayer</string>
+    <string name="sending">Envoi en cours...</string>
+    <string name="send_failed">Échec de l\'envoi\nVérifiez la connexion Bluetooth</string>
+    <string name="reconnect_try_again">Reconnectez et réessayez</string>
+    <string name="waiting_phone">En attente du traitement du téléphone...</string>
+    <string name="ai_thinking">L\'IA réfléchit</string>
+    <string name="mic_permission_required">Autorisation du microphone requise</string>
+    <string name="tap_continue">Appuyez sur le pavé tactile pour continuer la conversation</string>
+    <string name="you_said">Vous avez dit: %s\n\nL\'IA réfléchit...</string>
+    <string name="error_prefix">Erreur: %s</string>
+    <string name="say_hey_rokid">Dites \'Hey Rokid\' pour démarrer la conversation</string>
+    <string name="tap_touchpad_record">Appuyez sur le pavé tactile pour commencer l\'enregistrement</string>
+
+    <!-- Pagination -->
+    <string name="page_indicator">%1$d / %2$d</string>
+    <string name="swipe_for_more">Glissez haut/bas pour plus</string>
+    <string name="swipe_up_previous">▲ Glissez vers le haut</string>
+    <string name="swipe_down_next">▼ Glissez vers le bas</string>
+</resources>

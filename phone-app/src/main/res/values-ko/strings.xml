@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Info -->
+    <string name="app_name">Rokid AI 어시스턴트</string>
+    
+    <!-- Service Status -->
+    <string name="service_running">서비스 실행 중</string>
+    <string name="service_stopped">서비스 중지됨</string>
+    
+    <!-- Connection Status -->
+    <string name="connected">연결됨</string>
+    <string name="disconnected">연결 해제됨</string>
+    <string name="connecting">연결 중…</string>
+    
+    <!-- Actions -->
+    <string name="start_service">서비스 시작</string>
+    <string name="stop_service">서비스 중지</string>
+    <string name="connect">연결</string>
+    <string name="disconnect">연결 해제</string>
+    <string name="save">저장</string>
+    <string name="cancel">취소</string>
+    <string name="back">뒤로</string>
+    
+    <!-- Settings -->
+    <string name="settings">설정</string>
+    <string name="api_settings">API 설정</string>
+    <string name="ai_service">AI 서비스</string>
+    <string name="ai_provider">AI 제공자</string>
+    <string name="ai_model">AI 모델</string>
+    <string name="api_keys">API 키</string>
+    <string name="speech_recognition">음성 인식</string>
+    <string name="speech_service">음성 서비스</string>
+    <string name="advanced_settings">고급 설정</string>
+    <string name="system_prompt">시스템 프롬프트</string>
+    <string name="system_prompt_hint">AI 시스템 프롬프트 입력…</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings">언어 설정</string>
+    <string name="select_language">언어 선택</string>
+    <string name="app_language">앱 언어</string>
+    <string name="response_language">AI 응답 언어</string>
+    
+    <!-- Status Messages -->
+    <string name="settings_complete">설정 완료, 사용 가능합니다</string>
+    <string name="please_enter_api_key">%s API 키를 입력하세요</string>
+    <string name="select_provider">제공자 선택</string>
+    <string name="select_model">모델 선택</string>
+    
+    <!-- AI Processing -->
+    <string name="processing_voice">음성 인식 중…</string>
+    <string name="thinking">생각 중…</string>
+    <string name="voice_too_short">음성이 너무 짧습니다. 다시 시도하세요</string>
+    <string name="cannot_recognize">음성을 인식할 수 없습니다</string>
+    <string name="service_unavailable">AI 서비스를 일시적으로 사용할 수 없습니다</string>
+    <string name="network_error">네트워크 연결 실패, 설정을 확인하세요</string>
+    <string name="connection_timeout">연결 시간 초과, 나중에 다시 시도하세요</string>
+    
+    <!-- Misc -->
+    <string name="show">표시</string>
+    <string name="hide">숨기기</string>
+    <string name="in_use">사용 중</string>
+    
+    <!-- Additional API Keys -->
+    <string name="deepseek_api_key">DeepSeek API 키</string>
+    <string name="groq_api_key">Groq API 키</string>
+    <string name="xai_api_key">xAI API 키</string>
+    <string name="alibaba_api_key">Alibaba DashScope API 키</string>
+    <string name="zhipu_api_key">Zhipu AI API 키</string>
+    <string name="baidu_api_key">Baidu API 키</string>
+    <string name="baidu_secret_key">Baidu Secret 키</string>
+    <string name="perplexity_api_key">Perplexity API 키</string>
+    <string name="custom_api_key">사용자 지정 API 키 (선택 사항)</string>
+    <string name="custom_provider_settings">사용자 지정 제공자 설정</string>
+    <string name="base_url">기본 URL</string>
+    <string name="base_url_hint">예: http://localhost:11434/v1/</string>
+    <string name="model_name">모델 이름</string>
+    <string name="model_name_hint">예: llama3.2, qwen2.5</string>
+    <string name="custom_model_name">사용자 지정 모델 이름</string>
+    <string name="test_connection">연결 테스트</string>
+    <string name="testing_connection">연결 테스트 중…</string>
+    <string name="connection_success">연결 성공!</string>
+    <string name="connection_failed">연결 실패: %s</string>
+    <string name="invalid_url">잘못된 URL 형식입니다. http:// 또는 https://를 사용하세요</string>
+    <string name="api_key_optional">로컬 모델에는 API 키가 필요하지 않습니다</string>
+    
+    <!-- AI Provider Names -->
+    <string name="provider_gemini">Google Gemini</string>
+    <string name="provider_openai">OpenAI</string>
+    <string name="provider_anthropic">Anthropic Claude</string>
+    <string name="provider_deepseek">DeepSeek</string>
+    <string name="provider_groq">Groq</string>
+    <string name="provider_xai">xAI (Grok)</string>
+    <string name="provider_alibaba">Alibaba 통의천문</string>
+    <string name="provider_zhipu">Zhipu AI (ChatGLM)</string>
+    <string name="provider_baidu">Baidu 원신일언</string>
+    <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_custom">사용자 지정 / 셀프 호스팅</string>
+    
+    <!-- Speech Service Names -->
+    <string name="speech_service_gemini">Gemini 음성 인식</string>
+    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_google_cloud">Google Cloud STT</string>
+</resources>

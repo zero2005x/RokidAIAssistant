@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rokid AI</string>
+    
+    <!-- Status -->
+    <string name="listening">กำลังฟัง...</string>
+    <string name="processing">กำลังประมวลผล...</string>
+    <string name="ready">พร้อม</string>
+    <string name="connected">เชื่อมต่อแล้ว</string>
+    <string name="disconnected">ยกเลิกการเชื่อมต่อ</string>
+    <string name="tap_to_speak">แตะเพื่อพูด</string>
+    <string name="tap_to_connect">แตะเพื่อเชื่อมต่อ</string>
+    <string name="recording">กำลังบันทึก</string>
+    
+    <!-- Device Selection -->
+    <string name="select_phone">เลือกโทรศัพท์</string>
+    <string name="no_paired_devices">ไม่พบอุปกรณ์ที่จับคู่</string>
+    <string name="pair_device_hint">กรุณาจับคู่โทรศัพท์ในการตั้งค่าระบบ</string>
+    <string name="unknown_device">อุปกรณ์ไม่รู้จัก</string>
+    <string name="cancel">ยกเลิก</string>
+    
+    <!-- Display Messages -->
+    <string name="not_connected">ไม่ได้เชื่อมต่อกับโทรศัพท์\nกรุณาเลือกอุปกรณ์</string>
+    <string name="connecting_status">กำลังเชื่อมต่อ...</string>
+    <string name="connected_ready">เชื่อมต่อแล้ว พร้อมใช้งาน</string>
+    <string name="please_connect_phone">กรุณาเชื่อมต่อโทรศัพท์ก่อน</string>
+    <string name="please_wait">กรุณารอสักครู่</string>
+    <string name="tap_touchpad_start">แตะทัชแพดเพื่อเริ่มการสนทนา</string>
+    <string name="tap_stop_recording">แตะอีกครั้งเพื่อหยุดบันทึก</string>
+    <string name="select_paired_device">เลือกอุปกรณ์ที่จับคู่</string>
+    <string name="sending_audio">กำลังส่งเสียงไปยังโทรศัพท์...</string>
+    <string name="no_voice_detected">ไม่พบเสียง</string>
+    <string name="please_try_again">กรุณาลองอีกครั้ง</string>
+    <string name="sending">กำลังส่ง...</string>
+    <string name="send_failed">ส่งไม่สำเร็จ\nกรุณาตรวจสอบการเชื่อมต่อบลูทูธ</string>
+    <string name="reconnect_try_again">เชื่อมต่อใหม่และลองอีกครั้ง</string>
+    <string name="waiting_phone">กำลังรอโทรศัพท์ประมวลผล...</string>
+    <string name="ai_thinking">AI กำลังคิด</string>
+    <string name="mic_permission_required">ต้องการสิทธิ์ไมโครโฟน</string>
+    <string name="tap_continue">แตะทัชแพดเพื่อสนทนาต่อ</string>
+    <string name="you_said">คุณพูดว่า: %s\n\nAI กำลังคิด...</string>
+    <string name="error_prefix">ข้อผิดพลาด: %s</string>
+    <string name="say_hey_rokid">พูดว่า \'Hey Rokid\' เพื่อเริ่มการสนทนา</string>
+    <string name="tap_touchpad_record">แตะทัชแพดเพื่อเริ่มบันทึก</string>
+
+    <!-- Pagination -->
+    <string name="page_indicator">%1$d / %2$d</string>
+    <string name="swipe_for_more">ปัดขึ้น/ลงเพื่อดูเพิ่มเติม</string>
+    <string name="swipe_up_previous">▲ ปัดขึ้น - หน้าก่อน</string>
+    <string name="swipe_down_next">▼ ปัดลง - หน้าถัดไป</string>
+</resources>

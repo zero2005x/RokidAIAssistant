@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Info -->
+    <string name="app_name">Rokid AI Assistant</string>
+    <string name="app_title">Rokid AI Assistant (โทรศัพท์)</string>
+    
+    <!-- Service Status -->
+    <string name="service_running">บริการกำลังทำงาน</string>
+    <string name="service_stopped">บริการหยุดทำงาน</string>
+    
+    <!-- Connection Status -->
+    <string name="connected">เชื่อมต่อแล้ว</string>
+    <string name="disconnected">ยกเลิกการเชื่อมต่อ</string>
+    <string name="connecting">กำลังเชื่อมต่อ…</string>
+    <string name="reconnecting">กำลังเชื่อมต่อใหม่…</string>
+    <string name="connection_error">ข้อผิดพลาดการเชื่อมต่อ</string>
+    
+    <!-- Actions -->
+    <string name="start_service">เริ่มบริการ</string>
+    <string name="stop_service">หยุดบริการ</string>
+    <string name="start">เริ่ม</string>
+    <string name="stop">หยุด</string>
+    <string name="connect">เชื่อมต่อ</string>
+    <string name="disconnect">ยกเลิกการเชื่อมต่อ</string>
+    <string name="save">บันทึก</string>
+    <string name="cancel">ยกเลิก</string>
+    <string name="back">กลับ</string>
+    
+    <!-- Settings -->
+    <string name="settings">การตั้งค่า</string>
+    <string name="api_settings">การตั้งค่า API</string>
+    <string name="ai_service">บริการ AI</string>
+    <string name="ai_provider">ผู้ให้บริการ AI</string>
+    <string name="ai_model">โมเดล AI</string>
+    <string name="api_keys">คีย์ API</string>
+    <string name="speech_recognition">การรู้จำเสียง</string>
+    <string name="speech_recognition_service">บริการรู้จำเสียง</string>
+    <string name="speech_service">บริการเสียง</string>
+    <string name="advanced_settings">การตั้งค่าขั้นสูง</string>
+    <string name="system_prompt">พรอมต์ระบบ</string>
+    <string name="system_prompt_hint">ป้อนพรอมต์ระบบสำหรับ AI…</string>
+    <string name="enter_system_prompt">ป้อนพรอมต์ระบบ AI…</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings">ภาษา</string>
+    <string name="select_language">เลือกภาษา</string>
+    <string name="app_language">ภาษาแอป</string>
+    <string name="response_language">ภาษาการตอบกลับ AI</string>
+    
+    <!-- Status Messages -->
+    <string name="settings_complete">ตั้งค่าเสร็จสมบูรณ์ พร้อมใช้งาน</string>
+    <string name="please_enter_api_key">กรุณาป้อนคีย์ API %s</string>
+    <string name="select_provider">เลือกผู้ให้บริการ</string>
+    <string name="select_ai_provider">เลือกผู้ให้บริการ AI</string>
+    <string name="select_model">เลือกโมเดล</string>
+    <string name="select_speech_service">เลือกบริการรู้จำเสียง</string>
+    <string name="supports_audio">✓ รองรับเสียง</string>
+    
+    <!-- AI Processing -->
+    <string name="processing_voice">กำลังประมวลผลเสียง…</string>
+    <string name="thinking">กำลังคิด…</string>
+    <string name="voice_too_short">เสียงสั้นเกินไป กรุณาลองอีกครั้ง</string>
+    <string name="cannot_recognize">ไม่สามารถรู้จำเสียงได้</string>
+    <string name="service_unavailable">บริการ AI ไม่พร้อมใช้งานชั่วคราว</string>
+    <string name="network_error">การเชื่อมต่อเครือข่ายล้มเหลว กรุณาตรวจสอบการตั้งค่า</string>
+    <string name="connection_timeout">หมดเวลาการเชื่อมต่อ กรุณาลองอีกครั้ง</string>
+    <string name="ready">พร้อม</string>
+    
+    <!-- Conversation -->
+    <string name="conversation_history">ประวัติการสนทนา</string>
+    <string name="no_conversation_history">ไม่มีประวัติการสนทนา</string>
+    
+    <!-- Misc -->
+    <string name="show">แสดง</string>
+    <string name="hide">ซ่อน</string>
+    <string name="in_use">กำลังใช้งาน</string>
+    
+    <!-- API Keys -->
+    <string name="gemini_api_key">คีย์ API Gemini</string>
+    <string name="openai_api_key">คีย์ API OpenAI</string>
+    <string name="anthropic_api_key">คีย์ API Anthropic</string>
+    
+    <!-- Notification & Status -->
+    <string name="glasses_recording">แว่นกำลังบันทึกเสียง...</string>
+    <string name="recognizing_speech">กำลังรู้จำเสียง...</string>
+    <string name="processing_failed">ประมวลผลล้มเหลว: %s</string>
+    <string name="waiting_glasses">กำลังรอการเชื่อมต่อแว่น...</string>
+    <string name="connected_glasses">เชื่อมต่อกับแว่นแล้ว</string>
+
+    <!-- Custom Provider Settings -->
+    <string name="deepseek_api_key">คีย์ API DeepSeek</string>
+    <string name="groq_api_key">คีย์ API Groq</string>
+    <string name="xai_api_key">คีย์ API xAI</string>
+    <string name="alibaba_api_key">คีย์ API Alibaba DashScope</string>
+    <string name="zhipu_api_key">คีย์ API Zhipu AI</string>
+    <string name="baidu_api_key">คีย์ API Baidu</string>
+    <string name="baidu_secret_key">คีย์ลับ Baidu</string>
+    <string name="perplexity_api_key">คีย์ API Perplexity</string>
+    <string name="custom_api_key">คีย์ API แบบกำหนดเอง (ไม่บังคับ)</string>
+    <string name="custom_provider_settings">การตั้งค่าผู้ให้บริการแบบกำหนดเอง</string>
+    <string name="base_url">URL พื้นฐาน</string>
+    <string name="base_url_hint">เช่น http://localhost:11434/v1/</string>
+    <string name="model_name">ชื่อโมเดล</string>
+    <string name="model_name_hint">เช่น llama3.2, qwen2.5</string>
+    <string name="custom_model_name">ชื่อโมเดลแบบกำหนดเอง</string>
+    <string name="test_connection">ทดสอบการเชื่อมต่อ</string>
+    <string name="testing_connection">กำลังทดสอบการเชื่อมต่อ…</string>
+    <string name="connection_success">เชื่อมต่อสำเร็จ!</string>
+    <string name="connection_failed">การเชื่อมต่อล้มเหลว: %s</string>
+    <string name="invalid_url">รูปแบบ URL ไม่ถูกต้อง ใช้ http:// หรือ https://</string>
+    <string name="api_key_optional">คีย์ API ไม่บังคับสำหรับโมเดลท้องถิ่น</string>
+    
+    <!-- AI Provider Names -->
+    <string name="provider_gemini">Google Gemini</string>
+    <string name="provider_openai">OpenAI</string>
+    <string name="provider_anthropic">Anthropic Claude</string>
+    <string name="provider_deepseek">DeepSeek</string>
+    <string name="provider_groq">Groq</string>
+    <string name="provider_xai">xAI (Grok)</string>
+    <string name="provider_alibaba">Alibaba Qwen</string>
+    <string name="provider_zhipu">Zhipu AI (ChatGLM)</string>
+    <string name="provider_baidu">Baidu Ernie</string>
+    <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_custom">กำหนดเอง / โฮสต์เอง</string>
+    
+    <!-- Speech Service Names -->
+    <string name="speech_service_gemini">การรู้จำเสียง Gemini</string>
+    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_google_cloud">Google Cloud STT</string>
+</resources>

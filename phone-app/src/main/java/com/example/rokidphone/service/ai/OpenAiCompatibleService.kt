@@ -1,0 +1,513 @@
+package com.example.rokidphone.service.ai
+
+import android.util.Log
+import com.example.rokidphone.data.AiProvider
+import com.example.rokidphone.service.SpeechResult
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
+import org.json.JSONObject
+import java.util.concurrent.TimeUnit
+
+/**
+ * OpenAI-Compatible Service Implementation
+ * Handles all OpenAI-compatible APIs including:
+ * - OpenAI
+ * - DeepSeek
+ * - Groq
+ * - Custom/Self-hosted (Ollama, LM Studio, vLLM, etc.)
+ * 
+ * This is a generic implementation that works with any OpenAI-compatible endpoint.
+ */
+class OpenAiCompatibleService(
+    private val apiKey: String,
+    private val baseUrl: String,
+    private val modelId: String,
+    private val systemPrompt: String = "You are a friendly AI assistant. Please answer questions concisely.",
+    private val providerType: AiProvider = AiProvider.OPENAI
+) : AiServiceProvider {
+    
+    companion object {
+        private const val TAG = "OpenAiCompatibleService"
+        private const val MAX_RETRIES = 3
+        private const val RETRY_DELAY_MS = 1000L
+    }
+    
+    override val provider = providerType
+    
+    private val client: OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(120, TimeUnit.SECONDS)
+        .writeTimeout(120, TimeUnit.SECONDS)
+        .build()
+    
+    // Conversation history
+    private val conversationHistory = mutableListOf<Pair<String, String>>()
+    
+    /**
+     * Build the full endpoint URL
+     */
+    private fun buildUrl(endpoint: String): String {
+        val normalizedBase = baseUrl.trimEnd('/')
+        val normalizedEndpoint = endpoint.trimStart('/')
+        return "$normalizedBase/$normalizedEndpoint"
+    }
+    
+    /**
+     * Build authorization header based on provider type
+     */
+    private fun buildAuthHeader(): Pair<String, String> {
+        return if (apiKey.isNotBlank()) {
+            "Authorization" to "Bearer $apiKey"
+        } else {
+            // For local models (Ollama, LM Studio) that may not need auth
+            "" to ""
+        }
+    }
+    
+    /**
+     * Speech Recognition - Using Whisper API (if supported)
+     */
+    override suspend fun transcribe(pcmAudioData: ByteArray): SpeechResult {
+        return withContext(Dispatchers.IO) {
+            when (providerType) {
+                AiProvider.CUSTOM -> {
+                    // Custom providers typically don't support STT
+                    SpeechResult.Error("Speech recognition not supported for custom providers")
+                }
+                AiProvider.DEEPSEEK -> {
+                    SpeechResult.Error("DeepSeek does not support speech recognition")
+                }
+                else -> {
+                    // OpenAI, Groq support Whisper
+                    transcribeWithWhisper(pcmAudioData)
+                }
+            }
+        }
+    }
+    
+    private suspend fun transcribeWithWhisper(pcmAudioData: ByteArray): SpeechResult {
+        return withContext(Dispatchers.IO) {
+            Log.d(TAG, "Starting Whisper transcription, audio size: ${pcmAudioData.size} bytes")
+            
+            if (pcmAudioData.size < 1000) {
+                return@withContext SpeechResult.Error("Audio too short, please try again")
+            }
+            
+            val wavData = pcmToWav(pcmAudioData)
+            val boundary = "----WebKitFormBoundary${System.currentTimeMillis()}"
+            val requestBody = buildMultipartBody(boundary, wavData)
+            
+            val url = buildUrl("audio/transcriptions")
+            val authHeader = buildAuthHeader()
+            
+            try {
+                val requestBuilder = Request.Builder()
+                    .url(url)
+                    .addHeader("Content-Type", "multipart/form-data; boundary=$boundary")
+                    .post(requestBody.toRequestBody("multipart/form-data; boundary=$boundary".toMediaType()))
+                
+                if (authHeader.first.isNotBlank()) {
+                    requestBuilder.addHeader(authHeader.first, authHeader.second)
+                }
+                
+                client.newCall(requestBuilder.build()).execute().use { response ->
+                    val responseBody = response.body?.string()
+                    
+                    if (response.isSuccessful && responseBody != null) {
+                        val json = JSONObject(responseBody)
+                        val text = json.optString("text", "").trim()
+                        
+                        if (text.isEmpty()) {
+                            Log.w(TAG, "Empty transcription result")
+                            SpeechResult.Error("No speech detected")
+                        } else {
+                            Log.d(TAG, "Transcription: $text")
+                            SpeechResult.Success(text)
+                        }
+                    } else {
+                        Log.e(TAG, "API error: ${response.code}, body: $responseBody")
+                        SpeechResult.Error("Speech recognition failed: ${response.code}")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Whisper transcription error", e)
+                SpeechResult.Error("Speech recognition error: ${e.message}")
+            }
+        }
+    }
+    
+    private fun buildMultipartBody(boundary: String, wavData: ByteArray): ByteArray {
+        val output = java.io.ByteArrayOutputStream()
+        val writer = output.bufferedWriter()
+        
+        // file field
+        writer.write("--$boundary\r\n")
+        writer.write("Content-Disposition: form-data; name=\"file\"; filename=\"audio.wav\"\r\n")
+        writer.write("Content-Type: audio/wav\r\n\r\n")
+        writer.flush()
+        output.write(wavData)
+        writer.write("\r\n")
+        
+        // model field
+        val whisperModel = when (providerType) {
+            AiProvider.GROQ -> "whisper-large-v3-turbo"
+            else -> "whisper-1"
+        }
+        writer.write("--$boundary\r\n")
+        writer.write("Content-Disposition: form-data; name=\"model\"\r\n\r\n")
+        writer.write("$whisperModel\r\n")
+        
+        // language field
+        writer.write("--$boundary\r\n")
+        writer.write("Content-Disposition: form-data; name=\"language\"\r\n\r\n")
+        writer.write("zh\r\n")
+        
+        writer.write("--$boundary--\r\n")
+        writer.flush()
+        
+        return output.toByteArray()
+    }
+    
+    /**
+     * Text Chat - Using Chat Completions API
+     */
+    override suspend fun chat(userMessage: String): String {
+        return withContext(Dispatchers.IO) {
+            Log.d(TAG, "Chat request to $providerType: $userMessage")
+            
+            val messages = JSONArray().apply {
+                // System prompt
+                put(JSONObject().apply {
+                    put("role", "system")
+                    put("content", getFullSystemPrompt())
+                })
+                
+                // Conversation history
+                for ((role, content) in conversationHistory.takeLast(6)) {
+                    put(JSONObject().apply {
+                        put("role", role)
+                        put("content", content)
+                    })
+                }
+                
+                // Current user message
+                put(JSONObject().apply {
+                    put("role", "user")
+                    put("content", userMessage)
+                })
+            }
+            
+            val requestJson = JSONObject().apply {
+                put("model", modelId)
+                put("messages", messages)
+                put("temperature", 0.7)
+                put("max_tokens", 500)
+                put("stream", false)
+            }
+            
+            val url = buildUrl("chat/completions")
+            val authHeader = buildAuthHeader()
+            
+            try {
+                val requestBuilder = Request.Builder()
+                    .url(url)
+                    .addHeader("Content-Type", "application/json")
+                    .post(requestJson.toString().toRequestBody("application/json".toMediaType()))
+                
+                if (authHeader.first.isNotBlank()) {
+                    requestBuilder.addHeader(authHeader.first, authHeader.second)
+                }
+                
+                Log.d(TAG, "Sending chat request to: $url")
+                
+                client.newCall(requestBuilder.build()).execute().use { response ->
+                    val responseBody = response.body?.string()
+                    
+                    if (response.isSuccessful && responseBody != null) {
+                        val json = JSONObject(responseBody)
+                        val choices = json.optJSONArray("choices")
+                        val text = choices?.optJSONObject(0)
+                            ?.optJSONObject("message")
+                            ?.optString("content", "")?.trim()
+                        
+                        if (!text.isNullOrEmpty()) {
+                            addToHistory(userMessage, text)
+                            Log.d(TAG, "Response: $text")
+                            text
+                        } else {
+                            "Sorry, I couldn't generate a response."
+                        }
+                    } else {
+                        Log.e(TAG, "API error: ${response.code}, body: $responseBody")
+                        parseErrorMessage(responseBody) ?: "Sorry, the service is temporarily unavailable."
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Chat error", e)
+                "Sorry, an error occurred: ${e.message}"
+            }
+        }
+    }
+    
+    /**
+     * Image Analysis - Using vision-capable models
+     */
+    override suspend fun analyzeImage(imageData: ByteArray, prompt: String): String {
+        return withContext(Dispatchers.IO) {
+            if (!providerType.supportsVision) {
+                return@withContext "This provider does not support image analysis."
+            }
+            
+            Log.d(TAG, "Analyzing image with $providerType")
+            
+            val base64Image = android.util.Base64.encodeToString(imageData, android.util.Base64.NO_WRAP)
+            
+            val imageContent = JSONArray().apply {
+                put(JSONObject().apply {
+                    put("type", "text")
+                    put("text", prompt)
+                })
+                put(JSONObject().apply {
+                    put("type", "image_url")
+                    put("image_url", JSONObject().apply {
+                        put("url", "data:image/jpeg;base64,$base64Image")
+                    })
+                })
+            }
+            
+            val messages = JSONArray().apply {
+                put(JSONObject().apply {
+                    put("role", "user")
+                    put("content", imageContent)
+                })
+            }
+            
+            val requestJson = JSONObject().apply {
+                put("model", modelId)
+                put("messages", messages)
+                put("max_tokens", 500)
+            }
+            
+            val url = buildUrl("chat/completions")
+            val authHeader = buildAuthHeader()
+            
+            try {
+                val requestBuilder = Request.Builder()
+                    .url(url)
+                    .addHeader("Content-Type", "application/json")
+                    .post(requestJson.toString().toRequestBody("application/json".toMediaType()))
+                
+                if (authHeader.first.isNotBlank()) {
+                    requestBuilder.addHeader(authHeader.first, authHeader.second)
+                }
+                
+                client.newCall(requestBuilder.build()).execute().use { response ->
+                    val responseBody = response.body?.string()
+                    
+                    if (response.isSuccessful && responseBody != null) {
+                        val json = JSONObject(responseBody)
+                        val choices = json.optJSONArray("choices")
+                        choices?.optJSONObject(0)
+                            ?.optJSONObject("message")
+                            ?.optString("content", "")?.trim()
+                            ?: "Unable to analyze image."
+                    } else {
+                        Log.e(TAG, "Vision API error: ${response.code}")
+                        "Image analysis failed."
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Vision error", e)
+                "Image analysis error: ${e.message}"
+            }
+        }
+    }
+    
+    /**
+     * Test Connection - Verify API connectivity
+     */
+    suspend fun testConnection(): Result<String> {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Testing connection to: $baseUrl")
+                
+                // Try to list models (most providers support this)
+                val modelsUrl = buildUrl("models")
+                val authHeader = buildAuthHeader()
+                
+                val requestBuilder = Request.Builder()
+                    .url(modelsUrl)
+                    .get()
+                
+                if (authHeader.first.isNotBlank()) {
+                    requestBuilder.addHeader(authHeader.first, authHeader.second)
+                }
+                
+                client.newCall(requestBuilder.build()).execute().use { response ->
+                    if (response.isSuccessful) {
+                        val responseBody = response.body?.string()
+                        val json = JSONObject(responseBody ?: "{}")
+                        val data = json.optJSONArray("data")
+                        val modelCount = data?.length() ?: 0
+                        Result.success("Connected successfully! Found $modelCount models.")
+                    } else if (response.code == 401) {
+                        Result.failure(Exception("Authentication failed. Please check your API key."))
+                    } else if (response.code == 404) {
+                        // Some providers don't have /models endpoint, try a simple chat
+                        testWithSimpleChat()
+                    } else {
+                        Result.failure(Exception("Connection failed: ${response.code} ${response.message}"))
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Connection test failed", e)
+                Result.failure(e)
+            }
+        }
+    }
+    
+    private suspend fun testWithSimpleChat(): Result<String> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val messages = JSONArray().apply {
+                    put(JSONObject().apply {
+                        put("role", "user")
+                        put("content", "Hello")
+                    })
+                }
+                
+                val requestJson = JSONObject().apply {
+                    put("model", modelId)
+                    put("messages", messages)
+                    put("max_tokens", 10)
+                }
+                
+                val url = buildUrl("chat/completions")
+                val authHeader = buildAuthHeader()
+                
+                val requestBuilder = Request.Builder()
+                    .url(url)
+                    .addHeader("Content-Type", "application/json")
+                    .post(requestJson.toString().toRequestBody("application/json".toMediaType()))
+                
+                if (authHeader.first.isNotBlank()) {
+                    requestBuilder.addHeader(authHeader.first, authHeader.second)
+                }
+                
+                client.newCall(requestBuilder.build()).execute().use { response ->
+                    if (response.isSuccessful) {
+                        Result.success("Connected successfully!")
+                    } else {
+                        val body = response.body?.string()
+                        val errorMsg = parseErrorMessage(body) ?: "Connection failed: ${response.code}"
+                        Result.failure(Exception(errorMsg))
+                    }
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+    
+    /**
+     * Parse error message from API response
+     */
+    private fun parseErrorMessage(responseBody: String?): String? {
+        if (responseBody == null) return null
+        return try {
+            val json = JSONObject(responseBody)
+            json.optJSONObject("error")?.optString("message")
+                ?: json.optString("message")
+                ?: json.optString("error")
+        } catch (e: Exception) {
+            null
+        }
+    }
+    
+    /**
+     * Get current date time string
+     */
+    private fun getCurrentDateTime(): String {
+        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd EEEE HH:mm", java.util.Locale.getDefault())
+        return dateFormat.format(java.util.Date())
+    }
+    
+    /**
+     * Get full system prompt with date
+     */
+    private fun getFullSystemPrompt(): String {
+        return "$systemPrompt\n\nCurrent date/time: ${getCurrentDateTime()}"
+    }
+    
+    /**
+     * Convert PCM to WAV
+     */
+    private fun pcmToWav(
+        pcmData: ByteArray,
+        sampleRate: Int = 16000,
+        channels: Int = 1,
+        bitsPerSample: Int = 16
+    ): ByteArray {
+        val byteRate = sampleRate * channels * bitsPerSample / 8
+        val blockAlign = channels * bitsPerSample / 8
+        val dataSize = pcmData.size
+        val totalSize = 36 + dataSize
+        
+        val output = java.io.ByteArrayOutputStream()
+        
+        // RIFF header
+        output.write("RIFF".toByteArray())
+        output.write(intToBytes(totalSize, 4))
+        output.write("WAVE".toByteArray())
+        
+        // fmt chunk
+        output.write("fmt ".toByteArray())
+        output.write(intToBytes(16, 4))
+        output.write(intToBytes(1, 2))
+        output.write(intToBytes(channels, 2))
+        output.write(intToBytes(sampleRate, 4))
+        output.write(intToBytes(byteRate, 4))
+        output.write(intToBytes(blockAlign, 2))
+        output.write(intToBytes(bitsPerSample, 2))
+        
+        // data chunk
+        output.write("data".toByteArray())
+        output.write(intToBytes(dataSize, 4))
+        output.write(pcmData)
+        
+        return output.toByteArray()
+    }
+    
+    private fun intToBytes(value: Int, numBytes: Int): ByteArray {
+        val bytes = ByteArray(numBytes)
+        for (i in 0 until numBytes) {
+            bytes[i] = (value shr (8 * i) and 0xFF).toByte()
+        }
+        return bytes
+    }
+    
+    /**
+     * Add to conversation history
+     */
+    private fun addToHistory(userMessage: String, assistantMessage: String) {
+        conversationHistory.add("user" to userMessage)
+        conversationHistory.add("assistant" to assistantMessage)
+        
+        // Limit history length
+        while (conversationHistory.size > 10) {
+            conversationHistory.removeAt(0)
+        }
+    }
+    
+    /**
+     * Clear conversation history
+     */
+    override fun clearHistory() {
+        conversationHistory.clear()
+    }
+}

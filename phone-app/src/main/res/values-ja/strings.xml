@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Info -->
+    <string name="app_name">Rokid AI アシスタント</string>
+    
+    <!-- Service Status -->
+    <string name="service_running">サービス実行中</string>
+    <string name="service_stopped">サービス停止</string>
+    
+    <!-- Connection Status -->
+    <string name="connected">接続済み</string>
+    <string name="disconnected">未接続</string>
+    <string name="connecting">接続中…</string>
+    
+    <!-- Actions -->
+    <string name="start_service">サービス開始</string>
+    <string name="stop_service">サービス停止</string>
+    <string name="connect">接続</string>
+    <string name="disconnect">切断</string>
+    <string name="save">保存</string>
+    <string name="cancel">キャンセル</string>
+    <string name="back">戻る</string>
+    
+    <!-- Settings -->
+    <string name="settings">設定</string>
+    <string name="api_settings">API 設定</string>
+    <string name="ai_service">AI サービス</string>
+    <string name="ai_provider">AI プロバイダー</string>
+    <string name="ai_model">AI モデル</string>
+    <string name="api_keys">API キー</string>
+    <string name="speech_recognition">音声認識</string>
+    <string name="speech_recognition_service">音声認識サービス</string>
+    <string name="speech_service">音声サービス</string>
+    <string name="advanced_settings">詳細設定</string>
+    <string name="system_prompt">システムプロンプト</string>
+    <string name="system_prompt_hint">AI システムプロンプトを入力…</string>
+    <string name="enter_system_prompt">AI のシステムプロンプトを入力…</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings">言語設定</string>
+    <string name="select_language">言語を選択</string>
+    <string name="app_language">アプリの言語</string>
+    <string name="response_language">AI 応答言語</string>
+    
+    <!-- Status Messages -->
+    <string name="settings_complete">設定完了、使用可能です</string>
+    <string name="please_enter_api_key">%s API キーを入力してください</string>
+    <string name="select_provider">プロバイダーを選択</string>
+    <string name="select_ai_provider">AI プロバイダーを選択</string>
+    <string name="select_model">モデルを選択</string>
+    <string name="select_speech_service">音声認識サービスを選択</string>
+    <string name="supports_audio">✓ 音声対応</string>
+    
+    <!-- AI Processing -->
+    <string name="processing_voice">音声を認識中…</string>
+    <string name="thinking">考え中…</string>
+    <string name="voice_too_short">音声が短すぎます、もう一度お試しください</string>
+    <string name="cannot_recognize">音声を認識できません</string>
+    <string name="service_unavailable">AI サービスは一時的に利用できません</string>
+    <string name="network_error">ネットワーク接続に失敗しました、設定を確認してください</string>
+    <string name="connection_timeout">接続がタイムアウトしました、後でもう一度お試しください</string>
+    
+    <!-- Misc -->
+    <string name="show">表示</string>
+    <string name="hide">非表示</string>
+    <string name="in_use">使用中</string>
+    
+    <!-- Additional API Keys -->
+    <string name="deepseek_api_key">DeepSeek API キー</string>
+    <string name="groq_api_key">Groq API キー</string>
+    <string name="xai_api_key">xAI API キー</string>
+    <string name="alibaba_api_key">Alibaba DashScope API キー</string>
+    <string name="zhipu_api_key">Zhipu AI API キー</string>
+    <string name="baidu_api_key">Baidu API キー</string>
+    <string name="baidu_secret_key">Baidu Secret キー</string>
+    <string name="perplexity_api_key">Perplexity API キー</string>
+    <string name="custom_api_key">カスタム API キー（任意）</string>
+    <string name="custom_provider_settings">カスタムプロバイダー設定</string>
+    <string name="base_url">ベース URL</string>
+    <string name="base_url_hint">例：http://localhost:11434/v1/</string>
+    <string name="model_name">モデル名</string>
+    <string name="model_name_hint">例：llama3.2、qwen2.5</string>
+    <string name="custom_model_name">カスタムモデル名</string>
+    <string name="test_connection">接続テスト</string>
+    <string name="testing_connection">接続をテスト中…</string>
+    <string name="connection_success">接続成功！</string>
+    <string name="connection_failed">接続失敗：%s</string>
+    <string name="invalid_url">無効な URL 形式です。http:// または https:// を使用してください</string>
+    <string name="api_key_optional">ローカルモデルでは API キーは不要です</string>
+    
+    <!-- AI Provider Names -->
+    <string name="provider_gemini">Google Gemini</string>
+    <string name="provider_openai">OpenAI</string>
+    <string name="provider_anthropic">Anthropic Claude</string>
+    <string name="provider_deepseek">DeepSeek</string>
+    <string name="provider_groq">Groq</string>
+    <string name="provider_xai">xAI (Grok)</string>
+    <string name="provider_alibaba">Alibaba 通義千問</string>
+    <string name="provider_zhipu">智譜AI (ChatGLM)</string>
+    <string name="provider_baidu">Baidu 文心一言</string>
+    <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_custom">カスタム / セルフホスト</string>
+    
+    <!-- Speech Service Names -->
+    <string name="speech_service_gemini">Gemini 音声認識</string>
+    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_google_cloud">Google Cloud STT</string>
+</resources>

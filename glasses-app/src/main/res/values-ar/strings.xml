@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rokid AI</string>
+    
+    <!-- Status -->
+    <string name="listening">جارٍ الاستماع...</string>
+    <string name="processing">جارٍ المعالجة...</string>
+    <string name="ready">جاهز</string>
+    <string name="connected">متصل</string>
+    <string name="disconnected">غير متصل</string>
+    <string name="tap_to_speak">انقر للتحدث</string>
+    <string name="tap_to_connect">انقر للاتصال</string>
+    <string name="recording">جارٍ التسجيل</string>
+    
+    <!-- Device Selection -->
+    <string name="select_phone">اختر الهاتف</string>
+    <string name="no_paired_devices">لم يتم العثور على أجهزة مقترنة</string>
+    <string name="pair_device_hint">يرجى إقران هاتفك في إعدادات النظام</string>
+    <string name="unknown_device">جهاز غير معروف</string>
+    <string name="cancel">إلغاء</string>
+    
+    <!-- Display Messages -->
+    <string name="not_connected">غير متصل بالهاتف\nيرجى اختيار الجهاز</string>
+    <string name="connecting_status">جارٍ الاتصال...</string>
+    <string name="connected_ready">متصل، جاهز</string>
+    <string name="please_connect_phone">يرجى توصيل الهاتف أولاً</string>
+    <string name="please_wait">يرجى الانتظار</string>
+    <string name="tap_touchpad_start">انقر على لوحة اللمس لبدء المحادثة</string>
+    <string name="tap_stop_recording">انقر مرة أخرى لإيقاف التسجيل</string>
+    <string name="select_paired_device">اختر الجهاز المقترن</string>
+    <string name="sending_audio">جارٍ إرسال الصوت إلى الهاتف...</string>
+    <string name="no_voice_detected">لم يتم اكتشاف صوت</string>
+    <string name="please_try_again">يرجى المحاولة مرة أخرى</string>
+    <string name="sending">جارٍ الإرسال...</string>
+    <string name="send_failed">فشل الإرسال\nيرجى التحقق من اتصال البلوتوث</string>
+    <string name="reconnect_try_again">أعد الاتصال وحاول مرة أخرى</string>
+    <string name="waiting_phone">في انتظار معالجة الهاتف...</string>
+    <string name="ai_thinking">الذكاء الاصطناعي يفكر</string>
+    <string name="mic_permission_required">إذن الميكروفون مطلوب</string>
+    <string name="tap_continue">انقر على لوحة اللمس لمتابعة المحادثة</string>
+    <string name="you_said">قلت: %s\n\nالذكاء الاصطناعي يفكر...</string>
+    <string name="error_prefix">خطأ: %s</string>
+    <string name="say_hey_rokid">قل \'Hey Rokid\' لبدء المحادثة</string>
+    <string name="tap_touchpad_record">انقر على لوحة اللمس لبدء التسجيل</string>
+
+    <!-- Pagination -->
+    <string name="page_indicator">%1$d / %2$d</string>
+    <string name="swipe_for_more">اسحب لأعلى/لأسفل لعرض المزيد</string>
+    <string name="swipe_up_previous">▲ اسحب لأعلى للسابق</string>
+    <string name="swipe_down_next">▼ اسحب لأسفل للتالي</string>
+</resources>

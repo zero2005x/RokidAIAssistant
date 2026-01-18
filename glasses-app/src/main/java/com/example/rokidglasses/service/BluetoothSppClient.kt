@@ -1,0 +1,481 @@
+package com.example.rokidglasses.service
+
+import android.Manifest
+import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothSocket
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import android.util.Log
+import androidx.core.app.ActivityCompat
+import com.example.rokidcommon.protocol.Message
+import com.example.rokidcommon.protocol.MessageType
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+import org.json.JSONObject
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.UUID
+
+/**
+ * Bluetooth Connection State
+ */
+enum class BluetoothClientState {
+    DISCONNECTED,
+    CONNECTING,
+    CONNECTED
+}
+
+/**
+ * Glasses-side Bluetooth SPP Client
+ * Responsible for connecting to phone, sending voice data and receiving AI responses
+ */
+class BluetoothSppClient(
+    private val context: Context,
+    private val scope: CoroutineScope
+) {
+    companion object {
+        private const val TAG = "BluetoothSppClient"
+        
+        // Same UUID as phone-side
+        val SERVICE_UUID: UUID = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567890")
+        
+        // Message delimiter
+        private const val MESSAGE_DELIMITER = "\n"
+    }
+    
+    private val bluetoothAdapter: BluetoothAdapter? by lazy {
+        val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        bluetoothManager.adapter
+    }
+    
+    private var socket: BluetoothSocket? = null
+    private var inputStream: InputStream? = null
+    private var outputStream: OutputStream? = null
+    
+    private var connectJob: Job? = null
+    private var readJob: Job? = null
+    private var heartbeatJob: Job? = null
+    
+    // Heartbeat interval (10 seconds)
+    private val HEARTBEAT_INTERVAL = 10_000L
+    
+    // Connection state
+    private val _connectionState = MutableStateFlow(BluetoothClientState.DISCONNECTED)
+    val connectionState: StateFlow<BluetoothClientState> = _connectionState.asStateFlow()
+    
+    // Received message flow
+    private val _messageFlow = MutableSharedFlow<Message>(extraBufferCapacity = 16)
+    val messageFlow: SharedFlow<Message> = _messageFlow.asSharedFlow()
+    
+    // Connected device name
+    private val _connectedDeviceName = MutableStateFlow<String?>(null)
+    val connectedDeviceName: StateFlow<String?> = _connectedDeviceName.asStateFlow()
+    
+    /**
+     * Get list of paired devices
+     */
+    @SuppressLint("MissingPermission")
+    fun getPairedDevices(): List<BluetoothDevice> {
+        if (!hasBluetoothPermission()) {
+            Log.w(TAG, "No Bluetooth permission")
+            return emptyList()
+        }
+        
+        return bluetoothAdapter?.bondedDevices?.toList() ?: emptyList()
+    }
+    
+    /**
+     * Connect to specified device (with retry mechanism)
+     */
+    @SuppressLint("MissingPermission")
+    fun connect(device: BluetoothDevice, maxRetries: Int = 5) {
+        if (!hasBluetoothPermission()) {
+            Log.e(TAG, "No Bluetooth permission")
+            return
+        }
+        
+        if (_connectionState.value == BluetoothClientState.CONNECTING ||
+            _connectionState.value == BluetoothClientState.CONNECTED) {
+            Log.w(TAG, "Already connecting or connected")
+            return
+        }
+        
+        connectJob?.cancel()
+        connectJob = scope.launch(Dispatchers.IO) {
+            var lastException: Exception? = null
+            
+            for (attempt in 1..maxRetries) {
+                try {
+                    _connectionState.value = BluetoothClientState.CONNECTING
+                    Log.d(TAG, "Connecting to ${device.name}... (attempt $attempt/$maxRetries)")
+                    
+                    // Cancel device discovery to speed up connection
+                    bluetoothAdapter?.cancelDiscovery()
+                    
+                    // Wait a bit for discovery cancellation to take effect
+                    delay(200)
+                    
+                    // Close previous socket
+                    closeSocket()
+                    
+                    // Try multiple socket creation methods
+                    socket = createSocket(device, attempt)
+                    
+                    if (socket == null) {
+                        throw IOException("Failed to create socket")
+                    }
+                    
+                    // Connect with timeout handling
+                    Log.d(TAG, "Attempting socket connection...")
+                    socket?.connect()
+                    
+                    // Verify connection is established
+                    if (socket?.isConnected != true) {
+                        throw IOException("Socket not connected after connect() call")
+                    }
+                    
+                    inputStream = socket?.inputStream
+                    outputStream = socket?.outputStream
+                    
+                    _connectionState.value = BluetoothClientState.CONNECTED
+                    _connectedDeviceName.value = device.name
+                    
+                    Log.d(TAG, "Connected to ${device.name}")
+                    
+                    // Start reading messages
+                    startReading()
+                    
+                    // Start heartbeat to keep connection alive
+                    startHeartbeat()
+                    return@launch // Connection successful, exit
+                    
+                } catch (e: Exception) {
+                    Log.e(TAG, "Connection attempt $attempt failed", e)
+                    lastException = e
+                    closeSocket()
+                    
+                    if (attempt < maxRetries) {
+                        // Increase delay between retries progressively
+                        val delayMs = 1000L + (attempt * 500L)
+                        Log.d(TAG, "Retrying in ${delayMs}ms...")
+                        delay(delayMs)
+                    }
+                }
+            }
+            
+            // All retries failed
+            Log.e(TAG, "All connection attempts failed")
+            _connectionState.value = BluetoothClientState.DISCONNECTED
+        }
+    }
+    
+    /**
+     * Create socket using different methods based on attempt number
+     * Tries multiple approaches: Direct channel (fastest) then UUID-based (SDP lookup)
+     * Based on logs, reflection channel 4 has highest success rate
+     */
+    @SuppressLint("MissingPermission")
+    private fun createSocket(device: BluetoothDevice, attempt: Int): BluetoothSocket? {
+        // Prioritize direct channel connections (fastest and most reliable based on logs)
+        // Then fallback to UUID-based methods (relies on SDP)
+        
+        return when (attempt) {
+            1 -> {
+                // Method 1: Direct channel 4 (most successful based on logs)
+                Log.d(TAG, "Attempt 1: Using reflection with channel 4")
+                tryReflectionChannel(device, 4)
+            }
+            2 -> {
+                // Method 2: Insecure RFCOMM with UUID (matches server's insecure mode)
+                Log.d(TAG, "Attempt 2: Using createInsecureRfcommSocketToServiceRecord")
+                try {
+                    device.createInsecureRfcommSocketToServiceRecord(SERVICE_UUID)
+                } catch (e: Exception) {
+                    Log.w(TAG, "Insecure UUID method failed: ${e.message}")
+                    null
+                }
+            }
+            3 -> {
+                // Method 3: Standard secure RFCOMM with UUID
+                Log.d(TAG, "Attempt 3: Using createRfcommSocketToServiceRecord")
+                try {
+                    device.createRfcommSocketToServiceRecord(SERVICE_UUID)
+                } catch (e: Exception) {
+                    Log.w(TAG, "Secure UUID method failed: ${e.message}")
+                    null
+                }
+            }
+            4 -> {
+                // Method 4: Direct channel 1 (common fallback)
+                Log.d(TAG, "Attempt 4: Using reflection with channel 1")
+                tryReflectionChannel(device, 1)
+            }
+            else -> {
+                // Method 5: Try insecure direct channel
+                Log.d(TAG, "Attempt 5: Using createInsecureRfcommSocket with channel 4")
+                try {
+                    val method = device.javaClass.getMethod("createInsecureRfcommSocket", Int::class.java)
+                    method.invoke(device, 4) as BluetoothSocket
+                } catch (e: Exception) {
+                    Log.w(TAG, "Insecure reflection method failed: ${e.message}")
+                    // Last resort: try channel 1 insecure
+                    try {
+                        val method = device.javaClass.getMethod("createInsecureRfcommSocket", Int::class.java)
+                        method.invoke(device, 1) as BluetoothSocket
+                    } catch (e2: Exception) {
+                        Log.w(TAG, "All connection methods exhausted")
+                        null
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Try to create socket using reflection with specific channel
+     */
+    private fun tryReflectionChannel(device: BluetoothDevice, channel: Int): BluetoothSocket? {
+        return try {
+            val method = device.javaClass.getMethod("createRfcommSocket", Int::class.java)
+            method.invoke(device, channel) as BluetoothSocket
+        } catch (e: Exception) {
+            Log.w(TAG, "Reflection method failed for channel $channel: ${e.message}")
+            null
+        }
+    }
+    
+    /**
+     * Connect by device address
+     */
+    @SuppressLint("MissingPermission")
+    fun connectByAddress(address: String) {
+        if (!hasBluetoothPermission()) {
+            Log.e(TAG, "No Bluetooth permission")
+            return
+        }
+        
+        val device = bluetoothAdapter?.getRemoteDevice(address)
+        if (device != null) {
+            connect(device)
+        } else {
+            Log.e(TAG, "Device not found: $address")
+        }
+    }
+    
+    /**
+     * Disconnect
+     */
+    fun disconnect() {
+        Log.d(TAG, "Disconnecting...")
+        
+        connectJob?.cancel()
+        readJob?.cancel()
+        heartbeatJob?.cancel()
+        
+        closeSocket()
+        
+        _connectionState.value = BluetoothClientState.DISCONNECTED
+        _connectedDeviceName.value = null
+    }
+    
+    /**
+     * Start heartbeat to keep connection alive
+     * Sends HEARTBEAT message every 10 seconds
+     */
+    private fun startHeartbeat() {
+        heartbeatJob?.cancel()
+        heartbeatJob = scope.launch(Dispatchers.IO) {
+            while (isActive && _connectionState.value == BluetoothClientState.CONNECTED) {
+                delay(HEARTBEAT_INTERVAL)
+                
+                if (_connectionState.value == BluetoothClientState.CONNECTED) {
+                    try {
+                        val heartbeatMsg = Message(type = MessageType.HEARTBEAT)
+                        sendMessage(heartbeatMsg)
+                        Log.d(TAG, "Heartbeat sent")
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed to send heartbeat: ${e.message}")
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Send message
+     */
+    suspend fun sendMessage(message: Message): Boolean {
+        if (_connectionState.value != BluetoothClientState.CONNECTED) {
+            Log.w(TAG, "Not connected, cannot send message")
+            return false
+        }
+        
+        return withContext(Dispatchers.IO) {
+            try {
+                val json = message.toJson()
+                val data = (json + MESSAGE_DELIMITER).toByteArray(Charsets.UTF_8)
+                
+                outputStream?.write(data)
+                outputStream?.flush()
+                
+                Log.d(TAG, "Sent message: ${message.type}")
+                true
+            } catch (e: IOException) {
+                Log.e(TAG, "Failed to send message", e)
+                handleDisconnection()
+                false
+            }
+        }
+    }
+    
+    /**
+     * Send voice start signal
+     */
+    suspend fun sendVoiceStart(): Boolean {
+        return sendMessage(Message(type = MessageType.VOICE_START))
+    }
+    
+    /**
+     * Send voice data (with complete audio)
+     */
+    suspend fun sendVoiceEnd(audioData: ByteArray): Boolean {
+        val message = Message(
+            type = MessageType.VOICE_END,
+            binaryData = audioData
+        )
+        return sendMessage(message)
+    }
+    
+    /**
+     * Start reading messages
+     */
+    private fun startReading() {
+        readJob?.cancel()
+        readJob = scope.launch(Dispatchers.IO) {
+            val buffer = StringBuilder()
+            val readBuffer = ByteArray(4096)
+            
+            while (isActive && _connectionState.value == BluetoothClientState.CONNECTED) {
+                try {
+                    val bytesRead = inputStream?.read(readBuffer) ?: -1
+                    
+                    if (bytesRead == -1) {
+                        Log.d(TAG, "Stream closed")
+                        break
+                    }
+                    
+                    val received = String(readBuffer, 0, bytesRead, Charsets.UTF_8)
+                    buffer.append(received)
+                    
+                    // Process complete messages
+                    var delimiterIndex: Int
+                    while (buffer.indexOf(MESSAGE_DELIMITER).also { delimiterIndex = it } >= 0) {
+                        val messageStr = buffer.substring(0, delimiterIndex)
+                        buffer.delete(0, delimiterIndex + MESSAGE_DELIMITER.length)
+                        
+                        if (messageStr.isNotBlank()) {
+                            parseAndEmitMessage(messageStr)
+                        }
+                    }
+                    
+                } catch (e: IOException) {
+                    Log.e(TAG, "Read error", e)
+                    break
+                }
+            }
+            
+            handleDisconnection()
+        }
+    }
+    
+    /**
+     * Parse and emit message
+     */
+    private suspend fun parseAndEmitMessage(jsonStr: String) {
+        try {
+            val json = JSONObject(jsonStr)
+            val typeValue = json.optInt("type", -1)
+            val payload = if (json.has("payload")) json.getString("payload") else null
+            
+            // Handle binaryData (Base64 encoded)
+            val binaryData = if (json.has("binaryData")) {
+                try {
+                    android.util.Base64.decode(json.getString("binaryData"), android.util.Base64.DEFAULT)
+                } catch (e: Exception) {
+                    null
+                }
+            } else null
+            
+            val type = MessageType.fromCode(typeValue)
+            if (type != null) {
+                val message = Message(
+                    type = type,
+                    payload = payload,
+                    binaryData = binaryData
+                )
+                
+                Log.d(TAG, "Received message: $type, payload: $payload")
+                _messageFlow.emit(message)
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse message: $jsonStr", e)
+        }
+    }
+    
+    /**
+     * Handle disconnection
+     */
+    private suspend fun handleDisconnection() {
+        if (_connectionState.value == BluetoothClientState.DISCONNECTED) return
+        
+        Log.d(TAG, "Handling disconnection...")
+        closeSocket()
+        
+        _connectionState.value = BluetoothClientState.DISCONNECTED
+        _connectedDeviceName.value = null
+    }
+    
+    /**
+     * Close socket
+     */
+    private fun closeSocket() {
+        try {
+            inputStream?.close()
+            outputStream?.close()
+            socket?.close()
+        } catch (e: IOException) {
+            Log.e(TAG, "Error closing socket", e)
+        }
+        
+        inputStream = null
+        outputStream = null
+        socket = null
+    }
+    
+    /**
+     * Check Bluetooth permission
+     */
+    private fun hasBluetoothPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true // On Android 11 and below, BLUETOOTH permissions are install-time
+        }
+    }
+    
+    /**
+     * Check if Bluetooth is enabled
+     */
+    fun isBluetoothEnabled(): Boolean {
+        return bluetoothAdapter?.isEnabled == true
+    }
+}

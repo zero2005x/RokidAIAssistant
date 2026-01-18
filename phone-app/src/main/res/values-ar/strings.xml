@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Info -->
+    <string name="app_name">مساعد Rokid AI</string>
+    
+    <!-- Service Status -->
+    <string name="service_running">الخدمة قيد التشغيل</string>
+    <string name="service_stopped">الخدمة متوقفة</string>
+    
+    <!-- Connection Status -->
+    <string name="connected">متصل</string>
+    <string name="disconnected">غير متصل</string>
+    <string name="connecting">جارٍ الاتصال…</string>
+    
+    <!-- Actions -->
+    <string name="start_service">بدء الخدمة</string>
+    <string name="stop_service">إيقاف الخدمة</string>
+    <string name="connect">اتصال</string>
+    <string name="disconnect">قطع الاتصال</string>
+    <string name="save">حفظ</string>
+    <string name="cancel">إلغاء</string>
+    <string name="back">رجوع</string>
+    
+    <!-- Settings -->
+    <string name="settings">الإعدادات</string>
+    <string name="api_settings">إعدادات API</string>
+    <string name="ai_service">خدمة الذكاء الاصطناعي</string>
+    <string name="ai_provider">مزود الذكاء الاصطناعي</string>
+    <string name="ai_model">نموذج الذكاء الاصطناعي</string>
+    <string name="api_keys">مفاتيح API</string>
+    <string name="speech_recognition">التعرف على الصوت</string>
+    <string name="speech_service">خدمة الصوت</string>
+    <string name="advanced_settings">الإعدادات المتقدمة</string>
+    <string name="system_prompt">موجه النظام</string>
+    <string name="system_prompt_hint">أدخل موجه نظام الذكاء الاصطناعي…</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings">اللغة</string>
+    <string name="select_language">اختر اللغة</string>
+    <string name="app_language">لغة التطبيق</string>
+    <string name="response_language">لغة استجابة الذكاء الاصطناعي</string>
+    
+    <!-- Status Messages -->
+    <string name="settings_complete">اكتمل الإعداد، جاهز للاستخدام</string>
+    <string name="please_enter_api_key">يرجى إدخال مفتاح API لـ %s</string>
+    <string name="select_provider">اختر المزود</string>
+    <string name="select_model">اختر النموذج</string>
+    
+    <!-- AI Processing -->
+    <string name="processing_voice">جارٍ معالجة الصوت…</string>
+    <string name="thinking">جارٍ التفكير…</string>
+    <string name="voice_too_short">الصوت قصير جداً، يرجى المحاولة مرة أخرى</string>
+    <string name="cannot_recognize">لا يمكن التعرف على الصوت</string>
+    <string name="service_unavailable">خدمة الذكاء الاصطناعي غير متاحة مؤقتاً</string>
+    <string name="network_error">فشل الاتصال بالشبكة، يرجى التحقق من الإعدادات</string>
+    <string name="connection_timeout">انتهت مهلة الاتصال، يرجى المحاولة لاحقاً</string>
+    
+    <!-- Misc -->
+    <string name="show">إظهار</string>
+    <string name="hide">إخفاء</string>
+    <string name="in_use">قيد الاستخدام</string>
+
+    <!-- Custom Provider Settings -->
+    <string name="deepseek_api_key">مفتاح API DeepSeek</string>
+    <string name="groq_api_key">مفتاح API Groq</string>
+    <string name="xai_api_key">مفتاح API xAI</string>
+    <string name="alibaba_api_key">مفتاح API Alibaba DashScope</string>
+    <string name="zhipu_api_key">مفتاح API Zhipu AI</string>
+    <string name="baidu_api_key">مفتاح API Baidu</string>
+    <string name="baidu_secret_key">المفتاح السري Baidu</string>
+    <string name="perplexity_api_key">مفتاح API Perplexity</string>
+    <string name="custom_api_key">مفتاح API مخصص (اختياري)</string>
+    <string name="custom_provider_settings">إعدادات المزود المخصص</string>
+    <string name="base_url">عنوان URL الأساسي</string>
+    <string name="base_url_hint">مثال: http://localhost:11434/v1/</string>
+    <string name="model_name">اسم النموذج</string>
+    <string name="model_name_hint">مثال: llama3.2, qwen2.5</string>
+    <string name="custom_model_name">اسم النموذج المخصص</string>
+    <string name="test_connection">اختبار الاتصال</string>
+    <string name="testing_connection">جارٍ اختبار الاتصال…</string>
+    <string name="connection_success">تم الاتصال بنجاح!</string>
+    <string name="connection_failed">فشل الاتصال: %s</string>
+    <string name="invalid_url">صيغة URL غير صالحة. استخدم http:// أو https://</string>
+    <string name="api_key_optional">مفتاح API اختياري للنماذج المحلية</string>
+    
+    <!-- AI Provider Names -->
+    <string name="provider_gemini">Google Gemini</string>
+    <string name="provider_openai">OpenAI</string>
+    <string name="provider_anthropic">Anthropic Claude</string>
+    <string name="provider_deepseek">DeepSeek</string>
+    <string name="provider_groq">Groq</string>
+    <string name="provider_xai">xAI (Grok)</string>
+    <string name="provider_alibaba">Alibaba Qwen</string>
+    <string name="provider_zhipu">Zhipu AI (ChatGLM)</string>
+    <string name="provider_baidu">Baidu Ernie</string>
+    <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_custom">مخصص / مستضاف ذاتياً</string>
+    
+    <!-- Speech Service Names -->
+    <string name="speech_service_gemini">التعرف على الصوت Gemini</string>
+    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_google_cloud">Google Cloud STT</string>
+</resources>

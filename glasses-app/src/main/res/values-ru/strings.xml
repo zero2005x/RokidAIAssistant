@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rokid AI</string>
+    
+    <!-- Status -->
+    <string name="listening">Прослушивание...</string>
+    <string name="processing">Обработка...</string>
+    <string name="ready">Готово</string>
+    <string name="connected">Подключено</string>
+    <string name="disconnected">Отключено</string>
+    <string name="tap_to_speak">Нажмите, чтобы говорить</string>
+    <string name="tap_to_connect">Нажмите для подключения</string>
+    <string name="recording">Запись</string>
+    
+    <!-- Device Selection -->
+    <string name="select_phone">Выбрать телефон</string>
+    <string name="no_paired_devices">Сопряженные устройства не найдены</string>
+    <string name="pair_device_hint">Выполните сопряжение телефона в настройках системы</string>
+    <string name="unknown_device">Неизвестное устройство</string>
+    <string name="cancel">Отмена</string>
+    
+    <!-- Display Messages -->
+    <string name="not_connected">Не подключено к телефону\nВыберите устройство</string>
+    <string name="connecting_status">Подключение...</string>
+    <string name="connected_ready">Подключено, готово</string>
+    <string name="please_connect_phone">Сначала подключите телефон</string>
+    <string name="please_wait">Подождите</string>
+    <string name="tap_touchpad_start">Коснитесь сенсорной панели для начала разговора</string>
+    <string name="tap_stop_recording">Коснитесь еще раз для остановки записи</string>
+    <string name="select_paired_device">Выбрать сопряженное устройство</string>
+    <string name="sending_audio">Отправка аудио на телефон...</string>
+    <string name="no_voice_detected">Голос не обнаружен</string>
+    <string name="please_try_again">Попробуйте еще раз</string>
+    <string name="sending">Отправка...</string>
+    <string name="send_failed">Ошибка отправки\nПроверьте Bluetooth-соединение</string>
+    <string name="reconnect_try_again">Переподключитесь и попробуйте снова</string>
+    <string name="waiting_phone">Ожидание обработки телефоном...</string>
+    <string name="ai_thinking">ИИ думает</string>
+    <string name="mic_permission_required">Требуется разрешение на микрофон</string>
+    <string name="tap_continue">Коснитесь сенсорной панели для продолжения разговора</string>
+    <string name="you_said">Вы сказали: %s\n\nИИ думает...</string>
+    <string name="error_prefix">Ошибка: %s</string>
+    <string name="say_hey_rokid">Скажите \'Hey Rokid\' для начала разговора</string>
+    <string name="tap_touchpad_record">Коснитесь сенсорной панели для начала записи</string>
+
+    <!-- Pagination -->
+    <string name="page_indicator">%1$d / %2$d</string>
+    <string name="swipe_for_more">Проведите вверх/вниз для продолжения</string>
+    <string name="swipe_up_previous">▲ Вверх - предыдущая</string>
+    <string name="swipe_down_next">▼ Вниз - следующая</string>
+</resources>

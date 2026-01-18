@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rokid AI 助手</string>
+    
+    <!-- 主頁面 -->
+    <string name="main_title">連接您的 Rokid 眼鏡</string>
+    <string name="main_subtitle">連接後，您可以透過語音與 AI 助手對話</string>
+    <string name="btn_connect">掃描並連接眼鏡</string>
+    
+    <!-- 藍牙頁面 -->
+    <string name="bluetooth_title">連接眼鏡</string>
+    <string name="bluetooth_scanning">正在掃描附近的 Rokid 眼鏡...</string>
+    <string name="bluetooth_connecting">正在連接...</string>
+    <string name="bluetooth_not_found">未發現 Rokid 眼鏡</string>
+    <string name="bluetooth_ensure_on">請確保眼鏡已開機且藍牙已開啟</string>
+    
+    <!-- AI 助手頁面 -->
+    <string name="ai_title">AI 助手</string>
+    <string name="ai_listening">聆聽中...</string>
+    <string name="ai_processing">處理中...</string>
+    <string name="ai_hint">長按眼鏡觸控板或說「樂奇」開始對話</string>
+    <string name="ai_welcome">嗨！我是小洛，您的 AI 助手</string>
+    
+    <!-- 通用 -->
+    <string name="btn_retry">重試</string>
+    <string name="btn_back">返回</string>
+    <string name="btn_send">發送</string>
+    <string name="error_unknown">未知錯誤</string>
+</resources>

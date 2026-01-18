@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rokid AI</string>
+    
+    <!-- Status -->
+    <string name="listening">듣는 중...</string>
+    <string name="processing">처리 중...</string>
+    <string name="ready">준비 완료</string>
+    <string name="connected">연결됨</string>
+    <string name="disconnected">연결 끊김</string>
+    <string name="tap_to_speak">탭하여 말하기</string>
+    <string name="tap_to_connect">탭하여 연결</string>
+    <string name="recording">녹음 중</string>
+    
+    <!-- Device Selection -->
+    <string name="select_phone">휴대폰 선택</string>
+    <string name="no_paired_devices">페어링된 기기를 찾을 수 없습니다</string>
+    <string name="pair_device_hint">시스템 설정에서 휴대폰을 페어링하세요</string>
+    <string name="unknown_device">알 수 없는 기기</string>
+    <string name="cancel">취소</string>
+    
+    <!-- Display Messages -->
+    <string name="not_connected">휴대폰에 연결되지 않음\n기기를 선택하세요</string>
+    <string name="connecting_status">연결 중...</string>
+    <string name="connected_ready">연결됨, 준비 완료</string>
+    <string name="please_connect_phone">먼저 휴대폰을 연결하세요</string>
+    <string name="please_wait">잠시 기다려 주세요</string>
+    <string name="tap_touchpad_start">터치패드를 탭하여 대화 시작</string>
+    <string name="tap_stop_recording">다시 탭하여 녹음 중지</string>
+    <string name="select_paired_device">페어링된 기기 선택</string>
+    <string name="sending_audio">휴대폰으로 오디오 전송 중...</string>
+    <string name="no_voice_detected">음성이 감지되지 않았습니다</string>
+    <string name="please_try_again">다시 시도해 주세요</string>
+    <string name="sending">전송 중...</string>
+    <string name="send_failed">전송 실패\nBluetooth 연결을 확인하세요</string>
+    <string name="reconnect_try_again">다시 연결하고 재시도하세요</string>
+    <string name="waiting_phone">휴대폰 처리 대기 중...</string>
+    <string name="ai_thinking">AI가 생각 중</string>
+    <string name="mic_permission_required">마이크 권한이 필요합니다</string>
+    <string name="tap_continue">터치패드를 탭하여 대화 계속</string>
+    <string name="you_said">당신: %s\n\nAI가 생각 중...</string>
+    <string name="error_prefix">오류: %s</string>
+    <string name="say_hey_rokid">\'Hey Rokid\'라고 말하여 대화 시작</string>
+    <string name="tap_touchpad_record">터치패드를 탭하여 녹음 시작</string>
+
+    <!-- Pagination -->
+    <string name="page_indicator">%1$d / %2$d</string>
+    <string name="swipe_for_more">위/아래로 스와이프하여 더 보기</string>
+    <string name="swipe_up_previous">▲ 위로 스와이프 - 이전</string>
+    <string name="swipe_down_next">▼ 아래로 스와이프 - 다음</string>
+</resources>

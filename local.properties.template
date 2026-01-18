@@ -1,0 +1,29 @@
+# =============================================
+
+# Rokid AI Assistant - Sensitive Information Configuration
+
+# =============================================
+
+# Copy this file to local.properties and fill in the actual values
+
+# Note: local.properties should not be committed to version control!
+
+# ==============================================
+
+# Rokid Client Secret (Remove hyphens)
+
+# Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx → Remove hyphens
+
+ROKID_CLIENT_SECRET=your_rokid_client_secret_here
+
+# Gemini API Key (obtained from Google AI Studio)
+
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# OpenAI API Key (optional, for Whisper)
+
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Anthropic API Key (optional)
+
+ANTHROPIC_API_KEY=your_anthropic_api_key_here

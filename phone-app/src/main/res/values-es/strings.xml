@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Info -->
+    <string name="app_name">Rokid AI Asistente</string>
+    <string name="app_title">Rokid AI Asistente (Teléfono)</string>
+    
+    <!-- Service Status -->
+    <string name="service_running">Servicio en ejecución</string>
+    <string name="service_stopped">Servicio detenido</string>
+    
+    <!-- Connection Status -->
+    <string name="connected">Conectado</string>
+    <string name="disconnected">Desconectado</string>
+    <string name="connecting">Conectando…</string>
+    <string name="reconnecting">Reconectando…</string>
+    <string name="connection_error">Error de conexión</string>
+    
+    <!-- Actions -->
+    <string name="start_service">Iniciar servicio</string>
+    <string name="stop_service">Detener servicio</string>
+    <string name="start">Iniciar</string>
+    <string name="stop">Detener</string>
+    <string name="connect">Conectar</string>
+    <string name="disconnect">Desconectar</string>
+    <string name="save">Guardar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="back">Volver</string>
+    
+    <!-- Settings -->
+    <string name="settings">Configuración</string>
+    <string name="api_settings">Configuración de API</string>
+    <string name="ai_service">Servicio de IA</string>
+    <string name="ai_provider">Proveedor de IA</string>
+    <string name="ai_model">Modelo de IA</string>
+    <string name="api_keys">Claves API</string>
+    <string name="speech_recognition">Reconocimiento de voz</string>
+    <string name="speech_recognition_service">Servicio de reconocimiento de voz</string>
+    <string name="speech_service">Servicio de voz</string>
+    <string name="advanced_settings">Configuración avanzada</string>
+    <string name="system_prompt">Indicación del sistema</string>
+    <string name="system_prompt_hint">Ingrese la indicación del sistema de IA…</string>
+    <string name="enter_system_prompt">Ingrese el prompt del sistema de IA…</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings">Idioma</string>
+    <string name="select_language">Seleccionar idioma</string>
+    <string name="app_language">Idioma de la aplicación</string>
+    <string name="response_language">Idioma de respuesta de IA</string>
+    
+    <!-- Status Messages -->
+    <string name="settings_complete">Configuración completa, listo para usar</string>
+    <string name="please_enter_api_key">Por favor ingrese la clave API de %s</string>
+    <string name="select_provider">Seleccionar proveedor</string>
+    <string name="select_ai_provider">Seleccionar proveedor de IA</string>
+    <string name="select_model">Seleccionar modelo</string>
+    <string name="select_speech_service">Seleccionar servicio de reconocimiento de voz</string>
+    <string name="supports_audio">✓ Soporta audio</string>
+    
+    <!-- AI Processing -->
+    <string name="processing_voice">Procesando voz…</string>
+    <string name="thinking">Pensando…</string>
+    <string name="voice_too_short">Voz muy corta, intente de nuevo</string>
+    <string name="cannot_recognize">No se puede reconocer la voz</string>
+    <string name="service_unavailable">Servicio de IA temporalmente no disponible</string>
+    <string name="network_error">Error de conexión de red, verifique la configuración</string>
+    <string name="connection_timeout">Tiempo de conexión agotado, intente más tarde</string>
+    <string name="ready">Listo</string>
+    
+    <!-- Conversation -->
+    <string name="conversation_history">Historial de conversación</string>
+    <string name="no_conversation_history">Sin historial de conversación</string>
+    
+    <!-- Misc -->
+    <string name="show">Mostrar</string>
+    <string name="hide">Ocultar</string>
+    <string name="in_use">En uso</string>
+    
+    <!-- API Keys -->
+    <string name="gemini_api_key">Clave de API Gemini</string>
+    <string name="openai_api_key">Clave de API OpenAI</string>
+    <string name="anthropic_api_key">Clave de API Anthropic</string>
+    
+    <!-- Notification & Status -->
+    <string name="glasses_recording">Gafas grabando...</string>
+    <string name="recognizing_speech">Reconociendo voz...</string>
+    <string name="processing_failed">Error de procesamiento: %s</string>
+    <string name="waiting_glasses">Esperando conexión de gafas...</string>
+    <string name="connected_glasses">Conectado a las gafas</string>
+    
+    <!-- Additional API Keys -->
+    <string name="deepseek_api_key">Clave de API DeepSeek</string>
+    <string name="groq_api_key">Clave de API Groq</string>
+    <string name="xai_api_key">Clave de API xAI</string>
+    <string name="alibaba_api_key">Clave de API Alibaba DashScope</string>
+    <string name="zhipu_api_key">Clave de API Zhipu AI</string>
+    <string name="baidu_api_key">Clave de API Baidu</string>
+    <string name="baidu_secret_key">Clave secreta Baidu</string>
+    <string name="perplexity_api_key">Clave de API Perplexity</string>
+    <string name="custom_api_key">Clave de API personalizada (opcional)</string>
+    <string name="custom_provider_settings">Configuración de proveedor personalizado</string>
+    <string name="base_url">URL base</string>
+    <string name="base_url_hint">Ej.: http://localhost:11434/v1/</string>
+    <string name="model_name">Nombre del modelo</string>
+    <string name="model_name_hint">Ej.: llama3.2, qwen2.5</string>
+    <string name="custom_model_name">Nombre de modelo personalizado</string>
+    <string name="test_connection">Probar conexión</string>
+    <string name="testing_connection">Probando conexión…</string>
+    <string name="connection_success">¡Conexión exitosa!</string>
+    <string name="connection_failed">Conexión fallida: %s</string>
+    <string name="invalid_url">Formato de URL inválido. Use http:// o https://</string>
+    <string name="api_key_optional">La clave de API es opcional para modelos locales</string>
+    
+    <!-- AI Provider Names -->
+    <string name="provider_gemini">Google Gemini</string>
+    <string name="provider_openai">OpenAI</string>
+    <string name="provider_anthropic">Anthropic Claude</string>
+    <string name="provider_deepseek">DeepSeek</string>
+    <string name="provider_groq">Groq</string>
+    <string name="provider_xai">xAI (Grok)</string>
+    <string name="provider_alibaba">Alibaba Qwen</string>
+    <string name="provider_zhipu">Zhipu AI (ChatGLM)</string>
+    <string name="provider_baidu">Baidu Ernie</string>
+    <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_custom">Personalizado / Auto-alojado</string>
+    
+    <!-- Speech Service Names -->
+    <string name="speech_service_gemini">Reconocimiento de voz Gemini</string>
+    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_google_cloud">Google Cloud STT</string>
+</resources>

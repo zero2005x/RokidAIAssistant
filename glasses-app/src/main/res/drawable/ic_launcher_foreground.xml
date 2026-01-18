@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 眼鏡圖示 -->
+    <path
+        android:fillColor="#64B5F6"
+        android:pathData="M30,48 L30,58 C30,64 35,68 42,68 L46,68 C52,68 56,64 56,58 L56,48 C56,42 52,38 46,38 L42,38 C35,38 30,42 30,48z"/>
+    <path
+        android:fillColor="#64B5F6"
+        android:pathData="M52,48 L52,58 C52,64 57,68 64,68 L68,68 C74,68 78,64 78,58 L78,48 C78,42 74,38 68,38 L64,38 C57,38 52,42 52,48z"/>
+    <path
+        android:fillColor="#64B5F6"
+        android:pathData="M56,53 L52,53"
+        android:strokeWidth="2"
+        android:strokeColor="#64B5F6"/>
+    <!-- AI 星星 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,28 L55,32 L59,33 L55,34 L54,38 L53,34 L49,33 L53,32z"/>
+</vector>

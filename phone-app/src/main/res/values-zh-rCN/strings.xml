@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Info -->
+    <string name="app_name">Rokid AI 助手</string>
+    <string name="app_title">Rokid AI 助手 (手机)</string>
+    
+    <!-- Service Status -->
+    <string name="service_running">服务运行中</string>
+    <string name="service_stopped">服务已停止</string>
+    
+    <!-- Connection Status -->
+    <string name="connected">已连接</string>
+    <string name="disconnected">未连接</string>
+    <string name="connecting">连接中…</string>
+    <string name="reconnecting">重新连接中…</string>
+    <string name="connection_error">连接错误</string>
+    
+    <!-- Actions -->
+    <string name="start_service">启动服务</string>
+    <string name="stop_service">停止服务</string>
+    <string name="start">启动</string>
+    <string name="stop">停止</string>
+    <string name="connect">连接</string>
+    <string name="disconnect">断开</string>
+    <string name="save">保存</string>
+    <string name="cancel">取消</string>
+    <string name="back">返回</string>
+    
+    <!-- Settings -->
+    <string name="settings">设置</string>
+    <string name="api_settings">API 设置</string>
+    <string name="ai_service">AI 服务</string>
+    <string name="ai_provider">AI 提供商</string>
+    <string name="ai_model">AI 模型</string>
+    <string name="api_keys">API 密钥</string>
+    <string name="speech_recognition">语音识别</string>
+    <string name="speech_recognition_service">语音识别服务</string>
+    <string name="speech_service">语音服务</string>
+    <string name="advanced_settings">高级设置</string>
+    <string name="system_prompt">系统提示词</string>
+    <string name="system_prompt_hint">输入 AI 系统提示词…</string>
+    <string name="enter_system_prompt">输入 AI 的系统提示词…</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings">语言设置</string>
+    <string name="select_language">选择语言</string>
+    <string name="app_language">应用语言</string>
+    <string name="response_language">AI 回复语言</string>
+    
+    <!-- Status Messages -->
+    <string name="settings_complete">设置完成，可以开始使用</string>
+    <string name="please_enter_api_key">请填写 %s API Key</string>
+    <string name="select_provider">选择提供商</string>
+    <string name="select_ai_provider">选择 AI 提供商</string>
+    <string name="select_model">选择模型</string>
+    <string name="select_speech_service">选择语音识别服务</string>
+    <string name="supports_audio">✓ 支持音频</string>
+    
+    <!-- API Key Validation -->
+    <string name="api_key_required">需要 API 密钥</string>
+    <string name="api_key_not_set">尚未配置</string>
+    <string name="speech_service_not_configured">未配置语音识别服务。请设置 Gemini、OpenAI、Groq 或 xAI API 密钥。</string>
+    <string name="api_key_setup_hint">前往设置配置您的 API 密钥。在配置之前，应用将使用内置的备用服务。</string>
+    <string name="go_to_settings">前往设置</string>
+    <string name="later">稍后</string>
+    <string name="api_key_validation_failed">API 密钥验证失败</string>
+    <string name="service_not_ready">服务未就绪。请在设置中配置 API 密钥。</string>
+    
+    <!-- AI Processing -->
+    <string name="processing_voice">正在识别语音…</string>
+    <string name="thinking">正在思考…</string>
+    <string name="voice_too_short">语音太短，请再说一次</string>
+    <string name="cannot_recognize">无法识别语音</string>
+    <string name="service_unavailable">AI 服务暂时不可用</string>
+    <string name="network_error">网络连接失败，请检查网络设置</string>
+    <string name="connection_timeout">连接超时，请稍后再试</string>
+    <string name="ready">就绪</string>
+    
+    <!-- Conversation -->
+    <string name="conversation_history">对话记录</string>
+    <string name="no_conversation_history">目前没有对话记录</string>
+    
+    <!-- Misc -->
+    <string name="show">显示</string>
+    <string name="hide">隐藏</string>
+    <string name="in_use">使用中</string>
+    
+    <!-- API Keys -->
+    <string name="gemini_api_key">Gemini API 密钥</string>
+    <string name="openai_api_key">OpenAI API 密钥</string>
+    <string name="anthropic_api_key">Anthropic API 密钥</string>
+    
+    <!-- Notification & Status -->
+    <string name="glasses_recording">眼镜录音中...</string>
+    <string name="recognizing_speech">语音识别中...</string>
+    <string name="processing_failed">处理失败：%s</string>
+    <string name="waiting_glasses">等待眼镜连接...</string>
+    <string name="connected_glasses">已连接眼镜</string>
+    
+    <!-- Additional API Keys -->
+    <string name="deepseek_api_key">DeepSeek API 密钥</string>
+    <string name="groq_api_key">Groq API 密钥</string>
+    <string name="xai_api_key">xAI API 密钥</string>
+    <string name="alibaba_api_key">阿里云 DashScope API 密钥</string>
+    <string name="zhipu_api_key">智谱 AI API 密钥</string>
+    <string name="baidu_api_key">百度 API 密钥</string>
+    <string name="baidu_secret_key">百度 Secret 密钥</string>
+    <string name="perplexity_api_key">Perplexity API 密钥</string>
+    <string name="custom_api_key">自定义 API 密钥（可选）</string>
+    <string name="custom_provider_settings">自定义提供商设置</string>
+    <string name="base_url">基础网址</string>
+    <string name="base_url_hint">例如：http://localhost:11434/v1/</string>
+    <string name="model_name">模型名称</string>
+    <string name="model_name_hint">例如：llama3.2、qwen2.5</string>
+    <string name="custom_model_name">自定义模型名称</string>
+    <string name="test_connection">测试连接</string>
+    <string name="testing_connection">正在测试连接…</string>
+    <string name="connection_success">连接成功！</string>
+    <string name="connection_failed">连接失败：%s</string>
+    <string name="invalid_url">无效的网址格式，请使用 http:// 或 https://</string>
+    <string name="api_key_optional">本地模型不需要 API 密钥</string>
+    
+    <!-- AI Provider Names -->
+    <string name="provider_gemini">Google Gemini</string>
+    <string name="provider_openai">OpenAI</string>
+    <string name="provider_anthropic">Anthropic Claude</string>
+    <string name="provider_deepseek">深度求索 DeepSeek</string>
+    <string name="provider_groq">Groq</string>
+    <string name="provider_xai">xAI (Grok)</string>
+    <string name="provider_alibaba">阿里巴巴通义千问</string>
+    <string name="provider_zhipu">智谱清言 (ChatGLM)</string>
+    <string name="provider_baidu">百度文心一言</string>
+    <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_custom">自定义 / 自托管</string>
+    
+    <!-- Speech Service Names -->
+    <string name="speech_service_gemini">Gemini 语音识别</string>
+    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_google_cloud">Google Cloud 语音转文字</string>
+</resources>
