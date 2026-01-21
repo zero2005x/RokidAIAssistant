@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp") version "2.3.4"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.10"
 }
 
 android {
@@ -113,6 +115,17 @@ dependencies {
     
     // Coil for image loading in Compose
     implementation("io.coil-kt:coil-compose:2.5.0")
+    
+    // Room Database for conversation persistence
+    implementation("androidx.room:room-runtime:2.7.1")
+    implementation("androidx.room:room-ktx:2.7.1")
+    ksp("androidx.room:room-compiler:2.7.1")
+    
+    // Kotlin Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    
+    // Navigation Compose
+    implementation("androidx.navigation:navigation-compose:2.7.7")
     
     // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")

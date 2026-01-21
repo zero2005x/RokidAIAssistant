@@ -1,10 +1,125 @@
-# Rokid AI Assistant 架構文檔
+# Rokid AI Assistant Architecture
 
-## 概述
+## Overview
 
-Rokid AI Assistant 是一個智能眼鏡助手應用，採用「手機中繼」架構，通過藍牙將眼鏡與手機連接，由手機負責 AI 處理。
+Rokid AI Assistant is a smart glasses assistant application using a "phone relay" architecture. The glasses connect to the phone via Bluetooth, and the phone handles all AI processing.
 
-## 架構圖
+## System Architecture
+
+```
+┌─────────────────┐      Bluetooth SPP      ┌─────────────────┐      WiFi      ┌─────────────────┐
+│  Rokid Glasses  │ ◄──────────────────────► │    Phone App    │ ◄────────────► │    AI APIs      │
+│  (glasses-app)  │    Voice/Commands/Resp   │   (phone-app)   │   HTTP/REST   │  (Cloud/Local)  │
+└─────────────────┘                          └─────────────────┘                └─────────────────┘
+        │                                            │
+        │                                            │
+   ┌────┴────┐                              ┌───────┴────────┐
+   │ Record  │                              │ProviderManager │
+   │ Display │                              │  Room Database │
+   └─────────┘                              │ EnhancedAIServ │
+                                            └────────────────┘
+```
+
+---
+
+## Multi-LLM Provider Architecture
+
+The application uses a type-safe multi-provider architecture inspired by RikkaHub.
+
+### Core Components
+
+1. **ProviderSetting.kt** - Provider Configuration Sealed Class
+   - Path: `phone-app/src/main/java/com/example/rokidphone/ai/provider/ProviderSetting.kt`
+   - Uses sealed class for type-safe multi-provider support
+   - Each provider has its own configuration type (Gemini, OpenAI, Anthropic, DeepSeek, Groq, xAI, Alibaba, Zhipu, Baidu, Perplexity, Custom)
+   - Supports Kotlin Serialization
+
+2. **Provider.kt** - Unified Provider Interface
+   - Path: `phone-app/src/main/java/com/example/rokidphone/ai/provider/Provider.kt`
+   - Defines generic `Provider<T : ProviderSetting>` interface
+   - Includes `listModels`, `generateText`, `streamText`, `transcribe`, `analyzeImage` methods
+   - Defines `ChatMessage`, `GenerationResult`, `MessageChunk` data classes
+
+3. **ProviderManager.kt** - Provider Manager
+   - Path: `phone-app/src/main/java/com/example/rokidphone/ai/provider/ProviderManager.kt`
+   - Centralized management of all AI Provider instances and settings
+   - Service caching mechanism to avoid redundant service creation
+   - Dynamic provider and model switching support
+
+### Architecture Pattern
+
+```kotlin
+// Sealed class for different provider configurations
+sealed class ProviderSetting {
+    data class Gemini(val apiKey: String, ...) : ProviderSetting()
+    data class OpenAI(val apiKey: String, ...) : ProviderSetting()
+    data class Custom(val baseUrl: String, ...) : ProviderSetting()
+    // ...
+}
+
+// Unified Provider interface
+interface Provider<T : ProviderSetting> {
+    suspend fun generateText(setting: T, messages: List<ChatMessage>): GenerationResult
+    fun streamText(setting: T, messages: List<ChatMessage>): Flow<MessageChunk>
+    suspend fun transcribe(setting: T, audioData: ByteArray): SpeechResult
+    // ...
+}
+```
+
+---
+
+## Conversation Persistence (Room Database)
+
+### Database Components
+
+1. **AppDatabase.kt** - Room Database
+   - Path: `phone-app/src/main/java/com/example/rokidphone/data/db/AppDatabase.kt`
+   - Uses Room Database for data persistence
+   - Contains `ConversationEntity` and `MessageEntity` entities
+   - Defines `ConversationDao` and `MessageDao`
+
+2. **ConversationRepository.kt** - Conversation Repository
+   - Path: `phone-app/src/main/java/com/example/rokidphone/data/db/ConversationRepository.kt`
+   - Provides CRUD operations for conversations and messages
+   - Supports conversation archiving and pinning
+   - Auto-generates conversation titles
+
+### Data Schema
+
+```kotlin
+// Conversation Entity
+@Entity(tableName = "conversations")
+data class ConversationEntity(
+    val id: String,
+    val title: String,
+    val providerId: String,
+    val modelId: String,
+    val systemPrompt: String,
+    val createdAt: Long,
+    val updatedAt: Long,
+    val messageCount: Int,
+    val isArchived: Boolean,
+    val isPinned: Boolean
+)
+
+// Message Entity
+@Entity(tableName = "messages")
+data class MessageEntity(
+    val id: String,
+    val conversationId: String,
+    val role: String,  // "user", "assistant", "system"
+    val content: String,
+    val createdAt: Long,
+    val tokenCount: Int?,
+    val modelId: String?,
+    val hasImage: Boolean,
+    val imagePath: String?
+)
+```
+
+---
+
+## Architecture Diagram
 
 ```
 ┌─────────────────┐      Bluetooth SPP      ┌─────────────────┐      WiFi      ┌─────────────────┐
@@ -13,64 +128,66 @@ Rokid AI Assistant 是一個智能眼鏡助手應用，採用「手機中繼」�
 └─────────────────┘                          └─────────────────┘                └─────────────────┘
 ```
 
-## 模組說明
+## Module Description
 
-### 1. glasses-app (眼鏡端)
+### 1. glasses-app (Glasses Side)
 
-- **主要功能**: 語音錄製、喚醒詞偵測、顯示 AI 回應
-- **BluetoothSppClient**: 藍牙 SPP 客戶端，連接到手機
-- **GlassesViewModel**: 管理 UI 狀態和語音錄製
-- **WakeWordService**: 喚醒詞偵測服務
+- **Main Functions**: Voice recording, wake word detection, display AI responses
+- **BluetoothSppClient**: Bluetooth SPP client, connects to phone
+- **GlassesViewModel**: Manages UI state and voice recording
+- **WakeWordService**: Wake word detection service
 
-### 2. phone-app (手機端)
+### 2. phone-app (Phone Side)
 
-- **主要功能**: 藍牙伺服器、語音識別、AI 對話、設定管理
-- **BluetoothSppManager**: 藍牙 SPP 伺服器，接收眼鏡連接
-- **GeminiSpeechService**: 調用 Gemini API 進行語音識別和 AI 對話
-- **PhoneAIService**: 前台服務，管理藍牙和 AI 處理
-- **SettingsRepository**: 管理 API 設定
+- **Main Functions**: Bluetooth server, speech recognition, AI conversation, settings management
+- **BluetoothSppManager**: Bluetooth SPP server, receives glasses connections
+- **ProviderManager**: Manages all AI provider instances and settings
+- **EnhancedAIService**: Integrates ProviderManager, ConversationRepository, and AI services
+- **PhoneAIService**: Foreground service, manages Bluetooth and AI processing
+- **SettingsRepository**: Manages API settings
+- **ConversationRepository**: Manages conversation history persistence
 
-### 3. common (共用模組)
+### 3. common (Shared Module)
 
-- **Message**: 藍牙通訊訊息格式 (JSON + Base64 編碼)
-- **MessageType**: 訊息類型定義
-- **ConnectionState**: 連接狀態枚舉
+- **Message**: Bluetooth communication message format (JSON + Base64 encoding)
+- **MessageType**: Message type definitions
+- **ConnectionState**: Connection state enumeration
 
-## 通訊協議
+## Communication Protocol
 
-### 藍牙 SPP 協議
+### Bluetooth SPP Protocol
 
 - **UUID**: `a1b2c3d4-e5f6-7890-abcd-ef1234567890`
-- **格式**: JSON + 換行符分隔
-- **音訊編碼**: Base64 (用於 binaryData 欄位)
+- **Format**: JSON + newline delimiter
+- **Audio Encoding**: Base64 (for binaryData field)
 
-### 訊息類型
+### Message Types
 
-| 類型             | 方向      | 說明                   |
-| ---------------- | --------- | ---------------------- |
-| VOICE_START      | 眼鏡→手機 | 開始錄音               |
-| VOICE_END        | 眼鏡→手機 | 結束錄音，包含音訊數據 |
-| AI_PROCESSING    | 手機→眼鏡 | 正在處理中             |
-| USER_TRANSCRIPT  | 手機→眼鏡 | 語音轉文字結果         |
-| AI_RESPONSE_TEXT | 手機→眼鏡 | AI 文字回應            |
-| AI_ERROR         | 手機→眼鏡 | 處理錯誤               |
+| Type             | Direction       | Description                     |
+| ---------------- | --------------- | ------------------------------- |
+| VOICE_START      | Glasses → Phone | Recording started               |
+| VOICE_END        | Glasses → Phone | Recording ended, includes audio |
+| AI_PROCESSING    | Phone → Glasses | Processing status               |
+| USER_TRANSCRIPT  | Phone → Glasses | Speech-to-text result           |
+| AI_RESPONSE_TEXT | Phone → Glasses | AI text response                |
+| AI_ERROR         | Phone → Glasses | Processing error                |
 
-## 音訊格式
+## Audio Format
 
-- **取樣率**: 16000 Hz
-- **通道**: 單聲道 (Mono)
-- **位元深度**: 16-bit
-- **格式**: PCM → WAV (發送給 API 前轉換)
+- **Sample Rate**: 16000 Hz
+- **Channels**: Mono
+- **Bit Depth**: 16-bit
+- **Format**: PCM → WAV (converted before API call)
 
-## 支援的 AI 服務
+## Supported AI Services
 
-### 語音識別 (Speech-to-Text)
+### Speech-to-Text
 
-1. **Google Gemini** - 使用 multimodal 模型處理音訊
-2. **OpenAI Whisper** - (規劃中)
-3. **Google Cloud STT** - (規劃中)
+1. **Google Gemini** - Uses multimodal model for audio processing
+2. **OpenAI Whisper** - Supported via OpenAI and Groq
+3. **Google Cloud STT** - (Planned)
 
-### AI 對話
+### AI Chat
 
 1. **Google Gemini** - gemini-2.5-pro, gemini-2.5-flash, gemini-2.5-flash-lite
 2. **OpenAI GPT** - gpt-5.2, gpt-5, gpt-4o, gpt-4o-mini, o3-pro, o4-mini
@@ -84,59 +201,135 @@ Rokid AI Assistant 是一個智能眼鏡助手應用，採用「手機中繼」�
 10. **Perplexity** - sonar-pro, sonar, sonar-reasoning-pro, sonar-reasoning
 11. **Custom** - Ollama, LM Studio 等 OpenAI 相容 API
 
-## 設定項目 (phone-app)
+## Configuration (phone-app)
 
-手機端提供完整的 API 設定介面：
+The phone app provides a complete API configuration interface:
 
-### 支援的 AI 提供商
+### Supported AI Providers
 
-| 提供商        | 支援狀態    | 模型                                                    |
-| ------------- | ----------- | ------------------------------------------------------- |
-| Google Gemini | ✅ 完整支援 | gemini-2.5-pro, gemini-2.5-flash, gemini-2.5-flash-lite |
-| OpenAI        | ✅ 完整支援 | gpt-5.2, gpt-5, gpt-4o, gpt-4o-mini, o3-pro, o4-mini    |
-| Anthropic     | ✅ 完整支援 | claude-opus-4.5, claude-sonnet-4.5, claude-haiku-4.5    |
-| DeepSeek      | ✅ 完整支援 | deepseek-chat, deepseek-reasoner, deepseek-vl-3         |
-| Groq          | ✅ 完整支援 | llama-4-70b, llama-3.3-70b, qwen-3-32b                  |
-| xAI           | ✅ 完整支援 | grok-4, grok-4-fast, grok-3, grok-2-vision-1212         |
-| Alibaba       | ✅ 完整支援 | qwen3-max, qwen3-plus, qwen3-turbo, qwen3-vl-max        |
-| Zhipu AI      | ✅ 完整支援 | glm-4.7, glm-4-plus, glm-4-flash, glm-4v-plus           |
-| Baidu         | ✅ 完整支援 | ernie-5.0, ernie-x1, ernie-4.5-turbo                    |
-| Perplexity    | ✅ 完整支援 | sonar-pro, sonar, sonar-reasoning-pro                   |
-| Custom        | ✅ 完整支援 | Ollama, LM Studio 等 OpenAI 相容 API                    |
+| Provider      | Status          | Models                                                  |
+| ------------- | --------------- | ------------------------------------------------------- |
+| Google Gemini | ✅ Full Support | gemini-2.5-pro, gemini-2.5-flash, gemini-2.5-flash-lite |
+| OpenAI        | ✅ Full Support | gpt-5.2, gpt-5, gpt-4o, gpt-4o-mini, o3-pro, o4-mini    |
+| Anthropic     | ✅ Full Support | claude-opus-4.5, claude-sonnet-4.5, claude-haiku-4.5    |
+| DeepSeek      | ✅ Full Support | deepseek-chat, deepseek-reasoner, deepseek-vl-3         |
+| Groq          | ✅ Full Support | llama-4-70b, llama-3.3-70b, qwen-3-32b                  |
+| xAI           | ✅ Full Support | grok-4, grok-4-fast, grok-3, grok-2-vision-1212         |
+| Alibaba       | ✅ Full Support | qwen3-max, qwen3-plus, qwen3-turbo, qwen3-vl-max        |
+| Zhipu AI      | ✅ Full Support | glm-4.7, glm-4-plus, glm-4-flash, glm-4v-plus           |
+| Baidu         | ✅ Full Support | ernie-5.0, ernie-x1, ernie-4.5-turbo                    |
+| Perplexity    | ✅ Full Support | sonar-pro, sonar, sonar-reasoning-pro                   |
+| Custom        | ✅ Full Support | Ollama, LM Studio, and other OpenAI-compatible APIs     |
 
-### 可配置項目
+### Configurable Options
 
-- **AI 提供商** - 選擇 Gemini/OpenAI/Anthropic
-- **AI 模型** - 選擇對應提供商的模型
-- **API Keys** - 各提供商的 API Key (加密存儲)
-- **語音識別服務** - Gemini 音訊識別/Whisper/Google Cloud STT
-- **系統提示詞** - 自定義 AI 行為
+- **AI Provider** - Select from 11 providers
+- **AI Model** - Choose model for the selected provider
+- **API Keys** - Encrypted storage for each provider
+- **Speech Recognition** - Gemini Audio / Whisper / Google Cloud STT
+- **System Prompt** - Customize AI behavior
 
-### 設定存儲
+### Settings Storage
 
-- 使用 `EncryptedSharedPreferences` 安全存儲 API Key
-- 設定變更即時生效，無需重啟服務
+- Uses `EncryptedSharedPreferences` for secure API key storage
+- Settings changes take effect immediately without service restart
 
-### 相關文件
+### Related Files
 
-- `phone-app/src/main/java/com/example/rokidphone/data/ApiSettings.kt` - 設定數據類
-- `phone-app/src/main/java/com/example/rokidphone/data/SettingsRepository.kt` - 設定存儲
-- `phone-app/src/main/java/com/example/rokidphone/ui/SettingsScreen.kt` - 設定 UI
+- `phone-app/src/main/java/com/example/rokidphone/data/ApiSettings.kt` - Settings data class
+- `phone-app/src/main/java/com/example/rokidphone/data/SettingsRepository.kt` - Settings storage
+- `phone-app/src/main/java/com/example/rokidphone/ui/SettingsScreen.kt` - Settings UI
 
-## 開發環境
+## Project Structure
+
+```
+phone-app/src/main/java/com/example/rokidphone/
+├── ai/
+│   └── provider/
+│       ├── Provider.kt              # Unified provider interface
+│       ├── ProviderManager.kt       # Provider manager
+│       └── ProviderSetting.kt       # Provider settings sealed class
+├── data/
+│   ├── db/
+│   │   ├── AppDatabase.kt           # Room database
+│   │   └── ConversationRepository.kt # Conversation repository
+│   ├── ApiSettings.kt               # API settings
+│   └── SettingsRepository.kt        # Settings storage
+├── service/
+│   ├── ai/                          # AI service implementations
+│   │   ├── GeminiService.kt
+│   │   ├── OpenAiService.kt
+│   │   ├── AnthropicService.kt
+│   │   └── ...
+│   ├── EnhancedAIService.kt         # Enhanced AI service integration
+│   ├── BluetoothSppManager.kt       # Bluetooth SPP server
+│   └── PhoneAIService.kt            # Foreground service
+├── ui/
+│   ├── conversation/
+│   │   ├── ChatScreen.kt            # Chat screen
+│   │   └── ConversationHistoryScreen.kt # Conversation history
+│   └── SettingsScreen.kt            # Settings UI
+└── viewmodel/
+    ├── ConversationViewModel.kt     # Conversation ViewModel
+    └── PhoneViewModel.kt            # Phone ViewModel
+```
+
+---
+
+## Development Environment
 
 - **Android Gradle Plugin**: 9.0.0
 - **Kotlin**: 2.2.10
 - **Gradle**: 9.1.0
-- **Min SDK**: 26
+- **Min SDK**: 26 (glasses) / 28 (phone)
 - **Target SDK**: 34
 
-## 版本歷史
+### Key Dependencies
+
+| Dependency           | Version    |
+| -------------------- | ---------- |
+| Compose BOM          | 2024.02.00 |
+| Room Database        | 2.7.1      |
+| KSP                  | 2.3.4      |
+| Kotlin Serialization | 1.6.3      |
+| Navigation Compose   | 2.7.7      |
+| OkHttp               | 4.12.0     |
+
+---
+
+## Future Roadmap
+
+### MCP Tool Support (Advanced)
+
+```kotlin
+class McpManager {
+    suspend fun callTool(toolName: String, args: JsonObject): JsonElement
+    fun getAllAvailableTools(): List<McpTool>
+}
+```
+
+### Offline Mode Support
+
+- Local model integration (Ollama)
+- Offline caching mechanism
+- Offline speech recognition
+
+---
+
+## Version History
+
+### v1.1.0 (2026-01-22)
+
+- Multi-LLM provider architecture (ProviderManager)
+- Room database for conversation persistence
+- Conversation history UI with pin/archive support
+- Enhanced AI service integration
+- KSP 2.3.4 and Room 2.7.1 support
 
 ### v1.0.0 (2026-01-17)
 
-- 基礎架構完成
-- 藍牙 SPP 通訊
-- Gemini API 整合
-- 眼鏡端語音錄製
-- 手機端 AI 處理
+- Basic architecture completed
+- Bluetooth SPP communication
+- Gemini API integration
+- Glasses-side voice recording
+- Phone-side AI processing

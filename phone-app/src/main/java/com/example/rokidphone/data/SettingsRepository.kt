@@ -198,6 +198,10 @@ class SettingsRepository(context: Context) {
         saveSettings(getSettings().copy(baiduSecretKey = secretKey))
     }
     
+    fun updatePerplexityApiKey(apiKey: String) {
+        saveSettings(getSettings().copy(perplexityApiKey = apiKey))
+    }
+    
     fun updateCustomApiKey(apiKey: String) {
         saveSettings(getSettings().copy(customApiKey = apiKey))
     }

@@ -10,8 +10,11 @@ An AI voice assistant application running on Android smartphones, designed to wo
 - 🎤 **Voice Interaction**: Record voice through glasses microphone
 - 🤖 **Multi-Provider AI**: Support for 11 AI providers (Gemini, OpenAI, Claude, Perplexity, etc.)
 - 📺 **AR Display**: Show conversation content on glasses screen
-- 🌍 **Multi-Language**: Support for 13 languages
+- 🌍 **Multi-Language**: Support for 13 UI languages
 - 🔐 **Secure Storage**: API keys stored with EncryptedSharedPreferences
+- 💬 **Conversation History**: Persistent conversation storage with Room database
+- 📌 **Conversation Management**: Pin, archive, and search conversations
+- 🎛️ **Provider Manager**: Type-safe multi-provider architecture with service caching
 
 ## Architecture
 
@@ -33,21 +36,35 @@ An AI voice assistant application running on Android smartphones, designed to wo
 ```
 RokidAIAssistant/
 ├── phone-app/                    # Phone application
+│   ├── ai/
+│   │   └── provider/
+│   │       ├── Provider.kt       # Unified provider interface
+│   │       ├── ProviderManager.kt# Provider manager
+│   │       └── ProviderSetting.kt# Provider settings
 │   ├── data/
+│   │   ├── db/
+│   │   │   ├── AppDatabase.kt    # Room database
+│   │   │   └── ConversationRepository.kt
 │   │   ├── ApiSettings.kt        # AI provider settings
 │   │   ├── AppLanguage.kt        # Language definitions
 │   │   └── SettingsRepository.kt # Settings storage
 │   ├── service/
 │   │   ├── PhoneAIService.kt     # Main foreground service
+│   │   ├── EnhancedAIService.kt  # Enhanced AI integration
 │   │   ├── BluetoothSppManager.kt# Bluetooth SPP server
 │   │   └── ai/                   # AI service implementations
 │   │       ├── GeminiService.kt
 │   │       ├── OpenAiService.kt
 │   │       ├── AnthropicService.kt
 │   │       └── ...
-│   └── ui/
-│       ├── SettingsScreen.kt     # Settings UI
-│       └── ...
+│   ├── ui/
+│   │   ├── conversation/
+│   │   │   ├── ChatScreen.kt     # Chat interface
+│   │   │   └── ConversationHistoryScreen.kt
+│   │   └── SettingsScreen.kt     # Settings UI
+│   └── viewmodel/
+│       ├── ConversationViewModel.kt
+│       └── PhoneViewModel.kt
 │
 ├── glasses-app/                  # Glasses application
 │   ├── service/
@@ -201,12 +218,16 @@ JSON with newline delimiter, binary data encoded as Base64.
 
 ### Key Dependencies
 
-| Dependency        | Version    |
-| ----------------- | ---------- |
-| Compose BOM       | 2024.02.00 |
-| Generative AI SDK | 0.9.0      |
-| Retrofit          | 2.11.0     |
-| OkHttp            | 4.12.0     |
+| Dependency           | Version    |
+| -------------------- | ---------- |
+| Compose BOM          | 2024.02.00 |
+| Room Database        | 2.7.1      |
+| KSP                  | 2.3.4      |
+| Kotlin Serialization | 1.6.3      |
+| Navigation Compose   | 2.7.7      |
+| Generative AI SDK    | 0.2.2      |
+| Retrofit             | 2.9.0      |
+| OkHttp               | 4.12.0     |
 
 ## Security Notes
 

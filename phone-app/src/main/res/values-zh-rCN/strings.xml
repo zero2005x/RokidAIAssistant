@@ -137,4 +137,24 @@
     <string name="speech_service_gemini">Gemini 语音识别</string>
     <string name="speech_service_openai_whisper">OpenAI Whisper</string>
     <string name="speech_service_google_cloud">Google Cloud 语音转文字</string>
+    
+    <!-- Conversation History (New) -->
+    <string name="new_conversation">新对话</string>
+    <string name="no_conversations">暂无对话记录</string>
+    <string name="start_new_conversation">开始一个新对话</string>
+    <string name="pinned">已置顶</string>
+    <string name="recent">最近</string>
+    <string name="delete_conversation">删除对话</string>
+    <string name="delete_conversation_confirm">确定要删除这个对话吗？此操作无法撤销。</string>
+    <string name="delete">删除</string>
+    <string name="pin">置顶</string>
+    <string name="unpin">取消置顶</string>
+    <string name="archive">归档</string>
+    <string name="unarchive">取消归档</string>
+    <string name="clear_history">清除记录</string>
+    <string name="clear_history_confirm">确定要清除这个对话的所有消息吗？</string>
+    <string name="clear">清除</string>
+    <string name="start_chatting">开始与 AI 聊天</string>
+    <string name="type_message">输入消息…</string>
+    <string name="send">发送</string>
 </resources>
