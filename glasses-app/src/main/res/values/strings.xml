@@ -18,6 +18,7 @@
     <string name="pair_device_hint">Please pair your phone in system settings</string>
     <string name="unknown_device">Unknown Device</string>
     <string name="cancel">Cancel</string>
+    <string name="recommended">Recommended</string>
     
     <!-- Display Messages -->
     <string name="not_connected">Not connected to phone\nPlease select device</string>

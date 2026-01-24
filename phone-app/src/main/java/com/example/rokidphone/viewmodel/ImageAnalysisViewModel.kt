@@ -3,9 +3,11 @@ package com.example.rokidphone.viewmodel
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.rokidphone.R
 import com.example.rokidphone.data.AiRepository
 import com.example.rokidphone.data.ImageAnalysisResult
 import com.example.rokidphone.service.photo.PhotoData
@@ -18,36 +20,55 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * 图像分析状态
+ * UI text representation that supports both string resources and dynamic strings.
+ * Use this to avoid hardcoding strings in ViewModels while maintaining flexibility
+ * for dynamic error messages from APIs.
+ */
+sealed class UiText {
+    /** String resource (for localized messages) */
+    data class Resource(@StringRes val resId: Int) : UiText()
+    
+    /** Dynamic string (for API error messages) */
+    data class Dynamic(val text: String) : UiText()
+    
+    /** Resolve to actual string */
+    fun asString(context: Context): String = when (this) {
+        is Resource -> context.getString(resId)
+        is Dynamic -> text
+    }
+}
+
+/**
+ * Image analysis state
  */
 sealed class ImageAnalysisState {
-    /** 空闲状态 */
+    /** Idle state */
     object Idle : ImageAnalysisState()
     
-    /** 正在分析 */
+    /** Analyzing */
     data class Analyzing(
         val photoData: PhotoData? = null,
         val progress: Float = 0f,
-        val message: String = "正在分析图像..."
+        val message: UiText = UiText.Resource(R.string.analyzing_image)
     ) : ImageAnalysisState()
     
-    /** 分析成功 */
+    /** Analysis successful */
     data class Success(
         val photoData: PhotoData,
         val description: String,
         val analysisTimeMs: Long = 0
     ) : ImageAnalysisState()
     
-    /** 分析失败 */
+    /** Analysis failed */
     data class Error(
         val photoData: PhotoData? = null,
-        val message: String,
+        val message: UiText,
         val canRetry: Boolean = true
     ) : ImageAnalysisState()
 }
 
 /**
- * UI 状态
+ * UI state
  */
 data class ImageAnalysisUiState(
     val analysisState: ImageAnalysisState = ImageAnalysisState.Idle,
@@ -64,11 +85,11 @@ data class ImageAnalysisUiState(
 /**
  * ImageAnalysisViewModel
  * 
- * 职责：
- * 1. 管理图像分析的 UI 状态
- * 2. 协调 AiRepository 进行图像分析
- * 3. 监听新接收的照片并自动分析
- * 4. 提供重试和取消功能
+ * Responsibilities:
+ * 1. Manage image analysis UI state
+ * 2. Coordinate with AiRepository for image analysis
+ * 3. Listen for newly received photos and auto-analyze
+ * 4. Provide retry and cancel functionality
  */
 class ImageAnalysisViewModel(
     private val aiRepository: AiRepository,
@@ -86,18 +107,18 @@ class ImageAnalysisViewModel(
     private var currentAnalysisJob: Job? = null
     
     init {
-        // 初始化服务信息
+        // Initialize service information
         updateServiceInfo()
         
-        // 监听新接收的照片
+        // Listen for newly received photos
         viewModelScope.launch {
             photoRepository.photoFlow.collect { photoData ->
                 Log.d(TAG, "New photo received: ${photoData.filePath}")
                 
-                // 添加到最近照片列表
+                // Add to recent photos list
                 addRecentPhoto(photoData)
                 
-                // 如果启用了自动分析，开始分析
+                // If auto-analysis is enabled, start analyzing
                 if (_uiState.value.isAutoAnalyzeEnabled) {
                     analyzePhoto(photoData)
                 }
@@ -106,7 +127,7 @@ class ImageAnalysisViewModel(
     }
     
     /**
-     * 更新 AI 服务信息
+     * Update AI service information
      */
     private fun updateServiceInfo() {
         _uiState.update { 
@@ -119,28 +140,28 @@ class ImageAnalysisViewModel(
     }
     
     /**
-     * 分析照片
+     * Analyze photo
      */
     fun analyzePhoto(photoData: PhotoData) {
-        // 取消之前的分析任务
+        // Cancel previous analysis task
         currentAnalysisJob?.cancel()
         
         currentAnalysisJob = viewModelScope.launch {
             val startTime = System.currentTimeMillis()
             
-            // 更新状态：正在分析
+            // Update state: analyzing
             _uiState.update { 
                 it.copy(
                     analysisState = ImageAnalysisState.Analyzing(
                         photoData = photoData,
-                        message = "正在准备分析..."
+                        message = UiText.Resource(R.string.preparing_analysis)
                     ),
                     selectedPhoto = photoData
                 )
             }
             
             try {
-                // 获取照片字节数据
+                // Get photo byte data
                 val photoBytes = photoRepository.getPhotoBytes(photoData)
                 
                 if (photoBytes == null) {
@@ -148,25 +169,25 @@ class ImageAnalysisViewModel(
                         it.copy(
                             analysisState = ImageAnalysisState.Error(
                                 photoData = photoData,
-                                message = "无法读取照片数据"
+                                message = UiText.Resource(R.string.unable_to_read_photo)
                             )
                         )
                     }
                     return@launch
                 }
                 
-                // 更新状态：正在分析
+                // Update state: analyzing
                 _uiState.update {
                     it.copy(
                         analysisState = ImageAnalysisState.Analyzing(
                             photoData = photoData,
                             progress = 0.3f,
-                            message = "正在调用 AI 分析..."
+                            message = UiText.Resource(R.string.calling_ai_analysis)
                         )
                     )
                 }
                 
-                // 调用 AI 分析
+                // Call AI for analysis
                 val result = aiRepository.analyzeImage(
                     imageData = photoBytes,
                     mode = _uiState.value.analysisMode
@@ -178,7 +199,7 @@ class ImageAnalysisViewModel(
                     is ImageAnalysisResult.Success -> {
                         Log.d(TAG, "Analysis success: ${result.description.take(100)}")
                         
-                        // 更新 photoData 的分析结果
+                        // Update photoData analysis result
                         photoData.analysisResult = result.description
                         
                         _uiState.update {
@@ -199,7 +220,7 @@ class ImageAnalysisViewModel(
                             it.copy(
                                 analysisState = ImageAnalysisState.Error(
                                     photoData = photoData,
-                                    message = result.message
+                                    message = UiText.Dynamic(result.message)
                                 )
                             )
                         }
@@ -213,7 +234,7 @@ class ImageAnalysisViewModel(
                     it.copy(
                         analysisState = ImageAnalysisState.Error(
                             photoData = photoData,
-                            message = e.message ?: "分析失败"
+                            message = UiText.Dynamic(e.message ?: "Analysis failed")
                         )
                     )
                 }
@@ -222,7 +243,7 @@ class ImageAnalysisViewModel(
     }
     
     /**
-     * 使用 Bitmap 分析
+     * Analyze using Bitmap
      */
     fun analyzeBitmap(bitmap: Bitmap) {
         currentAnalysisJob?.cancel()
@@ -233,7 +254,7 @@ class ImageAnalysisViewModel(
             _uiState.update {
                 it.copy(
                     analysisState = ImageAnalysisState.Analyzing(
-                        message = "正在分析图像..."
+                        message = UiText.Resource(R.string.analyzing_image)
                     ),
                     selectedPhotoBitmap = bitmap
                 )
@@ -273,7 +294,7 @@ class ImageAnalysisViewModel(
                         _uiState.update {
                             it.copy(
                                 analysisState = ImageAnalysisState.Error(
-                                    message = result.message
+                                    message = UiText.Dynamic(result.message)
                                 )
                             )
                         }
@@ -284,7 +305,7 @@ class ImageAnalysisViewModel(
                 _uiState.update {
                     it.copy(
                         analysisState = ImageAnalysisState.Error(
-                            message = e.message ?: "分析失败"
+                            message = UiText.Dynamic(e.message ?: "Analysis failed")
                         )
                     )
                 }
@@ -293,7 +314,7 @@ class ImageAnalysisViewModel(
     }
     
     /**
-     * 重试分析
+     * Retry analysis
      */
     fun retryAnalysis() {
         val state = _uiState.value.analysisState
@@ -308,7 +329,7 @@ class ImageAnalysisViewModel(
     }
     
     /**
-     * 取消分析
+     * Cancel analysis
      */
     fun cancelAnalysis() {
         currentAnalysisJob?.cancel()
@@ -320,7 +341,7 @@ class ImageAnalysisViewModel(
     }
     
     /**
-     * 选择照片
+     * Select photo
      */
     fun selectPhoto(photoData: PhotoData) {
         _uiState.update {
@@ -329,7 +350,7 @@ class ImageAnalysisViewModel(
     }
     
     /**
-     * 设置分析模式
+     * Set analysis mode
      */
     fun setAnalysisMode(mode: AiRepository.AnalysisMode) {
         _uiState.update {
@@ -338,7 +359,7 @@ class ImageAnalysisViewModel(
     }
     
     /**
-     * 设置自动分析
+     * Set auto analysis
      */
     fun setAutoAnalyzeEnabled(enabled: Boolean) {
         _uiState.update {
@@ -347,7 +368,7 @@ class ImageAnalysisViewModel(
     }
     
     /**
-     * 添加到最近照片列表
+     * Add to recent photos list
      */
     private fun addRecentPhoto(photoData: PhotoData) {
         _uiState.update { state ->
@@ -359,7 +380,7 @@ class ImageAnalysisViewModel(
     }
     
     /**
-     * 重置状态
+     * Reset state
      */
     fun resetState() {
         cancelAnalysis()
@@ -373,7 +394,7 @@ class ImageAnalysisViewModel(
     }
     
     /**
-     * 刷新服务信息
+     * Refresh service info
      */
     fun refreshServiceInfo() {
         updateServiceInfo()

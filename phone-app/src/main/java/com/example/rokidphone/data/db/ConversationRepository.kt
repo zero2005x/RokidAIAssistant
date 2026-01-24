@@ -77,6 +77,35 @@ class ConversationRepository(context: Context) {
     }
     
     /**
+     * Find today's voice session conversation
+     * Returns the most recent voice session created today, or null if none exists
+     */
+    suspend fun findTodayVoiceSession(): Conversation? = withContext(Dispatchers.IO) {
+        try {
+            // Get today's date string in the same format used for voice session titles
+            val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+            val todayDate = dateFormat.format(java.util.Date())
+            
+            // Search for voice sessions with today's date in the title
+            val allConversations = conversationDao.getAllConversationsSync()
+            
+            // Find voice sessions created today (title contains "語音對話" or "Voice Session" and today's date)
+            val todayVoiceSessions = allConversations.filter { conversation ->
+                (conversation.title.contains("語音對話") || 
+                 conversation.title.contains("Voice Session") ||
+                 conversation.title.contains("语音对话")) && 
+                conversation.title.contains(todayDate)
+            }
+            
+            // Return the most recent one (highest updatedAt)
+            todayVoiceSessions.maxByOrNull { it.updatedAt }?.toConversation()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error finding today's voice session", e)
+            null
+        }
+    }
+    
+    /**
      * Create a new conversation
      */
     suspend fun createConversation(

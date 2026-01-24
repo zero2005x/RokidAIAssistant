@@ -18,6 +18,7 @@
     <string name="pair_device_hint">Veuillez jumeler votre téléphone dans les paramètres système</string>
     <string name="unknown_device">Appareil inconnu</string>
     <string name="cancel">Annuler</string>
+    <string name="recommended">Recommandé</string>
     
     <!-- Display Messages -->
     <string name="not_connected">Non connecté au téléphone\nVeuillez sélectionner un appareil</string>

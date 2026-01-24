@@ -1,7 +1,9 @@
 package com.example.rokidphone.viewmodel
 
 import android.app.Application
+import android.content.Intent
 import android.util.Log
+import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.rokidphone.ai.provider.ProviderManager
@@ -12,6 +14,9 @@ import com.example.rokidphone.data.db.Message
 import com.example.rokidphone.data.db.MessageRole
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Conversation ViewModel
@@ -305,6 +310,82 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
      */
     fun closeCurrentConversation() {
         _currentConversationId.value = null
+    }
+    
+    /**
+     * Export a conversation to text file and return share intent
+     */
+    fun exportConversation(conversation: Conversation, onExportReady: (Intent) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val messages = conversationRepository.getMessagesForConversationSync(conversation.id)
+                val dateFormatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                val fileNameFormatter = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+                
+                // Build conversation text
+                val content = buildString {
+                    appendLine("=".repeat(50))
+                    appendLine("Conversation: ${conversation.title}")
+                    appendLine("Model: ${conversation.modelId}")
+                    appendLine("Created: ${dateFormatter.format(Date(conversation.createdAt))}")
+                    appendLine("Messages: ${messages.size}")
+                    appendLine("=".repeat(50))
+                    appendLine()
+                    
+                    messages.forEach { message ->
+                        val role = when (message.role) {
+                            MessageRole.USER -> "👤 You"
+                            MessageRole.ASSISTANT -> "🤖 AI"
+                            MessageRole.SYSTEM -> "⚙️ System"
+                        }
+                        appendLine("[$role] ${dateFormatter.format(Date(message.createdAt))}")
+                        appendLine(message.content)
+                        appendLine()
+                        appendLine("-".repeat(30))
+                        appendLine()
+                    }
+                }
+                
+                // Write to file
+                val fileName = "chat_${fileNameFormatter.format(Date())}.txt"
+                val exportDir = File(getApplication<Application>().cacheDir, "exports")
+                exportDir.mkdirs()
+                val file = File(exportDir, fileName)
+                file.writeText(content)
+                
+                // Create share intent
+                val uri = FileProvider.getUriForFile(
+                    getApplication(),
+                    "${getApplication<Application>().packageName}.fileprovider",
+                    file
+                )
+                
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    putExtra(Intent.EXTRA_SUBJECT, "Chat Export: ${conversation.title}")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                
+                onExportReady(Intent.createChooser(shareIntent, "Export Conversation"))
+                
+                Log.d(TAG, "Exported conversation: ${conversation.id}")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to export conversation", e)
+                _uiState.update { it.copy(error = "Export failed: ${e.message}") }
+            }
+        }
+    }
+    
+    /**
+     * Export current conversation
+     */
+    fun exportCurrentConversation(onExportReady: (Intent) -> Unit) {
+        viewModelScope.launch {
+            val conversationId = _currentConversationId.value ?: return@launch
+            val conversation = conversationRepository.getConversationById(conversationId) ?: return@launch
+            exportConversation(conversation, onExportReady)
+        }
     }
 }
 

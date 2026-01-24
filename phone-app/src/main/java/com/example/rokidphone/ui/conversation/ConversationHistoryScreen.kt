@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -253,7 +254,7 @@ private fun ConversationItem(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (conversation.isPinned) Icons.Default.PushPin else Icons.Default.Chat,
+                    imageVector = if (conversation.isPinned) Icons.Default.PushPin else Icons.AutoMirrored.Filled.Chat,
                     contentDescription = null,
                     tint = if (conversation.isPinned) 
                         MaterialTheme.colorScheme.primary 

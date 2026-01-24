@@ -8,37 +8,45 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.rememberAsyncImagePainter
-import com.example.rokidcommon.protocol.ConnectionState
-import com.example.rokidphone.data.AvailableModels
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.rokidphone.data.SettingsRepository
 import com.example.rokidphone.data.validateForChat
 import com.example.rokidphone.data.validateForSpeech
 import com.example.rokidphone.service.PhoneAIService
 import com.example.rokidphone.ui.SettingsScreen
+import com.example.rokidphone.ui.conversation.ChatScreen
+import com.example.rokidphone.ui.conversation.ConversationHistoryScreen
+import com.example.rokidphone.ui.gallery.ClearAllConfirmDialog
+import com.example.rokidphone.ui.gallery.DeleteConfirmDialog
+import com.example.rokidphone.ui.gallery.PhotoDetailScreen
+import com.example.rokidphone.ui.gallery.PhotoGalleryScreen
+import com.example.rokidphone.ui.home.HomeScreen
+import com.example.rokidphone.ui.navigation.BottomNavDestination
+import com.example.rokidphone.ui.navigation.NavRoutes
 import com.example.rokidphone.ui.theme.RokidPhoneTheme
+import com.example.rokidphone.viewmodel.ConversationViewModel
+import com.example.rokidphone.viewmodel.PhotoGalleryViewModel
 import com.example.rokidphone.viewmodel.PhoneViewModel
-import java.io.File
 
 class MainActivity : AppCompatActivity() {
     
@@ -110,6 +118,9 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
+/**
+ * Main Screen with Bottom Navigation following Material Design 3
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhoneMainScreen(
@@ -121,7 +132,9 @@ fun PhoneMainScreen(
     val settingsRepository = remember { SettingsRepository.getInstance(context) }
     val settings by settingsRepository.settingsFlow.collectAsState()
     
-    var showSettings by remember { mutableStateOf(false) }
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
     
     val uiState by viewModel.uiState.collectAsState()
     
@@ -131,7 +144,7 @@ fun PhoneMainScreen(
             settings = settings,
             onGoToSettings = {
                 viewModel.dismissApiKeyWarning()
-                showSettings = true
+                navController.navigate(NavRoutes.SETTINGS)
             },
             onDismiss = {
                 viewModel.dismissApiKeyWarning()
@@ -139,424 +152,253 @@ fun PhoneMainScreen(
         )
     }
     
-    if (showSettings) {
-        SettingsScreen(
-            settings = settings,
-            onSettingsChange = { newSettings ->
-                settingsRepository.saveSettings(newSettings)
-            },
-            onBack = { showSettings = false }
-        )
-    } else {
-        Scaffold(
-            topBar = {
+    Scaffold(
+        topBar = {
+            // Only show top bar on Home screen
+            if (currentDestination?.route == NavRoutes.HOME) {
                 TopAppBar(
                     title = { Text(stringResource(R.string.app_title)) },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    ),
-                    actions = {
-                        IconButton(onClick = { showSettings = true }) {
-                            Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+                )
+            }
+        },
+        bottomBar = {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surface,
+                tonalElevation = 0.dp
+            ) {
+                BottomNavDestination.entries.forEach { destination ->
+                    val selected = currentDestination?.route == destination.route
+                    NavigationBarItem(
+                        icon = {
+                            Icon(
+                                imageVector = if (selected) destination.selectedIcon else destination.unselectedIcon,
+                                contentDescription = stringResource(destination.labelResId)
+                            )
+                        },
+                        label = { Text(stringResource(destination.labelResId)) },
+                        selected = selected,
+                        onClick = {
+                            navController.navigate(destination.route) {
+                                // Pop up to start destination to avoid building up stack
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                                // Avoid multiple copies of same destination
+                                launchSingleTop = true
+                                // Restore state when reselecting
+                                restoreState = true
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    ) { padding ->
+        NavHost(
+            navController = navController,
+            startDestination = NavRoutes.HOME,
+            modifier = Modifier.padding(padding),
+            enterTransition = { fadeIn(animationSpec = tween(300)) },
+            exitTransition = { fadeOut(animationSpec = tween(300)) }
+        ) {
+            composable(NavRoutes.HOME) {
+                HomeScreen(
+                    connectionState = uiState.connectionState,
+                    connectedGlassesName = uiState.connectedGlassesName,
+                    isServiceRunning = uiState.isServiceRunning,
+                    latestPhotoPath = uiState.latestPhotoPath,
+                    processingStatus = uiState.processingStatus,
+                    currentModelId = settings.aiModelId,
+                    conversations = uiState.conversations,
+                    onConnect = { viewModel.startScanning() },
+                    onDisconnect = { viewModel.disconnect() },
+                    onStartService = onStartService,
+                    onStopService = onStopService,
+                    onCapturePhoto = { viewModel.requestCapturePhoto() },
+                    onViewConversationHistory = { navController.navigate(NavRoutes.CHAT) },
+                    onViewGallery = { navController.navigate(NavRoutes.GALLERY) }
+                )
+            }
+            
+            composable(NavRoutes.GALLERY) {
+                // Photo Gallery screen
+                val galleryViewModel: PhotoGalleryViewModel = viewModel()
+                val groupedPhotos by galleryViewModel.groupedPhotos.collectAsState()
+                val photos by galleryViewModel.photos.collectAsState()
+                val photoCount by galleryViewModel.photoCount.collectAsState()
+                val galleryUiState by galleryViewModel.uiState.collectAsState()
+                val context = LocalContext.current
+                
+                // Reset detail view when entering gallery tab
+                DisposableEffect(Unit) {
+                    onDispose {
+                        galleryViewModel.closePhotoDetail()
+                        galleryViewModel.clearSelection()
+                    }
+                }
+                
+                // Show detail view if a photo is selected
+                val currentDetailPhoto = galleryUiState.currentDetailPhoto
+                if (currentDetailPhoto != null) {
+                    PhotoDetailScreen(
+                        photos = photos,
+                        initialPhoto = currentDetailPhoto,
+                        onBack = { galleryViewModel.closePhotoDetail() },
+                        onDelete = { galleryViewModel.deletePhoto(it) },
+                        onShare = { photo ->
+                            galleryViewModel.sharePhoto(photo) { intent ->
+                                context.startActivity(intent)
+                            }
+                        },
+                        loadBitmap = { photoData, maxSize ->
+                            galleryViewModel.loadBitmap(photoData, maxSize)
+                        }
+                    )
+                } else {
+                    PhotoGalleryScreen(
+                        groupedPhotos = groupedPhotos,
+                        photoCount = photoCount,
+                        uiState = galleryUiState,
+                        onPhotoClick = { galleryViewModel.openPhotoDetail(it) },
+                        onPhotoLongClick = { galleryViewModel.togglePhotoSelection(it.id) },
+                        onToggleSelection = { galleryViewModel.togglePhotoSelection(it) },
+                        onSelectAll = { galleryViewModel.selectAll() },
+                        onClearSelection = { galleryViewModel.clearSelection() },
+                        onDeleteSelected = { galleryViewModel.showDeleteConfirmDialog() },
+                        onShareSelected = { 
+                            galleryViewModel.shareSelectedPhotos { intent ->
+                                context.startActivity(intent)
+                            }
+                        },
+                        onClearAll = { galleryViewModel.showClearAllDialog() },
+                        onBack = { navController.popBackStack() },
+                        loadBitmap = { photoData, maxSize ->
+                            galleryViewModel.loadBitmap(photoData, maxSize)
+                        }
+                    )
+                }
+                
+                // Delete confirmation dialog
+                if (galleryUiState.showDeleteConfirmDialog) {
+                    DeleteConfirmDialog(
+                        count = galleryUiState.selectedPhotos.size,
+                        onConfirm = { galleryViewModel.deleteSelectedPhotos() },
+                        onDismiss = { galleryViewModel.hideDeleteConfirmDialog() }
+                    )
+                }
+                
+                // Clear all confirmation dialog
+                if (galleryUiState.showClearAllDialog) {
+                    ClearAllConfirmDialog(
+                        onConfirm = { galleryViewModel.clearAllPhotos() },
+                        onDismiss = { galleryViewModel.hideClearAllDialog() }
+                    )
+                }
+            }
+            
+            composable(NavRoutes.CHAT) {
+                // Full Chat screen with conversation management
+                val conversationViewModel: ConversationViewModel = viewModel()
+                val conversations by conversationViewModel.conversations.collectAsState()
+                val currentConversationId by conversationViewModel.currentConversationId.collectAsState()
+                val currentMessages by conversationViewModel.currentMessages.collectAsState()
+                val currentConversation by conversationViewModel.currentConversation.collectAsState()
+                val chatUiState by conversationViewModel.uiState.collectAsState()
+                val inputText by conversationViewModel.inputText.collectAsState()
+                val context = LocalContext.current
+                
+                // Reset conversation state when leaving chat tab
+                DisposableEffect(Unit) {
+                    onDispose {
+                        conversationViewModel.closeCurrentConversation()
+                    }
+                }
+                
+                if (currentConversationId != null) {
+                    // Show chat screen
+                    ChatScreen(
+                        conversationTitle = currentConversation?.title ?: stringResource(R.string.new_conversation),
+                        messages = currentMessages,
+                        isLoading = chatUiState.isLoading,
+                        inputText = inputText,
+                        onInputChange = { conversationViewModel.updateInputText(it) },
+                        onSendMessage = { conversationViewModel.sendMessage() },
+                        onBack = { conversationViewModel.closeCurrentConversation() },
+                        onClearHistory = { conversationViewModel.clearCurrentConversation() },
+                        onExport = {
+                            conversationViewModel.exportCurrentConversation { intent ->
+                                context.startActivity(intent)
+                            }
+                        }
+                    )
+                } else {
+                    // Show conversation history
+                    ConversationHistoryScreen(
+                        conversations = conversations,
+                        onConversationClick = { conversationViewModel.selectConversation(it) },
+                        onNewConversation = { conversationViewModel.createNewConversation() },
+                        onDeleteConversation = { conversationViewModel.deleteConversation(it) },
+                        onArchiveConversation = { conversationViewModel.archiveConversation(it) },
+                        onPinConversation = { conversationViewModel.pinConversation(it) },
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+            }
+            
+            composable(
+                route = NavRoutes.CONVERSATION_DETAIL,
+                arguments = listOf(navArgument("conversationId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val conversationId = backStackEntry.arguments?.getString("conversationId") ?: return@composable
+                val conversationViewModel: ConversationViewModel = viewModel()
+                val context = LocalContext.current
+                
+                // Select the conversation
+                LaunchedEffect(conversationId) {
+                    conversationViewModel.selectConversation(conversationId)
+                }
+                
+                val currentMessages by conversationViewModel.currentMessages.collectAsState()
+                val currentConversation by conversationViewModel.currentConversation.collectAsState()
+                val chatUiState by conversationViewModel.uiState.collectAsState()
+                val inputText by conversationViewModel.inputText.collectAsState()
+                
+                ChatScreen(
+                    conversationTitle = currentConversation?.title ?: "",
+                    messages = currentMessages,
+                    isLoading = chatUiState.isLoading,
+                    inputText = inputText,
+                    onInputChange = { conversationViewModel.updateInputText(it) },
+                    onSendMessage = { conversationViewModel.sendMessage() },
+                    onBack = { navController.popBackStack() },
+                    onClearHistory = { conversationViewModel.clearCurrentConversation() },
+                    onExport = {
+                        conversationViewModel.exportCurrentConversation { intent ->
+                            context.startActivity(intent)
                         }
                     }
                 )
             }
-        ) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp)
-            ) {
-                // Connection status card
-                ConnectionStatusCard(
-                    connectionState = uiState.connectionState,
-                    glassesName = uiState.connectedGlassesName,
-                    onConnect = { viewModel.startScanning() },
-                    onDisconnect = { viewModel.disconnect() }
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                // Camera capture card - only visible when connected
-                if (uiState.connectionState == ConnectionState.CONNECTED) {
-                    CameraCaptureCard(
-                        onCapturePhoto = { viewModel.requestCapturePhoto() }
-                    )
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-                
-                // Show latest captured photo if available
-                uiState.latestPhotoPath?.let { photoPath ->
-                    LatestPhotoCard(photoPath = photoPath)
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-                
-                // Service control card
-                ServiceControlCard(
-                    isServiceRunning = uiState.isServiceRunning,
-                    onStart = onStartService,
-                    onStop = onStopService
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                // Conversation history
-                ConversationHistory(
-                    conversations = uiState.conversations,
-                    modifier = Modifier.weight(1f)
-                )
-                
-                // Status bar - show current model
-                val currentModel = AvailableModels.findModel(settings.aiModelId)
-                StatusBar(
-                    processingStatus = uiState.processingStatus,
-                    aiModel = currentModel?.displayName ?: settings.aiModelId
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun ConnectionStatusCard(
-    connectionState: ConnectionState,
-    glassesName: String?,
-    onConnect: () -> Unit,
-    onDisconnect: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = when (connectionState) {
-                ConnectionState.CONNECTED -> MaterialTheme.colorScheme.primaryContainer
-                ConnectionState.CONNECTING, ConnectionState.RECONNECTING -> 
-                    MaterialTheme.colorScheme.tertiaryContainer
-                else -> MaterialTheme.colorScheme.surfaceVariant
-            }
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = when (connectionState) {
-                    ConnectionState.CONNECTED -> Icons.Default.BluetoothConnected
-                    ConnectionState.CONNECTING, ConnectionState.RECONNECTING -> 
-                        Icons.Default.BluetoothSearching
-                    else -> Icons.Default.BluetoothDisabled
-                },
-                contentDescription = null,
-                modifier = Modifier.size(40.dp)
-            )
             
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = when (connectionState) {
-                        ConnectionState.CONNECTED -> stringResource(R.string.connected)
-                        ConnectionState.CONNECTING -> stringResource(R.string.connecting)
-                        ConnectionState.RECONNECTING -> stringResource(R.string.reconnecting)
-                        ConnectionState.ERROR -> stringResource(R.string.connection_error)
-                        else -> stringResource(R.string.disconnected)
+            composable(NavRoutes.SETTINGS) {
+                SettingsScreen(
+                    settings = settings,
+                    onSettingsChange = { newSettings ->
+                        settingsRepository.saveSettings(newSettings)
                     },
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    onBack = { navController.popBackStack() }
                 )
-                
-                if (glassesName != null) {
-                    Text(
-                        text = glassesName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            
-            when (connectionState) {
-                ConnectionState.CONNECTED -> {
-                    Button(onClick = onDisconnect) {
-                        Text(stringResource(R.string.disconnect))
-                    }
-                }
-                ConnectionState.CONNECTING, ConnectionState.RECONNECTING -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        strokeWidth = 2.dp
-                    )
-                }
-                else -> {
-                    Button(onClick = onConnect) {
-                        Text(stringResource(R.string.connect))
-                    }
-                }
             }
         }
     }
 }
 
-@Composable
-fun CameraCaptureCard(
-    onCapturePhoto: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.CameraAlt,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                modifier = Modifier.size(40.dp)
-            )
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.camera_capture),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = stringResource(R.string.camera_capture_hint),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            
-            Button(
-                onClick = onCapturePhoto,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PhotoCamera,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.capture))
-            }
-        }
-    }
-}
-
-@Composable
-fun LatestPhotoCard(photoPath: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Image,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = stringResource(R.string.latest_photo),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            // Display the photo
-            val file = remember(photoPath) { File(photoPath) }
-            if (file.exists()) {
-                Image(
-                    painter = rememberAsyncImagePainter(file),
-                    contentDescription = "Captured photo",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.photo_not_found),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ServiceControlCard(
-    isServiceRunning: Boolean,
-    onStart: () -> Unit,
-    onStop: () -> Unit
-) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = if (isServiceRunning) Icons.Default.PlayCircle else Icons.Default.StopCircle,
-                contentDescription = null,
-                tint = if (isServiceRunning) Color(0xFF4CAF50) else Color.Gray,
-                modifier = Modifier.size(40.dp)
-            )
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.ai_service),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = if (isServiceRunning) stringResource(R.string.service_running) else stringResource(R.string.service_stopped),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            
-            Button(
-                onClick = if (isServiceRunning) onStop else onStart,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isServiceRunning) 
-                        MaterialTheme.colorScheme.error 
-                    else 
-                        MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Text(if (isServiceRunning) stringResource(R.string.stop) else stringResource(R.string.start))
-            }
-        }
-    }
-}
-
-@Composable
-fun ConversationHistory(
-    conversations: List<ConversationItem>,
-    modifier: Modifier = Modifier
-) {
-    Card(modifier = modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = stringResource(R.string.conversation_history),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            if (conversations.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.no_conversation_history),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            } else {
-                LazyColumn(modifier = Modifier.weight(1f)) {
-                    items(conversations) { item ->
-                        ConversationBubble(item = item)
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ConversationBubble(item: ConversationItem) {
-    val isUser = item.role == "user"
-    
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
-    ) {
-        Card(
-            colors = CardDefaults.cardColors(
-                containerColor = if (isUser) 
-                    MaterialTheme.colorScheme.primaryContainer 
-                else 
-                    MaterialTheme.colorScheme.secondaryContainer
-            ),
-            modifier = Modifier.widthIn(max = 280.dp)
-        ) {
-            Text(
-                text = item.content,
-                modifier = Modifier.padding(12.dp),
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-    }
-}
-
-@Composable
-fun StatusBar(
-    processingStatus: String?,
-    aiModel: String
-) {
-    val ready = stringResource(R.string.ready)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = processingStatus ?: ready,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        
-        Text(
-            text = "AI: $aiModel",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
+/**
+ * Conversation item data class
+ */
 data class ConversationItem(
     val role: String,
     val content: String,

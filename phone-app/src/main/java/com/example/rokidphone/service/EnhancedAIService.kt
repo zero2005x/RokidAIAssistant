@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 /**
- * 增強的 AI 服務整合層
- * 整合 ProviderManager、ConversationRepository 和 AI 服務
- * 參考 RikkaHub 的 ChatService 設計
+ * Enhanced AI Service Integration Layer
+ * Integrates ProviderManager, ConversationRepository and AI services
+ * Inspired by RikkaHub's ChatService design
  */
 class EnhancedAIService(
     private val context: Context
@@ -36,7 +36,7 @@ class EnhancedAIService(
     private val settingsRepository = SettingsRepository.getInstance(context)
     
     /**
-     * 發送訊息並取得回覆 (自動保存到對話歷史)
+     * Send message and get response (auto-saves to conversation history)
      */
     suspend fun sendMessage(
         conversationId: String,
@@ -46,32 +46,32 @@ class EnhancedAIService(
         return try {
             val settings = settingsRepository.getSettings()
             
-            // 保存使用者訊息
+            // Save user message
             conversationRepository.addUserMessage(
                 conversationId = conversationId,
                 content = userMessage,
-                imagePath = null  // TODO: 如果有圖片，需要先保存到檔案
+                imagePath = null  // TODO: If there's an image, need to save to file first
             )
             
-            // 取得 AI 服務
+            // Get AI service
             val aiService = providerManager.getActiveService()
-                ?: return Result.failure(Exception("AI 服務未設定"))
+                ?: return Result.failure(Exception("AI service not configured"))
             
-            // 根據是否有圖片選擇不同的處理方式
+            // Choose processing based on whether there's an image
             val response = if (imageData != null) {
                 aiService.analyzeImage(imageData, userMessage)
             } else {
                 aiService.chat(userMessage)
             }
             
-            // 保存 AI 回覆
+            // Save AI response
             conversationRepository.addAssistantMessage(
                 conversationId = conversationId,
                 content = response,
                 modelId = settings.aiModelId
             )
             
-            // 自動生成標題
+            // Auto-generate title
             val messageCount = conversationRepository.getMessageCount(conversationId)
             if (messageCount <= 2) {
                 conversationRepository.autoGenerateTitle(conversationId)
@@ -87,7 +87,7 @@ class EnhancedAIService(
     }
     
     /**
-     * 發送訊息並取得串流回覆
+     * Send message and get streaming response
      */
     fun sendMessageStream(
         conversationId: String,
@@ -96,7 +96,7 @@ class EnhancedAIService(
         try {
             val settings = settingsRepository.getSettings()
             
-            // 保存使用者訊息
+            // Save user message
             conversationRepository.addUserMessage(
                 conversationId = conversationId,
                 content = userMessage
@@ -104,26 +104,26 @@ class EnhancedAIService(
             
             emit(StreamResult.Started)
             
-            // 取得 AI 服務
+            // Get AI service
             val aiService = providerManager.getActiveService()
             if (aiService == null) {
-                emit(StreamResult.Error("AI 服務未設定"))
+                emit(StreamResult.Error("AI service not configured"))
                 return@flow
             }
             
-            // 目前先使用非串流方式 (TODO: 實現真正的串流)
+            // Currently using non-streaming approach (TODO: Implement true streaming)
             val response = aiService.chat(userMessage)
             
             emit(StreamResult.Chunk(response))
             
-            // 保存 AI 回覆
+            // Save AI response
             conversationRepository.addAssistantMessage(
                 conversationId = conversationId,
                 content = response,
                 modelId = settings.aiModelId
             )
             
-            // 自動生成標題
+            // Auto-generate title
             val messageCount = conversationRepository.getMessageCount(conversationId)
             if (messageCount <= 2) {
                 conversationRepository.autoGenerateTitle(conversationId)
@@ -133,17 +133,17 @@ class EnhancedAIService(
             
         } catch (e: Exception) {
             Log.e(TAG, "Stream error", e)
-            emit(StreamResult.Error(e.message ?: "未知錯誤"))
+            emit(StreamResult.Error(e.message ?: "Unknown error"))
         }
     }
     
     /**
-     * 快速對話 (不保存歷史)
+     * Quick chat (without saving history)
      */
     suspend fun quickChat(message: String): Result<String> {
         return try {
             val aiService = providerManager.getActiveService()
-                ?: return Result.failure(Exception("AI 服務未設定"))
+                ?: return Result.failure(Exception("AI service not configured"))
             
             val response = aiService.chat(message)
             Result.success(response)
@@ -154,15 +154,15 @@ class EnhancedAIService(
     }
     
     /**
-     * 圖片分析 (不保存歷史)
+     * Image analysis (without saving history)
      */
     suspend fun analyzeImage(
         imageData: ByteArray,
-        prompt: String = "請描述這張圖片"
+        prompt: String = "Please describe this image"
     ): Result<String> {
         return try {
             val aiService = providerManager.getActiveService()
-                ?: return Result.failure(Exception("AI 服務未設定"))
+                ?: return Result.failure(Exception("AI service not configured"))
             
             val response = aiService.analyzeImage(imageData, prompt)
             Result.success(response)
@@ -173,12 +173,12 @@ class EnhancedAIService(
     }
     
     /**
-     * 語音轉文字
+     * Speech to text transcription
      */
     suspend fun transcribe(audioData: ByteArray): Result<String> {
         return try {
             val aiService = providerManager.getActiveService()
-                ?: return Result.failure(Exception("AI 服務未設定"))
+                ?: return Result.failure(Exception("AI service not configured"))
             
             when (val result = aiService.transcribe(audioData)) {
                 is SpeechResult.Success -> Result.success(result.text)
@@ -191,10 +191,10 @@ class EnhancedAIService(
     }
     
     /**
-     * 開始新對話
+     * Start new conversation
      */
     suspend fun startNewConversation(
-        title: String = "新對話"
+        title: String = "New Conversation"
     ): Result<String> {
         return try {
             val settings = settingsRepository.getSettings()
@@ -212,16 +212,16 @@ class EnhancedAIService(
     }
     
     /**
-     * 取得或建立對話
+     * Get or create conversation
      */
     suspend fun getOrCreateConversation(): String {
         val conversations = conversationRepository.getAllConversations()
-        // 這裡簡化處理，實際應該取得最近的對話或建立新對話
+        // Simplified handling, should actually get recent conversation or create new one
         return startNewConversation().getOrThrow()
     }
     
     /**
-     * 清除 AI 服務快取
+     * Clear AI service cache
      */
     fun invalidateCache() {
         providerManager.invalidateCache()
@@ -229,7 +229,7 @@ class EnhancedAIService(
 }
 
 /**
- * 串流結果
+ * Stream result
  */
 sealed class StreamResult {
     data object Started : StreamResult()

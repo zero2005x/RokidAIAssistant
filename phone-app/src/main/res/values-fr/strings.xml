@@ -54,7 +54,20 @@
     <string name="select_ai_provider">Sélectionner le fournisseur IA</string>
     <string name="select_model">Sélectionner le modèle</string>
     <string name="select_speech_service">Sélectionner le service de reconnaissance vocale</string>
-    <string name="supports_audio">✓ Supporte l\'audio</string>
+    <string name="supports_audio">Audio</string>
+    <string name="supports_vision">Vision</string>
+    <string name="no_speech_support">Pas d\'audio</string>
+    <string name="no_vision_support">Pas de vision</string>
+    
+    <!-- API Key Validation -->
+    <string name="api_key_required">Clé API requise</string>
+    <string name="api_key_not_set">Non configuré</string>
+    <string name="speech_service_not_configured">Service de reconnaissance vocale non configuré. Configurez la clé API Gemini, OpenAI, Groq ou xAI.</string>
+    <string name="api_key_setup_hint">Allez dans Paramètres pour configurer vos clés API. L\'application utilisera le service de secours intégré jusqu\'à la configuration.</string>
+    <string name="go_to_settings">Aller aux Paramètres</string>
+    <string name="later">Plus tard</string>
+    <string name="api_key_validation_failed">Échec de la validation de la clé API</string>
+    <string name="service_not_ready">Service non prêt. Configurez les clés API dans les Paramètres.</string>
     
     <!-- AI Processing -->
     <string name="processing_voice">Traitement de la voix…</string>
@@ -69,6 +82,9 @@
     <!-- Conversation -->
     <string name="conversation_history">Historique des conversations</string>
     <string name="no_conversation_history">Aucun historique de conversation</string>
+    <string name="export_conversation">Exporter la conversation</string>
+    <string name="more_options">Plus d\'options</string>
+    <string name="voice_session_title">Session vocale - %s</string>
     
     <!-- Misc -->
     <string name="show">Afficher</string>
@@ -79,15 +95,6 @@
     <string name="gemini_api_key">Clé API Gemini</string>
     <string name="openai_api_key">Clé API OpenAI</string>
     <string name="anthropic_api_key">Clé API Anthropic</string>
-    
-    <!-- Notification & Status -->
-    <string name="glasses_recording">Enregistrement des lunettes...</string>
-    <string name="recognizing_speech">Reconnaissance vocale...</string>
-    <string name="processing_failed">Échec du traitement: %s</string>
-    <string name="waiting_glasses">En attente de connexion des lunettes...</string>
-    <string name="connected_glasses">Connecté aux lunettes</string>
-    
-    <!-- Additional API Keys -->
     <string name="deepseek_api_key">Clé API DeepSeek</string>
     <string name="groq_api_key">Clé API Groq</string>
     <string name="xai_api_key">Clé API xAI</string>
@@ -97,6 +104,8 @@
     <string name="baidu_secret_key">Clé secrète Baidu</string>
     <string name="perplexity_api_key">Clé API Perplexity</string>
     <string name="custom_api_key">Clé API personnalisée (optionnel)</string>
+    
+    <!-- Custom Provider Settings -->
     <string name="custom_provider_settings">Paramètres du fournisseur personnalisé</string>
     <string name="base_url">URL de base</string>
     <string name="base_url_hint">Ex.: http://localhost:11434/v1/</string>
@@ -109,6 +118,13 @@
     <string name="connection_failed">Échec de connexion : %s</string>
     <string name="invalid_url">Format d\'URL invalide. Utilisez http:// ou https://</string>
     <string name="api_key_optional">La clé API est optionnelle pour les modèles locaux</string>
+    
+    <!-- Notification & Status -->
+    <string name="glasses_recording">Enregistrement des lunettes...</string>
+    <string name="recognizing_speech">Reconnaissance vocale...</string>
+    <string name="processing_failed">Échec du traitement: %s</string>
+    <string name="waiting_glasses">En attente de connexion des lunettes...</string>
+    <string name="connected_glasses">Connecté aux lunettes</string>
     
     <!-- AI Provider Names -->
     <string name="provider_gemini">Google Gemini</string>
@@ -127,4 +143,82 @@
     <string name="speech_service_gemini">Reconnaissance vocale Gemini</string>
     <string name="speech_service_openai_whisper">OpenAI Whisper</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
+    
+    <!-- Photo Transfer -->
+    <string name="photo_received">Photo reçue des lunettes</string>
+    <string name="photo_processing_failed">Échec du traitement de la photo</string>
+    <string name="photo_transfer_failed">Échec du transfert de photo : %s</string>
+    <string name="analyzing_photo">Analyse de la photo…</string>
+    <string name="ai_analysis_unavailable">Analyse d\'image IA non disponible</string>
+    <string name="photo_analysis_failed">Échec de l\'analyse de photo : %s</string>
+    <string name="preparing_analysis">Préparation de l\'analyse…</string>
+    <string name="unable_to_read_photo">Impossible de lire les données de la photo</string>
+    <string name="calling_ai_analysis">Appel de l\'IA pour analyse…</string>
+    <string name="analyzing_image">Analyse de l\'image…</string>
+    
+    <!-- Camera Capture -->
+    <string name="camera_capture">Caméra des lunettes</string>
+    <string name="camera_capture_hint">Capturez une photo depuis les lunettes et analysez avec l\'IA</string>
+    <string name="capture">Capturer</string>
+    <string name="latest_photo">Dernière photo</string>
+    <string name="photo_not_found">Photo non trouvée</string>
+    
+    <!-- Conversation History (New) -->
+    <string name="new_conversation">Nouvelle conversation</string>
+    <string name="no_conversations">Pas encore de conversations</string>
+    <string name="start_new_conversation">Démarrer une nouvelle conversation</string>
+    <string name="pinned">Épinglé</string>
+    <string name="recent">Récent</string>
+    <string name="delete_conversation">Supprimer la conversation</string>
+    <string name="delete_conversation_confirm">Êtes-vous sûr de vouloir supprimer cette conversation ? Cette action ne peut pas être annulée.</string>
+    <string name="delete">Supprimer</string>
+    <string name="pin">Épingler</string>
+    <string name="unpin">Désépingler</string>
+    <string name="archive">Archiver</string>
+    <string name="unarchive">Désarchiver</string>
+    <string name="clear_history">Effacer l\'historique</string>
+    <string name="clear_history_confirm">Êtes-vous sûr de vouloir effacer tous les messages de cette conversation ?</string>
+    <string name="clear">Effacer</string>
+    <string name="start_chatting">Commencer à discuter avec l\'IA</string>
+    <string name="type_message">Tapez un message…</string>
+    <string name="send">Envoyer</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">Accueil</string>
+    <string name="nav_gallery">Galerie</string>
+    <string name="nav_chat">Chat</string>
+    <string name="nav_settings">Paramètres</string>
+    
+    <!-- Photo Gallery -->
+    <string name="gallery_empty">Aucune photo pour le moment</string>
+    <string name="gallery_empty_hint">Les photos capturées par vos lunettes apparaîtront ici</string>
+    <string name="gallery_photo_count">%d photos</string>
+    <string name="gallery_selected_count">%d sélectionnée(s)</string>
+    <string name="gallery_select_all">Tout sélectionner</string>
+    <string name="gallery_clear_all">Effacer toutes les photos</string>
+    <string name="gallery_clear_all_title">Effacer toutes les photos</string>
+    <string name="gallery_clear_all_message">Êtes-vous sûr de vouloir supprimer toutes les photos ? Cette action est irréversible.</string>
+    <string name="gallery_delete_title">Supprimer la photo</string>
+    <string name="gallery_delete_message">Supprimer %d photo(s) sélectionnée(s) ?</string>
+    <string name="gallery_delete_single_message">Êtes-vous sûr de vouloir supprimer cette photo ?</string>
+    <string name="gallery_info">Info photo</string>
+    <string name="gallery_photo_info">Détails de la photo</string>
+    <string name="gallery_info_date">Date</string>
+    <string name="gallery_info_dimensions">Dimensions</string>
+    <string name="gallery_info_size">Taille du fichier</string>
+    <string name="gallery_info_transfer_time">Temps de transfert</string>
+    <string name="gallery_info_analysis">Analyse IA</string>
+    <string name="gallery_load_error">Impossible de charger la photo</string>
+    <string name="share">Partager</string>
+    <string name="close">Fermer</string>
+    
+    <!-- Home Screen -->
+    <string name="home_welcome">Bienvenue sur Rokid AI</string>
+    <string name="home_subtitle">Votre assistant intelligent pour lunettes connectées</string>
+    <string name="quick_actions">Actions rapides</string>
+    <string name="glasses_status">État des lunettes</string>
+    <string name="ai_status">État de l\'IA</string>
+    <string name="current_model">Modèle actuel</string>
+    <string name="home_current_session">Session actuelle</string>
+    <string name="home_view_all">Voir tout</string>
 </resources>

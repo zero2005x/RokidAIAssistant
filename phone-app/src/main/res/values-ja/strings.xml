@@ -2,6 +2,7 @@
 <resources>
     <!-- App Info -->
     <string name="app_name">Rokid AI アシスタント</string>
+    <string name="app_title">Rokid AI アシスタント（電話）</string>
     
     <!-- Service Status -->
     <string name="service_running">サービス実行中</string>
@@ -11,10 +12,14 @@
     <string name="connected">接続済み</string>
     <string name="disconnected">未接続</string>
     <string name="connecting">接続中…</string>
+    <string name="reconnecting">再接続中…</string>
+    <string name="connection_error">接続エラー</string>
     
     <!-- Actions -->
     <string name="start_service">サービス開始</string>
     <string name="stop_service">サービス停止</string>
+    <string name="start">開始</string>
+    <string name="stop">停止</string>
     <string name="connect">接続</string>
     <string name="disconnect">切断</string>
     <string name="save">保存</string>
@@ -49,7 +54,20 @@
     <string name="select_ai_provider">AI プロバイダーを選択</string>
     <string name="select_model">モデルを選択</string>
     <string name="select_speech_service">音声認識サービスを選択</string>
-    <string name="supports_audio">✓ 音声対応</string>
+    <string name="supports_audio">音声</string>
+    <string name="supports_vision">ビジョン</string>
+    <string name="no_speech_support">音声非対応</string>
+    <string name="no_vision_support">ビジョン非対応</string>
+    
+    <!-- API Key Validation -->
+    <string name="api_key_required">API キーが必要です</string>
+    <string name="api_key_not_set">未設定</string>
+    <string name="speech_service_not_configured">音声認識サービスが設定されていません。Gemini、OpenAI、Groq、または xAI API キーを設定してください。</string>
+    <string name="api_key_setup_hint">設定から API キーを設定してください。設定完了まで内蔵のフォールバックサービスを使用します。</string>
+    <string name="go_to_settings">設定へ</string>
+    <string name="later">後で</string>
+    <string name="api_key_validation_failed">API キー検証失敗</string>
+    <string name="service_not_ready">サービスの準備ができていません。設定で API キーを設定してください。</string>
     
     <!-- AI Processing -->
     <string name="processing_voice">音声を認識中…</string>
@@ -59,13 +77,24 @@
     <string name="service_unavailable">AI サービスは一時的に利用できません</string>
     <string name="network_error">ネットワーク接続に失敗しました、設定を確認してください</string>
     <string name="connection_timeout">接続がタイムアウトしました、後でもう一度お試しください</string>
+    <string name="ready">準備完了</string>
+    
+    <!-- Conversation -->
+    <string name="conversation_history">会話履歴</string>
+    <string name="no_conversation_history">会話履歴がありません</string>
+    <string name="export_conversation">会話をエクスポート</string>
+    <string name="more_options">その他のオプション</string>
+    <string name="voice_session_title">音声セッション - %s</string>
     
     <!-- Misc -->
     <string name="show">表示</string>
     <string name="hide">非表示</string>
     <string name="in_use">使用中</string>
     
-    <!-- Additional API Keys -->
+    <!-- API Keys -->
+    <string name="gemini_api_key">Gemini API キー</string>
+    <string name="openai_api_key">OpenAI API キー</string>
+    <string name="anthropic_api_key">Anthropic API キー</string>
     <string name="deepseek_api_key">DeepSeek API キー</string>
     <string name="groq_api_key">Groq API キー</string>
     <string name="xai_api_key">xAI API キー</string>
@@ -75,6 +104,8 @@
     <string name="baidu_secret_key">Baidu Secret キー</string>
     <string name="perplexity_api_key">Perplexity API キー</string>
     <string name="custom_api_key">カスタム API キー（任意）</string>
+    
+    <!-- Custom Provider Settings -->
     <string name="custom_provider_settings">カスタムプロバイダー設定</string>
     <string name="base_url">ベース URL</string>
     <string name="base_url_hint">例：http://localhost:11434/v1/</string>
@@ -87,6 +118,13 @@
     <string name="connection_failed">接続失敗：%s</string>
     <string name="invalid_url">無効な URL 形式です。http:// または https:// を使用してください</string>
     <string name="api_key_optional">ローカルモデルでは API キーは不要です</string>
+    
+    <!-- Notification & Status -->
+    <string name="glasses_recording">グラス録音中...</string>
+    <string name="recognizing_speech">音声認識中...</string>
+    <string name="processing_failed">処理失敗：%s</string>
+    <string name="waiting_glasses">グラス接続待機中...</string>
+    <string name="connected_glasses">グラスに接続しました</string>
     
     <!-- AI Provider Names -->
     <string name="provider_gemini">Google Gemini</string>
@@ -105,4 +143,80 @@
     <string name="speech_service_gemini">Gemini 音声認識</string>
     <string name="speech_service_openai_whisper">OpenAI Whisper</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
+    
+    <!-- Photo Transfer -->
+    <string name="photo_received">グラスから写真を受信しました</string>
+    <string name="photo_processing_failed">写真の処理に失敗しました</string>
+    <string name="photo_transfer_failed">写真転送失敗：%s</string>
+    <string name="analyzing_photo">写真を分析中…</string>
+    <string name="ai_analysis_unavailable">AI 画像分析は利用できません</string>
+    <string name="photo_analysis_failed">写真分析失敗：%s</string>    <string name="preparing_analysis">分析の準備中…</string>
+    <string name="unable_to_read_photo">写真データを読み取れません</string>
+    <string name="calling_ai_analysis">AI分析を呼び出し中…</string>
+    <string name="analyzing_image">画像を分析中…</string>    
+    <!-- Camera Capture -->
+    <string name="camera_capture">グラスカメラ</string>
+    <string name="camera_capture_hint">グラスから写真を撮影し AI で分析</string>
+    <string name="capture">撮影</string>
+    <string name="latest_photo">最新の写真</string>
+    <string name="photo_not_found">写真が見つかりません</string>
+    
+    <!-- Conversation History (New) -->
+    <string name="new_conversation">新しい会話</string>
+    <string name="no_conversations">まだ会話がありません</string>
+    <string name="start_new_conversation">新しい会話を始めてください</string>
+    <string name="pinned">固定</string>
+    <string name="recent">最近</string>
+    <string name="delete_conversation">会話を削除</string>
+    <string name="delete_conversation_confirm">この会話を削除しますか？この操作は取り消せません。</string>
+    <string name="delete">削除</string>
+    <string name="pin">固定</string>
+    <string name="unpin">固定解除</string>
+    <string name="archive">アーカイブ</string>
+    <string name="unarchive">アーカイブ解除</string>
+    <string name="clear_history">履歴をクリア</string>
+    <string name="clear_history_confirm">この会話のすべてのメッセージをクリアしますか？</string>
+    <string name="clear">クリア</string>
+    <string name="start_chatting">AI とチャットを始める</string>
+    <string name="type_message">メッセージを入力…</string>
+    <string name="send">送信</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">ホーム</string>
+    <string name="nav_gallery">ギャラリー</string>
+    <string name="nav_chat">チャット</string>
+    <string name="nav_settings">設定</string>
+    
+    <!-- Photo Gallery -->
+    <string name="gallery_empty">写真がありません</string>
+    <string name="gallery_empty_hint">グラスで撮影した写真がここに表示されます</string>
+    <string name="gallery_photo_count">%d 枚の写真</string>
+    <string name="gallery_selected_count">%d 件選択中</string>
+    <string name="gallery_select_all">すべて選択</string>
+    <string name="gallery_clear_all">すべての写真を削除</string>
+    <string name="gallery_clear_all_title">すべての写真を削除</string>
+    <string name="gallery_clear_all_message">すべての写真を削除しますか？この操作は取り消せません。</string>
+    <string name="gallery_delete_title">写真を削除</string>
+    <string name="gallery_delete_message">選択した %d 枚の写真を削除しますか？</string>
+    <string name="gallery_delete_single_message">この写真を削除しますか？</string>
+    <string name="gallery_info">写真情報</string>
+    <string name="gallery_photo_info">写真の詳細</string>
+    <string name="gallery_info_date">日付</string>
+    <string name="gallery_info_dimensions">サイズ</string>
+    <string name="gallery_info_size">ファイルサイズ</string>
+    <string name="gallery_info_transfer_time">転送時間</string>
+    <string name="gallery_info_analysis">AI 分析</string>
+    <string name="gallery_load_error">写真を読み込めません</string>
+    <string name="share">共有</string>
+    <string name="close">閉じる</string>
+    
+    <!-- Home Screen -->
+    <string name="home_welcome">Rokid AI へようこそ</string>
+    <string name="home_subtitle">スマートグラスのインテリジェントアシスタント</string>
+    <string name="quick_actions">クイックアクション</string>
+    <string name="glasses_status">グラスの状態</string>
+    <string name="ai_status">AI の状態</string>
+    <string name="current_model">現在のモデル</string>
+    <string name="home_current_session">現在のセッション</string>
+    <string name="home_view_all">すべて表示</string>
 </resources>

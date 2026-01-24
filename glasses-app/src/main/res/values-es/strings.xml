@@ -18,6 +18,7 @@
     <string name="pair_device_hint">Por favor, empareje su teléfono en la configuración del sistema</string>
     <string name="unknown_device">Dispositivo desconocido</string>
     <string name="cancel">Cancelar</string>
+    <string name="recommended">Recomendado</string>
     
     <!-- Display Messages -->
     <string name="not_connected">No conectado al teléfono\nSeleccione un dispositivo</string>

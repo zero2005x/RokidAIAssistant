@@ -18,6 +18,7 @@
     <string name="pair_device_hint">Associa il tuo telefono nelle impostazioni di sistema</string>
     <string name="unknown_device">Dispositivo sconosciuto</string>
     <string name="cancel">Annulla</string>
+    <string name="recommended">Consigliato</string>
     
     <!-- Display Messages -->
     <string name="not_connected">Non connesso al telefono\nSeleziona un dispositivo</string>

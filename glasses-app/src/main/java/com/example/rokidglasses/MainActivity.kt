@@ -89,10 +89,8 @@ class MainActivity : ComponentActivity() {
     /**
      * Catch ALL key events at dispatch level for debugging
      */
-    override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
-        event?.let {
-            android.util.Log.d("MainActivity", "dispatchKeyEvent: action=${it.action}, keyCode=${it.keyCode} (${KeyEvent.keyCodeToString(it.keyCode)}), scanCode=${it.scanCode}")
-        }
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        android.util.Log.d("MainActivity", "dispatchKeyEvent: action=${event.action}, keyCode=${event.keyCode} (${KeyEvent.keyCodeToString(event.keyCode)}), scanCode=${event.scanCode}")
         return super.dispatchKeyEvent(event)
     }
     
@@ -357,6 +355,7 @@ fun GlassesMainScreen(
         if (showDeviceSelector) {
             DeviceSelectorDialog(
                 devices = uiState.availableDevices,
+                cxrConnectedPhoneName = uiState.cxrConnectedPhoneName,
                 onDeviceSelected = { device ->
                     viewModel.connectToDevice(device)
                     showDeviceSelector = false
@@ -370,9 +369,22 @@ fun GlassesMainScreen(
 @Composable
 fun DeviceSelectorDialog(
     devices: List<android.bluetooth.BluetoothDevice>,
+    cxrConnectedPhoneName: String? = null,
     onDeviceSelected: (android.bluetooth.BluetoothDevice) -> Unit,
     onDismiss: () -> Unit
 ) {
+    // Sort devices: CXR-connected phone first, then by name
+    val sortedDevices = remember(devices, cxrConnectedPhoneName) {
+        if (cxrConnectedPhoneName != null) {
+            devices.sortedByDescending { 
+                @Suppress("MissingPermission")
+                it.name?.equals(cxrConnectedPhoneName, ignoreCase = true) == true 
+            }
+        } else {
+            devices
+        }
+    }
+    
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color(0xFF1A1A1A),
@@ -385,7 +397,7 @@ fun DeviceSelectorDialog(
             )
         },
         text = {
-            if (devices.isEmpty()) {
+            if (sortedDevices.isEmpty()) {
                 Text(
                     text = stringResource(R.string.no_paired_devices) + "\n" + stringResource(R.string.pair_device_hint),
                     color = Color.White.copy(alpha = 0.7f),
@@ -395,23 +407,40 @@ fun DeviceSelectorDialog(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    devices.forEach { device ->
+                    sortedDevices.forEach { device ->
                         @Suppress("MissingPermission")
                         val deviceName = device.name ?: stringResource(R.string.unknown_device)
+                        val isRecommended = cxrConnectedPhoneName != null && 
+                            deviceName.equals(cxrConnectedPhoneName, ignoreCase = true)
                         
                         Surface(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { onDeviceSelected(device) },
-                            color = Color(0xFF2A2A2A),
+                            color = if (isRecommended) Color(0xFF1E3A5F) else Color(0xFF2A2A2A),
                             shape = MaterialTheme.shapes.small
                         ) {
-                            Text(
-                                text = deviceName,
-                                color = Color.White,
-                                fontSize = 16.sp,
-                                modifier = Modifier.padding(16.dp)
-                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = deviceName,
+                                    color = Color.White,
+                                    fontSize = 16.sp
+                                )
+                                if (isRecommended) {
+                                    Text(
+                                        text = "★ " + stringResource(R.string.recommended),
+                                        color = Color(0xFF64B5F6),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
                         }
                     }
                 }

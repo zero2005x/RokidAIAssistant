@@ -12,8 +12,8 @@ import kotlinx.coroutines.withContext
 /**
  * Camera Mode - determines which camera implementation to use
  * 
- * 注意：眼镜端应用只使用 Camera2 API
- * CXR-M SDK 的相机功能是给手机端用来远程控制眼镜相机的
+ * Note: Glasses-side application only uses Camera2 API
+ * CXR-M SDK camera functionality is for phone-side to remotely control glasses camera
  */
 enum class CameraMode {
     /** Automatically select best available (Camera2 for glasses) */
@@ -44,13 +44,13 @@ sealed class UnifiedCameraState {
 }
 
 /**
- * Unified Camera Manager (眼镜端)
+ * Unified Camera Manager (Glasses Side)
  * 
- * 眼镜端相机管理器，使用 Android Camera2 API 直接访问本地相机。
+ * Glasses-side camera manager that uses Android Camera2 API to directly access the local camera.
  * 
- * 架构说明：
- * - 眼镜端：使用 Camera2 API 直接拍照（本文件）
- * - 手机端：可使用 CXR-M SDK 的 takeGlassPhoto() 远程获取眼镜照片
+ * Architecture:
+ * - Glasses side: Uses Camera2 API for direct photo capture (this file)
+ * - Phone side: Can use CXR-M SDK's takeGlassPhoto() to remotely capture glasses photos
  * 
  * Usage:
  * ```kotlin
@@ -81,7 +81,7 @@ class UnifiedCameraManager(
     
     /**
      * Initialize the camera manager.
-     * 眼镜端使用 Camera2 API。
+     * Glasses side uses Camera2 API.
      */
     suspend fun initialize(): Result<Unit> = withContext(Dispatchers.IO) {
         _cameraState.value = UnifiedCameraState.Initializing

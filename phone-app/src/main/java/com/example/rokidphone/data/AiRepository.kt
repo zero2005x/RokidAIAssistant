@@ -12,7 +12,7 @@ import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 
 /**
- * 图像分析结果
+ * Image analysis result
  */
 sealed class ImageAnalysisResult {
     data class Success(val description: String) : ImageAnalysisResult()
@@ -20,13 +20,13 @@ sealed class ImageAnalysisResult {
 }
 
 /**
- * AI Repository - AI 服务封装层
+ * AI Repository - AI Service Encapsulation Layer
  * 
- * 职责：
- * 1. 封装 AI 服务调用
- * 2. 管理图像预处理
- * 3. 统一错误处理
- * 4. 支持多种分析模式
+ * Responsibilities:
+ * 1. Encapsulate AI service calls
+ * 2. Manage image preprocessing
+ * 3. Unified error handling
+ * 4. Support multiple analysis modes
  */
 class AiRepository private constructor(
     private val context: Context,
@@ -35,7 +35,7 @@ class AiRepository private constructor(
     companion object {
         private const val TAG = "AiRepository"
         
-        // 图像分析提示词
+        // Image analysis prompts
         private const val PROMPT_IMAGE_DESCRIPTION = 
             "请详细描述这张图片中你所看到的内容。包括主要对象、场景、颜色、动作等细节。用中文回答，简洁明了。"
         
@@ -48,8 +48,8 @@ class AiRepository private constructor(
         private const val PROMPT_IMAGE_SUMMARY = 
             "请用一句话概括这张图片的主要内容。用中文回答。"
         
-        // 图像处理参数
-        private const val MAX_IMAGE_SIZE = 1024 // 最大边长
+        // Image processing parameters
+        private const val MAX_IMAGE_SIZE = 1024 // Maximum side length
         private const val JPEG_QUALITY = 85
         
         @Volatile
@@ -66,18 +66,18 @@ class AiRepository private constructor(
     }
     
     /**
-     * 分析模式
+     * Analysis mode
      */
     enum class AnalysisMode {
-        DESCRIPTION,    // 详细描述
-        OCR,           // 文字识别
-        TRANSLATE,     // 翻译
-        SUMMARY,       // 简要概括
-        CUSTOM         // 自定义提示
+        DESCRIPTION,    // Detailed description
+        OCR,           // Text recognition
+        TRANSLATE,     // Translation
+        SUMMARY,       // Brief summary
+        CUSTOM         // Custom prompt
     }
     
     /**
-     * 创建 AI 服务实例
+     * Create AI service instance
      */
     private fun createAiService(): AiServiceProvider {
         val settings = settingsRepository.getSettings()
@@ -85,12 +85,12 @@ class AiRepository private constructor(
     }
     
     /**
-     * 分析图像（使用字节数组）
+     * Analyze image (using byte array)
      * 
-     * @param imageData 图像数据 (JPEG/PNG)
-     * @param mode 分析模式
-     * @param customPrompt 自定义提示词 (仅当 mode 为 CUSTOM 时使用)
-     * @return 分析结果
+     * @param imageData Image data (JPEG/PNG)
+     * @param mode Analysis mode
+     * @param customPrompt Custom prompt (only used when mode is CUSTOM)
+     * @return Analysis result
      */
     suspend fun analyzeImage(
         imageData: ByteArray,
@@ -100,10 +100,10 @@ class AiRepository private constructor(
         try {
             Log.d(TAG, "Analyzing image: ${imageData.size} bytes, mode: $mode")
             
-            // 预处理图像
+            // Preprocess image
             val processedData = preprocessImage(imageData)
             
-            // 获取提示词
+            // Get prompt
             val prompt = when (mode) {
                 AnalysisMode.DESCRIPTION -> PROMPT_IMAGE_DESCRIPTION
                 AnalysisMode.OCR -> PROMPT_IMAGE_OCR
@@ -112,7 +112,7 @@ class AiRepository private constructor(
                 AnalysisMode.CUSTOM -> customPrompt ?: PROMPT_IMAGE_DESCRIPTION
             }
             
-            // 调用 AI 服务
+            // Call AI service
             val aiService = createAiService()
             val result = aiService.analyzeImage(processedData, prompt)
             
@@ -129,7 +129,7 @@ class AiRepository private constructor(
     }
     
     /**
-     * 分析图像（使用 Base64 字符串）
+     * Analyze image (using Base64 string)
      */
     suspend fun analyzeImageBase64(
         base64Image: String,
@@ -146,7 +146,7 @@ class AiRepository private constructor(
     }
     
     /**
-     * 分析图像（使用 Bitmap）
+     * Analyze image (using Bitmap)
      */
     suspend fun analyzeImage(
         bitmap: Bitmap,
@@ -163,7 +163,7 @@ class AiRepository private constructor(
     }
     
     /**
-     * 快速描述图像（简化接口）
+     * Quick image description (simplified interface)
      */
     suspend fun describeImage(imageData: ByteArray): Result<String> {
         return when (val result = analyzeImage(imageData, AnalysisMode.DESCRIPTION)) {
@@ -175,7 +175,7 @@ class AiRepository private constructor(
     }
     
     /**
-     * 文字识别（OCR）
+     * Text recognition (OCR)
      */
     suspend fun recognizeText(imageData: ByteArray): Result<String> {
         return when (val result = analyzeImage(imageData, AnalysisMode.OCR)) {
@@ -187,7 +187,7 @@ class AiRepository private constructor(
     }
     
     /**
-     * 翻译图片中的文字
+     * Translate text in image
      */
     suspend fun translateImage(imageData: ByteArray): Result<String> {
         return when (val result = analyzeImage(imageData, AnalysisMode.TRANSLATE)) {
@@ -199,13 +199,13 @@ class AiRepository private constructor(
     }
     
     /**
-     * 预处理图像
-     * - 调整大小以节省带宽
-     * - 压缩质量
+     * Preprocess image
+     * - Resize to save bandwidth
+     * - Compress quality
      */
     private fun preprocessImage(imageData: ByteArray): ByteArray {
         return try {
-            // 解码图像
+            // Decode image
             val options = BitmapFactory.Options().apply {
                 inJustDecodeBounds = true
             }
@@ -214,22 +214,22 @@ class AiRepository private constructor(
             val width = options.outWidth
             val height = options.outHeight
             
-            // 如果图像已经足够小，直接返回
+            // If image is already small enough, return directly
             if (width <= MAX_IMAGE_SIZE && height <= MAX_IMAGE_SIZE) {
                 return imageData
             }
             
-            // 计算缩放比例
+            // Calculate scale ratio
             val scale = maxOf(width, height).toFloat() / MAX_IMAGE_SIZE
             
-            // 解码并缩放
+            // Decode and scale the image
             val decodeOptions = BitmapFactory.Options().apply {
                 inSampleSize = scale.toInt().coerceAtLeast(1)
             }
             val bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.size, decodeOptions)
                 ?: return imageData
             
-            // 压缩为 JPEG
+            // Compress to JPEG
             val result = bitmapToBytes(bitmap, JPEG_QUALITY)
             bitmap.recycle()
             
@@ -243,7 +243,7 @@ class AiRepository private constructor(
     }
     
     /**
-     * Bitmap 转 ByteArray
+     * Convert Bitmap to ByteArray
      */
     private fun bitmapToBytes(bitmap: Bitmap, quality: Int = JPEG_QUALITY): ByteArray {
         return ByteArrayOutputStream().use { stream ->
@@ -253,7 +253,7 @@ class AiRepository private constructor(
     }
     
     /**
-     * 检查 AI 服务是否可用
+     * Check if AI service is available
      */
     fun isServiceAvailable(): Boolean {
         val settings = settingsRepository.getSettings()
@@ -261,15 +261,15 @@ class AiRepository private constructor(
     }
     
     /**
-     * 获取当前 AI 提供商名称
+     * Get current AI provider name
      */
     fun getCurrentProviderName(): String {
-        // 返回 provider 的枚举名称，因为 displayName 需要 Context 来解析资源
+        // Return provider enum name since displayName requires Context to resolve resources
         return settingsRepository.getSettings().aiProvider.name
     }
     
     /**
-     * 获取当前模型 ID
+     * Get current model ID
      */
     fun getCurrentModelId(): String {
         return settingsRepository.getSettings().getCurrentModelId()

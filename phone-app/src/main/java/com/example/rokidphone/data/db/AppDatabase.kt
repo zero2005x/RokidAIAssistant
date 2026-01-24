@@ -168,6 +168,9 @@ interface ConversationDao {
     @Query("SELECT * FROM conversations WHERE is_archived = 0 ORDER BY is_pinned DESC, updated_at DESC")
     fun getAllConversations(): Flow<List<ConversationEntity>>
     
+    @Query("SELECT * FROM conversations WHERE is_archived = 0 ORDER BY is_pinned DESC, updated_at DESC")
+    suspend fun getAllConversationsSync(): List<ConversationEntity>
+    
     @Query("SELECT * FROM conversations WHERE is_archived = 1 ORDER BY updated_at DESC")
     fun getArchivedConversations(): Flow<List<ConversationEntity>>
     

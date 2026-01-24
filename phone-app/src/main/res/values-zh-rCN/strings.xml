@@ -54,7 +54,10 @@
     <string name="select_ai_provider">选择 AI 提供商</string>
     <string name="select_model">选择模型</string>
     <string name="select_speech_service">选择语音识别服务</string>
-    <string name="supports_audio">✓ 支持音频</string>
+    <string name="supports_audio">音频</string>
+    <string name="supports_vision">视觉</string>
+    <string name="no_speech_support">不支持音频</string>
+    <string name="no_vision_support">不支持视觉</string>
     
     <!-- API Key Validation -->
     <string name="api_key_required">需要 API 密钥</string>
@@ -79,6 +82,9 @@
     <!-- Conversation -->
     <string name="conversation_history">对话记录</string>
     <string name="no_conversation_history">目前没有对话记录</string>
+    <string name="export_conversation">导出对话</string>
+    <string name="more_options">更多选项</string>
+    <string name="voice_session_title">语音对话 - %s</string>
     
     <!-- Misc -->
     <string name="show">显示</string>
@@ -138,6 +144,23 @@
     <string name="speech_service_openai_whisper">OpenAI Whisper</string>
     <string name="speech_service_google_cloud">Google Cloud 语音转文字</string>
     
+    <!-- Photo Transfer -->
+    <string name="photo_received">已从眼镜接收照片</string>
+    <string name="photo_processing_failed">处理照片失败</string>
+    <string name="photo_transfer_failed">照片传输失败：%s</string>
+    <string name="analyzing_photo">正在分析照片…</string>
+    <string name="ai_analysis_unavailable">AI 图像分析不可用</string>
+    <string name="photo_analysis_failed">照片分析失败：%s</string>    <string name="preparing_analysis">准备分析中…</string>
+    <string name="unable_to_read_photo">无法读取照片数据</string>
+    <string name="calling_ai_analysis">正在调用 AI 进行分析…</string>
+    <string name="analyzing_image">正在分析图像…</string>    
+    <!-- Camera Capture -->
+    <string name="camera_capture">眼镜相机</string>
+    <string name="camera_capture_hint">从眼镜拍照并使用 AI 分析</string>
+    <string name="capture">拍摄</string>
+    <string name="latest_photo">最新照片</string>
+    <string name="photo_not_found">找不到照片</string>
+    
     <!-- Conversation History (New) -->
     <string name="new_conversation">新对话</string>
     <string name="no_conversations">暂无对话记录</string>
@@ -157,4 +180,43 @@
     <string name="start_chatting">开始与 AI 聊天</string>
     <string name="type_message">输入消息…</string>
     <string name="send">发送</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">首页</string>
+    <string name="nav_gallery">相册</string>
+    <string name="nav_chat">聊天</string>
+    <string name="nav_settings">设置</string>
+    
+    <!-- Photo Gallery -->
+    <string name="gallery_empty">暂无照片</string>
+    <string name="gallery_empty_hint">从眼镜拍摄的照片将显示在这里</string>
+    <string name="gallery_photo_count">%d 张照片</string>
+    <string name="gallery_selected_count">已选择 %d 项</string>
+    <string name="gallery_select_all">全选</string>
+    <string name="gallery_clear_all">清除所有照片</string>
+    <string name="gallery_clear_all_title">清除所有照片</string>
+    <string name="gallery_clear_all_message">确定要删除所有照片吗？此操作无法撤销。</string>
+    <string name="gallery_delete_title">删除照片</string>
+    <string name="gallery_delete_message">删除 %d 张已选择的照片？</string>
+    <string name="gallery_delete_single_message">确定要删除这张照片吗？</string>
+    <string name="gallery_info">照片信息</string>
+    <string name="gallery_photo_info">照片详情</string>
+    <string name="gallery_info_date">日期</string>
+    <string name="gallery_info_dimensions">尺寸</string>
+    <string name="gallery_info_size">文件大小</string>
+    <string name="gallery_info_transfer_time">传输时间</string>
+    <string name="gallery_info_analysis">AI 分析</string>
+    <string name="gallery_load_error">无法加载照片</string>
+    <string name="share">分享</string>
+    <string name="close">关闭</string>
+    
+    <!-- Home Screen -->
+    <string name="home_welcome">欢迎使用 Rokid AI</string>
+    <string name="home_subtitle">您的智能眼镜智能助手</string>
+    <string name="quick_actions">快捷操作</string>
+    <string name="glasses_status">眼镜状态</string>
+    <string name="ai_status">AI 状态</string>
+    <string name="current_model">当前模型</string>
+    <string name="home_current_session">當前會話</string>
+    <string name="home_view_all">查看全部</string>
 </resources>

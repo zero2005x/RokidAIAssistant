@@ -380,6 +380,8 @@ class BluetoothSppManager(
                             MessageType.VOICE_START -> {
                                 audioBuffer.clear()
                                 Log.d(TAG, "Voice recording started")
+                                // Emit to flow so service/UI can be notified
+                                _messageFlow.emit(message)
                             }
                             MessageType.VOICE_DATA -> {
                                 message.binaryData?.let { audioBuffer.add(it) }

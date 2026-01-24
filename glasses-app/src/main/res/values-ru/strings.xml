@@ -18,6 +18,7 @@
     <string name="pair_device_hint">Выполните сопряжение телефона в настройках системы</string>
     <string name="unknown_device">Неизвестное устройство</string>
     <string name="cancel">Отмена</string>
+    <string name="recommended">Рекомендуется</string>
     
     <!-- Display Messages -->
     <string name="not_connected">Не подключено к телефону\nВыберите устройство</string>

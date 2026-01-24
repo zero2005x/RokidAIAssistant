@@ -54,7 +54,10 @@
     <string name="select_ai_provider">Select AI Provider</string>
     <string name="select_model">Select Model</string>
     <string name="select_speech_service">Select Speech Recognition Service</string>
-    <string name="supports_audio">✓ Supports Audio</string>
+    <string name="supports_audio">Audio</string>
+    <string name="supports_vision">Vision</string>
+    <string name="no_speech_support">No Audio</string>
+    <string name="no_vision_support">No Vision</string>
     
     <!-- API Key Validation -->
     <string name="api_key_required">API Key Required</string>
@@ -79,6 +82,9 @@
     <!-- Conversation -->
     <string name="conversation_history">Conversation History</string>
     <string name="no_conversation_history">No conversation history</string>
+    <string name="export_conversation">Export Conversation</string>
+    <string name="more_options">More options</string>
+    <string name="voice_session_title">Voice Session - %s</string>
     
     <!-- Misc -->
     <string name="show">Show</string>
@@ -145,6 +151,11 @@
     <string name="analyzing_photo">Analyzing photo…</string>
     <string name="ai_analysis_unavailable">AI image analysis not available</string>
     <string name="photo_analysis_failed">Photo analysis failed: %s</string>
+    <string name="preparing_analysis">Preparing for analysis…</string>
+    <string name="unable_to_read_photo">Unable to read photo data</string>
+    <string name="calling_ai_analysis">Calling AI for analysis…</string>
+    <string name="analyzing_image">Analyzing image…</string>
+    <string name="analysis_failed">Analysis failed</string>
     
     <!-- Camera Capture -->
     <string name="camera_capture">Glasses Camera</string>
@@ -172,4 +183,43 @@
     <string name="start_chatting">Start chatting with AI</string>
     <string name="type_message">Type a message…</string>
     <string name="send">Send</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_gallery">Gallery</string>
+    <string name="nav_chat">Chat</string>
+    <string name="nav_settings">Settings</string>
+    
+    <!-- Photo Gallery -->
+    <string name="gallery_empty">No photos yet</string>
+    <string name="gallery_empty_hint">Photos captured from your glasses will appear here</string>
+    <string name="gallery_photo_count">%d photos</string>
+    <string name="gallery_selected_count">%d selected</string>
+    <string name="gallery_select_all">Select All</string>
+    <string name="gallery_clear_all">Clear All Photos</string>
+    <string name="gallery_clear_all_title">Clear All Photos</string>
+    <string name="gallery_clear_all_message">Are you sure you want to delete all photos? This action cannot be undone.</string>
+    <string name="gallery_delete_title">Delete Photo</string>
+    <string name="gallery_delete_message">Delete %d selected photo(s)?</string>
+    <string name="gallery_delete_single_message">Are you sure you want to delete this photo?</string>
+    <string name="gallery_info">Photo Info</string>
+    <string name="gallery_photo_info">Photo Details</string>
+    <string name="gallery_info_date">Date</string>
+    <string name="gallery_info_dimensions">Dimensions</string>
+    <string name="gallery_info_size">File Size</string>
+    <string name="gallery_info_transfer_time">Transfer Time</string>
+    <string name="gallery_info_analysis">AI Analysis</string>
+    <string name="gallery_load_error">Unable to load photo</string>
+    <string name="share">Share</string>
+    <string name="close">Close</string>
+    
+    <!-- Home Screen -->
+    <string name="home_welcome">Welcome to Rokid AI</string>
+    <string name="home_subtitle">Your intelligent assistant for smart glasses</string>
+    <string name="quick_actions">Quick Actions</string>
+    <string name="glasses_status">Glasses Status</string>
+    <string name="ai_status">AI Status</string>
+    <string name="current_model">Current Model</string>
+    <string name="home_current_session">Current Session</string>
+    <string name="home_view_all">View All</string>
 </resources>

@@ -17,13 +17,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.example.rokidphone.R
 import com.example.rokidphone.data.db.Message
 import com.example.rokidphone.data.db.MessageRole
+import com.example.rokidphone.ui.theme.AppShapeTokens
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -42,11 +42,13 @@ fun ChatScreen(
     onSendMessage: () -> Unit,
     onBack: () -> Unit,
     onClearHistory: () -> Unit,
+    onExport: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     var showClearDialog by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
     
     // Auto-scroll to bottom when new messages arrive
     LaunchedEffect(messages.size) {
@@ -73,11 +75,41 @@ fun ChatScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showClearDialog = true }) {
-                        Icon(
-                            Icons.Default.DeleteOutline,
-                            contentDescription = stringResource(R.string.clear_history)
-                        )
+                    // More options menu
+                    Box {
+                        IconButton(onClick = { showMenu = true }) {
+                            Icon(
+                                Icons.Default.MoreVert,
+                                contentDescription = stringResource(R.string.more_options)
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
+                            if (onExport != null && messages.isNotEmpty()) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.export_conversation)) },
+                                    onClick = {
+                                        showMenu = false
+                                        onExport()
+                                    },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Share, contentDescription = null)
+                                    }
+                                )
+                            }
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.clear_history)) },
+                                onClick = {
+                                    showMenu = false
+                                    showClearDialog = true
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Default.DeleteOutline, contentDescription = null)
+                                }
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -236,12 +268,7 @@ private fun MessageBubble(
         ) {
             // Message content
             Surface(
-                shape = RoundedCornerShape(
-                    topStart = 16.dp,
-                    topEnd = 16.dp,
-                    bottomStart = if (isUser) 16.dp else 4.dp,
-                    bottomEnd = if (isUser) 4.dp else 16.dp
-                ),
+                shape = if (isUser) AppShapeTokens.MessageBubbleUser else AppShapeTokens.MessageBubbleAssistant,
                 color = if (isUser) 
                     MaterialTheme.colorScheme.primary 
                 else 

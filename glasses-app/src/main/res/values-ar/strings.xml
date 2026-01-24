@@ -18,6 +18,7 @@
     <string name="pair_device_hint">يرجى إقران هاتفك في إعدادات النظام</string>
     <string name="unknown_device">جهاز غير معروف</string>
     <string name="cancel">إلغاء</string>
+    <string name="recommended">موصى به</string>
     
     <!-- Display Messages -->
     <string name="not_connected">غير متصل بالهاتف\nيرجى اختيار الجهاز</string>

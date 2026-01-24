@@ -18,6 +18,7 @@
     <string name="pair_device_hint">请在系统设置中配对您的手机</string>
     <string name="unknown_device">未知设备</string>
     <string name="cancel">取消</string>
+    <string name="recommended">推荐</string>
     
     <!-- Display Messages -->
     <string name="not_connected">未连接至手机\n请选择设备</string>

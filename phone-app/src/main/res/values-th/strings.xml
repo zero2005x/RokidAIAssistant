@@ -69,6 +69,9 @@
     <!-- Conversation -->
     <string name="conversation_history">ประวัติการสนทนา</string>
     <string name="no_conversation_history">ไม่มีประวัติการสนทนา</string>
+    <string name="export_conversation">ส่งออกการสนทนา</string>
+    <string name="more_options">ตัวเลือกเพิ่มเติม</string>
+    <string name="voice_session_title">เซสชันเสียง - %s</string>
     
     <!-- Misc -->
     <string name="show">แสดง</string>
@@ -127,4 +130,95 @@
     <string name="speech_service_gemini">การรู้จำเสียง Gemini</string>
     <string name="speech_service_openai_whisper">OpenAI Whisper</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
+    
+    <!-- Supports Vision -->
+    <string name="supports_vision">ภาพ</string>
+    <string name="no_speech_support">ไม่รองรับเสียง</string>
+    <string name="no_vision_support">ไม่รองรับภาพ</string>
+    
+    <!-- API Key Validation -->
+    <string name="api_key_required">ต้องการคีย์ API</string>
+    <string name="api_key_not_set">ยังไม่ได้กำหนดค่า</string>
+    <string name="speech_service_not_configured">บริการรู้จำเสียงยังไม่ได้กำหนดค่า กรุณากำหนดค่าคีย์ API Gemini, OpenAI, Groq หรือ xAI</string>
+    <string name="api_key_setup_hint">ไปที่การตั้งค่าเพื่อกำหนดค่าคีย์ API แอปจะใช้บริการสำรองในตัวจนกว่าจะกำหนดค่า</string>
+    <string name="go_to_settings">ไปที่การตั้งค่า</string>
+    <string name="later">ภายหลัง</string>
+    <string name="api_key_validation_failed">การตรวจสอบคีย์ API ล้มเหลว</string>
+    <string name="service_not_ready">บริการยังไม่พร้อม กรุณากำหนดค่าคีย์ API ในการตั้งค่า</string>
+    
+    <!-- Photo Transfer -->
+    <string name="photo_received">ได้รับรูปภาพจากแว่นแล้ว</string>
+    <string name="photo_processing_failed">การประมวลผลรูปภาพล้มเหลว</string>
+    <string name="photo_transfer_failed">การถ่ายโอนรูปภาพล้มเหลว: %s</string>
+    <string name="analyzing_photo">กำลังวิเคราะห์รูปภาพ…</string>
+    <string name="ai_analysis_unavailable">การวิเคราะห์ภาพ AI ไม่พร้อมใช้งาน</string>
+    <string name="photo_analysis_failed">การวิเคราะห์รูปภาพล้มเหลว: %s</string>    <string name="preparing_analysis">กำลังเตรียมการวิเคราะห์…</string>
+    <string name="unable_to_read_photo">ไม่สามารถอ่านข้อมูลรูปภาพ</string>
+    <string name="calling_ai_analysis">กำลังเรียก AI เพื่อวิเคราะห์…</string>
+    <string name="analyzing_image">กำลังวิเคราะห์ภาพ…</string>    
+    <!-- Camera Capture -->
+    <string name="camera_capture">กล้องแว่น</string>
+    <string name="camera_capture_hint">ถ่ายภาพจากแว่นและวิเคราะห์ด้วย AI</string>
+    <string name="capture">ถ่าย</string>
+    <string name="latest_photo">รูปภาพล่าสุด</string>
+    <string name="photo_not_found">ไม่พบรูปภาพ</string>
+    
+    <!-- Conversation History (New) -->
+    <string name="new_conversation">การสนทนาใหม่</string>
+    <string name="no_conversations">ยังไม่มีการสนทนา</string>
+    <string name="start_new_conversation">เริ่มการสนทนาใหม่</string>
+    <string name="pinned">ปักหมุด</string>
+    <string name="recent">ล่าสุด</string>
+    <string name="delete_conversation">ลบการสนทนา</string>
+    <string name="delete_conversation_confirm">คุณแน่ใจหรือไม่ว่าต้องการลบการสนทนานี้? การดำเนินการนี้ไม่สามารถยกเลิกได้</string>
+    <string name="delete">ลบ</string>
+    <string name="pin">ปักหมุด</string>
+    <string name="unpin">เลิกปักหมุด</string>
+    <string name="archive">เก็บถาวร</string>
+    <string name="unarchive">เลิกเก็บถาวร</string>
+    <string name="clear_history">ล้างประวัติ</string>
+    <string name="clear_history_confirm">คุณแน่ใจหรือไม่ว่าต้องการล้างข้อความทั้งหมดในการสนทนานี้?</string>
+    <string name="clear">ล้าง</string>
+    <string name="start_chatting">เริ่มแชทกับ AI</string>
+    <string name="type_message">พิมพ์ข้อความ…</string>
+    <string name="send">ส่ง</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">หน้าหลัก</string>
+    <string name="nav_gallery">แกลเลอรี</string>
+    <string name="nav_chat">แชท</string>
+    <string name="nav_settings">การตั้งค่า</string>
+    
+    <!-- Photo Gallery -->
+    <string name="gallery_empty">ยังไม่มีรูปภาพ</string>
+    <string name="gallery_empty_hint">รูปภาพที่ถ่ายจากแว่นของคุณจะปรากฏที่นี่</string>
+    <string name="gallery_photo_count">%d รูปภาพ</string>
+    <string name="gallery_selected_count">เลือก %d รายการ</string>
+    <string name="gallery_select_all">เลือกทั้งหมด</string>
+    <string name="gallery_clear_all">ลบรูปภาพทั้งหมด</string>
+    <string name="gallery_clear_all_title">ลบรูปภาพทั้งหมด</string>
+    <string name="gallery_clear_all_message">คุณแน่ใจหรือไม่ว่าต้องการลบรูปภาพทั้งหมด? การดำเนินการนี้ไม่สามารถยกเลิกได้</string>
+    <string name="gallery_delete_title">ลบรูปภาพ</string>
+    <string name="gallery_delete_message">ลบ %d รูปภาพที่เลือก?</string>
+    <string name="gallery_delete_single_message">คุณแน่ใจหรือไม่ว่าต้องการลบรูปภาพนี้?</string>
+    <string name="gallery_info">ข้อมูลรูปภาพ</string>
+    <string name="gallery_photo_info">รายละเอียดรูปภาพ</string>
+    <string name="gallery_info_date">วันที่</string>
+    <string name="gallery_info_dimensions">ขนาด</string>
+    <string name="gallery_info_size">ขนาดไฟล์</string>
+    <string name="gallery_info_transfer_time">เวลาถ่ายโอน</string>
+    <string name="gallery_info_analysis">การวิเคราะห์ AI</string>
+    <string name="gallery_load_error">ไม่สามารถโหลดรูปภาพได้</string>
+    <string name="share">แชร์</string>
+    <string name="close">ปิด</string>
+    
+    <!-- Home Screen -->
+    <string name="home_welcome">ยินดีต้อนรับสู่ Rokid AI</string>
+    <string name="home_subtitle">ผู้ช่วยอัจฉริยะสำหรับแว่นอัจฉริยะของคุณ</string>
+    <string name="quick_actions">การดำเนินการด่วน</string>
+    <string name="glasses_status">สถานะแว่น</string>
+    <string name="ai_status">สถานะ AI</string>
+    <string name="current_model">โมเดลปัจจุบัน</string>
+    <string name="home_current_session">เซสชันปัจจุบัน</string>
+    <string name="home_view_all">ดูทั้งหมด</string>
 </resources>

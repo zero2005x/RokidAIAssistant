@@ -8,12 +8,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * CXR-S SDK Service Manager (眼镜端)
+ * CXR-S SDK Service Manager (Glasses Side)
  * 
- * 封装 CXRServiceBridge，用于：
- * - 监听手机端连接状态
- * - 订阅手机端消息
- * - 向手机端发送消息
+ * Wraps CXRServiceBridge for:
+ * - Listening to phone side connection status
+ * - Subscribing to phone side messages
+ * - Sending messages to phone side
  * 
  * SDK Package: com.rokid.cxr:cxr-service-bridge
  */
@@ -22,13 +22,13 @@ class CxrServiceManager {
     companion object {
         private const val TAG = "CxrServiceManager"
         
-        // 消息通道名称（需与手机端约定一致）
+        // Message channel name (must match phone side)
         const val CHANNEL_PHOTO_REQUEST = "photo_request"
         const val CHANNEL_PHOTO_RESULT = "photo_result"
         const val CHANNEL_AI_EVENT = "ai_event"
         const val CHANNEL_STATUS = "status"
         
-        // 检查 SDK 是否可用
+        // Check if SDK is available
         fun isSdkAvailable(): Boolean {
             return try {
                 Class.forName("com.rokid.cxr.CXRServiceBridge")
@@ -50,7 +50,7 @@ class CxrServiceManager {
         }
     }
     
-    // 连接状态
+    // Connection state
     sealed class ConnectionState {
         object Disconnected : ConnectionState()
         data class Connected(val deviceName: String, val deviceType: Int) : ConnectionState()
@@ -59,20 +59,20 @@ class CxrServiceManager {
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
     
-    // ARTC 健康度
+    // ARTC health
     private val _artcHealth = MutableStateFlow(0f)
     val artcHealth: StateFlow<Float> = _artcHealth.asStateFlow()
     
-    // 消息回调
+    // Message callback
     private var onMessageReceived: ((name: String, args: Caps?, data: ByteArray?) -> Unit)? = null
     private var onMessageWithReply: ((name: String, args: Caps?, data: ByteArray?, reply: CXRServiceBridge.Reply?) -> Unit)? = null
     
-    // CXR Service Bridge 实例
+    // CXR Service Bridge instance
     private val cxrBridge: CXRServiceBridge by lazy {
         CXRServiceBridge()
     }
     
-    // 连接状态监听
+    // Connection state listener
     private val statusListener = object : CXRServiceBridge.StatusListener {
         override fun onConnected(name: String, type: Int) {
             Log.d(TAG, "Connected to device: $name, type: $type")
@@ -91,7 +91,7 @@ class CxrServiceManager {
     }
     
     /**
-     * 初始化服务
+     * Initialize service
      */
     fun initialize(): Boolean {
         return try {
@@ -100,7 +100,7 @@ class CxrServiceManager {
                 return false
             }
             
-            // 设置状态监听
+            // Set state listener
             cxrBridge.setStatusListener(statusListener)
             Log.d(TAG, "CxrServiceManager initialized")
             true
@@ -111,7 +111,7 @@ class CxrServiceManager {
     }
     
     /**
-     * 订阅普通消息
+     * Subscribe to regular messages
      */
     fun subscribe(channelName: String, callback: (name: String, args: Caps?, data: ByteArray?) -> Unit): Int {
         onMessageReceived = callback
@@ -129,7 +129,7 @@ class CxrServiceManager {
     }
     
     /**
-     * 订阅可回复消息
+     * Subscribe to messages with reply
      */
     fun subscribeWithReply(
         channelName: String, 
@@ -150,7 +150,7 @@ class CxrServiceManager {
     }
     
     /**
-     * 发送基础消息
+     * Send basic message
      */
     fun sendMessage(channelName: String, args: Caps): Int {
         val result = cxrBridge.sendMessage(channelName, args)
@@ -159,7 +159,7 @@ class CxrServiceManager {
     }
     
     /**
-     * 发送二进制消息
+     * Send binary message
      */
     fun sendMessage(channelName: String, args: Caps, data: ByteArray): Int {
         val result = cxrBridge.sendMessage(channelName, args, data, 0, data.size)
@@ -168,7 +168,7 @@ class CxrServiceManager {
     }
     
     /**
-     * 发送照片数据到手机端
+     * Send photo data to phone side
      */
     fun sendPhotoToPhone(photoData: ByteArray, fileName: String = "photo.webp"): Boolean {
         return try {
@@ -185,7 +185,7 @@ class CxrServiceManager {
     }
     
     /**
-     * 发送状态消息
+     * Send status message
      */
     fun sendStatus(status: String): Boolean {
         return try {
@@ -201,12 +201,12 @@ class CxrServiceManager {
     }
     
     /**
-     * 释放资源
+     * Release resources
      */
     fun release() {
         try {
             Log.d(TAG, "Releasing CxrServiceManager")
-            // SDK 会自动清理
+            // SDK will clean up automatically
         } catch (e: Exception) {
             Log.e(TAG, "Error releasing CxrServiceManager", e)
         }

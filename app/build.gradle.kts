@@ -1,4 +1,5 @@
 import java.util.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
@@ -6,7 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-// 從 local.properties 讀取敏感資訊
+// Read sensitive information from local.properties
 val localProperties = Properties()
 val localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
@@ -15,7 +16,7 @@ if (localPropertiesFile.exists()) {
 
 android {
     namespace = "com.example.rokidaiassistant"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.rokidaiassistant"
@@ -45,17 +46,26 @@ android {
     }
     
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    
-    kotlinOptions {
-        jvmTarget = "11"
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+    
+    // 16KB page alignment for Android 15+ compatibility
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 
@@ -63,13 +73,13 @@ dependencies {
     // ========================================
     // Rokid CXR SDK
     // ========================================
-    // 注意：真正的 SDK 需要從 Rokid 官方獲取
-    // 目前使用 app/src/main/java/.../sdk/CxrApi.kt 模擬實作
-    // 取得真正 SDK 後，取消下行註釋並刪除模擬實作
+    // Note: The actual SDK needs to be obtained from Rokid officially
+    // Currently using app/src/main/java/.../sdk/CxrApi.kt mock implementation
+    // After obtaining the real SDK, uncomment the line below and remove the mock implementation
      implementation("com.rokid.cxr:client-m:1.0.4")
     
     // ========================================
-    // 網路請求
+    // Network requests
     // ========================================
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")

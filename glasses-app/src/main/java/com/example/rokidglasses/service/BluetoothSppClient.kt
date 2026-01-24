@@ -176,23 +176,19 @@ class BluetoothSppClient(
     
     /**
      * Create socket using different methods based on attempt number
-     * Tries multiple approaches: Direct channel (fastest) then UUID-based (SDP lookup)
-     * Based on logs, reflection channel 4 has highest success rate
+     * Prioritizes UUID-based methods (proper SDP lookup) for reliable channel discovery
+     * Falls back to direct channel methods only if UUID methods fail
      */
     @SuppressLint("MissingPermission")
     private fun createSocket(device: BluetoothDevice, attempt: Int): BluetoothSocket? {
-        // Prioritize direct channel connections (fastest and most reliable based on logs)
-        // Then fallback to UUID-based methods (relies on SDP)
+        // Prioritize UUID-based methods (uses SDP to find correct channel)
+        // Direct channel methods are unreliable after reconnection
         
         return when (attempt) {
             1 -> {
-                // Method 1: Direct channel 4 (most successful based on logs)
-                Log.d(TAG, "Attempt 1: Using reflection with channel 4")
-                tryReflectionChannel(device, 4)
-            }
-            2 -> {
-                // Method 2: Insecure RFCOMM with UUID (matches server's insecure mode)
-                Log.d(TAG, "Attempt 2: Using createInsecureRfcommSocketToServiceRecord")
+                // Method 1: Insecure RFCOMM with UUID (matches server's insecure mode)
+                // This uses SDP to discover the correct channel dynamically
+                Log.d(TAG, "Attempt 1: Using createInsecureRfcommSocketToServiceRecord (UUID-based)")
                 try {
                     device.createInsecureRfcommSocketToServiceRecord(SERVICE_UUID)
                 } catch (e: Exception) {
@@ -200,15 +196,20 @@ class BluetoothSppClient(
                     null
                 }
             }
-            3 -> {
-                // Method 3: Standard secure RFCOMM with UUID
-                Log.d(TAG, "Attempt 3: Using createRfcommSocketToServiceRecord")
+            2 -> {
+                // Method 2: Standard secure RFCOMM with UUID
+                Log.d(TAG, "Attempt 2: Using createRfcommSocketToServiceRecord (UUID-based)")
                 try {
                     device.createRfcommSocketToServiceRecord(SERVICE_UUID)
                 } catch (e: Exception) {
                     Log.w(TAG, "Secure UUID method failed: ${e.message}")
                     null
                 }
+            }
+            3 -> {
+                // Method 3: Direct channel 4 (fallback if UUID methods fail)
+                Log.d(TAG, "Attempt 3: Using reflection with channel 4")
+                tryReflectionChannel(device, 4)
             }
             4 -> {
                 // Method 4: Direct channel 1 (common fallback)

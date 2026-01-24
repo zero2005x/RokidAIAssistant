@@ -1,4 +1,5 @@
 import java.util.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
@@ -8,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.example.rokidglasses"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.rokidglasses"
@@ -19,7 +20,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // API Keys - 從 local.properties 讀取，不要硬編碼
+        // API Keys - Read from local.properties, do not hardcode
         val localProps = rootProject.file("local.properties")
         val props = Properties().apply {
             if (localProps.exists()) {
@@ -50,10 +51,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     buildFeatures {
         compose = true
         buildConfig = true
@@ -64,10 +61,20 @@ android {
     }
     
     // Package local AAR files (for Rokid CXR SDK)
+    // 16KB page alignment for Android 15+ compatibility
     packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 
@@ -77,13 +84,13 @@ dependencies {
     // Common module
     implementation(project(":common"))
     
-    // AndroidX Core (輕量化)
+    // AndroidX Core (lightweight)
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
     
-    // Compose (僅基本元件)
+    // Compose (basic components only)
     implementation(platform("androidx.compose:compose-bom:2024.02.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
@@ -104,8 +111,8 @@ dependencies {
     // Bluetooth
     implementation("androidx.bluetooth:bluetooth:1.0.0-alpha02")
     
-    // Rokid CXR-S SDK (眼镜端 Service SDK - via Maven)
-    // 用于接收手机端消息、发送数据
+    // Rokid CXR-S SDK (Glasses Service SDK - via Maven)
+    // Used for receiving phone messages and sending data
     implementation("com.rokid.cxr:cxr-service-bridge:1.0-20250519.061355-45")
     
     // Debug

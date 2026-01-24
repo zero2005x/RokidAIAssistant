@@ -18,6 +18,7 @@
     <string name="pair_device_hint">Vui lòng ghép nối điện thoại trong cài đặt hệ thống</string>
     <string name="unknown_device">Thiết bị không xác định</string>
     <string name="cancel">Hủy</string>
+    <string name="recommended">Đề xuất</string>
     
     <!-- Display Messages -->
     <string name="not_connected">Chưa kết nối với điện thoại\nVui lòng chọn thiết bị</string>

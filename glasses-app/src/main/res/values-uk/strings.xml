@@ -18,6 +18,7 @@
     <string name="pair_device_hint">Сполучіть телефон у налаштуваннях системи</string>
     <string name="unknown_device">Невідомий пристрій</string>
     <string name="cancel">Скасувати</string>
+    <string name="recommended">Рекомендовано</string>
     
     <!-- Display Messages -->
     <string name="not_connected">Не підключено до телефону\nВиберіть пристрій</string>

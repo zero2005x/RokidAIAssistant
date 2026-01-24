@@ -350,15 +350,21 @@ fun SettingsSection(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(12.dp))
             content()
@@ -372,27 +378,38 @@ fun SettingsRow(
     subtitle: String,
     onClick: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    androidx.compose.material3.Surface(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        shape = MaterialTheme.shapes.small,
+        color = MaterialTheme.colorScheme.surface
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = MaterialTheme.typography.bodyLarge)
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp, horizontal = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title, 
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
             )
         }
-        Icon(
-            imageVector = Icons.Default.ChevronRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
     }
 }
 
@@ -504,19 +521,44 @@ fun ModelSelectionDialog(
                             onClick = { onSelect(model.id) }
                         )
                         Spacer(modifier = Modifier.width(12.dp))
-                        Column {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(model.displayName)
                             Text(
                                 text = model.description,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            if (model.supportsAudio) {
-                                Text(
-                                    text = stringResource(R.string.supports_audio),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
+                            // Show capability badges
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.padding(top = 4.dp)
+                            ) {
+                                if (model.supportsAudio) {
+                                    CapabilityBadge(
+                                        icon = Icons.Default.Mic,
+                                        text = stringResource(R.string.supports_audio),
+                                        isSupported = true
+                                    )
+                                } else {
+                                    CapabilityBadge(
+                                        icon = Icons.Default.MicOff,
+                                        text = stringResource(R.string.no_speech_support),
+                                        isSupported = false
+                                    )
+                                }
+                                if (model.supportsVision) {
+                                    CapabilityBadge(
+                                        icon = Icons.Default.Image,
+                                        text = stringResource(R.string.supports_vision),
+                                        isSupported = true
+                                    )
+                                } else {
+                                    CapabilityBadge(
+                                        icon = Icons.Default.HideImage,
+                                        text = stringResource(R.string.no_vision_support),
+                                        isSupported = false
+                                    )
+                                }
                             }
                         }
                     }
@@ -529,6 +571,39 @@ fun ModelSelectionDialog(
             }
         }
     )
+}
+
+/**
+ * Badge to indicate model capability support
+ */
+@Composable
+private fun CapabilityBadge(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    text: String,
+    isSupported: Boolean
+) {
+    val color = if (isSupported) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.outline
+    }
+    
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = text,
+            modifier = Modifier.size(12.dp),
+            tint = color
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            color = color
+        )
+    }
 }
 
 @Composable

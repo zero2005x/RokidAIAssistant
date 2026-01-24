@@ -18,6 +18,7 @@
     <string name="pair_device_hint">システム設定でスマートフォンをペアリングしてください</string>
     <string name="unknown_device">不明なデバイス</string>
     <string name="cancel">キャンセル</string>
+    <string name="recommended">おすすめ</string>
     
     <!-- Display Messages -->
     <string name="not_connected">スマートフォンに未接続\nデバイスを選択してください</string>

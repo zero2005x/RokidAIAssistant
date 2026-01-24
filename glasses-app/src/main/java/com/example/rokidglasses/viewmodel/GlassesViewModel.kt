@@ -47,6 +47,8 @@ data class GlassesUiState(
     val bluetoothState: BluetoothClientState = BluetoothClientState.DISCONNECTED,
     val connectedDeviceName: String? = null,
     val availableDevices: List<BluetoothDevice> = emptyList(),
+    // CXR connected phone name (to help identify correct SPP device)
+    val cxrConnectedPhoneName: String? = null,
     // Photo capture state
     val isCapturingPhoto: Boolean = false,
     val photoTransferProgress: Float = 0f
@@ -89,11 +91,11 @@ class GlassesViewModel(
     private val bluetoothClient = BluetoothSppClient(context, viewModelScope)
     
     // Camera manager for photo capture
-    // 眼镜端使用 Camera2 API 直接访问本地相机（不再使用 CXR-M SDK）
-    // CXR-M SDK 是手机端用来远程控制眼镜相机的
+    // Glasses use Camera2 API to directly access local camera (no longer using CXR-M SDK)
+    // CXR-M SDK is for phone side to remotely control glasses camera
     private var cameraManager: UnifiedCameraManager? = null
     
-    // CXR-S SDK 服务管理器（用于与手机端通信）
+    // CXR-S SDK service manager (for communication with phone)
     private var cxrServiceManager: CxrServiceManager? = null
     
     // Photo transfer protocol
@@ -109,8 +111,8 @@ class GlassesViewModel(
     }
     
     /**
-     * 初始化 CXR-S SDK 服务（眼镜端）
-     * 用于接收手机端的消息和命令
+     * Initialize CXR-S SDK service (Glasses Side)
+     * Used to receive messages and commands from phone side
      */
     private fun initializeCxrService() {
         if (CxrServiceManager.isSdkAvailable()) {
@@ -119,15 +121,18 @@ class GlassesViewModel(
             Log.d(TAG, "CXR-S Service initialized: $initialized")
             
             if (initialized) {
-                // 监听连接状态
+                // Listen for connection state
                 viewModelScope.launch {
                     cxrServiceManager?.connectionState?.collect { state ->
                         when (state) {
                             is CxrServiceManager.ConnectionState.Connected -> {
                                 Log.d(TAG, "CXR connected to: ${state.deviceName}")
+                                // Store CXR-connected phone name for SPP device selection
+                                _uiState.update { it.copy(cxrConnectedPhoneName = state.deviceName) }
                             }
                             is CxrServiceManager.ConnectionState.Disconnected -> {
                                 Log.d(TAG, "CXR disconnected")
+                                _uiState.update { it.copy(cxrConnectedPhoneName = null) }
                             }
                         }
                     }
@@ -140,11 +145,11 @@ class GlassesViewModel(
     
     private fun initializeCamera() {
         viewModelScope.launch {
-            // 眼镜端直接使用 Camera2 API（不再依赖 CXR-M SDK）
-            // CXR-M SDK 的相机功能是给手机端用来远程控制眼镜相机的
+            // Glasses directly use Camera2 API (no longer depends on CXR-M SDK)
+            // CXR-M SDK camera functionality is for phone side to remotely control glasses camera
             cameraManager = UnifiedCameraManager(
                 context = context,
-                preferredMode = CameraMode.CAMERA2  // 直接使用本地 Camera2 API
+                preferredMode = CameraMode.CAMERA2  // Use local Camera2 API directly
             )
             
             val result = cameraManager?.initialize()

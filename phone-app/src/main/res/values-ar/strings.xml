@@ -2,6 +2,7 @@
 <resources>
     <!-- App Info -->
     <string name="app_name">مساعد Rokid AI</string>
+    <string name="app_title">مساعد Rokid AI (الهاتف)</string>
     
     <!-- Service Status -->
     <string name="service_running">الخدمة قيد التشغيل</string>
@@ -11,10 +12,14 @@
     <string name="connected">متصل</string>
     <string name="disconnected">غير متصل</string>
     <string name="connecting">جارٍ الاتصال…</string>
+    <string name="reconnecting">جارٍ إعادة الاتصال…</string>
+    <string name="connection_error">خطأ في الاتصال</string>
     
     <!-- Actions -->
     <string name="start_service">بدء الخدمة</string>
     <string name="stop_service">إيقاف الخدمة</string>
+    <string name="start">بدء</string>
+    <string name="stop">إيقاف</string>
     <string name="connect">اتصال</string>
     <string name="disconnect">قطع الاتصال</string>
     <string name="save">حفظ</string>
@@ -29,10 +34,12 @@
     <string name="ai_model">نموذج الذكاء الاصطناعي</string>
     <string name="api_keys">مفاتيح API</string>
     <string name="speech_recognition">التعرف على الصوت</string>
+    <string name="speech_recognition_service">خدمة التعرف على الصوت</string>
     <string name="speech_service">خدمة الصوت</string>
     <string name="advanced_settings">الإعدادات المتقدمة</string>
     <string name="system_prompt">موجه النظام</string>
     <string name="system_prompt_hint">أدخل موجه نظام الذكاء الاصطناعي…</string>
+    <string name="enter_system_prompt">أدخل موجه نظام الذكاء الاصطناعي…</string>
     
     <!-- Language Settings -->
     <string name="language_settings">اللغة</string>
@@ -44,7 +51,23 @@
     <string name="settings_complete">اكتمل الإعداد، جاهز للاستخدام</string>
     <string name="please_enter_api_key">يرجى إدخال مفتاح API لـ %s</string>
     <string name="select_provider">اختر المزود</string>
+    <string name="select_ai_provider">اختر مزود الذكاء الاصطناعي</string>
     <string name="select_model">اختر النموذج</string>
+    <string name="select_speech_service">اختر خدمة التعرف على الصوت</string>
+    <string name="supports_audio">صوت</string>
+    <string name="supports_vision">رؤية</string>
+    <string name="no_speech_support">لا يدعم الصوت</string>
+    <string name="no_vision_support">لا يدعم الرؤية</string>
+    
+    <!-- API Key Validation -->
+    <string name="api_key_required">مفتاح API مطلوب</string>
+    <string name="api_key_not_set">غير مُعد</string>
+    <string name="speech_service_not_configured">لم يتم إعداد خدمة التعرف على الصوت. يرجى إعداد مفتاح API لـ Gemini أو OpenAI أو Groq أو xAI.</string>
+    <string name="api_key_setup_hint">انتقل إلى الإعدادات لإعداد مفاتيح API. سيستخدم التطبيق الخدمة الاحتياطية حتى يتم الإعداد.</string>
+    <string name="go_to_settings">انتقل إلى الإعدادات</string>
+    <string name="later">لاحقاً</string>
+    <string name="api_key_validation_failed">فشل التحقق من مفتاح API</string>
+    <string name="service_not_ready">الخدمة غير جاهزة. يرجى إعداد مفاتيح API في الإعدادات.</string>
     
     <!-- AI Processing -->
     <string name="processing_voice">جارٍ معالجة الصوت…</string>
@@ -54,13 +77,24 @@
     <string name="service_unavailable">خدمة الذكاء الاصطناعي غير متاحة مؤقتاً</string>
     <string name="network_error">فشل الاتصال بالشبكة، يرجى التحقق من الإعدادات</string>
     <string name="connection_timeout">انتهت مهلة الاتصال، يرجى المحاولة لاحقاً</string>
+    <string name="ready">جاهز</string>
+    
+    <!-- Conversation -->
+    <string name="conversation_history">سجل المحادثة</string>
+    <string name="no_conversation_history">لا يوجد سجل محادثة</string>
+    <string name="export_conversation">تصدير المحادثة</string>
+    <string name="more_options">المزيد من الخيارات</string>
+    <string name="voice_session_title">جلسة صوتية - %s</string>
     
     <!-- Misc -->
     <string name="show">إظهار</string>
     <string name="hide">إخفاء</string>
     <string name="in_use">قيد الاستخدام</string>
-
-    <!-- Custom Provider Settings -->
+    
+    <!-- API Keys -->
+    <string name="gemini_api_key">مفتاح API Gemini</string>
+    <string name="openai_api_key">مفتاح API OpenAI</string>
+    <string name="anthropic_api_key">مفتاح API Anthropic</string>
     <string name="deepseek_api_key">مفتاح API DeepSeek</string>
     <string name="groq_api_key">مفتاح API Groq</string>
     <string name="xai_api_key">مفتاح API xAI</string>
@@ -70,6 +104,8 @@
     <string name="baidu_secret_key">المفتاح السري Baidu</string>
     <string name="perplexity_api_key">مفتاح API Perplexity</string>
     <string name="custom_api_key">مفتاح API مخصص (اختياري)</string>
+    
+    <!-- Custom Provider Settings -->
     <string name="custom_provider_settings">إعدادات المزود المخصص</string>
     <string name="base_url">عنوان URL الأساسي</string>
     <string name="base_url_hint">مثال: http://localhost:11434/v1/</string>
@@ -82,6 +118,13 @@
     <string name="connection_failed">فشل الاتصال: %s</string>
     <string name="invalid_url">صيغة URL غير صالحة. استخدم http:// أو https://</string>
     <string name="api_key_optional">مفتاح API اختياري للنماذج المحلية</string>
+    
+    <!-- Notification & Status -->
+    <string name="glasses_recording">النظارات تسجل...</string>
+    <string name="recognizing_speech">التعرف على الكلام...</string>
+    <string name="processing_failed">فشلت المعالجة: %s</string>
+    <string name="waiting_glasses">في انتظار اتصال النظارات...</string>
+    <string name="connected_glasses">متصل بالنظارات</string>
     
     <!-- AI Provider Names -->
     <string name="provider_gemini">Google Gemini</string>
@@ -100,4 +143,82 @@
     <string name="speech_service_gemini">التعرف على الصوت Gemini</string>
     <string name="speech_service_openai_whisper">OpenAI Whisper</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
+    
+    <!-- Photo Transfer -->
+    <string name="photo_received">تم استلام صورة من النظارات</string>
+    <string name="photo_processing_failed">فشل معالجة الصورة</string>
+    <string name="photo_transfer_failed">فشل نقل الصورة: %s</string>
+    <string name="analyzing_photo">جارٍ تحليل الصورة…</string>
+    <string name="ai_analysis_unavailable">تحليل الصور بالذكاء الاصطناعي غير متاح</string>
+    <string name="photo_analysis_failed">فشل تحليل الصورة: %s</string>
+    <string name="preparing_analysis">جارٍ التحضير للتحليل…</string>
+    <string name="unable_to_read_photo">تعذر قراءة بيانات الصورة</string>
+    <string name="calling_ai_analysis">جارٍ استدعاء الذكاء الاصطناعي للتحليل…</string>
+    <string name="analyzing_image">جارٍ تحليل الصورة…</string>
+    
+    <!-- Camera Capture -->
+    <string name="camera_capture">كاميرا النظارات</string>
+    <string name="camera_capture_hint">التقط صورة من النظارات وحللها بالذكاء الاصطناعي</string>
+    <string name="capture">التقاط</string>
+    <string name="latest_photo">آخر صورة</string>
+    <string name="photo_not_found">لم يتم العثور على الصورة</string>
+    
+    <!-- Conversation History (New) -->
+    <string name="new_conversation">محادثة جديدة</string>
+    <string name="no_conversations">لا توجد محادثات بعد</string>
+    <string name="start_new_conversation">ابدأ محادثة جديدة</string>
+    <string name="pinned">مثبت</string>
+    <string name="recent">الأخيرة</string>
+    <string name="delete_conversation">حذف المحادثة</string>
+    <string name="delete_conversation_confirm">هل أنت متأكد من حذف هذه المحادثة؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="delete">حذف</string>
+    <string name="pin">تثبيت</string>
+    <string name="unpin">إلغاء التثبيت</string>
+    <string name="archive">أرشفة</string>
+    <string name="unarchive">إلغاء الأرشفة</string>
+    <string name="clear_history">مسح السجل</string>
+    <string name="clear_history_confirm">هل أنت متأكد من مسح جميع الرسائل في هذه المحادثة؟</string>
+    <string name="clear">مسح</string>
+    <string name="start_chatting">ابدأ الدردشة مع الذكاء الاصطناعي</string>
+    <string name="type_message">اكتب رسالة…</string>
+    <string name="send">إرسال</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_gallery">المعرض</string>
+    <string name="nav_chat">الدردشة</string>
+    <string name="nav_settings">الإعدادات</string>
+    
+    <!-- Photo Gallery -->
+    <string name="gallery_empty">لا توجد صور بعد</string>
+    <string name="gallery_empty_hint">ستظهر الصور الملتقطة من نظاراتك هنا</string>
+    <string name="gallery_photo_count">%d صورة</string>
+    <string name="gallery_selected_count">%d محددة</string>
+    <string name="gallery_select_all">تحديد الكل</string>
+    <string name="gallery_clear_all">مسح جميع الصور</string>
+    <string name="gallery_clear_all_title">مسح جميع الصور</string>
+    <string name="gallery_clear_all_message">هل أنت متأكد من حذف جميع الصور؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="gallery_delete_title">حذف الصورة</string>
+    <string name="gallery_delete_message">حذف %d صورة محددة؟</string>
+    <string name="gallery_delete_single_message">هل أنت متأكد من حذف هذه الصورة؟</string>
+    <string name="gallery_info">معلومات الصورة</string>
+    <string name="gallery_photo_info">تفاصيل الصورة</string>
+    <string name="gallery_info_date">التاريخ</string>
+    <string name="gallery_info_dimensions">الأبعاد</string>
+    <string name="gallery_info_size">حجم الملف</string>
+    <string name="gallery_info_transfer_time">وقت النقل</string>
+    <string name="gallery_info_analysis">تحليل الذكاء الاصطناعي</string>
+    <string name="gallery_load_error">تعذر تحميل الصورة</string>
+    <string name="share">مشاركة</string>
+    <string name="close">إغلاق</string>
+    
+    <!-- Home Screen -->
+    <string name="home_welcome">مرحباً بك في Rokid AI</string>
+    <string name="home_subtitle">مساعدك الذكي للنظارات الذكية</string>
+    <string name="quick_actions">إجراءات سريعة</string>
+    <string name="glasses_status">حالة النظارات</string>
+    <string name="ai_status">حالة الذكاء الاصطناعي</string>
+    <string name="current_model">النموذج الحالي</string>
+    <string name="home_current_session">الجلسة الحالية</string>
+    <string name="home_view_all">عرض الكل</string>
 </resources>

@@ -18,6 +18,7 @@
     <string name="pair_device_hint">請在系統設定中配對您的手機</string>
     <string name="unknown_device">未知裝置</string>
     <string name="cancel">取消</string>
+    <string name="recommended">推薦</string>
     
     <!-- Display Messages -->
     <string name="not_connected">未連線至手機\n請選擇裝置</string>

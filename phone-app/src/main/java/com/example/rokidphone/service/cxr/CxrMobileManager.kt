@@ -13,13 +13,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * CXR-M SDK Manager (手机端)
+ * CXR-M SDK Manager (Phone Side)
  * 
- * 封装 CxrApi，用于：
- * - 连接眼镜蓝牙
- * - 监听 AI 事件（长按按键）
- * - 拍摄照片
- * - 控制眼镜设备
+ * Wraps CxrApi for:
+ * - Connecting to glasses via Bluetooth
+ * - Listening to AI events (long press button)
+ * - Capturing photos
+ * - Controlling glasses device
  * 
  * SDK Package: com.rokid.cxr:client-m
  */
@@ -28,7 +28,7 @@ class CxrMobileManager(private val context: Context) {
     companion object {
         private const val TAG = "CxrMobileManager"
         
-        // 检查 SDK 是否可用
+        // Check if SDK is available
         fun isSdkAvailable(): Boolean {
             return try {
                 Class.forName("com.rokid.cxr.client.extend.CxrApi")
@@ -41,7 +41,7 @@ class CxrMobileManager(private val context: Context) {
         }
     }
     
-    // 连接状态
+    // Connection state
     sealed class BluetoothState {
         object Disconnected : BluetoothState()
         object Connecting : BluetoothState()
@@ -52,23 +52,23 @@ class CxrMobileManager(private val context: Context) {
     private val _bluetoothState = MutableStateFlow<BluetoothState>(BluetoothState.Disconnected)
     val bluetoothState: StateFlow<BluetoothState> = _bluetoothState.asStateFlow()
     
-    // WiFi P2P 连接状态
+    // WiFi P2P connection state
     private val _wifiConnected = MutableStateFlow(false)
     val wifiConnected: StateFlow<Boolean> = _wifiConnected.asStateFlow()
     
-    // AI 事件回调
+    // AI event callback
     private var onAiKeyDown: (() -> Unit)? = null
     private var onAiKeyUp: (() -> Unit)? = null
     private var onAiExit: (() -> Unit)? = null
     
-    // 照片结果回调
+    // Photo result callback
     private var onPhotoResult: ((status: ValueUtil.CxrStatus?, photoData: ByteArray?) -> Unit)? = null
     
-    // 眼镜信息
+    // Glasses information
     private var glassSocketUuid: String? = null
     private var glassMacAddress: String? = null
     
-    // CXR API 实例
+    // CXR API instance
     private val cxrApi: CxrApi by lazy {
         CxrApi.getInstance().also {
             Log.d(TAG, "CxrApi instance created: $it")
@@ -76,7 +76,7 @@ class CxrMobileManager(private val context: Context) {
         }
     }
     
-    // 蓝牙状态回调
+    // Bluetooth status callback
     private val bluetoothCallback = object : BluetoothStatusCallback {
         override fun onConnectionInfo(
             socketUuid: String?,
@@ -90,7 +90,7 @@ class CxrMobileManager(private val context: Context) {
                 glassSocketUuid = socketUuid
                 glassMacAddress = macAddress
                 
-                // 继续连接
+                // Continue connection
                 connectBluetooth(context, socketUuid, macAddress)
             } else {
                 Log.e(TAG, "Invalid connection info")
@@ -123,7 +123,7 @@ class CxrMobileManager(private val context: Context) {
         }
     }
     
-    // AI 事件监听
+    // AI event listener
     private val aiEventListener = object : AiEventListener {
         override fun onAiKeyDown() {
             Log.d(TAG, "AI key down (long press)")
@@ -141,7 +141,7 @@ class CxrMobileManager(private val context: Context) {
         }
     }
     
-    // 照片结果回调
+    // Photo result callback
     private val photoCallback = object : PhotoResultCallback {
         override fun onPhotoResult(status: ValueUtil.CxrStatus?, photo: ByteArray?) {
             Log.d(TAG, "Photo result: status=$status, size=${photo?.size ?: 0}")
@@ -150,7 +150,7 @@ class CxrMobileManager(private val context: Context) {
     }
     
     /**
-     * 初始化蓝牙连接
+     * Initialize Bluetooth connection
      */
     fun initBluetooth(device: BluetoothDevice): Boolean {
         return try {
@@ -172,7 +172,7 @@ class CxrMobileManager(private val context: Context) {
     }
     
     /**
-     * 连接蓝牙
+     * Connect Bluetooth
      */
     private fun connectBluetooth(context: Context, socketUuid: String, macAddress: String) {
         try {
@@ -186,7 +186,7 @@ class CxrMobileManager(private val context: Context) {
     }
     
     /**
-     * 检查蓝牙是否已连接
+     * Check if Bluetooth is connected
      */
     fun isBluetoothConnected(): Boolean {
         return try {
@@ -197,7 +197,7 @@ class CxrMobileManager(private val context: Context) {
     }
     
     /**
-     * 断开蓝牙
+     * Disconnect Bluetooth
      */
     fun disconnectBluetooth() {
         try {
@@ -210,7 +210,7 @@ class CxrMobileManager(private val context: Context) {
     }
     
     /**
-     * 设置 AI 事件监听器
+     * Set AI event listener
      */
     fun setAiEventListener(
         onKeyDown: (() -> Unit)? = null,
@@ -226,7 +226,7 @@ class CxrMobileManager(private val context: Context) {
     }
     
     /**
-     * 移除 AI 事件监听器
+     * Remove AI event listener
      */
     fun removeAiEventListener() {
         onAiKeyDown = null
@@ -236,7 +236,7 @@ class CxrMobileManager(private val context: Context) {
     }
     
     /**
-     * 打开眼镜相机
+     * Open glasses camera
      */
     fun openGlassCamera(
         width: Int = 1280, 
@@ -254,7 +254,7 @@ class CxrMobileManager(private val context: Context) {
     }
     
     /**
-     * 拍照
+     * Take photo
      */
     fun takePhoto(
         width: Int = 1280,
@@ -275,7 +275,7 @@ class CxrMobileManager(private val context: Context) {
     }
     
     /**
-     * 发送退出 AI 场景事件
+     * Send exit AI scene event
      */
     fun sendExitEvent(): ValueUtil.CxrStatus? {
         return try {
@@ -287,7 +287,7 @@ class CxrMobileManager(private val context: Context) {
     }
     
     /**
-     * 发送 TTS 内容到眼镜
+     * Send TTS content to glasses
      */
     fun sendTtsContent(content: String): ValueUtil.CxrStatus? {
         return try {
@@ -299,7 +299,7 @@ class CxrMobileManager(private val context: Context) {
     }
     
     /**
-     * 通知 TTS 播放完成
+     * Notify TTS playback completed
      */
     fun notifyTtsFinished(): ValueUtil.CxrStatus? {
         return try {
@@ -311,7 +311,7 @@ class CxrMobileManager(private val context: Context) {
     }
     
     /**
-     * 通知 AI 错误
+     * Notify AI error
      */
     fun notifyAiError(): ValueUtil.CxrStatus? {
         return try {
@@ -323,7 +323,7 @@ class CxrMobileManager(private val context: Context) {
     }
     
     /**
-     * 通知无网络
+     * Notify no network
      */
     fun notifyNoNetwork(): ValueUtil.CxrStatus? {
         return try {
@@ -335,7 +335,7 @@ class CxrMobileManager(private val context: Context) {
     }
     
     /**
-     * 获取眼镜信息
+     * Get glasses info
      */
     fun getGlassInfo(callback: (status: ValueUtil.CxrStatus?, info: GlassInfo?) -> Unit) {
         try {
@@ -351,7 +351,7 @@ class CxrMobileManager(private val context: Context) {
     }
     
     /**
-     * 释放资源
+     * Release resources
      */
     fun release() {
         try {

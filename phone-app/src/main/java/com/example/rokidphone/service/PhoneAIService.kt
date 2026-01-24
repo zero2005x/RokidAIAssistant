@@ -18,6 +18,7 @@ import com.example.rokidphone.data.AiProvider
 import com.example.rokidphone.data.ApiSettings
 import com.example.rokidphone.data.AvailableModels
 import com.example.rokidphone.data.SettingsRepository
+import com.example.rokidphone.data.db.ConversationRepository
 import com.example.rokidphone.service.ai.AiServiceFactory
 import com.example.rokidphone.service.ai.AiServiceProvider
 import com.example.rokidphone.service.cxr.CxrMobileManager
@@ -65,6 +66,12 @@ class PhoneAIService : Service() {
     // Photo repository for managing received photos
     private var photoRepository: PhotoRepository? = null
     
+    // Conversation repository for persisting voice conversations
+    private var conversationRepository: ConversationRepository? = null
+    
+    // Current voice conversation ID (for grouping voice interactions)
+    private var currentVoiceConversationId: String? = null
+    
     private val _messageFlow = MutableSharedFlow<Message>()
     val messageFlow = _messageFlow.asSharedFlow()
     
@@ -106,6 +113,14 @@ class PhoneAIService : Service() {
             // Get settings
             val settingsRepository = SettingsRepository.getInstance(this)
             val settings = settingsRepository.getSettings()
+            
+            // Initialize conversation repository for persisting voice conversations
+            conversationRepository = ConversationRepository.getInstance(this)
+            
+            // Create or get the current voice conversation session
+            serviceScope.launch {
+                ensureVoiceConversationSession(settings)
+            }
             
             // Validate model and provider compatibility
             val validatedSettings = validateAndCorrectSettings(settings)
@@ -550,6 +565,9 @@ class PhoneAIService : Service() {
                 payload = transcript
             ))
             
+            // 3.1 Save user message to database for history
+            saveUserMessage(transcript)
+            
             // 4. Notify thinking
             bluetoothManager?.sendMessage(Message.aiProcessing(getString(R.string.thinking)))
             
@@ -570,9 +588,17 @@ class PhoneAIService : Service() {
                 payload = aiResponse
             ))
             
+            // 6.1 Save AI response to database for history
+            val settings = SettingsRepository.getInstance(this).getSettings()
+            saveAssistantMessage(aiResponse, settings.aiModelId)
+            
             // 7. TTS voice playback (optional)
             ttsService?.speak(aiResponse) { }
             
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            // Service is being stopped, don't treat this as an error
+            Log.d(TAG, "Voice processing cancelled (service stopping)")
+            throw e  // Re-throw to properly propagate cancellation
         } catch (e: Exception) {
             Log.e(TAG, "Error processing voice data", e)
             bluetoothManager?.sendMessage(Message.aiError(getString(R.string.processing_failed, e.message ?: "")))
@@ -603,6 +629,73 @@ class PhoneAIService : Service() {
             // Clean up extra whitespace
             .replace(Regex("\\n{3,}"), "\n\n")
             .trim()
+    }
+    
+    /**
+     * Ensure a voice conversation session exists for persisting voice interactions
+     * Creates a new conversation if needed, or continues using existing one from today
+     */
+    private suspend fun ensureVoiceConversationSession(settings: ApiSettings) {
+        try {
+            if (currentVoiceConversationId == null) {
+                // First, try to find an existing voice session from today
+                val existingSession = conversationRepository?.findTodayVoiceSession()
+                
+                if (existingSession != null) {
+                    // Reuse existing session from today
+                    currentVoiceConversationId = existingSession.id
+                    Log.d(TAG, "Reusing existing voice conversation session: $currentVoiceConversationId")
+                } else {
+                    // Create a new conversation for voice interactions
+                    val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault())
+                    val title = getString(R.string.voice_session_title, dateFormat.format(java.util.Date()))
+                    
+                    val conversation = conversationRepository?.createConversation(
+                        providerId = settings.aiProvider.name,
+                        modelId = settings.aiModelId,
+                        title = title,
+                        systemPrompt = settings.systemPrompt
+                    )
+                    
+                    currentVoiceConversationId = conversation?.id
+                    Log.d(TAG, "Created voice conversation session: $currentVoiceConversationId")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error creating voice conversation session", e)
+        }
+    }
+    
+    /**
+     * Save user message to database
+     */
+    private suspend fun saveUserMessage(content: String) {
+        currentVoiceConversationId?.let { conversationId ->
+            try {
+                conversationRepository?.addUserMessage(conversationId, content)
+                Log.d(TAG, "Saved user message to conversation: $conversationId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving user message", e)
+            }
+        }
+    }
+    
+    /**
+     * Save AI response to database
+     */
+    private suspend fun saveAssistantMessage(content: String, modelId: String?) {
+        currentVoiceConversationId?.let { conversationId ->
+            try {
+                conversationRepository?.addAssistantMessage(
+                    conversationId = conversationId,
+                    content = content,
+                    modelId = modelId
+                )
+                Log.d(TAG, "Saved assistant message to conversation: $conversationId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving assistant message", e)
+            }
+        }
     }
     
     private fun updateNotification(state: BluetoothConnectionState) {

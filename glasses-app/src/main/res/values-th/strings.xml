@@ -18,6 +18,7 @@
     <string name="pair_device_hint">กรุณาจับคู่โทรศัพท์ในการตั้งค่าระบบ</string>
     <string name="unknown_device">อุปกรณ์ไม่รู้จัก</string>
     <string name="cancel">ยกเลิก</string>
+    <string name="recommended">แนะนำ</string>
     
     <!-- Display Messages -->
     <string name="not_connected">ไม่ได้เชื่อมต่อกับโทรศัพท์\nกรุณาเลือกอุปกรณ์</string>
