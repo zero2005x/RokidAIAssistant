@@ -11,7 +11,9 @@ import kotlinx.coroutines.withContext
  * For processing user voice questions and generating responses
  */
 class GeminiAIService(
-    private val apiKey: String // Must be passed from BuildConfig or settings
+    private val apiKey: String, // Must be passed from BuildConfig or settings
+    private val systemPrompt: String = "", // System prompt from string resources
+    private val systemPromptAck: String = "" // System prompt acknowledgment from string resources
 ) {
     companion object {
         private const val TAG = "GeminiAIService"
@@ -60,14 +62,18 @@ class GeminiAIService(
         }
     }
     
-    private fun buildHistory() = listOf(
-        content(role = "user") {
-            text("You are a friendly AI assistant installed on Rokid smart glasses. Please answer questions concisely in the user's language, with each response not exceeding 100 words.")
-        },
-        content(role = "model") {
-            text("Understood, I am your Rokid AI assistant. I will assist you concisely. How can I help you?")
-        }
-    ) + conversationHistory.flatMap { (user, model) ->
+    private fun buildHistory() = if (systemPrompt.isNotEmpty() && systemPromptAck.isNotEmpty()) {
+        listOf(
+            content(role = "user") {
+                text(systemPrompt)
+            },
+            content(role = "model") {
+                text(systemPromptAck)
+            }
+        )
+    } else {
+        emptyList()
+    } + conversationHistory.flatMap { (user, model) ->
         listOf(
             content(role = "user") { text(user) },
             content(role = "model") { text(model) }

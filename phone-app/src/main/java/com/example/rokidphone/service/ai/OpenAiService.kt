@@ -21,7 +21,7 @@ import org.json.JSONObject
 class OpenAiService(
     apiKey: String,
     modelId: String = "gpt-4o",
-    systemPrompt: String = "You are a friendly AI assistant. Please answer questions concisely."
+    systemPrompt: String = ""
 ) : BaseAiService(apiKey, modelId, systemPrompt), AiServiceProvider {
     
     companion object {

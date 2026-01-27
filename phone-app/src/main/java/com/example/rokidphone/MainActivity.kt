@@ -41,6 +41,7 @@ import com.example.rokidphone.ui.gallery.DeleteConfirmDialog
 import com.example.rokidphone.ui.gallery.PhotoDetailScreen
 import com.example.rokidphone.ui.gallery.PhotoGalleryScreen
 import com.example.rokidphone.ui.home.HomeScreen
+import com.example.rokidphone.ui.logs.LogViewerScreen
 import com.example.rokidphone.ui.navigation.BottomNavDestination
 import com.example.rokidphone.ui.navigation.NavRoutes
 import com.example.rokidphone.ui.theme.RokidPhoneTheme
@@ -137,6 +138,24 @@ fun PhoneMainScreen(
     val currentDestination = navBackStackEntry?.destination
     
     val uiState by viewModel.uiState.collectAsState()
+    
+    // Check if initial setup is needed when settings are loaded
+    LaunchedEffect(settings) {
+        viewModel.checkInitialSetup(settings.hasAnyApiKeyConfigured())
+    }
+    
+    // Show initial setup dialog when no API key is configured
+    if (uiState.showInitialSetup) {
+        InitialSetupDialog(
+            onGoToSettings = {
+                viewModel.dismissInitialSetup()
+                navController.navigate(NavRoutes.SETTINGS)
+            },
+            onDismiss = {
+                viewModel.dismissInitialSetup()
+            }
+        )
+    }
     
     // Show API key warning dialog when triggered by service
     if (uiState.showApiKeyWarning) {
@@ -389,7 +408,14 @@ fun PhoneMainScreen(
                     onSettingsChange = { newSettings ->
                         settingsRepository.saveSettings(newSettings)
                     },
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    onNavigateToLogViewer = { navController.navigate(NavRoutes.LOG_VIEWER) }
+                )
+            }
+            
+            composable(NavRoutes.LOG_VIEWER) {
+                LogViewerScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
         }
@@ -476,6 +502,50 @@ fun ApiKeyMissingDialog(
         confirmButton = {
             Button(onClick = onGoToSettings) {
                 Text(stringResource(R.string.go_to_settings))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.later))
+            }
+        }
+    )
+}
+
+/**
+ * Initial setup dialog shown when no API key is configured at all
+ */
+@Composable
+fun InitialSetupDialog(
+    onGoToSettings: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                Icons.Default.Settings,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        title = {
+            Text(stringResource(R.string.initial_setup_title))
+        },
+        text = {
+            Column {
+                Text(stringResource(R.string.initial_setup_message))
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.initial_setup_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = onGoToSettings) {
+                Text(stringResource(R.string.setup_now))
             }
         },
         dismissButton = {

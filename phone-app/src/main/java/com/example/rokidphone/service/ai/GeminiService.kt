@@ -26,7 +26,7 @@ import org.json.JSONObject
 class GeminiService(
     apiKey: String,
     modelId: String = "gemini-2.5-flash",
-    systemPrompt: String = "You are a friendly AI assistant. Please answer questions concisely."
+    systemPrompt: String = ""
 ) : BaseAiService(apiKey, modelId, systemPrompt), AiServiceProvider {
     
     companion object {
@@ -64,7 +64,13 @@ class GeminiService(
                                 })
                             })
                             put(JSONObject().apply {
-                                put("text", "Please transcribe this audio into text. Only output the transcribed text content, do not add any explanation. If unclear, respond with 'Unable to recognize'.")
+                                put("text", """Transcribe the speech in this audio to text.
+Rules:
+1. Only output the actual spoken words, nothing else
+2. If the audio contains no clear speech, only noise, silence, or unintelligible sounds, respond with exactly: Unable to recognize
+3. Do not output timestamps, time codes, or numbers like "00:00"
+4. Do not describe the audio or add any explanation
+5. If you hear beeps, static, or mechanical sounds instead of speech, respond with: Unable to recognize""")
                             })
                         })
                     })
@@ -91,7 +97,13 @@ class GeminiService(
                         val json = JSONObject(responseBody)
                         val text = extractTextFromResponse(json)
                         
-                        if (text.isNullOrEmpty() || text.contains("Unable to recognize")) {
+                        if (text.isNullOrEmpty() || 
+                            text.contains("Unable to recognize") || 
+                            isGeminiErrorResponse(text) ||
+                            isInvalidTranscription(text)) {
+                            if (!text.isNullOrEmpty()) {
+                                Log.d(TAG, "Filtered invalid transcription: $text")
+                            }
                             null
                         } else {
                             Log.d(TAG, "Transcription: $text")
@@ -281,5 +293,85 @@ class GeminiService(
             }
         }
         return null
+    }
+    
+    /**
+     * Detect Gemini error/apology responses that indicate no valid speech was recognized
+     * These are full sentences from Gemini explaining it couldn't transcribe
+     */
+    private fun isGeminiErrorResponse(text: String): Boolean {
+        val lowerText = text.lowercase()
+        
+        // Common Gemini apology patterns when it can't recognize speech
+        val errorPatterns = listOf(
+            "i'm sorry",
+            "i am sorry", 
+            "cannot recognize",
+            "cannot provide a transcription",
+            "cannot transcribe",
+            "no discernible speech",
+            "no speech",
+            "only noise",
+            "appears to contain only noise",
+            "unable to transcribe",
+            "no audio content",
+            "empty audio",
+            "silence"
+        )
+        
+        if (errorPatterns.any { lowerText.contains(it) }) {
+            Log.d(TAG, "Detected Gemini error response")
+            return true
+        }
+        
+        return false
+    }
+    
+    /**
+     * Detect invalid transcription patterns that indicate noise/silence was misinterpreted
+     * These patterns include:
+     * - Repeated timestamp patterns (00:00, 00:01, etc.)
+     * - Repeated zeros or colons
+     * - Very repetitive short patterns
+     */
+    private fun isInvalidTranscription(text: String): Boolean {
+        val trimmedText = text.trim()
+        
+        // Empty or very short text
+        if (trimmedText.length < 2) return true
+        
+        // Pattern: mostly zeros, colons, and spaces (like "00:00:00:00..." or "00:00 00:01...")
+        val timestampPattern = Regex("^[0-9: \\n]+$")
+        if (timestampPattern.matches(trimmedText)) {
+            Log.d(TAG, "Detected timestamp-only pattern")
+            return true
+        }
+        
+        // Pattern: repeated timestamp format (00:00, 00:01, etc.)
+        val repeatedTimestampPattern = Regex("(\\d{2}:\\d{2}[:\\s]*){3,}")
+        if (repeatedTimestampPattern.containsMatchIn(trimmedText)) {
+            Log.d(TAG, "Detected repeated timestamp pattern")
+            return true
+        }
+        
+        // Pattern: more than 50% of text is zeros, colons, or newlines
+        val invalidChars = trimmedText.count { it == '0' || it == ':' || it == '\n' || it == ' ' }
+        val ratio = invalidChars.toFloat() / trimmedText.length
+        if (ratio > 0.7f && trimmedText.length > 10) {
+            Log.d(TAG, "Detected high ratio of invalid chars: $ratio")
+            return true
+        }
+        
+        // Pattern: very repetitive content (same short sequence repeated many times)
+        if (trimmedText.length >= 20) {
+            val firstFew = trimmedText.take(5)
+            val occurrences = trimmedText.windowed(5, 1).count { it == firstFew }
+            if (occurrences > trimmedText.length / 8) {
+                Log.d(TAG, "Detected highly repetitive pattern")
+                return true
+            }
+        }
+        
+        return false
     }
 }

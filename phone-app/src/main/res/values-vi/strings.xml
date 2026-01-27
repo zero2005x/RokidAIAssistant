@@ -40,6 +40,7 @@
     <string name="system_prompt">Lời nhắc hệ thống</string>
     <string name="system_prompt_hint">Nhập lời nhắc hệ thống cho AI…</string>
     <string name="enter_system_prompt">Nhập lời nhắc hệ thống AI…</string>
+    <string name="default_system_prompt">Bạn là một trợ lý AI thân thiện. Vui lòng trả lời câu hỏi một cách ngắn gọn.</string>
     
     <!-- Language Settings -->
     <string name="language_settings">Ngôn ngữ</string>
@@ -68,6 +69,12 @@
     <string name="later">Để sau</string>
     <string name="api_key_validation_failed">Xác thực khóa API thất bại</string>
     <string name="service_not_ready">Dịch vụ chưa sẵn sàng. Vui lòng cấu hình khóa API trong Cài đặt.</string>
+    
+    <!-- Initial Setup -->
+    <string name="initial_setup_title">Chào mừng! Bắt đầu thôi</string>
+    <string name="initial_setup_message">Để sử dụng trợ lý giọng nói AI và tính năng nhận dạng hình ảnh, bạn cần cấu hình ít nhất một khóa API.\n\nCác dịch vụ được hỗ trợ:\n• Google Gemini\n• OpenAI\n• Anthropic Claude\n• DeepSeek\n• Groq\n• xAI Grok</string>
+    <string name="initial_setup_hint">Bạn có thể nhận khóa API miễn phí từ các nhà cung cấp này. Gemini cung cấp hạn mức miễn phí hào phóng.</string>
+    <string name="setup_now">Cấu hình ngay</string>
     
     <!-- AI Processing -->
     <string name="processing_voice">Đang xử lý giọng nói…</string>
@@ -139,10 +146,54 @@
     <string name="provider_perplexity">Perplexity</string>
     <string name="provider_custom">Tùy chỉnh / Tự lưu trữ</string>
     
-    <!-- Speech Service Names -->
+    <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Nhận dạng giọng nói Gemini</string>
     <string name="speech_service_openai_whisper">OpenAI Whisper</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
+    
+    <!-- STT Provider Names -->
+    <string name="stt_provider_gemini">Gemini</string>
+    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_groq_whisper">Groq Whisper</string>
+    <string name="stt_provider_google_cloud">Google Cloud STT</string>
+    <string name="stt_provider_azure">Azure Speech</string>
+    <string name="stt_provider_aws">AWS Transcribe</string>
+    <string name="stt_provider_ibm_watson">IBM Watson</string>
+    <string name="stt_provider_deepgram">Deepgram</string>
+    <string name="stt_provider_assemblyai">AssemblyAI</string>
+    <string name="stt_provider_iflytek">iFLYTEK</string>
+    <string name="stt_provider_huawei">Huawei SIS</string>
+    <string name="stt_provider_volcengine">Volcengine</string>
+    
+    <!-- STT Settings -->
+    <string name="stt_settings_title">Cài đặt nhận dạng giọng nói</string>
+    <string name="stt_provider_label">Nhà cung cấp STT</string>
+    <string name="stt_credentials_title">Thông tin xác thực STT</string>
+    <string name="stt_test_connection">Kiểm tra kết nối</string>
+    <string name="stt_test_success">Kết nối thành công</string>
+    <string name="stt_test_failed">Kiểm tra kết nối thất bại</string>
+    <string name="stt_api_key">Khóa API</string>
+    <string name="stt_api_secret">Bí mật API</string>
+    <string name="stt_app_id">ID ứng dụng</string>
+    <string name="stt_project_id">ID dự án</string>
+    <string name="stt_region">Khu vực</string>
+    <string name="stt_service_url">URL dịch vụ</string>
+    <string name="stt_access_key">Khóa truy cập</string>
+    <string name="stt_secret_key">Khóa bí mật</string>
+    <string name="stt_subscription_key">Khóa đăng ký</string>
+    
+    <!-- STT Error Messages -->
+    <string name="stt_error_audio_too_short">Âm thanh quá ngắn, vui lòng thử lại</string>
+    <string name="stt_error_unable_to_recognize">Không thể nhận dạng giọng nói, vui lòng thử lại</string>
+    <string name="stt_error_upload_failed">Tải âm thanh lên thất bại</string>
+    <string name="stt_error_create_transcript_failed">Tạo bản ghi thất bại</string>
+    <string name="stt_error_transcription_timeout">Ghi âm thất bại hoặc hết thời gian</string>
+    <string name="stt_error_transcription_error">Lỗi ghi âm: %s</string>
+    <string name="stt_error_service_unavailable">Dịch vụ AI tạm thời không khả dụng, vui lòng thử lại sau</string>
+    <string name="stt_error_no_speech_detected">Không phát hiện giọng nói</string>
+    <string name="stt_error_not_supported">Nhà cung cấp này không hỗ trợ nhận dạng giọng nói</string>
+    <string name="stt_error_provider_not_supported">%s không hỗ trợ nhận dạng giọng nói, vui lòng sử dụng dịch vụ khác</string>
+    <string name="stt_error_recognition_failed">Nhận dạng giọng nói thất bại: %s</string>
     
     <!-- Photo Transfer -->
     <string name="photo_received">Đã nhận ảnh từ kính</string>
@@ -150,10 +201,13 @@
     <string name="photo_transfer_failed">Chuyển ảnh thất bại: %s</string>
     <string name="analyzing_photo">Đang phân tích ảnh…</string>
     <string name="ai_analysis_unavailable">Phân tích hình ảnh AI không khả dụng</string>
-    <string name="photo_analysis_failed">Phân tích ảnh thất bại: %s</string>    <string name="preparing_analysis">Đang chuẩn bị phân tích…</string>
+    <string name="photo_analysis_failed">Phân tích ảnh thất bại: %s</string>
+    <string name="preparing_analysis">Đang chuẩn bị phân tích…</string>
     <string name="unable_to_read_photo">Không thể đọc dữ liệu ảnh</string>
     <string name="calling_ai_analysis">Đang gọi AI để phân tích…</string>
-    <string name="analyzing_image">Đang phân tích hình ảnh…</string>    
+    <string name="analyzing_image">Đang phân tích hình ảnh…</string>
+    <string name="analysis_failed">Phân tích thất bại</string>
+    
     <!-- Camera Capture -->
     <string name="camera_capture">Camera kính</string>
     <string name="camera_capture_hint">Chụp ảnh từ kính và phân tích bằng AI</string>
@@ -219,4 +273,9 @@
     <string name="current_model">Mô hình hiện tại</string>
     <string name="home_current_session">Phiên hiện tại</string>
     <string name="home_view_all">Xem tất cả</string>
+    
+    <!-- Developer Tools -->
+    <string name="developer_tools">Công cụ nhà phát triển</string>
+    <string name="log_viewer">Trình xem nhật ký</string>
+    <string name="log_viewer_description">Xem, xuất và quản lý nhật ký ứng dụng</string>
 </resources>

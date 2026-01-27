@@ -40,6 +40,7 @@
     <string name="system_prompt">System Prompt</string>
     <string name="system_prompt_hint">Enter system prompt for AI…</string>
     <string name="enter_system_prompt">Enter AI system prompt…</string>
+    <string name="default_system_prompt">You are a friendly AI assistant. Please answer questions concisely.</string>
     
     <!-- Language Settings -->
     <string name="language_settings">Language</string>
@@ -68,6 +69,12 @@
     <string name="later">Later</string>
     <string name="api_key_validation_failed">API Key validation failed</string>
     <string name="service_not_ready">Service not ready. Please configure API keys in Settings.</string>
+    
+    <!-- Initial Setup -->
+    <string name="initial_setup_title">Welcome! Let\'s Get Started</string>
+    <string name="initial_setup_message">To use AI voice assistant and image recognition features, you need to configure at least one API key.\n\nSupported services:\n• Google Gemini\n• OpenAI\n• Anthropic Claude\n• DeepSeek\n• Groq\n• xAI Grok</string>
+    <string name="initial_setup_hint">You can get free API keys from these providers. Gemini offers a generous free tier.</string>
+    <string name="setup_now">Set Up Now</string>
     
     <!-- AI Processing -->
     <string name="processing_voice">Processing voice…</string>
@@ -139,10 +146,54 @@
     <string name="provider_perplexity">Perplexity</string>
     <string name="provider_custom">Custom / Self-Hosted</string>
     
-    <!-- Speech Service Names -->
+    <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Gemini Audio Recognition</string>
     <string name="speech_service_openai_whisper">OpenAI Whisper</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
+    
+    <!-- STT Provider Names -->
+    <string name="stt_provider_gemini">Gemini Audio</string>
+    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_groq_whisper">Groq Whisper</string>
+    <string name="stt_provider_google_cloud">Google Cloud STT</string>
+    <string name="stt_provider_azure">Azure Speech</string>
+    <string name="stt_provider_aws">Amazon Transcribe</string>
+    <string name="stt_provider_ibm_watson">IBM Watson STT</string>
+    <string name="stt_provider_deepgram">Deepgram</string>
+    <string name="stt_provider_assemblyai">AssemblyAI</string>
+    <string name="stt_provider_iflytek">科大訊飛 iFLYTEK</string>
+    <string name="stt_provider_huawei">华为云 SIS</string>
+    <string name="stt_provider_volcengine">火山引擎 ASR</string>
+    
+    <!-- STT Settings -->
+    <string name="stt_settings_title">Speech Recognition Settings</string>
+    <string name="stt_provider_label">STT Provider</string>
+    <string name="stt_credentials_title">Credentials</string>
+    <string name="stt_test_connection">Test Connection</string>
+    <string name="stt_test_success">Connection successful!</string>
+    <string name="stt_test_failed">Connection failed: %s</string>
+    <string name="stt_api_key">API Key</string>
+    <string name="stt_api_secret">API Secret</string>
+    <string name="stt_app_id">App ID</string>
+    <string name="stt_project_id">Project ID</string>
+    <string name="stt_region">Region</string>
+    <string name="stt_service_url">Service URL</string>
+    <string name="stt_access_key">Access Key (AK)</string>
+    <string name="stt_secret_key">Secret Key (SK)</string>
+    <string name="stt_subscription_key">Subscription Key</string>
+    
+    <!-- STT Error Messages -->
+    <string name="stt_error_audio_too_short">Audio too short, please try again</string>
+    <string name="stt_error_unable_to_recognize">Unable to recognize speech, please try again</string>
+    <string name="stt_error_upload_failed">Failed to upload audio</string>
+    <string name="stt_error_create_transcript_failed">Failed to create transcript</string>
+    <string name="stt_error_transcription_timeout">Transcription failed or timed out</string>
+    <string name="stt_error_transcription_error">Transcription error: %s</string>
+    <string name="stt_error_service_unavailable">AI service temporarily unavailable, please try again later</string>
+    <string name="stt_error_no_speech_detected">No speech detected</string>
+    <string name="stt_error_not_supported">Speech recognition not supported for this provider</string>
+    <string name="stt_error_provider_not_supported">%s does not support speech recognition, please use another service</string>
+    <string name="stt_error_recognition_failed">Speech recognition failed: %s</string>
     
     <!-- Photo Transfer -->
     <string name="photo_received">Photo received from glasses</string>
@@ -222,4 +273,9 @@
     <string name="current_model">Current Model</string>
     <string name="home_current_session">Current Session</string>
     <string name="home_view_all">View All</string>
+    
+    <!-- Developer Tools -->
+    <string name="developer_tools">Developer Tools</string>
+    <string name="log_viewer">Log Viewer</string>
+    <string name="log_viewer_description">View, export, and manage app logs</string>
 </resources>

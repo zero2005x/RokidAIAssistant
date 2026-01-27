@@ -49,4 +49,8 @@
     <string name="swipe_for_more">Vuốt lên/xuống để xem thêm</string>
     <string name="swipe_up_previous">▲ Vuốt lên - trang trước</string>
     <string name="swipe_down_next">▼ Vuốt xuống - trang sau</string>
+    
+    <!-- AI System Prompt -->
+    <string name="glasses_system_prompt">Bạn là trợ lý AI thân thiện được cài đặt trên kính thông minh Rokid. Vui lòng trả lời câu hỏi ngắn gọn bằng ngôn ngữ của người dùng, mỗi câu trả lời không quá 100 từ.</string>
+    <string name="glasses_system_prompt_ack">Đã hiểu, tôi là trợ lý AI Rokid của bạn. Tôi sẽ hỗ trợ bạn một cách ngắn gọn. Tôi có thể giúp gì cho bạn?</string>
 </resources>

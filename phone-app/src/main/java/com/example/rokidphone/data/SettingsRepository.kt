@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.example.rokidphone.R
+import com.example.rokidphone.service.stt.SttProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * Settings Repository
  * Uses EncryptedSharedPreferences for secure API Key storage
  */
-class SettingsRepository(context: Context) {
+class SettingsRepository(private val context: Context) {
     
     companion object {
         private const val PREFS_NAME = "rokid_api_settings"
@@ -20,7 +22,7 @@ class SettingsRepository(context: Context) {
         // Keys for general settings
         private const val KEY_AI_PROVIDER = "ai_provider"
         private const val KEY_AI_MODEL = "ai_model"
-        private const val KEY_SPEECH_SERVICE = "speech_service"
+        private const val KEY_STT_PROVIDER = "stt_provider"
         private const val KEY_SPEECH_LANGUAGE = "speech_language"
         private const val KEY_RESPONSE_LANGUAGE = "response_language"
         private const val KEY_SYSTEM_PROMPT = "system_prompt"
@@ -102,14 +104,13 @@ class SettingsRepository(context: Context) {
             customBaseUrl = prefs.getString(KEY_CUSTOM_BASE_URL, "http://localhost:11434/v1/") 
                 ?: "http://localhost:11434/v1/",
             customModelName = prefs.getString(KEY_CUSTOM_MODEL_NAME, "llama4") ?: "llama4",
-            speechService = SpeechService.fromName(
-                prefs.getString(KEY_SPEECH_SERVICE, SpeechService.GEMINI_AUDIO.name) ?: SpeechService.GEMINI_AUDIO.name
+            sttProvider = SttProvider.fromName(
+                prefs.getString(KEY_STT_PROVIDER, SttProvider.GEMINI.name) ?: SttProvider.GEMINI.name
             ),
             speechLanguage = prefs.getString(KEY_SPEECH_LANGUAGE, "zh-TW") ?: "zh-TW",
             responseLanguage = prefs.getString(KEY_RESPONSE_LANGUAGE, "zh-TW") ?: "zh-TW",
-            systemPrompt = prefs.getString(KEY_SYSTEM_PROMPT, 
-                "You are a friendly AI assistant. Please answer questions concisely.") 
-                ?: "You are a friendly AI assistant. Please answer questions concisely."
+            systemPrompt = prefs.getString(KEY_SYSTEM_PROMPT, null) 
+                ?: context.getString(R.string.default_system_prompt)
         )
     }
     
@@ -134,7 +135,7 @@ class SettingsRepository(context: Context) {
             putString(KEY_CUSTOM_API_KEY, settings.customApiKey)
             putString(KEY_CUSTOM_BASE_URL, settings.customBaseUrl)
             putString(KEY_CUSTOM_MODEL_NAME, settings.customModelName)
-            putString(KEY_SPEECH_SERVICE, settings.speechService.name)
+            putString(KEY_STT_PROVIDER, settings.sttProvider.name)
             putString(KEY_SPEECH_LANGUAGE, settings.speechLanguage)
             putString(KEY_RESPONSE_LANGUAGE, settings.responseLanguage)
             putString(KEY_SYSTEM_PROMPT, settings.systemPrompt)
@@ -214,11 +215,53 @@ class SettingsRepository(context: Context) {
         saveSettings(getSettings().copy(customModelName = modelName))
     }
     
-    fun updateSpeechService(service: SpeechService) {
-        saveSettings(getSettings().copy(speechService = service))
+    fun updateSttProvider(provider: SttProvider) {
+        saveSettings(getSettings().copy(sttProvider = provider))
     }
     
     fun updateSystemPrompt(prompt: String) {
         saveSettings(getSettings().copy(systemPrompt = prompt))
+    }
+    
+    /**
+     * Get the default system prompt in the current locale
+     */
+    fun getDefaultSystemPrompt(): String {
+        return context.getString(R.string.default_system_prompt)
+    }
+    
+    /**
+     * Get the default system prompt for a specific language
+     */
+    fun getDefaultSystemPromptForLanguage(language: AppLanguage): String {
+        val locale = LanguageManager.getLocale(language)
+        val configuration = android.content.res.Configuration(context.resources.configuration)
+        configuration.setLocale(locale)
+        val localizedContext = context.createConfigurationContext(configuration)
+        return localizedContext.getString(R.string.default_system_prompt)
+    }
+    
+    /**
+     * Check if the current system prompt is a default prompt (any language)
+     */
+    fun isUsingDefaultSystemPrompt(): Boolean {
+        val currentPrompt = getSettings().systemPrompt
+        if (currentPrompt.isEmpty()) return true
+        
+        // Check against all language defaults
+        return AppLanguage.entries.any { lang ->
+            try {
+                getDefaultSystemPromptForLanguage(lang) == currentPrompt
+            } catch (e: Exception) {
+                false
+            }
+        }
+    }
+    
+    /**
+     * Reset system prompt to default (localized)
+     */
+    fun resetSystemPromptToDefault() {
+        updateSystemPrompt(getDefaultSystemPrompt())
     }
 }

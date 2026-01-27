@@ -31,7 +31,7 @@ class BaiduService(
     private val apiKey: String,
     private val secretKey: String,
     private val modelId: String = "ernie-4.0-8k",
-    private val systemPrompt: String = "You are a friendly AI assistant. Please answer questions concisely."
+    private val systemPrompt: String = ""
 ) : AiServiceProvider {
     
     companion object {

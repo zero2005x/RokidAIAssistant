@@ -20,11 +20,83 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /**
+ * Speech error codes for localization support
+ */
+enum class SpeechErrorCode {
+    AUDIO_TOO_SHORT,
+    UNABLE_TO_RECOGNIZE,
+    UPLOAD_FAILED,
+    CREATE_TRANSCRIPT_FAILED,
+    TRANSCRIPTION_TIMEOUT,
+    TRANSCRIPTION_ERROR,
+    SERVICE_UNAVAILABLE,
+    NO_SPEECH_DETECTED,
+    NOT_SUPPORTED,
+    PROVIDER_NOT_SUPPORTED,
+    RECOGNITION_FAILED,
+    NETWORK_ERROR,
+    UNKNOWN;
+    
+    /**
+     * Get the string resource ID for this error code
+     */
+    fun getStringResId(): Int {
+        return when (this) {
+            AUDIO_TOO_SHORT -> com.example.rokidphone.R.string.stt_error_audio_too_short
+            UNABLE_TO_RECOGNIZE -> com.example.rokidphone.R.string.stt_error_unable_to_recognize
+            UPLOAD_FAILED -> com.example.rokidphone.R.string.stt_error_upload_failed
+            CREATE_TRANSCRIPT_FAILED -> com.example.rokidphone.R.string.stt_error_create_transcript_failed
+            TRANSCRIPTION_TIMEOUT -> com.example.rokidphone.R.string.stt_error_transcription_timeout
+            TRANSCRIPTION_ERROR -> com.example.rokidphone.R.string.stt_error_transcription_error
+            SERVICE_UNAVAILABLE -> com.example.rokidphone.R.string.stt_error_service_unavailable
+            NO_SPEECH_DETECTED -> com.example.rokidphone.R.string.stt_error_no_speech_detected
+            NOT_SUPPORTED -> com.example.rokidphone.R.string.stt_error_not_supported
+            PROVIDER_NOT_SUPPORTED -> com.example.rokidphone.R.string.stt_error_provider_not_supported
+            RECOGNITION_FAILED -> com.example.rokidphone.R.string.stt_error_recognition_failed
+            NETWORK_ERROR -> com.example.rokidphone.R.string.stt_error_transcription_error
+            UNKNOWN -> com.example.rokidphone.R.string.stt_error_transcription_error
+        }
+    }
+    
+    /**
+     * Check if this error code uses a format string (has %s placeholder)
+     */
+    fun requiresDetail(): Boolean {
+        return this in listOf(TRANSCRIPTION_ERROR, PROVIDER_NOT_SUPPORTED, RECOGNITION_FAILED)
+    }
+}
+
+/**
  * Speech recognition result
  */
 sealed class SpeechResult {
     data class Success(val text: String) : SpeechResult()
-    data class Error(val message: String, val isNetworkError: Boolean = false) : SpeechResult()
+    data class Error(
+        val message: String, 
+        val isNetworkError: Boolean = false,
+        val errorCode: SpeechErrorCode? = null,
+        val errorDetail: String? = null
+    ) : SpeechResult() {
+        /**
+         * Get localized error message using Context
+         */
+        fun getLocalizedMessage(context: android.content.Context): String {
+            return when {
+                errorCode != null -> {
+                    val resId = errorCode.getStringResId()
+                    if (errorDetail != null && errorCode.requiresDetail()) {
+                        context.getString(resId, errorDetail)
+                    } else if (errorCode.requiresDetail()) {
+                        // If format string but no detail, use a generic error message
+                        context.getString(resId, "")
+                    } else {
+                        context.getString(resId)
+                    }
+                }
+                else -> message
+            }
+        }
+    }
 }
 
 /**
@@ -34,7 +106,7 @@ sealed class SpeechResult {
 class GeminiSpeechService(
     private val apiKey: String,
     private val modelId: String = "gemini-2.5-flash",
-    private val systemPrompt: String = "You are a friendly AI assistant. Please provide concise answers."
+    private val systemPrompt: String = ""
 ) {
     companion object {
         private const val TAG = "GeminiSpeechService"
@@ -123,7 +195,13 @@ class GeminiSpeechService(
                                 })
                             })
                             put(JSONObject().apply {
-                                put("text", "Please transcribe this audio. Output only the transcribed text without any explanation. If unclear, reply with 'Unable to recognize'.")
+                                put("text", """Transcribe the speech in this audio to text.
+Rules:
+1. Only output the actual spoken words, nothing else
+2. If the audio contains no clear speech, only noise, silence, or unintelligible sounds, respond with exactly: Unable to recognize
+3. Do not output timestamps, time codes, or numbers like "00:00"
+4. Do not describe the audio or add any explanation
+5. If you hear beeps, static, or mechanical sounds instead of speech, respond with: Unable to recognize""")
                             })
                         })
                     })
@@ -154,7 +232,10 @@ class GeminiSpeechService(
                             val json = JSONObject(responseBody)
                             val text = extractTextFromResponse(json)
                             
-                            if (text.isNullOrEmpty() || text.contains("Unable to recognize")) {
+                            if (text.isNullOrEmpty() || 
+                                text.contains("Unable to recognize") || 
+                                isGeminiErrorResponse(text) ||
+                                isInvalidTranscription(text)) {
                                 return@withContext SpeechResult.Error("Unable to recognize speech, please try again")
                             }
                             
@@ -339,6 +420,77 @@ class GeminiSpeechService(
             }
         }
         return null
+    }
+    
+    /**
+     * Detect Gemini error/apology responses that indicate no valid speech was recognized
+     * These are full sentences from Gemini explaining it couldn't transcribe
+     */
+    private fun isGeminiErrorResponse(text: String): Boolean {
+        val lowerText = text.lowercase()
+        
+        // Common Gemini apology patterns when it can't recognize speech
+        val errorPatterns = listOf(
+            "i'm sorry",
+            "i am sorry", 
+            "cannot recognize",
+            "cannot provide a transcription",
+            "cannot transcribe",
+            "no discernible speech",
+            "no speech",
+            "only noise",
+            "appears to contain only noise",
+            "unable to transcribe",
+            "no audio content",
+            "empty audio",
+            "silence"
+        )
+        
+        if (errorPatterns.any { lowerText.contains(it) }) {
+            Log.d(TAG, "Detected Gemini error response: $text")
+            return true
+        }
+        
+        return false
+    }
+    
+    /**
+     * Check if transcription result is invalid (timestamps, repeated zeros, etc.)
+     * This happens when Gemini misinterprets silence/noise as timestamps
+     */
+    private fun isInvalidTranscription(text: String): Boolean {
+        // Pattern 1: Only contains numbers, colons, spaces, and newlines (timestamp-like)
+        val timestampOnlyPattern = Regex("^[0-9: \\n]+$")
+        if (timestampOnlyPattern.matches(text)) {
+            Log.d(TAG, "Invalid transcription detected: timestamp-only pattern")
+            return true
+        }
+        
+        // Pattern 2: Contains repeated timestamp patterns like "00:00" or "00:06 00:07 00:08"
+        val repeatedTimestampPattern = Regex("(\\d{2}:\\d{2}[:\\s]*){3,}")
+        if (repeatedTimestampPattern.containsMatchIn(text)) {
+            Log.d(TAG, "Invalid transcription detected: repeated timestamp pattern")
+            return true
+        }
+        
+        // Pattern 3: High ratio of zeros, colons, or newlines (likely noise interpreted as timestamps)
+        val invalidChars = text.count { it == '0' || it == ':' || it == '\n' }
+        if (text.length > 10 && invalidChars.toFloat() / text.length > 0.7f) {
+            Log.d(TAG, "Invalid transcription detected: high ratio of zeros/colons/newlines")
+            return true
+        }
+        
+        // Pattern 4: Very repetitive content (same short sequence repeated many times)
+        if (text.length > 20) {
+            val firstFew = text.take(5)
+            val occurrences = text.windowed(5).count { it == firstFew }
+            if (occurrences > text.length / 10) {
+                Log.d(TAG, "Invalid transcription detected: highly repetitive content")
+                return true
+            }
+        }
+        
+        return false
     }
     
     /**

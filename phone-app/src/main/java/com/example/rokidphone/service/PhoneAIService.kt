@@ -158,9 +158,13 @@ class PhoneAIService : Service() {
         try {
             bluetoothManager = BluetoothSppManager(this, serviceScope)
             
-            // Start listening for Bluetooth connections
-            bluetoothManager?.startListening()
-            Log.d(TAG, "Bluetooth manager started listening")
+            // Start listening for Bluetooth connections (only if permission granted)
+            if (bluetoothManager?.hasBluetoothPermission() == true) {
+                bluetoothManager?.startListening()
+                Log.d(TAG, "Bluetooth manager started listening")
+            } else {
+                Log.w(TAG, "Bluetooth permission not granted, waiting for permission")
+            }
             
             // Monitor Bluetooth connection state
             serviceScope.launch {
@@ -740,20 +744,19 @@ class PhoneAIService : Service() {
      * Create AI service
      */
     private fun createAiService(settings: ApiSettings): AiServiceProvider {
-        // If no API key, use default Gemini with BuildConfig key
+        // If no API key configured, notify user
         val effectiveSettings = if (settings.getCurrentApiKey().isBlank()) {
-            Log.w(TAG, "No API key for ${settings.aiProvider}, falling back to built-in Gemini")
-            
-            // Check if BuildConfig has a valid Gemini API key
+            // Check if BuildConfig has a valid Gemini API key as fallback
             if (BuildConfig.GEMINI_API_KEY.isNotBlank()) {
+                Log.d(TAG, "No API key for ${settings.aiProvider}, using development fallback")
                 settings.copy(
                     aiProvider = AiProvider.GEMINI,
                     aiModelId = "gemini-2.5-flash",
                     geminiApiKey = BuildConfig.GEMINI_API_KEY
                 )
             } else {
-                // No fallback available, create with empty key (will fail gracefully)
-                Log.e(TAG, "No fallback API key available!")
+                // No fallback available - user must configure API key
+                Log.w(TAG, "No API key configured. Please set up an API key in Settings.")
                 settings
             }
         } else {

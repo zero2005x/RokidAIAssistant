@@ -40,6 +40,7 @@
     <string name="system_prompt">พรอมต์ระบบ</string>
     <string name="system_prompt_hint">ป้อนพรอมต์ระบบสำหรับ AI…</string>
     <string name="enter_system_prompt">ป้อนพรอมต์ระบบ AI…</string>
+    <string name="default_system_prompt">คุณเป็นผู้ช่วย AI ที่เป็นมิตร กรุณาตอบคำถามอย่างกระชับ</string>
     
     <!-- Language Settings -->
     <string name="language_settings">ภาษา</string>
@@ -126,10 +127,54 @@
     <string name="provider_perplexity">Perplexity</string>
     <string name="provider_custom">กำหนดเอง / โฮสต์เอง</string>
     
-    <!-- Speech Service Names -->
+    <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">การรู้จำเสียง Gemini</string>
     <string name="speech_service_openai_whisper">OpenAI Whisper</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
+    
+    <!-- STT Provider Names -->
+    <string name="stt_provider_gemini">Gemini</string>
+    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_groq_whisper">Groq Whisper</string>
+    <string name="stt_provider_google_cloud">Google Cloud STT</string>
+    <string name="stt_provider_azure">Azure Speech</string>
+    <string name="stt_provider_aws">AWS Transcribe</string>
+    <string name="stt_provider_ibm_watson">IBM Watson</string>
+    <string name="stt_provider_deepgram">Deepgram</string>
+    <string name="stt_provider_assemblyai">AssemblyAI</string>
+    <string name="stt_provider_iflytek">iFLYTEK</string>
+    <string name="stt_provider_huawei">Huawei SIS</string>
+    <string name="stt_provider_volcengine">Volcengine</string>
+    
+    <!-- STT Settings -->
+    <string name="stt_settings_title">การตั้งค่าการรู้จำเสียง</string>
+    <string name="stt_provider_label">ผู้ให้บริการ STT</string>
+    <string name="stt_credentials_title">ข้อมูลรับรอง STT</string>
+    <string name="stt_test_connection">ทดสอบการเชื่อมต่อ</string>
+    <string name="stt_test_success">เชื่อมต่อสำเร็จ</string>
+    <string name="stt_test_failed">ทดสอบการเชื่อมต่อล้มเหลว</string>
+    <string name="stt_api_key">คีย์ API</string>
+    <string name="stt_api_secret">ซีเคร็ต API</string>
+    <string name="stt_app_id">ID แอป</string>
+    <string name="stt_project_id">ID โปรเจกต์</string>
+    <string name="stt_region">ภูมิภาค</string>
+    <string name="stt_service_url">URL บริการ</string>
+    <string name="stt_access_key">คีย์การเข้าถึง</string>
+    <string name="stt_secret_key">คีย์ลับ</string>
+    <string name="stt_subscription_key">คีย์สมัครสมาชิก</string>
+    
+    <!-- STT Error Messages -->
+    <string name="stt_error_audio_too_short">เสียงสั้นเกินไป กรุณาลองอีกครั้ง</string>
+    <string name="stt_error_unable_to_recognize">ไม่สามารถรู้จำเสียงได้ กรุณาลองอีกครั้ง</string>
+    <string name="stt_error_upload_failed">อัปโหลดเสียงล้มเหลว</string>
+    <string name="stt_error_create_transcript_failed">สร้างการถอดเสียงล้มเหลว</string>
+    <string name="stt_error_transcription_timeout">การถอดเสียงล้มเหลวหรือหมดเวลา</string>
+    <string name="stt_error_transcription_error">ข้อผิดพลาดการถอดเสียง: %s</string>
+    <string name="stt_error_service_unavailable">บริการ AI ไม่พร้อมใช้งานชั่วคราว กรุณาลองอีกครั้งภายหลัง</string>
+    <string name="stt_error_no_speech_detected">ไม่พบเสียงพูด</string>
+    <string name="stt_error_not_supported">ผู้ให้บริการนี้ไม่รองรับการรู้จำเสียง</string>
+    <string name="stt_error_provider_not_supported">%s ไม่รองรับการรู้จำเสียง กรุณาใช้บริการอื่น</string>
+    <string name="stt_error_recognition_failed">การรู้จำเสียงล้มเหลว: %s</string>
     
     <!-- Supports Vision -->
     <string name="supports_vision">ภาพ</string>
@@ -146,16 +191,25 @@
     <string name="api_key_validation_failed">การตรวจสอบคีย์ API ล้มเหลว</string>
     <string name="service_not_ready">บริการยังไม่พร้อม กรุณากำหนดค่าคีย์ API ในการตั้งค่า</string>
     
+    <!-- Initial Setup -->
+    <string name="initial_setup_title">ยินดีต้อนรับ! มาเริ่มกันเลย</string>
+    <string name="initial_setup_message">เพื่อใช้งานผู้ช่วย AI เสียงและฟีเจอร์จดจำรูปภาพ คุณต้องกำหนดค่าคีย์ API อย่างน้อยหนึ่งรายการ\n\nบริการที่รองรับ:\n• Google Gemini\n• OpenAI\n• Anthropic Claude\n• DeepSeek\n• Groq\n• xAI Grok</string>
+    <string name="initial_setup_hint">คุณสามารถรับคีย์ API ฟรีจากผู้ให้บริการเหล่านี้ Gemini มีโควต้าฟรีที่เอื้อเฟื้อ</string>
+    <string name="setup_now">ตั้งค่าตอนนี้</string>
+    
     <!-- Photo Transfer -->
     <string name="photo_received">ได้รับรูปภาพจากแว่นแล้ว</string>
     <string name="photo_processing_failed">การประมวลผลรูปภาพล้มเหลว</string>
     <string name="photo_transfer_failed">การถ่ายโอนรูปภาพล้มเหลว: %s</string>
     <string name="analyzing_photo">กำลังวิเคราะห์รูปภาพ…</string>
     <string name="ai_analysis_unavailable">การวิเคราะห์ภาพ AI ไม่พร้อมใช้งาน</string>
-    <string name="photo_analysis_failed">การวิเคราะห์รูปภาพล้มเหลว: %s</string>    <string name="preparing_analysis">กำลังเตรียมการวิเคราะห์…</string>
+    <string name="photo_analysis_failed">การวิเคราะห์รูปภาพล้มเหลว: %s</string>
+    <string name="preparing_analysis">กำลังเตรียมการวิเคราะห์…</string>
     <string name="unable_to_read_photo">ไม่สามารถอ่านข้อมูลรูปภาพ</string>
     <string name="calling_ai_analysis">กำลังเรียก AI เพื่อวิเคราะห์…</string>
-    <string name="analyzing_image">กำลังวิเคราะห์ภาพ…</string>    
+    <string name="analyzing_image">กำลังวิเคราะห์ภาพ…</string>
+    <string name="analysis_failed">การวิเคราะห์ล้มเหลว</string>
+    
     <!-- Camera Capture -->
     <string name="camera_capture">กล้องแว่น</string>
     <string name="camera_capture_hint">ถ่ายภาพจากแว่นและวิเคราะห์ด้วย AI</string>
@@ -221,4 +275,9 @@
     <string name="current_model">โมเดลปัจจุบัน</string>
     <string name="home_current_session">เซสชันปัจจุบัน</string>
     <string name="home_view_all">ดูทั้งหมด</string>
+    
+    <!-- Developer Tools -->
+    <string name="developer_tools">เครื่องมือนักพัฒนา</string>
+    <string name="log_viewer">ตัวดูบันทึก</string>
+    <string name="log_viewer_description">ดู ส่งออก และจัดการบันทึกของแอป</string>
 </resources>

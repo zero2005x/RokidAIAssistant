@@ -49,4 +49,8 @@
     <string name="swipe_for_more">اسحب لأعلى/لأسفل لعرض المزيد</string>
     <string name="swipe_up_previous">▲ اسحب لأعلى للسابق</string>
     <string name="swipe_down_next">▼ اسحب لأسفل للتالي</string>
+    
+    <!-- AI System Prompt -->
+    <string name="glasses_system_prompt">أنت مساعد ذكاء اصطناعي ودود مثبت على نظارات Rokid الذكية. يرجى الإجابة على الأسئلة بإيجاز بلغة المستخدم، مع عدم تجاوز كل إجابة 100 كلمة.</string>
+    <string name="glasses_system_prompt_ack">مفهوم، أنا مساعد Rokid AI الخاص بك. سأساعدك بإيجاز. كيف يمكنني مساعدتك؟</string>
 </resources>

@@ -26,6 +26,7 @@ data class PhoneUiState(
     val isScanning: Boolean = false,
     val availableDevices: List<String> = emptyList(),
     val showApiKeyWarning: Boolean = false,  // Flag to show API key warning dialog
+    val showInitialSetup: Boolean = false,   // Flag to show initial setup dialog (no API key configured)
     val latestPhotoPath: String? = null      // Path to the latest received photo
 )
 
@@ -137,6 +138,23 @@ class PhoneViewModel : ViewModel() {
     
     fun dismissApiKeyWarning() {
         _uiState.update { it.copy(showApiKeyWarning = false) }
+    }
+    
+    /**
+     * Check if initial setup is needed (no API key configured at all)
+     * Called from UI when settings are loaded
+     */
+    fun checkInitialSetup(hasAnyApiKey: Boolean) {
+        if (!hasAnyApiKey) {
+            _uiState.update { it.copy(showInitialSetup = true) }
+        }
+    }
+    
+    /**
+     * Dismiss initial setup dialog
+     */
+    fun dismissInitialSetup() {
+        _uiState.update { it.copy(showInitialSetup = false) }
     }
     
     /**

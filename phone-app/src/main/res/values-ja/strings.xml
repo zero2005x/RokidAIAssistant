@@ -40,6 +40,7 @@
     <string name="system_prompt">システムプロンプト</string>
     <string name="system_prompt_hint">AI システムプロンプトを入力…</string>
     <string name="enter_system_prompt">AI のシステムプロンプトを入力…</string>
+    <string name="default_system_prompt">あなたは親切な AI アシスタントです。質問には簡潔にお答えください。</string>
     
     <!-- Language Settings -->
     <string name="language_settings">言語設定</string>
@@ -68,6 +69,12 @@
     <string name="later">後で</string>
     <string name="api_key_validation_failed">API キー検証失敗</string>
     <string name="service_not_ready">サービスの準備ができていません。設定で API キーを設定してください。</string>
+    
+    <!-- Initial Setup -->
+    <string name="initial_setup_title">ようこそ！設定を始めましょう</string>
+    <string name="initial_setup_message">AI 音声アシスタントと画像認識機能を使用するには、少なくとも1つの API キーを設定する必要があります。\n\nサポートされているサービス：\n• Google Gemini\n• OpenAI\n• Anthropic Claude\n• DeepSeek\n• Groq\n• xAI Grok</string>
+    <string name="initial_setup_hint">これらのプロバイダーから無料の API キーを取得できます。Gemini は寛大な無料枠を提供しています。</string>
+    <string name="setup_now">今すぐ設定</string>
     
     <!-- AI Processing -->
     <string name="processing_voice">音声を認識中…</string>
@@ -139,10 +146,54 @@
     <string name="provider_perplexity">Perplexity</string>
     <string name="provider_custom">カスタム / セルフホスト</string>
     
-    <!-- Speech Service Names -->
+    <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Gemini 音声認識</string>
     <string name="speech_service_openai_whisper">OpenAI Whisper</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
+    
+    <!-- STT Provider Names -->
+    <string name="stt_provider_gemini">Gemini 音声</string>
+    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_groq_whisper">Groq Whisper</string>
+    <string name="stt_provider_google_cloud">Google Cloud STT</string>
+    <string name="stt_provider_azure">Azure Speech</string>
+    <string name="stt_provider_aws">Amazon Transcribe</string>
+    <string name="stt_provider_ibm_watson">IBM Watson STT</string>
+    <string name="stt_provider_deepgram">Deepgram</string>
+    <string name="stt_provider_assemblyai">AssemblyAI</string>
+    <string name="stt_provider_iflytek">科大訊飛 iFLYTEK</string>
+    <string name="stt_provider_huawei">華為雲 SIS</string>
+    <string name="stt_provider_volcengine">火山引擎 ASR</string>
+    
+    <!-- STT Settings -->
+    <string name="stt_settings_title">音声認識設定</string>
+    <string name="stt_provider_label">STT プロバイダー</string>
+    <string name="stt_credentials_title">認証情報</string>
+    <string name="stt_test_connection">接続テスト</string>
+    <string name="stt_test_success">接続成功！</string>
+    <string name="stt_test_failed">接続失敗：%s</string>
+    <string name="stt_api_key">API キー</string>
+    <string name="stt_api_secret">API シークレット</string>
+    <string name="stt_app_id">アプリ ID</string>
+    <string name="stt_project_id">プロジェクト ID</string>
+    <string name="stt_region">リージョン</string>
+    <string name="stt_service_url">サービス URL</string>
+    <string name="stt_access_key">アクセスキー (AK)</string>
+    <string name="stt_secret_key">シークレットキー (SK)</string>
+    <string name="stt_subscription_key">サブスクリプションキー</string>
+    
+    <!-- STT Error Messages -->
+    <string name="stt_error_audio_too_short">音声が短すぎます。もう一度お試しください</string>
+    <string name="stt_error_unable_to_recognize">音声を認識できません。もう一度お試しください</string>
+    <string name="stt_error_upload_failed">音声のアップロードに失敗しました</string>
+    <string name="stt_error_create_transcript_failed">文字起こしの作成に失敗しました</string>
+    <string name="stt_error_transcription_timeout">文字起こしに失敗したかタイムアウトしました</string>
+    <string name="stt_error_transcription_error">文字起こしエラー：%s</string>
+    <string name="stt_error_service_unavailable">AIサービスが一時的に利用できません。後でもう一度お試しください</string>
+    <string name="stt_error_no_speech_detected">音声が検出されませんでした</string>
+    <string name="stt_error_not_supported">このプロバイダーは音声認識に対応していません</string>
+    <string name="stt_error_provider_not_supported">%s は音声認識に対応していません。他のサービスをご利用ください</string>
+    <string name="stt_error_recognition_failed">音声認識に失敗しました：%s</string>
     
     <!-- Photo Transfer -->
     <string name="photo_received">グラスから写真を受信しました</string>
@@ -150,10 +201,12 @@
     <string name="photo_transfer_failed">写真転送失敗：%s</string>
     <string name="analyzing_photo">写真を分析中…</string>
     <string name="ai_analysis_unavailable">AI 画像分析は利用できません</string>
-    <string name="photo_analysis_failed">写真分析失敗：%s</string>    <string name="preparing_analysis">分析の準備中…</string>
+    <string name="photo_analysis_failed">写真分析失敗：%s</string>
+    <string name="preparing_analysis">分析の準備中…</string>
     <string name="unable_to_read_photo">写真データを読み取れません</string>
     <string name="calling_ai_analysis">AI分析を呼び出し中…</string>
-    <string name="analyzing_image">画像を分析中…</string>    
+    <string name="analyzing_image">画像を分析中…</string>
+    <string name="analysis_failed">分析に失敗しました</string>
     <!-- Camera Capture -->
     <string name="camera_capture">グラスカメラ</string>
     <string name="camera_capture_hint">グラスから写真を撮影し AI で分析</string>
@@ -219,4 +272,9 @@
     <string name="current_model">現在のモデル</string>
     <string name="home_current_session">現在のセッション</string>
     <string name="home_view_all">すべて表示</string>
+    
+    <!-- Developer Tools -->
+    <string name="developer_tools">開発者ツール</string>
+    <string name="log_viewer">ログビューア</string>
+    <string name="log_viewer_description">アプリのログを表示、エクスポート、管理</string>
 </resources>

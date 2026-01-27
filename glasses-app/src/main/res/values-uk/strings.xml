@@ -49,4 +49,8 @@
     <string name="swipe_for_more">Проведіть вгору/вниз для продовження</string>
     <string name="swipe_up_previous">▲ Вгору - попередня</string>
     <string name="swipe_down_next">▼ Вниз - наступна</string>
+    
+    <!-- AI System Prompt -->
+    <string name="glasses_system_prompt">Ви дружній ШІ-асистент, встановлений на розумних окулярах Rokid. Будь ласка, відповідайте на запитання стисло мовою користувача, кожна відповідь не повинна перевищувати 100 слів.</string>
+    <string name="glasses_system_prompt_ack">Зрозуміло, я ваш ШІ-асистент Rokid. Я допомагатиму вам стисло. Чим можу допомогти?</string>
 </resources>

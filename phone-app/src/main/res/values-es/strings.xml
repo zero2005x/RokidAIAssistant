@@ -40,6 +40,7 @@
     <string name="system_prompt">Indicación del sistema</string>
     <string name="system_prompt_hint">Ingrese la indicación del sistema de IA…</string>
     <string name="enter_system_prompt">Ingrese el prompt del sistema de IA…</string>
+    <string name="default_system_prompt">Eres un asistente de IA amigable. Por favor responde las preguntas de manera concisa.</string>
     
     <!-- Language Settings -->
     <string name="language_settings">Idioma</string>
@@ -68,6 +69,12 @@
     <string name="later">Más tarde</string>
     <string name="api_key_validation_failed">Validación de clave API fallida</string>
     <string name="service_not_ready">Servicio no listo. Configure las claves API en Configuración.</string>
+    
+    <!-- Initial Setup -->
+    <string name="initial_setup_title">¡Bienvenido! Empecemos</string>
+    <string name="initial_setup_message">Para usar el asistente de voz IA y las funciones de reconocimiento de imágenes, necesita configurar al menos una clave API.\n\nServicios compatibles:\n• Google Gemini\n• OpenAI\n• Anthropic Claude\n• DeepSeek\n• Groq\n• xAI Grok</string>
+    <string name="initial_setup_hint">Puede obtener claves API gratuitas de estos proveedores. Gemini ofrece una cuota gratuita generosa.</string>
+    <string name="setup_now">Configurar ahora</string>
     
     <!-- AI Processing -->
     <string name="processing_voice">Procesando voz…</string>
@@ -139,10 +146,54 @@
     <string name="provider_perplexity">Perplexity</string>
     <string name="provider_custom">Personalizado / Auto-alojado</string>
     
-    <!-- Speech Service Names -->
+    <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Reconocimiento de voz Gemini</string>
     <string name="speech_service_openai_whisper">OpenAI Whisper</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
+    
+    <!-- STT Provider Names -->
+    <string name="stt_provider_gemini">Gemini</string>
+    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_groq_whisper">Groq Whisper</string>
+    <string name="stt_provider_google_cloud">Google Cloud STT</string>
+    <string name="stt_provider_azure">Azure Speech</string>
+    <string name="stt_provider_aws">AWS Transcribe</string>
+    <string name="stt_provider_ibm_watson">IBM Watson</string>
+    <string name="stt_provider_deepgram">Deepgram</string>
+    <string name="stt_provider_assemblyai">AssemblyAI</string>
+    <string name="stt_provider_iflytek">iFLYTEK</string>
+    <string name="stt_provider_huawei">Huawei SIS</string>
+    <string name="stt_provider_volcengine">Volcengine</string>
+    
+    <!-- STT Settings -->
+    <string name="stt_settings_title">Configuración de reconocimiento de voz</string>
+    <string name="stt_provider_label">Proveedor STT</string>
+    <string name="stt_credentials_title">Credenciales STT</string>
+    <string name="stt_test_connection">Probar conexión</string>
+    <string name="stt_test_success">Conexión exitosa</string>
+    <string name="stt_test_failed">Prueba de conexión fallida</string>
+    <string name="stt_api_key">Clave API</string>
+    <string name="stt_api_secret">Secreto API</string>
+    <string name="stt_app_id">ID de aplicación</string>
+    <string name="stt_project_id">ID de proyecto</string>
+    <string name="stt_region">Región</string>
+    <string name="stt_service_url">URL del servicio</string>
+    <string name="stt_access_key">Clave de acceso</string>
+    <string name="stt_secret_key">Clave secreta</string>
+    <string name="stt_subscription_key">Clave de suscripción</string>
+    
+    <!-- STT Error Messages -->
+    <string name="stt_error_audio_too_short">Audio demasiado corto, inténtelo de nuevo</string>
+    <string name="stt_error_unable_to_recognize">No se puede reconocer el habla, inténtelo de nuevo</string>
+    <string name="stt_error_upload_failed">Error al subir el audio</string>
+    <string name="stt_error_create_transcript_failed">Error al crear la transcripción</string>
+    <string name="stt_error_transcription_timeout">Transcripción fallida o tiempo agotado</string>
+    <string name="stt_error_transcription_error">Error de transcripción: %s</string>
+    <string name="stt_error_service_unavailable">Servicio de IA temporalmente no disponible, inténtelo de nuevo más tarde</string>
+    <string name="stt_error_no_speech_detected">No se detectó habla</string>
+    <string name="stt_error_not_supported">El reconocimiento de voz no es compatible con este proveedor</string>
+    <string name="stt_error_provider_not_supported">%s no admite reconocimiento de voz, por favor use otro servicio</string>
+    <string name="stt_error_recognition_failed">Fallo en el reconocimiento de voz: %s</string>
     
     <!-- Photo Transfer -->
     <string name="photo_received">Foto recibida de las gafas</string>
@@ -155,6 +206,7 @@
     <string name="unable_to_read_photo">No se pueden leer los datos de la foto</string>
     <string name="calling_ai_analysis">Llamando a IA para análisis…</string>
     <string name="analyzing_image">Analizando imagen…</string>
+    <string name="analysis_failed">Error en el análisis</string>
     
     <!-- Camera Capture -->
     <string name="camera_capture">Cámara de gafas</string>
@@ -221,4 +273,9 @@
     <string name="current_model">Modelo actual</string>
     <string name="home_current_session">Sesión actual</string>
     <string name="home_view_all">Ver todo</string>
+    
+    <!-- Developer Tools -->
+    <string name="developer_tools">Herramientas de desarrollo</string>
+    <string name="log_viewer">Visor de registros</string>
+    <string name="log_viewer_description">Ver, exportar y gestionar los registros de la aplicación</string>
 </resources>

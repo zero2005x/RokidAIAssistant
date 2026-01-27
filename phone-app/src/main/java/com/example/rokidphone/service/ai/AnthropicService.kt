@@ -25,7 +25,7 @@ import org.json.JSONObject
 class AnthropicService(
     apiKey: String,
     modelId: String = "claude-3-5-sonnet-20241022",
-    systemPrompt: String = "You are a friendly AI assistant. Please answer questions concisely."
+    systemPrompt: String = ""
 ) : BaseAiService(apiKey, modelId, systemPrompt), AiServiceProvider {
     
     companion object {

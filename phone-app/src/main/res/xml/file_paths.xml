@@ -5,4 +5,7 @@
     
     <!-- Glasses photos directory for sharing photos -->
     <files-path name="glasses_photos" path="glasses_photos/" />
+    
+    <!-- Log files directory for sharing logs -->
+    <files-path name="logs" path="logs/" />
 </paths>

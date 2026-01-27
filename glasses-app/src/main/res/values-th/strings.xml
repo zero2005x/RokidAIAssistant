@@ -49,4 +49,8 @@
     <string name="swipe_for_more">ปัดขึ้น/ลงเพื่อดูเพิ่มเติม</string>
     <string name="swipe_up_previous">▲ ปัดขึ้น - หน้าก่อน</string>
     <string name="swipe_down_next">▼ ปัดลง - หน้าถัดไป</string>
+    
+    <!-- AI System Prompt -->
+    <string name="glasses_system_prompt">คุณคือผู้ช่วย AI ที่เป็นมิตรซึ่งติดตั้งบนแว่นตาอัจฉริยะ Rokid กรุณาตอบคำถามอย่างกระชับในภาษาของผู้ใช้ แต่ละคำตอบไม่เกิน 100 คำ</string>
+    <string name="glasses_system_prompt_ack">เข้าใจค่ะ ผมคือผู้ช่วย AI Rokid ของคุณ ผมจะช่วยเหลืออย่างกระชับ มีอะไรให้ช่วยไหมคะ?</string>
 </resources>

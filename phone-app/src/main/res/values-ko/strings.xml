@@ -40,6 +40,7 @@
     <string name="system_prompt">시스템 프롬프트</string>
     <string name="system_prompt_hint">AI 시스템 프롬프트 입력…</string>
     <string name="enter_system_prompt">AI 시스템 프롬프트 입력…</string>
+    <string name="default_system_prompt">당신은 친절한 AI 어시스턴트입니다. 질문에 간결하게 답변해 주세요.</string>
     
     <!-- Language Settings -->
     <string name="language_settings">언어 설정</string>
@@ -68,6 +69,12 @@
     <string name="later">나중에</string>
     <string name="api_key_validation_failed">API 키 검증 실패</string>
     <string name="service_not_ready">서비스가 준비되지 않았습니다. 설정에서 API 키를 설정하세요.</string>
+    
+    <!-- Initial Setup -->
+    <string name="initial_setup_title">환영합니다! 시작하기</string>
+    <string name="initial_setup_message">AI 음성 비서 및 이미지 인식 기능을 사용하려면 최소 하나의 API 키를 설정해야 합니다.\n\n지원되는 서비스:\n• Google Gemini\n• OpenAI\n• Anthropic Claude\n• DeepSeek\n• Groq\n• xAI Grok</string>
+    <string name="initial_setup_hint">이 제공업체들로부터 무료 API 키를 받을 수 있습니다. Gemini는 넉넉한 무료 한도를 제공합니다.</string>
+    <string name="setup_now">지금 설정</string>
     
     <!-- AI Processing -->
     <string name="processing_voice">음성 인식 중…</string>
@@ -139,10 +146,54 @@
     <string name="provider_perplexity">Perplexity</string>
     <string name="provider_custom">사용자 지정 / 셀프 호스팅</string>
     
-    <!-- Speech Service Names -->
+    <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Gemini 음성 인식</string>
     <string name="speech_service_openai_whisper">OpenAI Whisper</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
+    
+    <!-- STT Provider Names -->
+    <string name="stt_provider_gemini">Gemini 음성</string>
+    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_groq_whisper">Groq Whisper</string>
+    <string name="stt_provider_google_cloud">Google Cloud STT</string>
+    <string name="stt_provider_azure">Azure Speech</string>
+    <string name="stt_provider_aws">Amazon Transcribe</string>
+    <string name="stt_provider_ibm_watson">IBM Watson STT</string>
+    <string name="stt_provider_deepgram">Deepgram</string>
+    <string name="stt_provider_assemblyai">AssemblyAI</string>
+    <string name="stt_provider_iflytek">科大讯飞 iFLYTEK</string>
+    <string name="stt_provider_huawei">화웨이 클라우드 SIS</string>
+    <string name="stt_provider_volcengine">화산엔진 ASR</string>
+    
+    <!-- STT Settings -->
+    <string name="stt_settings_title">음성 인식 설정</string>
+    <string name="stt_provider_label">STT 제공업체</string>
+    <string name="stt_credentials_title">자격 증명</string>
+    <string name="stt_test_connection">연결 테스트</string>
+    <string name="stt_test_success">연결 성공!</string>
+    <string name="stt_test_failed">연결 실패: %s</string>
+    <string name="stt_api_key">API 키</string>
+    <string name="stt_api_secret">API 시크릿</string>
+    <string name="stt_app_id">앱 ID</string>
+    <string name="stt_project_id">프로젝트 ID</string>
+    <string name="stt_region">리전</string>
+    <string name="stt_service_url">서비스 URL</string>
+    <string name="stt_access_key">액세스 키 (AK)</string>
+    <string name="stt_secret_key">시크릿 키 (SK)</string>
+    <string name="stt_subscription_key">구독 키</string>
+    
+    <!-- STT Error Messages -->
+    <string name="stt_error_audio_too_short">오디오가 너무 짧습니다. 다시 시도해 주세요</string>
+    <string name="stt_error_unable_to_recognize">음성을 인식할 수 없습니다. 다시 시도해 주세요</string>
+    <string name="stt_error_upload_failed">오디오 업로드 실패</string>
+    <string name="stt_error_create_transcript_failed">텍스트 변환 생성 실패</string>
+    <string name="stt_error_transcription_timeout">텍스트 변환 실패 또는 시간 초과</string>
+    <string name="stt_error_transcription_error">텍스트 변환 오류: %s</string>
+    <string name="stt_error_service_unavailable">AI 서비스를 일시적으로 사용할 수 없습니다. 나중에 다시 시도해 주세요</string>
+    <string name="stt_error_no_speech_detected">음성이 감지되지 않았습니다</string>
+    <string name="stt_error_not_supported">이 제공자는 음성 인식을 지원하지 않습니다</string>
+    <string name="stt_error_provider_not_supported">%s은(는) 음성 인식을 지원하지 않습니다. 다른 서비스를 사용하세요</string>
+    <string name="stt_error_recognition_failed">음성 인식 실패: %s</string>
     
     <!-- Photo Transfer -->
     <string name="photo_received">안경에서 사진 수신됨</string>
@@ -150,10 +201,12 @@
     <string name="photo_transfer_failed">사진 전송 실패: %s</string>
     <string name="analyzing_photo">사진 분석 중…</string>
     <string name="ai_analysis_unavailable">AI 이미지 분석을 사용할 수 없습니다</string>
-    <string name="photo_analysis_failed">사진 분석 실패: %s</string>    <string name="preparing_analysis">분석 준비 중…</string>
+    <string name="photo_analysis_failed">사진 분석 실패: %s</string>
+    <string name="preparing_analysis">분석 준비 중…</string>
     <string name="unable_to_read_photo">사진 데이터를 읽을 수 없습니다</string>
     <string name="calling_ai_analysis">AI 분석 호출 중…</string>
-    <string name="analyzing_image">이미지 분석 중…</string>    
+    <string name="analyzing_image">이미지 분석 중…</string>
+    <string name="analysis_failed">분석 실패</string>
     <!-- Camera Capture -->
     <string name="camera_capture">안경 카메라</string>
     <string name="camera_capture_hint">안경에서 사진을 촬영하고 AI로 분석</string>
@@ -219,4 +272,9 @@
     <string name="current_model">현재 모델</string>
     <string name="home_current_session">현재 세션</string>
     <string name="home_view_all">모두 보기</string>
+    
+    <!-- Developer Tools -->
+    <string name="developer_tools">개발자 도구</string>
+    <string name="log_viewer">로그 뷰어</string>
+    <string name="log_viewer_description">앱 로그 보기, 내보내기 및 관리</string>
 </resources>

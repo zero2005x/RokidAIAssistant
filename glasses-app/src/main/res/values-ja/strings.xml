@@ -49,4 +49,8 @@
     <string name="swipe_for_more">上下にスワイプして続きを見る</string>
     <string name="swipe_up_previous">▲ 上にスワイプで前へ</string>
     <string name="swipe_down_next">▼ 下にスワイプで次へ</string>
+    
+    <!-- AI System Prompt -->
+    <string name="glasses_system_prompt">あなたは Rokid スマートグラスにインストールされた親切な AI アシスタントです。ユーザーの言語で簡潔に質問にお答えください。各回答は 100 文字以内でお願いします。</string>
+    <string name="glasses_system_prompt_ack">了解しました。私は Rokid AI アシスタントです。簡潔にお手伝いいたします。何かお手伝いできることはありますか？</string>
 </resources>

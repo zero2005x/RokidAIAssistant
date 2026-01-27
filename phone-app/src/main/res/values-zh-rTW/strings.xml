@@ -40,6 +40,7 @@
     <string name="system_prompt">系統提示詞</string>
     <string name="system_prompt_hint">輸入 AI 系統提示詞…</string>
     <string name="enter_system_prompt">輸入 AI 的系統提示詞…</string>
+    <string name="default_system_prompt">你是一個友善的 AI 助理。請簡潔地回答問題。</string>
     
     <!-- Language Settings -->
     <string name="language_settings">語言設定</string>
@@ -68,6 +69,12 @@
     <string name="later">稍後</string>
     <string name="api_key_validation_failed">API 金鑰驗證失敗</string>
     <string name="service_not_ready">服務未就緒。請在設定中配置 API 金鑰。</string>
+    
+    <!-- Initial Setup -->
+    <string name="initial_setup_title">歡迎！開始設定</string>
+    <string name="initial_setup_message">要使用 AI 語音助理和圖像辨識功能，您需要設定至少一個 API 金鑰。\n\n支援的服務：\n• Google Gemini\n• OpenAI\n• Anthropic Claude\n• DeepSeek\n• Groq\n• xAI Grok</string>
+    <string name="initial_setup_hint">您可以從這些提供商取得免費的 API 金鑰。Gemini 提供優惠的免費額度。</string>
+    <string name="setup_now">立即設定</string>
     
     <!-- AI Processing -->
     <string name="processing_voice">正在識別語音…</string>
@@ -139,10 +146,54 @@
     <string name="provider_perplexity">Perplexity</string>
     <string name="provider_custom">自訂 / 自架伺服器</string>
     
-    <!-- Speech Service Names -->
+    <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Gemini 語音辨識</string>
     <string name="speech_service_openai_whisper">OpenAI Whisper</string>
     <string name="speech_service_google_cloud">Google Cloud 語音轉文字</string>
+    
+    <!-- STT Provider Names -->
+    <string name="stt_provider_gemini">Gemini 語音</string>
+    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_groq_whisper">Groq Whisper</string>
+    <string name="stt_provider_google_cloud">Google Cloud STT</string>
+    <string name="stt_provider_azure">Azure 語音</string>
+    <string name="stt_provider_aws">Amazon Transcribe</string>
+    <string name="stt_provider_ibm_watson">IBM Watson STT</string>
+    <string name="stt_provider_deepgram">Deepgram</string>
+    <string name="stt_provider_assemblyai">AssemblyAI</string>
+    <string name="stt_provider_iflytek">科大訊飛</string>
+    <string name="stt_provider_huawei">華為雲 SIS</string>
+    <string name="stt_provider_volcengine">火山引擎 ASR</string>
+    
+    <!-- STT Settings -->
+    <string name="stt_settings_title">語音辨識設定</string>
+    <string name="stt_provider_label">語音辨識服務商</string>
+    <string name="stt_credentials_title">憑證設定</string>
+    <string name="stt_test_connection">測試連線</string>
+    <string name="stt_test_success">連線成功！</string>
+    <string name="stt_test_failed">連線失敗：%s</string>
+    <string name="stt_api_key">API 金鑰</string>
+    <string name="stt_api_secret">API 密鑰</string>
+    <string name="stt_app_id">應用程式 ID</string>
+    <string name="stt_project_id">專案 ID</string>
+    <string name="stt_region">區域</string>
+    <string name="stt_service_url">服務 URL</string>
+    <string name="stt_access_key">存取金鑰 (AK)</string>
+    <string name="stt_secret_key">密鑰 (SK)</string>
+    <string name="stt_subscription_key">訂閱金鑰</string>
+    
+    <!-- STT Error Messages -->
+    <string name="stt_error_audio_too_short">音訊太短，請重試</string>
+    <string name="stt_error_unable_to_recognize">無法識別語音，請重試</string>
+    <string name="stt_error_upload_failed">音訊上傳失敗</string>
+    <string name="stt_error_create_transcript_failed">建立轉錄失敗</string>
+    <string name="stt_error_transcription_timeout">轉錄失敗或逾時</string>
+    <string name="stt_error_transcription_error">轉錄錯誤：%s</string>
+    <string name="stt_error_service_unavailable">AI 服務暫時不可用，請稍後重試</string>
+    <string name="stt_error_no_speech_detected">未偵測到語音</string>
+    <string name="stt_error_not_supported">此服務不支援語音識別</string>
+    <string name="stt_error_provider_not_supported">%s 不支援語音識別，請使用其他服務</string>
+    <string name="stt_error_recognition_failed">語音識別失敗：%s</string>
     
     <!-- Photo Transfer -->
     <string name="photo_received">已從眼鏡接收照片</string>
@@ -150,10 +201,12 @@
     <string name="photo_transfer_failed">照片傳輸失敗：%s</string>
     <string name="analyzing_photo">正在分析照片…</string>
     <string name="ai_analysis_unavailable">AI 圖像分析不可用</string>
-    <string name="photo_analysis_failed">照片分析失敗：%s</string>    <string name="preparing_analysis">準備分析中…</string>
+    <string name="photo_analysis_failed">照片分析失敗：%s</string>
+    <string name="preparing_analysis">準備分析中…</string>
     <string name="unable_to_read_photo">無法讀取照片資料</string>
     <string name="calling_ai_analysis">正在呼叫 AI 進行分析…</string>
-    <string name="analyzing_image">正在分析圖像…</string>    
+    <string name="analyzing_image">正在分析圖像…</string>
+    <string name="analysis_failed">分析失敗</string>
     <!-- Camera Capture -->
     <string name="camera_capture">眼鏡相機</string>
     <string name="camera_capture_hint">從眼鏡拍照並使用 AI 分析</string>
@@ -219,4 +272,9 @@
     <string name="current_model">當前模型</string>
     <string name="home_current_session">當前會話</string>
     <string name="home_view_all">查看全部</string>
+    
+    <!-- Developer Tools -->
+    <string name="developer_tools">開發者工具</string>
+    <string name="log_viewer">日誌檢視器</string>
+    <string name="log_viewer_description">檢視、匯出和管理應用程式日誌</string>
 </resources>

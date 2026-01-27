@@ -26,7 +26,7 @@ import org.json.JSONObject
 class GroqService(
     apiKey: String,
     modelId: String = "llama-3.3-70b-versatile",
-    systemPrompt: String = "You are a friendly AI assistant. Please answer questions concisely."
+    systemPrompt: String = ""
 ) : BaseAiService(apiKey, modelId, systemPrompt), AiServiceProvider {
     
     companion object {

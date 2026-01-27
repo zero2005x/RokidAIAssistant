@@ -40,6 +40,7 @@
     <string name="system_prompt">Системный промпт</string>
     <string name="system_prompt_hint">Введите системный промпт ИИ…</string>
     <string name="enter_system_prompt">Введите системный промпт ИИ…</string>
+    <string name="default_system_prompt">Вы дружелюбный ИИ-ассистент. Пожалуйста, отвечайте на вопросы кратко.</string>
     
     <!-- Language Settings -->
     <string name="language_settings">Язык</string>
@@ -68,6 +69,12 @@
     <string name="later">Позже</string>
     <string name="api_key_validation_failed">Ошибка проверки ключа API</string>
     <string name="service_not_ready">Сервис не готов. Настройте ключи API в Настройках.</string>
+    
+    <!-- Initial Setup -->
+    <string name="initial_setup_title">Добро пожаловать! Начнём настройку</string>
+    <string name="initial_setup_message">Для использования голосового помощника ИИ и распознавания изображений необходимо настроить хотя бы один ключ API.\n\nПоддерживаемые сервисы:\n• Google Gemini\n• OpenAI\n• Anthropic Claude\n• DeepSeek\n• Groq\n• xAI Grok</string>
+    <string name="initial_setup_hint">Вы можете получить бесплатные ключи API от этих провайдеров. Gemini предлагает щедрую бесплатную квоту.</string>
+    <string name="setup_now">Настроить сейчас</string>
     
     <!-- AI Processing -->
     <string name="processing_voice">Обработка голоса…</string>
@@ -139,10 +146,54 @@
     <string name="provider_perplexity">Perplexity</string>
     <string name="provider_custom">Пользовательский / Самостоятельный хостинг</string>
     
-    <!-- Speech Service Names -->
+    <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Распознавание речи Gemini</string>
     <string name="speech_service_openai_whisper">OpenAI Whisper</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
+    
+    <!-- STT Provider Names -->
+    <string name="stt_provider_gemini">Gemini</string>
+    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_groq_whisper">Groq Whisper</string>
+    <string name="stt_provider_google_cloud">Google Cloud STT</string>
+    <string name="stt_provider_azure">Azure Speech</string>
+    <string name="stt_provider_aws">AWS Transcribe</string>
+    <string name="stt_provider_ibm_watson">IBM Watson</string>
+    <string name="stt_provider_deepgram">Deepgram</string>
+    <string name="stt_provider_assemblyai">AssemblyAI</string>
+    <string name="stt_provider_iflytek">iFLYTEK</string>
+    <string name="stt_provider_huawei">Huawei SIS</string>
+    <string name="stt_provider_volcengine">Volcengine</string>
+    
+    <!-- STT Settings -->
+    <string name="stt_settings_title">Настройки распознавания речи</string>
+    <string name="stt_provider_label">Провайдер STT</string>
+    <string name="stt_credentials_title">Учётные данные STT</string>
+    <string name="stt_test_connection">Тест соединения</string>
+    <string name="stt_test_success">Соединение успешно</string>
+    <string name="stt_test_failed">Тест соединения не пройден</string>
+    <string name="stt_api_key">API-ключ</string>
+    <string name="stt_api_secret">API-секрет</string>
+    <string name="stt_app_id">ID приложения</string>
+    <string name="stt_project_id">ID проекта</string>
+    <string name="stt_region">Регион</string>
+    <string name="stt_service_url">URL сервиса</string>
+    <string name="stt_access_key">Ключ доступа</string>
+    <string name="stt_secret_key">Секретный ключ</string>
+    <string name="stt_subscription_key">Ключ подписки</string>
+    
+    <!-- STT Error Messages -->
+    <string name="stt_error_audio_too_short">Аудио слишком короткое, попробуйте снова</string>
+    <string name="stt_error_unable_to_recognize">Не удалось распознать речь, попробуйте снова</string>
+    <string name="stt_error_upload_failed">Ошибка загрузки аудио</string>
+    <string name="stt_error_create_transcript_failed">Ошибка создания транскрипции</string>
+    <string name="stt_error_transcription_timeout">Транскрипция не удалась или истекло время ожидания</string>
+    <string name="stt_error_transcription_error">Ошибка транскрипции: %s</string>
+    <string name="stt_error_service_unavailable">Сервис ИИ временно недоступен, попробуйте позже</string>
+    <string name="stt_error_no_speech_detected">Речь не обнаружена</string>
+    <string name="stt_error_not_supported">Распознавание речи не поддерживается для этого провайдера</string>
+    <string name="stt_error_provider_not_supported">%s не поддерживает распознавание речи, пожалуйста используйте другой сервис</string>
+    <string name="stt_error_recognition_failed">Ошибка распознавания речи: %s</string>
     
     <!-- Photo Transfer -->
     <string name="photo_received">Фото получено с очков</string>
@@ -150,10 +201,13 @@
     <string name="photo_transfer_failed">Ошибка передачи фото: %s</string>
     <string name="analyzing_photo">Анализ фото…</string>
     <string name="ai_analysis_unavailable">Анализ изображений ИИ недоступен</string>
-    <string name="photo_analysis_failed">Ошибка анализа фото: %s</string>    <string name="preparing_analysis">Подготовка анализа…</string>
+    <string name="photo_analysis_failed">Ошибка анализа фото: %s</string>
+    <string name="preparing_analysis">Подготовка анализа…</string>
     <string name="unable_to_read_photo">Невозможно прочитать данные фото</string>
     <string name="calling_ai_analysis">Вызов IA для анализа…</string>
-    <string name="analyzing_image">Анализ изображения…</string>    
+    <string name="analyzing_image">Анализ изображения…</string>
+    <string name="analysis_failed">Ошибка анализа</string>
+    
     <!-- Camera Capture -->
     <string name="camera_capture">Камера очков</string>
     <string name="camera_capture_hint">Сделайте фото с очков и проанализируйте с ИИ</string>
@@ -219,4 +273,9 @@
     <string name="current_model">Текущая модель</string>
     <string name="home_current_session">Текущий сеанс</string>
     <string name="home_view_all">Показать все</string>
+    
+    <!-- Developer Tools -->
+    <string name="developer_tools">Инструменты разработчика</string>
+    <string name="log_viewer">Просмотр журналов</string>
+    <string name="log_viewer_description">Просмотр, экспорт и управление журналами приложения</string>
 </resources>

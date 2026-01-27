@@ -66,18 +66,6 @@ object LanguageManager {
      * Get Locale object for language
      */
     fun getLocale(language: AppLanguage): Locale {
-        return when (language) {
-            AppLanguage.SIMPLIFIED_CHINESE -> Locale.SIMPLIFIED_CHINESE
-            AppLanguage.TRADITIONAL_CHINESE -> Locale.TRADITIONAL_CHINESE
-            AppLanguage.JAPANESE -> Locale.JAPANESE
-            AppLanguage.KOREAN -> Locale.KOREAN
-            AppLanguage.FRENCH -> Locale.FRENCH
-            AppLanguage.ITALIAN -> Locale.ITALIAN
-            AppLanguage.SPANISH -> Locale("es")
-            AppLanguage.RUSSIAN -> Locale("ru")
-            AppLanguage.UKRAINIAN -> Locale("uk")
-            AppLanguage.ARABIC -> Locale("ar")
-            else -> Locale.ENGLISH
-        }
+        return language.locale
     }
 }

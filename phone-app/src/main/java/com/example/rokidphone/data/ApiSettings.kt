@@ -2,6 +2,7 @@ package com.example.rokidphone.data
 
 import androidx.annotation.StringRes
 import com.example.rokidphone.R
+import com.example.rokidphone.service.stt.SttProvider
 
 /**
  * AI Service Providers
@@ -663,21 +664,6 @@ object AvailableModels {
 }
 
 /**
- * Speech Recognition Service
- */
-enum class SpeechService(@StringRes val displayNameResId: Int) {
-    GEMINI_AUDIO(R.string.speech_service_gemini),
-    OPENAI_WHISPER(R.string.speech_service_openai_whisper),
-    GOOGLE_CLOUD_STT(R.string.speech_service_google_cloud);
-    
-    companion object {
-        fun fromName(name: String): SpeechService {
-            return entries.find { it.name == name } ?: GEMINI_AUDIO
-        }
-    }
-}
-
-/**
  * Provider-specific configuration
  */
 data class ProviderConfig(
@@ -713,12 +699,14 @@ data class ApiSettings(
     val customModelName: String = "llama4",
     
     // Speech recognition settings
-    val speechService: SpeechService = SpeechService.GEMINI_AUDIO,
+    val sttProvider: SttProvider = SttProvider.GEMINI,
     val speechLanguage: String = "zh-TW",
     
     // AI response settings
     val responseLanguage: String = "zh-TW",
-    val systemPrompt: String = "You are a friendly AI assistant. Please answer questions concisely."
+    // Note: The default value is set to empty string here. 
+    // The actual default (localized) is provided by SettingsRepository.getDefaultSystemPrompt()
+    val systemPrompt: String = ""
 ) {
     /**
      * Get current AI provider's API Key
@@ -825,6 +813,31 @@ data class ApiSettings(
             missing.add(aiProvider)
         }
         return missing
+    }
+    
+    /**
+     * Check if any API key is configured at all
+     * Returns true if at least one provider has an API key set
+     */
+    fun hasAnyApiKeyConfigured(): Boolean {
+        return geminiApiKey.isNotBlank() ||
+               openaiApiKey.isNotBlank() ||
+               anthropicApiKey.isNotBlank() ||
+               deepseekApiKey.isNotBlank() ||
+               groqApiKey.isNotBlank() ||
+               xaiApiKey.isNotBlank() ||
+               alibabaApiKey.isNotBlank() ||
+               zhipuApiKey.isNotBlank() ||
+               (baiduApiKey.isNotBlank() && baiduSecretKey.isNotBlank()) ||
+               perplexityApiKey.isNotBlank() ||
+               (customApiKey.isNotBlank() || customBaseUrl.isNotBlank())
+    }
+    
+    /**
+     * Get list of all configured providers
+     */
+    fun getConfiguredProviders(): List<AiProvider> {
+        return AiProvider.entries.filter { isProviderConfigured(it) }
     }
     
     /**

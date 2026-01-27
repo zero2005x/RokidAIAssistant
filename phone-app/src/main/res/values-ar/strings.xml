@@ -40,6 +40,7 @@
     <string name="system_prompt">موجه النظام</string>
     <string name="system_prompt_hint">أدخل موجه نظام الذكاء الاصطناعي…</string>
     <string name="enter_system_prompt">أدخل موجه نظام الذكاء الاصطناعي…</string>
+    <string name="default_system_prompt">أنت مساعد ذكاء اصطناعي ودود. يرجى الإجابة على الأسئلة بإيجاز.</string>
     
     <!-- Language Settings -->
     <string name="language_settings">اللغة</string>
@@ -68,6 +69,12 @@
     <string name="later">لاحقاً</string>
     <string name="api_key_validation_failed">فشل التحقق من مفتاح API</string>
     <string name="service_not_ready">الخدمة غير جاهزة. يرجى إعداد مفاتيح API في الإعدادات.</string>
+    
+    <!-- Initial Setup -->
+    <string name="initial_setup_title">مرحباً! لنبدأ</string>
+    <string name="initial_setup_message">لاستخدام مساعد الصوت بالذكاء الاصطناعي وميزات التعرف على الصور، تحتاج إلى إعداد مفتاح API واحد على الأقل.\n\nالخدمات المدعومة:\n• Google Gemini\n• OpenAI\n• Anthropic Claude\n• DeepSeek\n• Groq\n• xAI Grok</string>
+    <string name="initial_setup_hint">يمكنك الحصول على مفاتيح API مجانية من هؤلاء المزودين. يوفر Gemini حصة مجانية سخية.</string>
+    <string name="setup_now">إعداد الآن</string>
     
     <!-- AI Processing -->
     <string name="processing_voice">جارٍ معالجة الصوت…</string>
@@ -139,10 +146,54 @@
     <string name="provider_perplexity">Perplexity</string>
     <string name="provider_custom">مخصص / مستضاف ذاتياً</string>
     
-    <!-- Speech Service Names -->
+    <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">التعرف على الصوت Gemini</string>
     <string name="speech_service_openai_whisper">OpenAI Whisper</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
+    
+    <!-- STT Provider Names -->
+    <string name="stt_provider_gemini">Gemini</string>
+    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_groq_whisper">Groq Whisper</string>
+    <string name="stt_provider_google_cloud">Google Cloud STT</string>
+    <string name="stt_provider_azure">Azure Speech</string>
+    <string name="stt_provider_aws">AWS Transcribe</string>
+    <string name="stt_provider_ibm_watson">IBM Watson</string>
+    <string name="stt_provider_deepgram">Deepgram</string>
+    <string name="stt_provider_assemblyai">AssemblyAI</string>
+    <string name="stt_provider_iflytek">iFLYTEK</string>
+    <string name="stt_provider_huawei">Huawei SIS</string>
+    <string name="stt_provider_volcengine">Volcengine</string>
+    
+    <!-- STT Settings -->
+    <string name="stt_settings_title">إعدادات التعرف على الصوت</string>
+    <string name="stt_provider_label">مزود STT</string>
+    <string name="stt_credentials_title">بيانات اعتماد STT</string>
+    <string name="stt_test_connection">اختبار الاتصال</string>
+    <string name="stt_test_success">الاتصال ناجح</string>
+    <string name="stt_test_failed">فشل اختبار الاتصال</string>
+    <string name="stt_api_key">مفتاح API</string>
+    <string name="stt_api_secret">سر API</string>
+    <string name="stt_app_id">معرف التطبيق</string>
+    <string name="stt_project_id">معرف المشروع</string>
+    <string name="stt_region">المنطقة</string>
+    <string name="stt_service_url">عنوان URL للخدمة</string>
+    <string name="stt_access_key">مفتاح الوصول</string>
+    <string name="stt_secret_key">المفتاح السري</string>
+    <string name="stt_subscription_key">مفتاح الاشتراك</string>
+    
+    <!-- STT Error Messages -->
+    <string name="stt_error_audio_too_short">الصوت قصير جداً، يرجى المحاولة مرة أخرى</string>
+    <string name="stt_error_unable_to_recognize">تعذر التعرف على الكلام، يرجى المحاولة مرة أخرى</string>
+    <string name="stt_error_upload_failed">فشل تحميل الصوت</string>
+    <string name="stt_error_create_transcript_failed">فشل إنشاء النص</string>
+    <string name="stt_error_transcription_timeout">فشل النسخ أو انتهت المهلة</string>
+    <string name="stt_error_transcription_error">خطأ في النسخ: %s</string>
+    <string name="stt_error_service_unavailable">خدمة الذكاء الاصطناعي غير متاحة مؤقتًا، يرجى المحاولة لاحقًا</string>
+    <string name="stt_error_no_speech_detected">لم يتم اكتشاف أي كلام</string>
+    <string name="stt_error_not_supported">التعرف على الكلام غير مدعوم لهذا المزود</string>
+    <string name="stt_error_provider_not_supported">%s لا يدعم التعرف على الكلام، يرجى استخدام خدمة أخرى</string>
+    <string name="stt_error_recognition_failed">فشل التعرف على الكلام: %s</string>
     
     <!-- Photo Transfer -->
     <string name="photo_received">تم استلام صورة من النظارات</string>
@@ -155,6 +206,7 @@
     <string name="unable_to_read_photo">تعذر قراءة بيانات الصورة</string>
     <string name="calling_ai_analysis">جارٍ استدعاء الذكاء الاصطناعي للتحليل…</string>
     <string name="analyzing_image">جارٍ تحليل الصورة…</string>
+    <string name="analysis_failed">فشل التحليل</string>
     
     <!-- Camera Capture -->
     <string name="camera_capture">كاميرا النظارات</string>
@@ -221,4 +273,9 @@
     <string name="current_model">النموذج الحالي</string>
     <string name="home_current_session">الجلسة الحالية</string>
     <string name="home_view_all">عرض الكل</string>
+    
+    <!-- Developer Tools -->
+    <string name="developer_tools">أدوات المطور</string>
+    <string name="log_viewer">عارض السجلات</string>
+    <string name="log_viewer_description">عرض وتصدير وإدارة سجلات التطبيق</string>
 </resources>

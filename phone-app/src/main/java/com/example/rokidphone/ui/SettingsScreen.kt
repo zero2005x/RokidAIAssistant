@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import com.example.rokidphone.R
 import com.example.rokidphone.data.*
 import com.example.rokidphone.service.ai.AiServiceFactory
+import com.example.rokidphone.service.stt.SttProvider
+import com.example.rokidphone.service.stt.SttServiceFactory
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,6 +34,7 @@ fun SettingsScreen(
     settings: ApiSettings,
     onSettingsChange: (ApiSettings) -> Unit,
     onBack: () -> Unit,
+    onNavigateToLogViewer: () -> Unit = {},
     onTestConnection: (ApiSettings) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -221,7 +224,7 @@ fun SettingsScreen(
                 SettingsSection(title = stringResource(R.string.speech_recognition)) {
                     SettingsRow(
                         title = stringResource(R.string.speech_recognition_service),
-                        subtitle = stringResource(settings.speechService.displayNameResId),
+                        subtitle = stringResource(settings.sttProvider.displayNameResId),
                         onClick = { showSpeechServiceDialog = true }
                     )
                 }
@@ -278,6 +281,18 @@ fun SettingsScreen(
                     }
                 }
             }
+            
+            // Developer Tools section
+            item {
+                SettingsSection(title = stringResource(R.string.developer_tools)) {
+                    SettingsRow(
+                        title = stringResource(R.string.log_viewer),
+                        subtitle = stringResource(R.string.log_viewer_description),
+                        onClick = onNavigateToLogViewer,
+                        icon = Icons.Default.BugReport
+                    )
+                }
+            }
         }
     }
     
@@ -310,10 +325,10 @@ fun SettingsScreen(
     }
     
     if (showSpeechServiceDialog) {
-        SpeechServiceSelectionDialog(
-            currentService = settings.speechService,
-            onSelect = { service ->
-                onSettingsChange(settings.copy(speechService = service))
+        SttProviderSelectionDialog(
+            currentProvider = settings.sttProvider,
+            onSelect = { provider ->
+                onSettingsChange(settings.copy(sttProvider = provider))
                 showSpeechServiceDialog = false
             },
             onDismiss = { showSpeechServiceDialog = false }
@@ -335,8 +350,42 @@ fun SettingsScreen(
         LanguageSelectionDialog(
             currentLanguage = currentLanguage,
             onSelect = { language ->
+                val settingsRepository = SettingsRepository.getInstance(context)
+                
+                // Check if current system prompt is default (needs update when language changes)
+                val isUsingDefaultPrompt = settingsRepository.isUsingDefaultSystemPrompt()
+                
+                // Get new language's default prompt BEFORE changing the language
+                val newDefaultPrompt = settingsRepository.getDefaultSystemPromptForLanguage(language)
+                
+                // Get the corresponding speech language code
+                val newSpeechLanguage = when (language) {
+                    AppLanguage.SIMPLIFIED_CHINESE -> "zh-CN"
+                    AppLanguage.TRADITIONAL_CHINESE -> "zh-TW"
+                    AppLanguage.JAPANESE -> "ja-JP"
+                    AppLanguage.KOREAN -> "ko-KR"
+                    AppLanguage.FRENCH -> "fr-FR"
+                    AppLanguage.SPANISH -> "es-ES"
+                    AppLanguage.ITALIAN -> "it-IT"
+                    AppLanguage.RUSSIAN -> "ru-RU"
+                    AppLanguage.THAI -> "th-TH"
+                    AppLanguage.UKRAINIAN -> "uk-UA"
+                    AppLanguage.VIETNAMESE -> "vi-VN"
+                    AppLanguage.ARABIC -> "ar-SA"
+                    else -> "en-US"
+                }
+                
+                // Change the language
                 LanguageManager.setLanguage(context, language)
                 currentLanguage = language
+                
+                // Update settings: system prompt and speech language
+                var updatedSettings = settings.copy(speechLanguage = newSpeechLanguage)
+                if (isUsingDefaultPrompt) {
+                    updatedSettings = updatedSettings.copy(systemPrompt = newDefaultPrompt)
+                }
+                onSettingsChange(updatedSettings)
+                
                 showLanguageDialog = false
             },
             onDismiss = { showLanguageDialog = false }
@@ -376,7 +425,8 @@ fun SettingsSection(
 fun SettingsRow(
     title: String,
     subtitle: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null
 ) {
     androidx.compose.material3.Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -391,17 +441,33 @@ fun SettingsRow(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title, 
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (icon != null) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .padding(end = 0.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                }
+                Column {
+                    Text(
+                        text = title, 
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                    )
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
             Icon(
                 imageVector = Icons.Default.ChevronRight,
@@ -607,30 +673,41 @@ private fun CapabilityBadge(
 }
 
 @Composable
-fun SpeechServiceSelectionDialog(
-    currentService: SpeechService,
-    onSelect: (SpeechService) -> Unit,
+fun SttProviderSelectionDialog(
+    currentProvider: SttProvider,
+    onSelect: (SttProvider) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val implementedProviders = remember { SttServiceFactory.getImplementedProviders() }
+    
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.select_speech_service)) },
         text = {
-            Column {
-                SpeechService.entries.forEach { service ->
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
+                implementedProviders.forEach { provider ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onSelect(service) }
+                            .clickable { onSelect(provider) }
                             .padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
-                            selected = service == currentService,
-                            onClick = { onSelect(service) }
+                            selected = provider == currentProvider,
+                            onClick = { onSelect(provider) }
                         )
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text(stringResource(service.displayNameResId))
+                        Column {
+                            Text(stringResource(provider.displayNameResId))
+                            Text(
+                                text = provider.description,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }

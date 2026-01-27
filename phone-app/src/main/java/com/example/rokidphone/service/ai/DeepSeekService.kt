@@ -26,7 +26,7 @@ import org.json.JSONObject
 class DeepSeekService(
     apiKey: String,
     modelId: String = "deepseek-chat",
-    systemPrompt: String = "You are a friendly AI assistant. Please answer questions concisely."
+    systemPrompt: String = ""
 ) : BaseAiService(apiKey, modelId, systemPrompt), AiServiceProvider {
     
     companion object {

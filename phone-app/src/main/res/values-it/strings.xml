@@ -40,6 +40,7 @@
     <string name="system_prompt">Prompt di sistema</string>
     <string name="system_prompt_hint">Inserisci il prompt di sistema dell\'IA…</string>
     <string name="enter_system_prompt">Inserisci il prompt di sistema dell\'IA…</string>
+    <string name="default_system_prompt">Sei un assistente IA amichevole. Rispondi alle domande in modo conciso.</string>
     
     <!-- Language Settings -->
     <string name="language_settings">Lingua</string>
@@ -68,6 +69,12 @@
     <string name="later">Più tardi</string>
     <string name="api_key_validation_failed">Validazione chiave API fallita</string>
     <string name="service_not_ready">Servizio non pronto. Configura le chiavi API nelle Impostazioni.</string>
+    
+    <!-- Initial Setup -->
+    <string name="initial_setup_title">Benvenuto! Iniziamo</string>
+    <string name="initial_setup_message">Per utilizzare l\'assistente vocale AI e le funzionalità di riconoscimento immagini, è necessario configurare almeno una chiave API.\n\nServizi supportati:\n• Google Gemini\n• OpenAI\n• Anthropic Claude\n• DeepSeek\n• Groq\n• xAI Grok</string>
+    <string name="initial_setup_hint">Puoi ottenere chiavi API gratuite da questi fornitori. Gemini offre una quota gratuita generosa.</string>
+    <string name="setup_now">Configura ora</string>
     
     <!-- AI Processing -->
     <string name="processing_voice">Elaborazione voce…</string>
@@ -139,10 +146,54 @@
     <string name="provider_perplexity">Perplexity</string>
     <string name="provider_custom">Personalizzato / Self-Hosted</string>
     
-    <!-- Speech Service Names -->
+    <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Riconoscimento vocale Gemini</string>
     <string name="speech_service_openai_whisper">OpenAI Whisper</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
+    
+    <!-- STT Provider Names -->
+    <string name="stt_provider_gemini">Gemini</string>
+    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_groq_whisper">Groq Whisper</string>
+    <string name="stt_provider_google_cloud">Google Cloud STT</string>
+    <string name="stt_provider_azure">Azure Speech</string>
+    <string name="stt_provider_aws">AWS Transcribe</string>
+    <string name="stt_provider_ibm_watson">IBM Watson</string>
+    <string name="stt_provider_deepgram">Deepgram</string>
+    <string name="stt_provider_assemblyai">AssemblyAI</string>
+    <string name="stt_provider_iflytek">iFLYTEK</string>
+    <string name="stt_provider_huawei">Huawei SIS</string>
+    <string name="stt_provider_volcengine">Volcengine</string>
+    
+    <!-- STT Settings -->
+    <string name="stt_settings_title">Impostazioni riconoscimento vocale</string>
+    <string name="stt_provider_label">Provider STT</string>
+    <string name="stt_credentials_title">Credenziali STT</string>
+    <string name="stt_test_connection">Test connessione</string>
+    <string name="stt_test_success">Connessione riuscita</string>
+    <string name="stt_test_failed">Test connessione fallito</string>
+    <string name="stt_api_key">Chiave API</string>
+    <string name="stt_api_secret">Segreto API</string>
+    <string name="stt_app_id">ID applicazione</string>
+    <string name="stt_project_id">ID progetto</string>
+    <string name="stt_region">Regione</string>
+    <string name="stt_service_url">URL servizio</string>
+    <string name="stt_access_key">Chiave di accesso</string>
+    <string name="stt_secret_key">Chiave segreta</string>
+    <string name="stt_subscription_key">Chiave di abbonamento</string>
+    
+    <!-- STT Error Messages -->
+    <string name="stt_error_audio_too_short">Audio troppo breve, riprova</string>
+    <string name="stt_error_unable_to_recognize">Impossibile riconoscere il parlato, riprova</string>
+    <string name="stt_error_upload_failed">Caricamento audio fallito</string>
+    <string name="stt_error_create_transcript_failed">Creazione trascrizione fallita</string>
+    <string name="stt_error_transcription_timeout">Trascrizione fallita o scaduta</string>
+    <string name="stt_error_transcription_error">Errore di trascrizione: %s</string>
+    <string name="stt_error_service_unavailable">Servizio AI temporaneamente non disponibile, riprova più tardi</string>
+    <string name="stt_error_no_speech_detected">Nessun parlato rilevato</string>
+    <string name="stt_error_not_supported">Il riconoscimento vocale non è supportato per questo provider</string>
+    <string name="stt_error_provider_not_supported">%s non supporta il riconoscimento vocale, utilizzare un altro servizio</string>
+    <string name="stt_error_recognition_failed">Riconoscimento vocale fallito: %s</string>
     
     <!-- Photo Transfer -->
     <string name="photo_received">Foto ricevuta dagli occhiali</string>
@@ -150,10 +201,13 @@
     <string name="photo_transfer_failed">Trasferimento foto fallito: %s</string>
     <string name="analyzing_photo">Analisi foto…</string>
     <string name="ai_analysis_unavailable">Analisi immagine IA non disponibile</string>
-    <string name="photo_analysis_failed">Analisi foto fallita: %s</string>    <string name="preparing_analysis">Preparazione analisi…</string>
+    <string name="photo_analysis_failed">Analisi foto fallita: %s</string>
+    <string name="preparing_analysis">Preparazione analisi…</string>
     <string name="unable_to_read_photo">Impossibile leggere i dati della foto</string>
     <string name="calling_ai_analysis">Chiamata IA per analisi…</string>
-    <string name="analyzing_image">Analisi immagine in corso…</string>    
+    <string name="analyzing_image">Analisi immagine in corso…</string>
+    <string name="analysis_failed">Analisi fallita</string>
+    
     <!-- Camera Capture -->
     <string name="camera_capture">Fotocamera occhiali</string>
     <string name="camera_capture_hint">Cattura foto dagli occhiali e analizza con IA</string>
@@ -219,4 +273,9 @@
     <string name="current_model">Modello attuale</string>
     <string name="home_current_session">Sessione corrente</string>
     <string name="home_view_all">Vedi tutto</string>
+    
+    <!-- Developer Tools -->
+    <string name="developer_tools">Strumenti sviluppatore</string>
+    <string name="log_viewer">Visualizzatore log</string>
+    <string name="log_viewer_description">Visualizza, esporta e gestisci i log dell\'app</string>
 </resources>

@@ -19,6 +19,7 @@ object NavRoutes {
     const val GALLERY = "gallery"
     const val CONVERSATION_HISTORY = "conversation_history"
     const val CONVERSATION_DETAIL = "conversation/{conversationId}"
+    const val LOG_VIEWER = "log_viewer"
     
     fun conversationDetail(conversationId: String) = "conversation/$conversationId"
 }

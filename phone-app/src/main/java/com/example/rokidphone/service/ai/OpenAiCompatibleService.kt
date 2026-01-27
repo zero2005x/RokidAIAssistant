@@ -27,7 +27,7 @@ class OpenAiCompatibleService(
     private val apiKey: String,
     private val baseUrl: String,
     private val modelId: String,
-    private val systemPrompt: String = "You are a friendly AI assistant. Please answer questions concisely.",
+    private val systemPrompt: String = "",
     private val providerType: AiProvider = AiProvider.OPENAI
 ) : AiServiceProvider {
     
