@@ -1,174 +1,335 @@
 # Rokid AI Assistant
 
-An AI voice assistant app running on Android phones that works with Rokid smart glasses.
+> 📖 [繁體中文版](doc/zh-TW/README.md)
+
+**AI-powered voice and vision assistant for Rokid AR glasses.**
+
+---
+
+## 🚀 Quick Start (5 minutes)
+
+```bash
+# 1. Clone
+git clone https://github.com/your-repo/RokidAIAssistant.git && cd RokidAIAssistant
+
+# 2. Configure API keys
+cp local.properties.template local.properties
+# Edit local.properties → Add your GEMINI_API_KEY (required)
+
+# 3. Build & Install
+./gradlew :phone-app:installDebug    # Install phone app
+./gradlew :glasses-app:installDebug  # Install glasses app (on Rokid device)
+```
+
+> **Minimum requirement**: Only `GEMINI_API_KEY` is needed to run. Get one at [Google AI Studio](https://ai.google.dev/).
+
+---
+
+## Scope
+
+### In Scope
+
+- Voice-to-text transcription and AI chat on Rokid AR glasses
+- Photo capture from glasses camera with AI image analysis
+- Phone ↔ Glasses communication via Rokid CXR SDK
+- Multiple AI/STT provider support (Gemini, OpenAI, Anthropic, etc.)
+- Conversation history persistence
+
+### Out of Scope
+
+- Standalone glasses-only operation (phone required for AI processing)
+- Offline AI inference
+- Video streaming or real-time AR overlays
+
+---
 
 ## Features
 
-- 🔗 **Bluetooth Connection**: Automatically scan and connect to Rokid glasses
-- 🎤 **Voice Interaction**: Receive voice input through glasses microphone
-- 🤖 **AI Conversation**: Integrated with Google Gemini API for intelligent dialogue
-- 📺 **AR Display**: Display conversation content on glasses screen
-- 📷 **Photo Capture**: Capture photos through glasses camera for AI analysis
+| Feature                 | Description                                              |
+| ----------------------- | -------------------------------------------------------- |
+| 🎤 Voice Interaction    | Speak to AI through glasses or phone                     |
+| 📷 Photo Analysis       | Capture images with glasses camera, get AI analysis      |
+| 🤖 Multi-AI Providers   | Gemini, OpenAI, Anthropic, DeepSeek, Groq, xAI, and more |
+| 🎧 Multi-STT Providers  | Google, Azure, AWS, Deepgram, and more                   |
+| 📱 Phone-Glasses Comm   | Via Rokid CXR SDK and Bluetooth SPP                      |
+| 💬 Conversation History | Room database persistence                                |
 
-## Technical Architecture
+---
 
-```
-┌─────────────────────────────────────────┐
-│           Phone App (phone-app)          │
-├─────────────────────────────────────────┤
-│  Rokid CXR-M SDK                        │
-│  ├── Bluetooth Connection Management    │
-│  ├── AI Event Listening                 │
-│  └── Audio Stream Reception             │
-├─────────────────────────────────────────┤
-│  AI Service Layer                        │
-│  ├── Speech-to-Text (Whisper API) ✅    │
-│  ├── Gemini API (Integrated) ✅         │
-│  └── Text-to-Speech (Edge TTS) ✅       │
-└─────────────────────────────────────────┘
-                   │
-            Bluetooth SPP
-                   │
-┌─────────────────────────────────────────┐
-│          Glasses App (glasses-app)       │
-├─────────────────────────────────────────┤
-│  Rokid CXR-S SDK                        │
-│  ├── Touchpad / Voice Wake-up           │
-│  ├── Microphone Recording               │
-│  ├── Camera Capture (Camera2 API)       │
-│  └── AR Subtitle Display                │
-└─────────────────────────────────────────┘
-```
-
-## Project Structure
+## Module / Directory Guide
 
 ```
 RokidAIAssistant/
-├── glasses-app/                    # Glasses-side application
-│   └── src/main/java/.../
-│       ├── MainActivity.kt         # Main entry, key handling
-│       ├── viewmodel/
-│       │   └── GlassesViewModel.kt # UI state management
-│       └── service/
-│           ├── photo/
-│           │   ├── GlassesCameraManager.kt  # Camera2 API wrapper
-│           │   └── UnifiedCameraManager.kt  # Unified camera interface
-│           ├── BluetoothSppClient.kt        # Bluetooth SPP client
-│           ├── CxrServiceManager.kt         # CXR-S SDK manager
-│           └── WakeWordService.kt           # Voice wake-up detection
+├── phone-app/                    # 📱 Phone app (main AI hub)
+│   └── src/main/java/.../rokidphone/
+│       ├── MainActivity.kt       # Entry point
+│       ├── service/ai/           # AI provider implementations
+│       ├── service/stt/          # STT provider implementations
+│       ├── service/cxr/          # CXR SDK manager
+│       ├── data/db/              # Room database
+│       ├── ui/                   # Compose UI screens
+│       └── viewmodel/            # ViewModels
 │
-├── phone-app/                      # Phone-side application
-│   └── src/main/java/.../
-│       ├── MainActivity.kt         # Main entry
-│       ├── viewmodel/
-│       │   ├── PhoneViewModel.kt   # Main UI state
-│       │   └── ImageAnalysisViewModel.kt  # Image AI analysis
-│       └── service/
-│           ├── BluetoothSppManager.kt      # Bluetooth SPP server
-│           ├── GeminiSpeechService.kt      # Gemini Live API
-│           ├── PhoneAIService.kt           # AI orchestration
-│           ├── ServiceBridge.kt            # Service communication
-│           └── cxr/
-│               └── CxrMobileManager.kt     # CXR-M SDK manager
+├── glasses-app/                  # 👓 Glasses app (display/input)
+│   └── src/main/java/.../rokidglasses/
+│       ├── MainActivity.kt       # Entry point
+│       ├── service/photo/        # Camera service
+│       ├── ui/                   # Compose UI
+│       └── viewmodel/            # GlassesViewModel
 │
-├── common/                         # Shared module
-│   └── src/main/java/.../
-│       ├── Constants.kt            # Shared constants
-│       └── protocol/
-│           └── MessageType.kt      # Bluetooth message protocol
+├── common/                       # 📦 Shared protocol library
+│   └── src/main/java/.../rokidcommon/
+│       ├── Constants.kt          # Shared constants
+│       └── protocol/             # Message, MessageType, ConnectionState
 │
-└── app/                            # Legacy app module
+├── app/                          # 🧪 Original integrated app (dev only)
+├── doc/                          # 📚 Documentation
+└── gradle/libs.versions.toml     # Version catalog
 ```
 
-## Quick Start
+| Module        | App ID                     | Purpose                               |
+| ------------- | -------------------------- | ------------------------------------- |
+| `phone-app`   | `com.example.rokidphone`   | AI processing, STT, CXR SDK, database |
+| `glasses-app` | `com.example.rokidglasses` | Display, camera, wake word            |
+| `common`      | (library)                  | Shared protocol & constants           |
+
+---
+
+## Technology Stack
+
+| Category    | Technology                   | Version        |
+| ----------- | ---------------------------- | -------------- |
+| Language    | Kotlin                       | 2.2.10         |
+| Min SDK     | Android                      | 28 (9.0 Pie)   |
+| Target SDK  | Android                      | 34 (14)        |
+| Compile SDK | Android                      | 36             |
+| Build       | Gradle + Kotlin DSL          | 9.0            |
+| UI          | Jetpack Compose + Material 3 | BOM 2026.01.00 |
+| Async       | Kotlin Coroutines            | 1.10.2         |
+| Database    | Room                         | 2.8.4          |
+| Networking  | Retrofit + OkHttp            | 3.0 / 5.3      |
+| Rokid SDK   | CXR client-m                 | 1.0.4          |
+
+---
+
+## Build & Run
 
 ### Prerequisites
 
-- Android Studio Hedgehog (2023.1.1) or newer
-- Android SDK 34
-- Kotlin 1.9.22
-- Rokid glasses device + SN authentication file
-- Gemini API Key
+- **Android Studio**: Ladybug (2024.2) or later
+- **JDK**: 17
+- **Android SDK**: API 36 installed
 
-### Setup Steps
+### Environment Setup
 
-1. **Clone the project**
+```bash
+# Copy template and edit with your keys
+cp local.properties.template local.properties
+```
 
-   ```bash
-   cd RokidAIAssistant
+**Required keys in `local.properties`:**
+
+```properties
+# Required
+GEMINI_API_KEY=your_gemini_api_key
+
+# Required for glasses connection
+ROKID_CLIENT_SECRET=your_rokid_secret_without_hyphens
+
+# Optional
+OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_anthropic_key
+```
+
+### Gradle Commands
+
+```bash
+# Build all modules (debug)
+./gradlew assembleDebug
+
+# Build specific module
+./gradlew :phone-app:assembleDebug
+./gradlew :glasses-app:assembleDebug
+
+# Install to connected device
+./gradlew :phone-app:installDebug
+./gradlew :glasses-app:installDebug
+
+# Build release APK
+./gradlew assembleRelease
+
+# Clean build
+./gradlew clean
+```
+
+### APK Output Locations
+
+```
+phone-app/build/outputs/apk/debug/phone-app-debug.apk
+phone-app/build/outputs/apk/release/phone-app-release.apk
+glasses-app/build/outputs/apk/debug/glasses-app-debug.apk
+glasses-app/build/outputs/apk/release/glasses-app-release.apk
+```
+
+---
+
+## Debug vs Release
+
+| Aspect       | Debug            | Release                       |
+| ------------ | ---------------- | ----------------------------- |
+| Minification | ❌ Disabled      | ✅ Enabled (ProGuard)         |
+| Debuggable   | ✅ Yes           | ❌ No                         |
+| Signing      | Debug keystore   | Release keystore (required)   |
+| BuildConfig  | API keys visible | API keys visible (obfuscated) |
+| Performance  | Slower           | Optimized                     |
+
+### ProGuard Rules
+
+- `phone-app/proguard-rules.pro` - Keeps Gemini, OkHttp, Gson, common protocol
+- `glasses-app/proguard-rules.pro` - Keeps CXR SDK, common protocol
+
+---
+
+## Testing
+
+> ⚠️ **Note**: Unit tests are not yet implemented in this project.
+
+### Manual Testing Checklist
+
+1. **Phone App**
+   - [ ] Launch app, verify Settings screen loads
+   - [ ] Configure AI provider (Gemini), test text chat
+   - [ ] Test voice input from phone microphone
+   - [ ] Verify conversation history persists after restart
+
+2. **Glasses App**
+   - [ ] Install on Rokid glasses, verify UI displays
+   - [ ] Test camera photo capture
+   - [ ] Verify photo transfer to phone
+
+3. **Integration**
+   - [ ] Pair phone with glasses via CXR SDK
+   - [ ] Test voice command from glasses → AI response displayed
+   - [ ] Test photo capture → AI analysis → result displayed
+
+### Running Instrumentation Tests (when available)
+
+```bash
+./gradlew :phone-app:connectedAndroidTest
+./gradlew :glasses-app:connectedAndroidTest
+```
+
+---
+
+## Common Developer Tasks
+
+### Add a New AI Provider
+
+1. Create implementation in `phone-app/src/.../service/ai/YourProvider.kt`
+2. Implement `AiServiceProvider` interface (see [ARCHITECTURE.md](doc/ARCHITECTURE.md#ai-service-provider-interface))
+3. Register in `AiServiceFactory.kt`
+4. Add to `AiProvider` enum in settings
+
+### Add a New Screen (Compose)
+
+1. Create screen composable in `phone-app/src/.../ui/yourscreen/YourScreen.kt`
+2. Create ViewModel in `phone-app/src/.../viewmodel/YourViewModel.kt`
+3. Add route to `phone-app/src/.../ui/navigation/AppNavigation.kt`
+
+### Add a New Permission
+
+1. Add to `AndroidManifest.xml`:
+   ```xml
+   <uses-permission android:name="android.permission.YOUR_PERMISSION" />
    ```
+2. Request at runtime (for dangerous permissions) in Activity/ViewModel
 
-2. **Configure sensitive information**
+---
 
-   Edit `local.properties`:
+## FAQ & Troubleshooting
 
-   ```properties
-   sdk.dir=<your Android SDK path>
-   ROKID_CLIENT_SECRET=<your Client Secret, remove hyphens>
-   GEMINI_API_KEY=<your Gemini API Key>
-   OPENAI_API_KEY=<your OpenAI API Key for Whisper STT>
-   ```
+### Build Issues
 
-3. **Place SN authentication file**
+**Q: Build fails with "API key not found"**
 
-   Copy the `.lc` authentication file to:
+```
+A: Ensure local.properties exists and contains GEMINI_API_KEY.
+   Check the file is in project root, not in a module folder.
+```
 
-   ```
-   app/src/main/res/raw/sn_auth_file.lc
-   ```
+**Q: Gradle sync fails with version errors**
 
-4. **Build and run**
-   ```bash
-   ./gradlew assembleDebug
-   # Or click Run in Android Studio
-   ```
+```
+A: Ensure Android Studio has SDK 36 installed.
+   File → Settings → SDK Manager → Install API 36.
+```
 
-### Usage
+**Q: JDK version mismatch**
 
-1. Install `glasses-app` on Rokid glasses
-2. Install `phone-app` on Android phone
-3. Open both apps and connect via Bluetooth
-4. **On glasses**: Press Enter key or say wake word
-5. **On phone**: Tap "Capture Photo" button to take photos
-6. Start conversing with AI!
+```
+A: Project requires JDK 17.
+   File → Settings → Build → Gradle → Gradle JDK → Select JDK 17.
+```
 
-## Feature Status
+### Runtime Issues
 
-### ✅ Completed
+**Q: App crashes on launch**
 
-- [x] Speech-to-Text integration (OpenAI Whisper API)
-- [x] Text-to-Speech integration (Edge TTS + System TTS fallback)
-- [x] Gemini AI conversation
-- [x] Bluetooth connection with CXR SDK integration
-- [x] Photo capture via Camera2 API (YUV format)
-- [x] Photo transfer to phone via Bluetooth
-- [x] Image analysis with Gemini Vision
+```
+A: Check Logcat for missing API key errors.
+   Ensure all required permissions are granted.
+```
 
-### ⏳ To Do
+**Q: Cannot connect to glasses**
 
-- [ ] Settings page (API Key management, voice settings, etc.)
-- [ ] Conversation history persistence
-- [ ] Offline mode support
-- [ ] Error handling optimization
+```
+A: 1. Verify ROKID_CLIENT_SECRET is set (without hyphens)
+   2. Enable Bluetooth on both devices
+   3. Ensure glasses are in pairing mode
+```
 
-## Dependencies
+**Q: AI responses are empty**
 
-| Dependency        | Version    |
-| ----------------- | ---------- |
-| Rokid CXR SDK     | 1.0.4      |
-| Kotlin            | 1.9.22     |
-| Compose BOM       | 2024.02.00 |
-| Generative AI SDK | 0.2.2      |
-| Retrofit          | 2.9.0      |
-| OkHttp            | 4.12.0     |
+```
+A: 1. Verify API key is valid and has quota
+   2. Check network connectivity
+   3. Review Logcat for API error responses
+```
 
-## Notes
+### Release Issues
 
-⚠️ **Security Reminder**:
+**Q: Release build fails with signing error**
 
-- `local.properties` contains sensitive information, **do NOT commit to Git**
-- Already added to `.gitignore` exclusion
+```
+A: Create a release keystore and configure in build.gradle.kts:
+   signingConfigs {
+       create("release") {
+           storeFile = file("path/to/keystore.jks")
+           storePassword = "password"
+           keyAlias = "alias"
+           keyPassword = "password"
+       }
+   }
+```
+
+**Q: ProGuard removes required classes**
+
+```
+A: Add keep rules to proguard-rules.pro:
+   -keep class com.your.package.** { *; }
+```
+
+---
+
+## Documentation
+
+| Document                                     | Description                                  |
+| -------------------------------------------- | -------------------------------------------- |
+| [API Settings Guide](doc/API_SETTINGS.md)    | Complete API configuration for all providers |
+| [Architecture Overview](doc/ARCHITECTURE.md) | System design, data flow, component details  |
+
+---
 
 ## License
 
-Private project, for internal use only.
+This project is proprietary software.

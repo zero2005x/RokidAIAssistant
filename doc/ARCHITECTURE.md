@@ -1,335 +1,578 @@
-# Rokid AI Assistant Architecture
+# Architecture Overview
 
-## Overview
+> 📖 [繁體中文版](zh-TW/ARCHITECTURE.md)
 
-Rokid AI Assistant is a smart glasses assistant application using a "phone relay" architecture. The glasses connect to the phone via Bluetooth, and the phone handles all AI processing.
+**System design documentation for Rokid AI Assistant.**
+
+---
+
+## 🎯 Quick Reference
+
+| Question                        | Answer                                  | See Section                                             |
+| ------------------------------- | --------------------------------------- | ------------------------------------------------------- |
+| How does phone talk to glasses? | CXR SDK + Bluetooth                     | [Communication Flow](#communication-flow)               |
+| How to add a new AI provider?   | Implement `AiServiceProvider` interface | [AI Provider Interface](#ai-service-provider-interface) |
+| Where is conversation stored?   | Room database in phone-app              | [Data Flow](#data-flow)                                 |
+| How are messages formatted?     | Binary protocol in `common/protocol/`   | [Message Protocol](#message-protocol)                   |
+
+---
+
+## Scope
+
+### In Scope
+
+- High-level system architecture and module relationships
+- Communication protocols between phone and glasses
+- Key component interfaces and responsibilities
+- Data flow patterns
+- Technology decision rationale
+
+### Out of Scope
+
+- Line-by-line code explanations
+- UI/UX design specifications
+- Deployment and CI/CD pipelines
+- Performance benchmarks
+
+---
+
+## Table of Contents
+
+- [System Architecture](#system-architecture)
+- [Module Structure](#module-structure)
+- [Communication Flow](#communication-flow)
+- [Component Details](#component-details)
+- [Data Flow](#data-flow)
+- [Technology Decisions](#technology-decisions)
+- [Common Development Patterns](#common-development-patterns)
+
+---
 
 ## System Architecture
 
+### High-Level Overview
+
 ```
-┌─────────────────┐      Bluetooth SPP      ┌─────────────────┐      WiFi      ┌─────────────────┐
-│  Rokid Glasses  │ ◄──────────────────────► │    Phone App    │ ◄────────────► │    AI APIs      │
-│  (glasses-app)  │    Voice/Commands/Resp   │   (phone-app)   │   HTTP/REST   │  (Cloud/Local)  │
-└─────────────────┘                          └─────────────────┘                └─────────────────┘
-        │                                            │
-        │                                            │
-   ┌────┴────┐                              ┌───────┴────────┐
-   │ Record  │                              │ProviderManager │
-   │ Display │                              │  Room Database │
-   └─────────┘                              │ EnhancedAIServ │
-                                            └────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                         Rokid AI Assistant                          │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   ┌─────────────┐         Bluetooth/CXR         ┌─────────────┐    │
+│   │             │◄──────────────────────────────►│             │    │
+│   │  Phone App  │                                │ Glasses App │    │
+│   │             │                                │             │    │
+│   └──────┬──────┘                                └──────┬──────┘    │
+│          │                                              │           │
+│          ▼                                              ▼           │
+│   ┌─────────────┐                                ┌─────────────┐    │
+│   │   Common    │◄───────── Shared ─────────────►│   Common    │    │
+│   │   Module    │          Protocol              │   Module    │    │
+│   └─────────────┘                                └─────────────┘    │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+                    ┌───────────────────────────────┐
+                    │       External AI APIs        │
+                    │  (Gemini, OpenAI, Claude...)  │
+                    └───────────────────────────────┘
+```
+
+### Design Principles
+
+| Principle                  | Description                             | Implementation                         |
+| -------------------------- | --------------------------------------- | -------------------------------------- |
+| **Separation of Concerns** | Each module has a single responsibility | phone-app = AI, glasses-app = UI/Input |
+| **Offloading**             | Heavy processing on phone               | AI inference, STT run on phone         |
+| **Shared Protocol**        | Common message format                   | `common/protocol/Message.kt`           |
+| **Provider Abstraction**   | Pluggable providers                     | `AiServiceProvider` interface          |
+
+---
+
+## Module Structure
+
+### Project Layout
+
+```
+RokidAIAssistant/
+├── app/                          # Original integrated app (dev only)
+│   └── src/main/java/.../rokidaiassistant/
+│
+├── phone-app/                    # 📱 Phone application
+│   └── src/main/java/.../rokidphone/
+│       ├── MainActivity.kt       # Entry point, permission handling
+│       ├── PhoneApplication.kt   # Application class
+│       ├── ai/                   # AI provider interfaces
+│       │   ├── AiServiceProvider.kt      # ⭐ Core interface
+│       │   └── AiServiceFactory.kt       # Provider factory
+│       ├── data/
+│       │   ├── ApiSettings.kt    # API configuration
+│       │   ├── db/               # Room database
+│       │   │   ├── AppDatabase.kt
+│       │   │   ├── ConversationDao.kt
+│       │   │   └── MessageEntity.kt
+│       │   └── SettingsRepository.kt
+│       ├── service/
+│       │   ├── ai/               # AI implementations
+│       │   │   ├── GeminiService.kt
+│       │   │   ├── OpenAiCompatibleService.kt
+│       │   │   └── AnthropicService.kt
+│       │   ├── cxr/              # Rokid SDK
+│       │   │   └── CxrMobileManager.kt
+│       │   ├── photo/            # Photo handling
+│       │   └── stt/              # Speech-to-text
+│       │       └── SttProvider.kt
+│       ├── ui/                   # Jetpack Compose UI
+│       │   ├── conversation/     # Chat screen
+│       │   ├── settings/         # Settings screen
+│       │   └── navigation/       # NavHost
+│       └── viewmodel/            # ViewModels
+│
+├── glasses-app/                  # 👓 Glasses application
+│   └── src/main/java/.../rokidglasses/
+│       ├── MainActivity.kt       # Entry point
+│       ├── GlassesApplication.kt # Application class
+│       ├── sdk/                  # CXR SDK wrapper
+│       ├── service/
+│       │   └── photo/            # Camera service
+│       ├── ui/                   # Compose UI
+│       └── viewmodel/
+│           └── GlassesViewModel.kt
+│
+├── common/                       # 📦 Shared library
+│   └── src/main/java/.../rokidcommon/
+│       ├── Constants.kt          # Shared constants
+│       └── protocol/
+│           ├── Message.kt        # ⭐ Core message class
+│           ├── MessageType.kt    # Message type enum
+│           └── ConnectionState.kt
+│
+└── gradle/libs.versions.toml     # Version catalog
+```
+
+### Module Dependencies
+
+```
+phone-app ──────► common
+glasses-app ────► common
+app ────────────► common (dev only)
 ```
 
 ---
 
-## Multi-LLM Provider Architecture
+## Communication Flow
 
-The application uses a type-safe multi-provider architecture inspired by RikkaHub.
+### Voice Interaction Flow
 
-### Core Components
+```
+┌─────────────┐                    ┌─────────────┐                    ┌─────────────┐
+│   Glasses   │                    │    Phone    │                    │   AI API    │
+└──────┬──────┘                    └──────┬──────┘                    └──────┬──────┘
+       │                                  │                                  │
+       │  1. User triggers voice input    │                                  │
+       │  (button press / wake word)      │                                  │
+       ├─────────────────────────────────►│                                  │
+       │                                  │                                  │
+       │  2. VOICE_START message          │                                  │
+       ├─────────────────────────────────►│                                  │
+       │                                  │                                  │
+       │  3. VOICE_DATA (audio chunks)    │                                  │
+       ├─────────────────────────────────►│                                  │
+       │                                  │                                  │
+       │  4. VOICE_END message            │                                  │
+       ├─────────────────────────────────►│                                  │
+       │                                  │                                  │
+       │                                  │  5. Speech-to-Text               │
+       │                                  ├─────────────────────────────────►│
+       │                                  │                                  │
+       │                                  │  6. Transcription result         │
+       │                                  │◄─────────────────────────────────┤
+       │                                  │                                  │
+       │  7. AI_PROCESSING message        │                                  │
+       │◄─────────────────────────────────┤                                  │
+       │                                  │                                  │
+       │                                  │  8. AI Chat request              │
+       │                                  ├─────────────────────────────────►│
+       │                                  │                                  │
+       │                                  │  9. AI response                  │
+       │                                  │◄─────────────────────────────────┤
+       │                                  │                                  │
+       │  10. AI_RESPONSE_TEXT message    │                                  │
+       │◄─────────────────────────────────┤                                  │
+       │                                  │                                  │
+       │  11. Display response on glasses │                                  │
+       ▼                                  ▼                                  ▼
+```
 
-1. **ProviderSetting.kt** - Provider Configuration Sealed Class
-   - Path: `phone-app/src/main/java/com/example/rokidphone/ai/provider/ProviderSetting.kt`
-   - Uses sealed class for type-safe multi-provider support
-   - Each provider has its own configuration type (Gemini, OpenAI, Anthropic, DeepSeek, Groq, xAI, Alibaba, Zhipu, Baidu, Perplexity, Custom)
-   - Supports Kotlin Serialization
+### Photo Capture Flow
 
-2. **Provider.kt** - Unified Provider Interface
-   - Path: `phone-app/src/main/java/com/example/rokidphone/ai/provider/Provider.kt`
-   - Defines generic `Provider<T : ProviderSetting>` interface
-   - Includes `listModels`, `generateText`, `streamText`, `transcribe`, `analyzeImage` methods
-   - Defines `ChatMessage`, `GenerationResult`, `MessageChunk` data classes
+```
+┌─────────────┐                    ┌─────────────┐                    ┌─────────────┐
+│   Glasses   │                    │    Phone    │                    │   AI API    │
+└──────┬──────┘                    └──────┬──────┘                    └──────┬──────┘
+       │                                  │                                  │
+       │  1. CAPTURE_PHOTO command        │                                  │
+       │◄─────────────────────────────────┤                                  │
+       │                                  │                                  │
+       │  2. Camera captures image        │                                  │
+       │                                  │                                  │
+       │  3. PHOTO_START message          │                                  │
+       ├─────────────────────────────────►│                                  │
+       │                                  │                                  │
+       │  4. PHOTO_DATA (chunks)          │                                  │
+       ├─────────────────────────────────►│                                  │
+       │                                  │                                  │
+       │  5. PHOTO_END message            │                                  │
+       ├─────────────────────────────────►│                                  │
+       │                                  │                                  │
+       │                                  │  6. Image analysis request       │
+       │                                  ├─────────────────────────────────►│
+       │                                  │                                  │
+       │                                  │  7. Analysis result              │
+       │                                  │◄─────────────────────────────────┤
+       │                                  │                                  │
+       │  8. PHOTO_ANALYSIS_RESULT        │                                  │
+       │◄─────────────────────────────────┤                                  │
+       │                                  │                                  │
+       ▼                                  ▼                                  ▼
+```
 
-3. **ProviderManager.kt** - Provider Manager
-   - Path: `phone-app/src/main/java/com/example/rokidphone/ai/provider/ProviderManager.kt`
-   - Centralized management of all AI Provider instances and settings
-   - Service caching mechanism to avoid redundant service creation
-   - Dynamic provider and model switching support
+---
 
-### Architecture Pattern
+## Component Details
+
+### Phone App Components
+
+#### PhoneAIService
+
+The central background service that orchestrates all AI operations:
 
 ```kotlin
-// Sealed class for different provider configurations
-sealed class ProviderSetting {
-    data class Gemini(val apiKey: String, ...) : ProviderSetting()
-    data class OpenAI(val apiKey: String, ...) : ProviderSetting()
-    data class Custom(val baseUrl: String, ...) : ProviderSetting()
-    // ...
-}
+class PhoneAIService : Service() {
+    // AI service (pluggable providers)
+    private var aiService: AiServiceProvider?
 
-// Unified Provider interface
-interface Provider<T : ProviderSetting> {
-    suspend fun generateText(setting: T, messages: List<ChatMessage>): GenerationResult
-    fun streamText(setting: T, messages: List<ChatMessage>): Flow<MessageChunk>
-    suspend fun transcribe(setting: T, audioData: ByteArray): SpeechResult
-    // ...
+    // Speech recognition service
+    private var speechService: AiServiceProvider?
+
+    // CXR SDK manager
+    private var cxrManager: CxrMobileManager?
+
+    // Photo repository
+    private var photoRepository: PhotoRepository?
+
+    // Conversation persistence
+    private var conversationRepository: ConversationRepository?
 }
 ```
 
----
+#### AI Service Provider Interface
 
-## Conversation Persistence (Room Database)
-
-### Database Components
-
-1. **AppDatabase.kt** - Room Database
-   - Path: `phone-app/src/main/java/com/example/rokidphone/data/db/AppDatabase.kt`
-   - Uses Room Database for data persistence
-   - Contains `ConversationEntity` and `MessageEntity` entities
-   - Defines `ConversationDao` and `MessageDao`
-
-2. **ConversationRepository.kt** - Conversation Repository
-   - Path: `phone-app/src/main/java/com/example/rokidphone/data/db/ConversationRepository.kt`
-   - Provides CRUD operations for conversations and messages
-   - Supports conversation archiving and pinning
-   - Auto-generates conversation titles
-
-### Data Schema
+All AI providers implement this unified interface:
 
 ```kotlin
-// Conversation Entity
-@Entity(tableName = "conversations")
-data class ConversationEntity(
-    val id: String,
-    val title: String,
-    val providerId: String,
-    val modelId: String,
-    val systemPrompt: String,
-    val createdAt: Long,
-    val updatedAt: Long,
-    val messageCount: Int,
-    val isArchived: Boolean,
-    val isPinned: Boolean
-)
+interface AiServiceProvider {
+    val provider: AiProvider
 
-// Message Entity
-@Entity(tableName = "messages")
-data class MessageEntity(
+    suspend fun transcribe(pcmAudioData: ByteArray): SpeechResult
+    suspend fun chat(userMessage: String): String
+    suspend fun analyzeImage(imageData: ByteArray, prompt: String): String
+    fun clearHistory()
+}
+```
+
+#### Supported AI Providers
+
+| Provider  | Implementation            | Features               |
+| --------- | ------------------------- | ---------------------- |
+| Gemini    | `GeminiService`           | Native SDK, multimodal |
+| OpenAI    | `OpenAiCompatibleService` | OpenAI-compatible API  |
+| Anthropic | `AnthropicService`        | Custom API format      |
+| DeepSeek  | `OpenAiCompatibleService` | OpenAI-compatible      |
+| Groq      | `OpenAiCompatibleService` | OpenAI-compatible      |
+| xAI       | `OpenAiCompatibleService` | OpenAI-compatible      |
+| Alibaba   | `OpenAiCompatibleService` | OpenAI-compatible      |
+| Zhipu     | `OpenAiCompatibleService` | OpenAI-compatible      |
+| Baidu     | `BaiduService`            | OAuth authentication   |
+| Custom    | `OpenAiCompatibleService` | User-defined endpoint  |
+
+#### STT Service Architecture
+
+```kotlin
+interface SttService {
+    suspend fun transcribe(audioData: ByteArray): SttResult
+    fun supportsStreaming(): Boolean
+    fun supportsRealtime(): Boolean
+}
+```
+
+Supported providers:
+
+- Gemini (native)
+- OpenAI Whisper
+- Groq Whisper
+- Azure Speech
+- AWS Transcribe
+- Deepgram
+- AssemblyAI
+- iFlytek
+
+### Glasses App Components
+
+#### GlassesViewModel
+
+Main ViewModel handling UI state and user interactions:
+
+```kotlin
+class GlassesViewModel : ViewModel() {
+    // UI state
+    val uiState: StateFlow<GlassesUiState>
+
+    // Voice recording state
+    val isRecording: StateFlow<Boolean>
+
+    // Connection state
+    val connectionState: StateFlow<ConnectionState>
+}
+```
+
+#### WakeWordService
+
+Background service for voice wake word detection:
+
+```kotlin
+class WakeWordService : Service() {
+    // Listens for wake word ("Hey Rokid")
+    // Triggers voice input when detected
+}
+```
+
+#### CameraService
+
+Handles photo capture on glasses:
+
+```kotlin
+class CameraService : Service() {
+    // Captures photos from glasses camera
+    // Transfers photos to phone via protocol
+}
+```
+
+### Common Module Components
+
+#### Message Protocol
+
+Binary message format for efficient transmission:
+
+```kotlin
+data class Message(
     val id: String,
-    val conversationId: String,
-    val role: String,  // "user", "assistant", "system"
-    val content: String,
-    val createdAt: Long,
-    val tokenCount: Int?,
-    val modelId: String?,
-    val hasImage: Boolean,
-    val imagePath: String?
+    val type: MessageType,
+    val timestamp: Long,
+    val payload: String?,
+    val binaryData: ByteArray?
 )
+```
+
+#### Message Types
+
+```kotlin
+enum class MessageType(val code: Int) {
+    // Connection (0x00-0x0F)
+    HANDSHAKE(0x00),
+    HEARTBEAT(0x02),
+    DISCONNECT(0x0F),
+
+    // Voice (0x10-0x1F)
+    VOICE_START(0x10),
+    VOICE_DATA(0x11),
+    VOICE_END(0x12),
+
+    // AI (0x20-0x2F)
+    AI_PROCESSING(0x20),
+    AI_RESPONSE_TEXT(0x21),
+    AI_ERROR(0x2F),
+
+    // Display (0x30-0x3F)
+    DISPLAY_TEXT(0x30),
+    DISPLAY_CLEAR(0x31),
+
+    // Photo (0x40-0x4F)
+    PHOTO_START(0x40),
+    PHOTO_DATA(0x41),
+    PHOTO_END(0x42),
+    CAPTURE_PHOTO(0x47),
+
+    // System (0xF0-0xFF)
+    SYSTEM_STATUS(0xF0),
+    SYSTEM_ERROR(0xFF)
+}
 ```
 
 ---
 
-## Architecture Diagram
-
-```
-┌─────────────────┐      Bluetooth SPP      ┌─────────────────┐      WiFi      ┌─────────────────┐
-│   Rokid 眼鏡    │ ◄──────────────────────► │     手機 App    │ ◄────────────► │   Gemini API    │
-│  (glasses-app)  │     語音/指令/回應       │   (phone-app)   │   HTTP/REST   │  (Google Cloud) │
-└─────────────────┘                          └─────────────────┘                └─────────────────┘
-```
-
-## Module Description
-
-### 1. glasses-app (Glasses Side)
-
-- **Main Functions**: Voice recording, wake word detection, display AI responses
-- **BluetoothSppClient**: Bluetooth SPP client, connects to phone
-- **GlassesViewModel**: Manages UI state and voice recording
-- **WakeWordService**: Wake word detection service
-
-### 2. phone-app (Phone Side)
-
-- **Main Functions**: Bluetooth server, speech recognition, AI conversation, settings management
-- **BluetoothSppManager**: Bluetooth SPP server, receives glasses connections
-- **ProviderManager**: Manages all AI provider instances and settings
-- **EnhancedAIService**: Integrates ProviderManager, ConversationRepository, and AI services
-- **PhoneAIService**: Foreground service, manages Bluetooth and AI processing
-- **SettingsRepository**: Manages API settings
-- **ConversationRepository**: Manages conversation history persistence
-
-### 3. common (Shared Module)
-
-- **Message**: Bluetooth communication message format (JSON + Base64 encoding)
-- **MessageType**: Message type definitions
-- **ConnectionState**: Connection state enumeration
-
-## Communication Protocol
-
-### Bluetooth SPP Protocol
-
-- **UUID**: `a1b2c3d4-e5f6-7890-abcd-ef1234567890`
-- **Format**: JSON + newline delimiter
-- **Audio Encoding**: Base64 (for binaryData field)
-
-### Message Types
-
-| Type             | Direction       | Description                     |
-| ---------------- | --------------- | ------------------------------- |
-| VOICE_START      | Glasses → Phone | Recording started               |
-| VOICE_END        | Glasses → Phone | Recording ended, includes audio |
-| AI_PROCESSING    | Phone → Glasses | Processing status               |
-| USER_TRANSCRIPT  | Phone → Glasses | Speech-to-text result           |
-| AI_RESPONSE_TEXT | Phone → Glasses | AI text response                |
-| AI_ERROR         | Phone → Glasses | Processing error                |
-
-## Audio Format
-
-- **Sample Rate**: 16000 Hz
-- **Channels**: Mono
-- **Bit Depth**: 16-bit
-- **Format**: PCM → WAV (converted before API call)
-
-## Supported AI Services
-
-### Speech-to-Text
-
-1. **Google Gemini** - Uses multimodal model for audio processing
-2. **OpenAI Whisper** - Supported via OpenAI and Groq
-3. **Google Cloud STT** - (Planned)
-
-### AI Chat
-
-1. **Google Gemini** - gemini-2.5-pro, gemini-2.5-flash, gemini-2.5-flash-lite
-2. **OpenAI GPT** - gpt-5.2, gpt-5, gpt-4o, gpt-4o-mini, o3-pro, o4-mini
-3. **Anthropic Claude** - claude-opus-4.5, claude-sonnet-4.5, claude-haiku-4.5
-4. **DeepSeek** - deepseek-chat, deepseek-reasoner, deepseek-vl-3
-5. **Groq** - llama-4-70b, llama-3.3-70b, qwen-3-32b, llama-4-vision-90b
-6. **xAI** - grok-4, grok-4-fast, grok-3, grok-2-vision-1212
-7. **Alibaba Qwen** - qwen3-max, qwen3-plus, qwen3-turbo, qwen3-vl-max
-8. **Zhipu AI** - glm-4.7, glm-4-plus, glm-4-flash, glm-4v-plus
-9. **Baidu Ernie** - ernie-5.0, ernie-x1, ernie-4.5-turbo, ernie-vision-pro
-10. **Perplexity** - sonar-pro, sonar, sonar-reasoning-pro, sonar-reasoning
-11. **Custom** - Ollama, LM Studio 等 OpenAI 相容 API
-
-## Configuration (phone-app)
-
-The phone app provides a complete API configuration interface:
-
-### Supported AI Providers
-
-| Provider      | Status          | Models                                                  |
-| ------------- | --------------- | ------------------------------------------------------- |
-| Google Gemini | ✅ Full Support | gemini-2.5-pro, gemini-2.5-flash, gemini-2.5-flash-lite |
-| OpenAI        | ✅ Full Support | gpt-5.2, gpt-5, gpt-4o, gpt-4o-mini, o3-pro, o4-mini    |
-| Anthropic     | ✅ Full Support | claude-opus-4.5, claude-sonnet-4.5, claude-haiku-4.5    |
-| DeepSeek      | ✅ Full Support | deepseek-chat, deepseek-reasoner, deepseek-vl-3         |
-| Groq          | ✅ Full Support | llama-4-70b, llama-3.3-70b, qwen-3-32b                  |
-| xAI           | ✅ Full Support | grok-4, grok-4-fast, grok-3, grok-2-vision-1212         |
-| Alibaba       | ✅ Full Support | qwen3-max, qwen3-plus, qwen3-turbo, qwen3-vl-max        |
-| Zhipu AI      | ✅ Full Support | glm-4.7, glm-4-plus, glm-4-flash, glm-4v-plus           |
-| Baidu         | ✅ Full Support | ernie-5.0, ernie-x1, ernie-4.5-turbo                    |
-| Perplexity    | ✅ Full Support | sonar-pro, sonar, sonar-reasoning-pro                   |
-| Custom        | ✅ Full Support | Ollama, LM Studio, and other OpenAI-compatible APIs     |
-
-### Configurable Options
-
-- **AI Provider** - Select from 11 providers
-- **AI Model** - Choose model for the selected provider
-- **API Keys** - Encrypted storage for each provider
-- **Speech Recognition** - Gemini Audio / Whisper / Google Cloud STT
-- **System Prompt** - Customize AI behavior
+## Data Flow
 
 ### Settings Storage
 
-- Uses `EncryptedSharedPreferences` for secure API key storage
-- Settings changes take effect immediately without service restart
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Phone App                                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   ┌─────────────────┐     ┌─────────────────┐                   │
+│   │ SettingsScreen  │────►│SettingsRepository│                  │
+│   └─────────────────┘     └────────┬────────┘                   │
+│                                    │                             │
+│                         ┌──────────┴──────────┐                 │
+│                         ▼                     ▼                 │
+│               ┌─────────────────┐   ┌─────────────────┐         │
+│               │  DataStore     │   │ EncryptedShared │         │
+│               │  Preferences   │   │   Preferences   │         │
+│               └─────────────────┘   └─────────────────┘         │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
 
-### Related Files
-
-- `phone-app/src/main/java/com/example/rokidphone/data/ApiSettings.kt` - Settings data class
-- `phone-app/src/main/java/com/example/rokidphone/data/SettingsRepository.kt` - Settings storage
-- `phone-app/src/main/java/com/example/rokidphone/ui/SettingsScreen.kt` - Settings UI
-
-## Project Structure
+### Conversation Persistence
 
 ```
-phone-app/src/main/java/com/example/rokidphone/
-├── ai/
-│   └── provider/
-│       ├── Provider.kt              # Unified provider interface
-│       ├── ProviderManager.kt       # Provider manager
-│       └── ProviderSetting.kt       # Provider settings sealed class
-├── data/
-│   ├── db/
-│   │   ├── AppDatabase.kt           # Room database
-│   │   └── ConversationRepository.kt # Conversation repository
-│   ├── ApiSettings.kt               # API settings
-│   └── SettingsRepository.kt        # Settings storage
-├── service/
-│   ├── ai/                          # AI service implementations
-│   │   ├── GeminiService.kt
-│   │   ├── OpenAiService.kt
-│   │   ├── AnthropicService.kt
-│   │   └── ...
-│   ├── EnhancedAIService.kt         # Enhanced AI service integration
-│   ├── BluetoothSppManager.kt       # Bluetooth SPP server
-│   └── PhoneAIService.kt            # Foreground service
-├── ui/
-│   ├── conversation/
-│   │   ├── ChatScreen.kt            # Chat screen
-│   │   └── ConversationHistoryScreen.kt # Conversation history
-│   └── SettingsScreen.kt            # Settings UI
-└── viewmodel/
-    ├── ConversationViewModel.kt     # Conversation ViewModel
-    └── PhoneViewModel.kt            # Phone ViewModel
+┌─────────────────────────────────────────────────────────────────┐
+│                     Room Database                                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   ┌───────────────┐    ┌───────────────┐    ┌───────────────┐   │
+│   │ Conversation  │    │   Message     │    │   Photo       │   │
+│   │    Entity     │    │    Entity     │    │   Entity      │   │
+│   └───────┬───────┘    └───────┬───────┘    └───────┬───────┘   │
+│           │                    │                    │           │
+│           └────────────────────┼────────────────────┘           │
+│                                ▼                                 │
+│                    ┌───────────────────┐                        │
+│                    │ ConversationRepo  │                        │
+│                    └───────────────────┘                        │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Development Environment
+## Technology Decisions
 
-- **Android Gradle Plugin**: 9.0.0
-- **Kotlin**: 2.2.10
-- **Gradle**: 9.1.0
-- **Min SDK**: 26 (glasses) / 28 (phone)
-- **Target SDK**: 34
-
-### Key Dependencies
-
-| Dependency           | Version    |
-| -------------------- | ---------- |
-| Compose BOM          | 2024.02.00 |
-| Room Database        | 2.7.1      |
-| KSP                  | 2.3.4      |
-| Kotlin Serialization | 1.6.3      |
-| Navigation Compose   | 2.7.7      |
-| OkHttp               | 4.12.0     |
+| Decision                  | Rationale                                    | Trade-offs                   |
+| ------------------------- | -------------------------------------------- | ---------------------------- |
+| **Kotlin**                | Coroutines, null safety, Compose integration | Learning curve for Java devs |
+| **Jetpack Compose**       | Declarative, better state management         | Newer ecosystem              |
+| **Room Database**         | Type-safe, Flow support                      | SQLite overhead              |
+| **Multiple AI Providers** | Flexibility, fallback, cost optimization     | More code to maintain        |
+| **Modular Architecture**  | Parallel dev, different targets              | Build complexity             |
 
 ---
 
-## Future Roadmap
+## Common Development Patterns
 
-### MCP Tool Support (Advanced)
+### Adding a New AI Provider
+
+**1. Create the service class:**
 
 ```kotlin
-class McpManager {
-    suspend fun callTool(toolName: String, args: JsonObject): JsonElement
-    fun getAllAvailableTools(): List<McpTool>
+// phone-app/src/.../service/ai/YourProviderService.kt
+class YourProviderService(private val apiKey: String) : AiServiceProvider {
+    override val provider = AiProvider.YOUR_PROVIDER
+
+    override suspend fun sendMessage(message: String, imageData: ByteArray?): Flow<String> = flow {
+        // Implement API call
+        emit("Response from your provider")
+    }
+
+    override fun clearHistory() { /* Clear conversation */ }
 }
 ```
 
-### Offline Mode Support
+**2. Register in factory:**
 
-- Local model integration (Ollama)
-- Offline caching mechanism
-- Offline speech recognition
+```kotlin
+// phone-app/src/.../ai/AiServiceFactory.kt
+fun create(provider: AiProvider, settings: ApiSettings): AiServiceProvider {
+    return when (provider) {
+        AiProvider.YOUR_PROVIDER -> YourProviderService(settings.apiKey)
+        // ... other providers
+    }
+}
+```
 
----
+**3. Add to enum:**
 
-## Version History
+```kotlin
+// phone-app/src/.../data/ApiSettings.kt
+enum class AiProvider {
+    GEMINI, OPENAI, ANTHROPIC, YOUR_PROVIDER
+}
+```
 
-### v1.1.0 (2026-01-22)
+### Adding a New Message Type
 
-- Multi-LLM provider architecture (ProviderManager)
-- Room database for conversation persistence
-- Conversation history UI with pin/archive support
-- Enhanced AI service integration
-- KSP 2.3.4 and Room 2.7.1 support
+**1. Add to MessageType enum:**
 
-### v1.0.0 (2026-01-17)
+```kotlin
+// common/src/.../protocol/MessageType.kt
+enum class MessageType(val code: Int) {
+    // ... existing types
+    YOUR_NEW_TYPE(0x50)
+}
+```
 
-- Basic architecture completed
-- Bluetooth SPP communication
-- Gemini API integration
-- Glasses-side voice recording
-- Phone-side AI processing
+**2. Handle in phone-app:**
+
+```kotlin
+// phone-app/src/.../service/cxr/CxrMobileManager.kt
+when (message.type) {
+    MessageType.YOUR_NEW_TYPE -> handleYourNewType(message)
+    // ...
+}
+```
+
+**3. Handle in glasses-app (if needed):**
+
+```kotlin
+// glasses-app/src/.../sdk/CxrGlassesManager.kt
+when (message.type) {
+    MessageType.YOUR_NEW_TYPE -> handleYourNewType(message)
+    // ...
+}
+```
+
+### Adding a New Compose Screen
+
+**1. Create the screen:**
+
+```kotlin
+// phone-app/src/.../ui/yourscreen/YourScreen.kt
+@Composable
+fun YourScreen(
+    viewModel: YourViewModel = viewModel(),
+    onNavigateBack: () -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    // UI implementation
+}
+```
+
+**2. Create ViewModel:**
+
+```kotlin
+// phone-app/src/.../viewmodel/YourViewModel.kt
+class YourViewModel : ViewModel() {
+    private val _uiState = MutableStateFlow(YourUiState())
+    val uiState: StateFlow<YourUiState> = _uiState.asStateFlow()
+}
+```
+
+**3. Add navigation:**
+
+```kotlin
+// phone-app/src/.../ui/navigation/AppNavigation.kt
+composable("your_screen") {
+    YourScreen(onNavigateBack = { navController.popBackStack() })
+}
+```
