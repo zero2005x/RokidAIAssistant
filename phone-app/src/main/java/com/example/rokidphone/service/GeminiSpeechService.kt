@@ -177,6 +177,11 @@ class GeminiSpeechService(
         return withContext(Dispatchers.IO) {
             Log.d(TAG, "Starting transcription, audio size: ${pcmAudioData.size} bytes")
             
+            if (apiKey.isBlank()) {
+                Log.e(TAG, "API key is not configured")
+                return@withContext SpeechResult.Error("API key not configured. Please set up an API key in Settings.")
+            }
+            
             if (pcmAudioData.size < 1000) {
                 return@withContext SpeechResult.Error("Audio too short, please try again")
             }

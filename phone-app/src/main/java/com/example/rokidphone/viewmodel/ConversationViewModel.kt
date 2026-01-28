@@ -136,6 +136,20 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
         val text = _inputText.value.trim()
         if (text.isBlank()) return
         
+        // Check API key before sending
+        val settings = settingsRepository.getSettings()
+        val apiKey = settings.getCurrentApiKey()
+        if (apiKey.isBlank()) {
+            Log.e(TAG, "API key not configured")
+            _uiState.update { 
+                it.copy(
+                    isLoading = false,
+                    error = "API key not configured. Please set up an API key in Settings."
+                )
+            }
+            return
+        }
+        
         val conversationId = _currentConversationId.value
         if (conversationId == null) {
             // If no current conversation, create one first

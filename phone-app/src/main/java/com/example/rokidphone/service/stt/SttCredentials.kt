@@ -58,7 +58,31 @@ data class SttCredentials(
     val volcengineAk: String = "",  // Access Key
     val volcangineSk: String = "",  // Secret Key
     val volcengineRegion: String = "",  // Optional
-    val volcengineAppId: String = ""  // Application ID
+    val volcengineAppId: String = "",  // Application ID
+    
+    // === 阿里云 ASR ===
+    val aliyunAccessKeyId: String = "",
+    val aliyunAccessKeySecret: String = "",
+    val aliyunAppKey: String = "",  // NLS AppKey
+    
+    // === 腾讯云 ASR ===
+    val tencentSecretId: String = "",
+    val tencentSecretKey: String = "",
+    val tencentAppId: String = "",
+    val tencentEngineModelType: String = "16k_zh",  // Engine model type
+    
+    // === 百度云 ASR ===
+    val baiduAsrApiKey: String = "",
+    val baiduAsrSecretKey: String = "",
+    
+    // === Rev.ai ===
+    val revaiAccessToken: String = "",
+    
+    // === Speechmatics ===
+    val speechmaticsApiKey: String = "",
+    
+    // === Otter.ai ===
+    val otteraiApiKey: String = ""
 ) {
     /**
      * Get the currently selected provider
@@ -94,6 +118,14 @@ data class SttCredentials(
             SttProvider.IFLYTEK -> iflytekAppId.isNotBlank() && iflytekApiKey.isNotBlank() && iflytekApiSecret.isNotBlank()
             SttProvider.HUAWEI_SIS -> huaweiAk.isNotBlank() && huaweiSk.isNotBlank() && huaweiProjectId.isNotBlank()
             SttProvider.VOLCENGINE -> volcengineAk.isNotBlank() && volcangineSk.isNotBlank()
+            SttProvider.REV_AI -> revaiAccessToken.isNotBlank()
+            SttProvider.SPEECHMATICS -> speechmaticsApiKey.isNotBlank()
+            SttProvider.ALIBABA_ASR -> aliyunAccessKeyId.isNotBlank() && aliyunAccessKeySecret.isNotBlank() && aliyunAppKey.isNotBlank()
+            SttProvider.TENCENT_ASR -> tencentSecretId.isNotBlank() && tencentSecretKey.isNotBlank()
+            SttProvider.BAIDU_ASR -> baiduAsrApiKey.isNotBlank() && baiduAsrSecretKey.isNotBlank()
+            SttProvider.OTTER_AI -> otteraiApiKey.isNotBlank()
+            SttProvider.BAIDU_ASR -> false  // TODO: Implement Baidu ASR credentials
+            SttProvider.OTTER_AI -> false  // TODO: Implement Otter.ai credentials
         }
     }
     

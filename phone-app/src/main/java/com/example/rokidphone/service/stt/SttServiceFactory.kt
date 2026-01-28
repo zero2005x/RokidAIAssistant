@@ -48,6 +48,59 @@ object SttServiceFactory {
                 }
             }
             
+            // New providers - Now implemented
+            SttProvider.ALIBABA_ASR -> {
+                if (sttCredentials.aliyunAccessKeyId.isBlank() || 
+                    sttCredentials.aliyunAccessKeySecret.isBlank() ||
+                    sttCredentials.aliyunAppKey.isBlank()) {
+                    Log.w(TAG, "Aliyun ASR credentials not configured")
+                    null
+                } else {
+                    AliyunSttService(
+                        accessKeyId = sttCredentials.aliyunAccessKeyId,
+                        accessKeySecret = sttCredentials.aliyunAccessKeySecret,
+                        appKey = sttCredentials.aliyunAppKey
+                    )
+                }
+            }
+            
+            SttProvider.TENCENT_ASR -> {
+                if (sttCredentials.tencentSecretId.isBlank() || 
+                    sttCredentials.tencentSecretKey.isBlank() ||
+                    sttCredentials.tencentAppId.isBlank()) {
+                    Log.w(TAG, "Tencent ASR credentials not configured")
+                    null
+                } else {
+                    TencentSttService(
+                        secretId = sttCredentials.tencentSecretId,
+                        secretKey = sttCredentials.tencentSecretKey,
+                        appId = sttCredentials.tencentAppId,
+                        engineModelType = sttCredentials.tencentEngineModelType
+                    )
+                }
+            }
+            
+            SttProvider.BAIDU_ASR -> {
+                if (sttCredentials.baiduAsrApiKey.isBlank() || 
+                    sttCredentials.baiduAsrSecretKey.isBlank()) {
+                    Log.w(TAG, "Baidu ASR credentials not configured")
+                    null
+                } else {
+                    BaiduSttService(
+                        apiKey = sttCredentials.baiduAsrApiKey,
+                        secretKey = sttCredentials.baiduAsrSecretKey
+                    )
+                }
+            }
+            
+            // TODO: Implement these providers
+            SttProvider.REV_AI,
+            SttProvider.SPEECHMATICS,
+            SttProvider.OTTER_AI -> {
+                Log.w(TAG, "Provider $provider not yet implemented")
+                null
+            }
+            
             SttProvider.GROQ_WHISPER -> {
                 val apiKey = apiSettings.groqApiKey
                 if (apiKey.isBlank()) {
@@ -104,56 +157,160 @@ object SttServiceFactory {
                 }
             }
             
-            // Providers not yet implemented - return null with log
+            // Providers now implemented
             SttProvider.GOOGLE_CLOUD_STT -> {
-                Log.w(TAG, "Google Cloud STT not yet implemented - requires SDK integration")
-                null
+                if (sttCredentials.gcpProjectId.isBlank()) {
+                    Log.w(TAG, "Google Cloud STT project ID not configured")
+                    null
+                } else {
+                    GoogleCloudSttService(
+                        projectId = sttCredentials.gcpProjectId,
+                        apiKey = sttCredentials.gcpApiKey,
+                        serviceAccountJson = sttCredentials.gcpServiceAccountJson,
+                        useServiceAccount = sttCredentials.gcpUseServiceAccount
+                    )
+                }
             }
             
             SttProvider.AWS_TRANSCRIBE -> {
-                Log.w(TAG, "AWS Transcribe not yet implemented - requires SDK integration")
-                null
+                if (sttCredentials.awsAccessKeyId.isBlank() || 
+                    sttCredentials.awsSecretAccessKey.isBlank()) {
+                    Log.w(TAG, "AWS Transcribe credentials not configured")
+                    null
+                } else {
+                    AwsTranscribeSttService(
+                        accessKeyId = sttCredentials.awsAccessKeyId,
+                        secretAccessKey = sttCredentials.awsSecretAccessKey,
+                        region = sttCredentials.awsRegion
+                    )
+                }
             }
             
+            // Tier 2 providers - Now implemented
             SttProvider.IBM_WATSON -> {
-                Log.w(TAG, "IBM Watson STT not yet implemented")
-                null
+                if (sttCredentials.ibmApiKey.isBlank() || 
+                    sttCredentials.ibmServiceUrl.isBlank()) {
+                    Log.w(TAG, "IBM Watson credentials not configured")
+                    null
+                } else {
+                    IbmWatsonSttService(
+                        apiKey = sttCredentials.ibmApiKey,
+                        serviceUrl = sttCredentials.ibmServiceUrl,
+                        model = "en-US_BroadbandModel",
+                        interimResults = false,
+                        smartFormatting = true
+                    )
+                }
             }
             
             SttProvider.HUAWEI_SIS -> {
-                Log.w(TAG, "Huawei SIS not yet implemented")
-                null
+                if (sttCredentials.huaweiAk.isBlank() || 
+                    sttCredentials.huaweiSk.isBlank() ||
+                    sttCredentials.huaweiProjectId.isBlank()) {
+                    Log.w(TAG, "Huawei SIS credentials not configured")
+                    null
+                } else {
+                    HuaweiSisSttService(
+                        accessKey = sttCredentials.huaweiAk,
+                        secretKey = sttCredentials.huaweiSk,
+                        region = sttCredentials.huaweiRegion,
+                        projectId = sttCredentials.huaweiProjectId,
+                        audioFormat = "pcm16k16bit",
+                        property = "chinese_16k_common"
+                    )
+                }
             }
             
             SttProvider.VOLCENGINE -> {
-                Log.w(TAG, "Volcengine ASR not yet implemented")
-                null
+                if (sttCredentials.volcengineAppId.isBlank() || 
+                    sttCredentials.volcengineAk.isBlank() ||
+                    sttCredentials.volcangineSk.isBlank()) {
+                    Log.w(TAG, "Volcengine credentials not configured")
+                    null
+                } else {
+                    VolcengineSttService(
+                        appId = sttCredentials.volcengineAppId,
+                        accessKeyId = sttCredentials.volcengineAk,
+                        accessKeySecret = sttCredentials.volcangineSk,
+                        cluster = "volcengine_streaming_common"
+                    )
+                }
+            }
+            
+            // Tier 3 providers - Now implemented
+            SttProvider.REV_AI -> {
+                if (sttCredentials.revaiAccessToken.isBlank()) {
+                    Log.w(TAG, "Rev.ai access token not configured")
+                    null
+                } else {
+                    RevAiSttService(
+                        accessToken = sttCredentials.revaiAccessToken,
+                        language = "en",
+                        filterProfanity = false
+                    )
+                }
+            }
+            
+            SttProvider.SPEECHMATICS -> {
+                if (sttCredentials.speechmaticsApiKey.isBlank()) {
+                    Log.w(TAG, "Speechmatics API key not configured")
+                    null
+                } else {
+                    SpeechmaticsSttService(
+                        apiKey = sttCredentials.speechmaticsApiKey,
+                        language = "en",
+                        enableDiarization = false,
+                        operatingPoint = "standard"
+                    )
+                }
+            }
+            
+            SttProvider.OTTER_AI -> {
+                if (sttCredentials.otteraiApiKey.isBlank()) {
+                    Log.w(TAG, "Otter.ai API key not configured")
+                    null
+                } else {
+                    OtterAiSttService(
+                        apiKey = sttCredentials.otteraiApiKey
+                    )
+                }
             }
         }
     }
     
     /**
-     * Get list of fully implemented providers
+     * Get providers that are fully implemented and available
      */
     fun getImplementedProviders(): List<SttProvider> = listOf(
+        // Existing providers
         SttProvider.GEMINI,
         SttProvider.OPENAI_WHISPER,
         SttProvider.GROQ_WHISPER,
         SttProvider.DEEPGRAM,
         SttProvider.ASSEMBLYAI,
         SttProvider.AZURE_SPEECH,
-        SttProvider.IFLYTEK
+        SttProvider.IFLYTEK,
+        // Tier 1 providers
+        SttProvider.GOOGLE_CLOUD_STT,
+        SttProvider.AWS_TRANSCRIBE,
+        SttProvider.ALIBABA_ASR,
+        SttProvider.TENCENT_ASR,
+        SttProvider.BAIDU_ASR,
+        // Tier 2 providers
+        SttProvider.IBM_WATSON,
+        SttProvider.HUAWEI_SIS,
+        // Tier 3 providers
+        SttProvider.VOLCENGINE,
+        SttProvider.REV_AI,
+        SttProvider.SPEECHMATICS,
+        SttProvider.OTTER_AI
     )
     
     /**
      * Get providers that are planned but not yet implemented
      */
     fun getPlannedProviders(): List<SttProvider> = listOf(
-        SttProvider.GOOGLE_CLOUD_STT,
-        SttProvider.AWS_TRANSCRIBE,
-        SttProvider.IBM_WATSON,
-        SttProvider.HUAWEI_SIS,
-        SttProvider.VOLCENGINE
+        // All providers are now implemented!
     )
 }
 

@@ -155,15 +155,26 @@ class BluetoothSppClient(
                     return@launch // Connection successful, exit
                     
                 } catch (e: Exception) {
-                    Log.e(TAG, "Connection attempt $attempt failed", e)
+                    Log.e(TAG, "Connection attempt $attempt failed: ${e.message}", e)
                     lastException = e
+                    
+                    // Explicitly close socket and wait for system to release resources
                     closeSocket()
                     
                     if (attempt < maxRetries) {
-                        // Increase delay between retries progressively
-                        val delayMs = 1000L + (attempt * 500L)
-                        Log.d(TAG, "Retrying in ${delayMs}ms...")
+                        // Progressive backoff: longer delays for more failed attempts
+                        // This gives the Bluetooth stack time to clean up resources
+                        val delayMs = 1500L + (attempt * 1000L)  // 2.5s, 3.5s, 4.5s...
+                        Log.d(TAG, "Connection failed. Waiting ${delayMs}ms before retry $attempt/$maxRetries...")
                         delay(delayMs)
+                        
+                        // Cancel any pending discovery operations before retry
+                        try {
+                            bluetoothAdapter?.cancelDiscovery()
+                            delay(300)  // Brief pause for cancellation to take effect
+                        } catch (e2: Exception) {
+                            Log.w(TAG, "Failed to cancel discovery: ${e2.message}")
+                        }
                     }
                 }
             }
@@ -465,20 +476,44 @@ class BluetoothSppClient(
     }
     
     /**
-     * Close socket
+     * Close socket and release all resources
+     * Ensures proper cleanup to avoid "socket might closed" errors
      */
     private fun closeSocket() {
+        Log.d(TAG, "Closing socket and releasing resources...")
+        
+        // Close streams first (order matters)
         try {
-            inputStream?.close()
-            outputStream?.close()
-            socket?.close()
-        } catch (e: IOException) {
-            Log.e(TAG, "Error closing socket", e)
+            outputStream?.flush()  // Flush any pending data
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to flush output stream: ${e.message}")
         }
         
+        try {
+            inputStream?.close()
+        } catch (e: IOException) {
+            Log.w(TAG, "Error closing input stream: ${e.message}")
+        }
+        
+        try {
+            outputStream?.close()
+        } catch (e: IOException) {
+            Log.w(TAG, "Error closing output stream: ${e.message}")
+        }
+        
+        // Close socket last
+        try {
+            socket?.close()
+        } catch (e: IOException) {
+            Log.w(TAG, "Error closing socket: ${e.message}")
+        }
+        
+        // Clear references
         inputStream = null
         outputStream = null
         socket = null
+        
+        Log.d(TAG, "Socket closed and resources released")
     }
     
     /**

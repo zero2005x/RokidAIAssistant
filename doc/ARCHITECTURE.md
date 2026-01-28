@@ -300,22 +300,40 @@ interface AiServiceProvider {
 
 ```kotlin
 interface SttService {
-    suspend fun transcribe(audioData: ByteArray): SttResult
+    suspend fun transcribe(audioData: ByteArray): SpeechResult
+    suspend fun validateCredentials(): Boolean
     fun supportsStreaming(): Boolean
-    fun supportsRealtime(): Boolean
 }
 ```
 
-Supported providers:
+**Supported Providers (18 total):**
+
+**Tier 1 - Premium (5):**
+
+- Google Cloud STT
+- AWS Transcribe
+- Alibaba ASR (Aliyun)
+- Tencent ASR
+- Baidu ASR
+
+**Tier 2 - Enterprise (9):**
 
 - Gemini (native)
 - OpenAI Whisper
 - Groq Whisper
-- Azure Speech
-- AWS Transcribe
 - Deepgram
 - AssemblyAI
-- iFlytek
+- Azure Speech
+- iFLYTEK
+- IBM Watson STT
+- Huawei SIS
+
+**Tier 3 - Specialized (4):**
+
+- Volcengine ASR
+- Rev.ai
+- Speechmatics
+- Otter.ai
 
 ### Glasses App Components
 

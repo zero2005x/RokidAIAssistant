@@ -40,7 +40,7 @@
     <string name="system_prompt">系統提示詞</string>
     <string name="system_prompt_hint">輸入 AI 系統提示詞…</string>
     <string name="enter_system_prompt">輸入 AI 的系統提示詞…</string>
-    <string name="default_system_prompt">你是一個友善的 AI 助理。請簡潔地回答問題。</string>
+    <string name="default_system_prompt">你是一個友善的 AI 助理。請用繁體中文簡潔清晰地回答所有問題。</string>
     
     <!-- Language Settings -->
     <string name="language_settings">語言設定</string>
@@ -164,6 +164,12 @@
     <string name="stt_provider_iflytek">科大訊飛</string>
     <string name="stt_provider_huawei">華為雲 SIS</string>
     <string name="stt_provider_volcengine">火山引擎 ASR</string>
+    <string name="stt_provider_rev_ai">Rev.ai</string>
+    <string name="stt_provider_speechmatics">Speechmatics</string>
+    <string name="stt_provider_alibaba_asr">阿里雲 ASR</string>
+    <string name="stt_provider_tencent_asr">騰訊雲 ASR</string>
+    <string name="stt_provider_baidu_asr">百度雲 ASR</string>
+    <string name="stt_provider_otter_ai">Otter.ai</string>
     
     <!-- STT Settings -->
     <string name="stt_settings_title">語音辨識設定</string>

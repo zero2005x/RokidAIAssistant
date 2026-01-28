@@ -1,11 +1,14 @@
 package com.example.rokidglasses.viewmodel
 
+import android.Manifest
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -260,6 +263,20 @@ class GlassesViewModel(
         
         Log.d(TAG, "Start recording")
         
+        // Check RECORD_AUDIO permission before proceeding
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.RECORD_AUDIO
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            Log.e(TAG, "RECORD_AUDIO permission not granted")
+            _uiState.update { it.copy(
+                displayText = context.getString(R.string.mic_permission_required),
+                isListening = false
+            ) }
+            return
+        }
+        
         // Notify phone that recording started
         viewModelScope.launch {
             bluetoothClient.sendVoiceStart()
@@ -274,6 +291,22 @@ class GlassesViewModel(
                     AudioFormat.ENCODING_PCM_16BIT
                 )
                 
+                // Verify permission again before AudioRecord initialization
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.RECORD_AUDIO
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    Log.e(TAG, "RECORD_AUDIO permission lost during initialization")
+                    withContext(Dispatchers.Main) {
+                        _uiState.update { it.copy(
+                            displayText = context.getString(R.string.mic_permission_required),
+                            isListening = false
+                        ) }
+                    }
+                    return@launch
+                }
+                
                 audioRecord = AudioRecord(
                     MediaRecorder.AudioSource.MIC,
                     Constants.AUDIO_SAMPLE_RATE,
@@ -281,6 +314,20 @@ class GlassesViewModel(
                     AudioFormat.ENCODING_PCM_16BIT,
                     bufferSize
                 )
+                
+                // Verify AudioRecord was initialized successfully
+                if (audioRecord?.state != AudioRecord.STATE_INITIALIZED) {
+                    Log.e(TAG, "AudioRecord initialization failed")
+                    withContext(Dispatchers.Main) {
+                        _uiState.update { it.copy(
+                            displayText = "Failed to initialize microphone",
+                            isListening = false
+                        ) }
+                    }
+                    audioRecord?.release()
+                    audioRecord = null
+                    return@launch
+                }
                 
                 audioRecord?.startRecording()
                 Log.d(TAG, "AudioRecord started recording")

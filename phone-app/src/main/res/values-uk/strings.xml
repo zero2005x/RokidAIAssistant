@@ -40,7 +40,7 @@
     <string name="system_prompt">Системний промпт</string>
     <string name="system_prompt_hint">Введіть системний промпт ШІ…</string>
     <string name="enter_system_prompt">Введіть системний промпт ШІ…</string>
-    <string name="default_system_prompt">Ви дружній ШІ-асистент. Будь ласка, відповідайте на питання стисло.</string>
+    <string name="default_system_prompt">Ви дружній ШІ-асистент. Будь ласка, відповідайте на всі питання українською мовою стисло і зрозуміло.</string>
     
     <!-- Language Settings -->
     <string name="language_settings">Мова</string>

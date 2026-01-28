@@ -342,9 +342,11 @@ fun PhoneMainScreen(
                         conversationTitle = currentConversation?.title ?: stringResource(R.string.new_conversation),
                         messages = currentMessages,
                         isLoading = chatUiState.isLoading,
+                        error = chatUiState.error,
                         inputText = inputText,
                         onInputChange = { conversationViewModel.updateInputText(it) },
                         onSendMessage = { conversationViewModel.sendMessage() },
+                        onClearError = { conversationViewModel.clearError() },
                         onBack = { conversationViewModel.closeCurrentConversation() },
                         onClearHistory = { conversationViewModel.clearCurrentConversation() },
                         onExport = {
@@ -389,9 +391,11 @@ fun PhoneMainScreen(
                     conversationTitle = currentConversation?.title ?: "",
                     messages = currentMessages,
                     isLoading = chatUiState.isLoading,
+                    error = chatUiState.error,
                     inputText = inputText,
                     onInputChange = { conversationViewModel.updateInputText(it) },
                     onSendMessage = { conversationViewModel.sendMessage() },
+                    onClearError = { conversationViewModel.clearError() },
                     onBack = { navController.popBackStack() },
                     onClearHistory = { conversationViewModel.clearCurrentConversation() },
                     onExport = {

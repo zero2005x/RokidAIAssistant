@@ -40,7 +40,7 @@
     <string name="system_prompt">พรอมต์ระบบ</string>
     <string name="system_prompt_hint">ป้อนพรอมต์ระบบสำหรับ AI…</string>
     <string name="enter_system_prompt">ป้อนพรอมต์ระบบ AI…</string>
-    <string name="default_system_prompt">คุณเป็นผู้ช่วย AI ที่เป็นมิตร กรุณาตอบคำถามอย่างกระชับ</string>
+    <string name="default_system_prompt">คุณเป็นผู้ช่วย AI ที่เป็นมิตร กรุณาตอบคำถามทั้งหมดเป็นภาษาไทยอย่างกระชับและชัดเจน</string>
     
     <!-- Language Settings -->
     <string name="language_settings">ภาษา</string>

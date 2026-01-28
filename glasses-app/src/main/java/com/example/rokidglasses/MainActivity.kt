@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -35,6 +36,10 @@ import com.example.rokidglasses.ui.theme.RokidGlassesTheme
 import com.example.rokidglasses.viewmodel.GlassesViewModel
 
 class MainActivity : ComponentActivity() {
+    
+    companion object {
+        private const val TAG = "MainActivity"
+    }
     
     // Hold reference to ViewModel for key events
     private var glassesViewModel: GlassesViewModel? = null
@@ -217,8 +222,10 @@ class MainActivity : ComponentActivity() {
         }
         
         if (notGranted.isNotEmpty()) {
+            Log.w(TAG, "Missing permissions: ${notGranted.joinToString(", ")}")
             permissionLauncher.launch(notGranted.toTypedArray())
         } else {
+            Log.d(TAG, "All permissions granted")
             startServices()
         }
     }

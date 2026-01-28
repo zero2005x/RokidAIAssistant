@@ -40,7 +40,7 @@
     <string name="system_prompt">Системный промпт</string>
     <string name="system_prompt_hint">Введите системный промпт ИИ…</string>
     <string name="enter_system_prompt">Введите системный промпт ИИ…</string>
-    <string name="default_system_prompt">Вы дружелюбный ИИ-ассистент. Пожалуйста, отвечайте на вопросы кратко.</string>
+    <string name="default_system_prompt">Вы дружелюбный ИИ-ассистент. Пожалуйста, отвечайте на все вопросы на русском языке кратко и ясно.</string>
     
     <!-- Language Settings -->
     <string name="language_settings">Язык</string>

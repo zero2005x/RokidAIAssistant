@@ -45,14 +45,15 @@ cp local.properties.template local.properties
 
 ## Features
 
-| Feature                 | Description                                              |
-| ----------------------- | -------------------------------------------------------- |
-| 🎤 Voice Interaction    | Speak to AI through glasses or phone                     |
-| 📷 Photo Analysis       | Capture images with glasses camera, get AI analysis      |
-| 🤖 Multi-AI Providers   | Gemini, OpenAI, Anthropic, DeepSeek, Groq, xAI, and more |
-| 🎧 Multi-STT Providers  | Google, Azure, AWS, Deepgram, and more                   |
-| 📱 Phone-Glasses Comm   | Via Rokid CXR SDK and Bluetooth SPP                      |
-| 💬 Conversation History | Room database persistence                                |
+| Feature                 | Description                                                                                                                                                                                                                                |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 🎤 Voice Interaction    | Speak to AI through glasses or phone                                                                                                                                                                                                       |
+| 📷 Photo Analysis       | Capture images with glasses camera, get AI analysis                                                                                                                                                                                        |
+| 🤖 Multi-AI Providers   | 11 providers: Gemini, OpenAI, Anthropic, Claude, DeepSeek, Groq, Baidu, Alibaba (Qwen), Zhipu (GLM), Perplexity, xAI                                                                                                                       |
+| 🎧 Multi-STT Providers  | 18 providers: Gemini, OpenAI Whisper, Groq Whisper, Deepgram, AssemblyAI, Azure Speech, iFLYTEK, Google Cloud STT, AWS Transcribe, Alibaba ASR, Tencent ASR, Baidu ASR, IBM Watson, Huawei SIS, Volcengine, Rev.ai, Speechmatics, Otter.ai |
+| 📱 Phone-Glasses Comm   | Via Rokid CXR SDK and Bluetooth SPP                                                                                                                                                                                                        |
+| 💬 Conversation History | Room database persistence                                                                                                                                                                                                                  |
+| 🌍 Multi-Language       | 13 languages: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Italiano, Русский, Українська, العربية, Tiếng Việt, ไทย                                                                                                      |
 
 ---
 
@@ -323,10 +324,11 @@ A: Add keep rules to proguard-rules.pro:
 
 ## Documentation
 
-| Document                                     | Description                                  |
-| -------------------------------------------- | -------------------------------------------- |
-| [API Settings Guide](doc/API_SETTINGS.md)    | Complete API configuration for all providers |
-| [Architecture Overview](doc/ARCHITECTURE.md) | System design, data flow, component details  |
+| Document                                                      | Description                                  |
+| ------------------------------------------------------------- | -------------------------------------------- |
+| [API Settings Guide](doc/API_SETTINGS.md)                     | Complete API configuration for all providers |
+| [Architecture Overview](doc/ARCHITECTURE.md)                  | System design, data flow, component details  |
+| [STT Implementation Status](doc/STT_IMPLEMENTATION_STATUS.md) | Complete status of all 18 STT providers      |
 
 ---
 

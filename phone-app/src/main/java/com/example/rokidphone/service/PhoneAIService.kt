@@ -233,6 +233,18 @@ class PhoneAIService : Service() {
             return
         }
         
+        // Check API key before sending capture command
+        val settingsRepository = SettingsRepository.getInstance(this)
+        val apiKey = settingsRepository.getSettings().geminiApiKey
+        if (apiKey.isBlank()) {
+            Log.e(TAG, "API key is not configured, aborting photo capture")
+            // Notify UI to show API key warning dialog
+            ServiceBridge.notifyApiKeyMissing()
+            // Also send error message to glasses
+            bluetoothManager?.sendMessage(Message.aiError("API key not configured. Please set up an API key in Settings."))
+            return
+        }
+        
         Log.d(TAG, "Sending CAPTURE_PHOTO command to glasses")
         bluetoothManager?.sendMessage(Message(type = MessageType.CAPTURE_PHOTO))
     }
@@ -309,6 +321,15 @@ class PhoneAIService : Service() {
             return
         }
         
+        // Check API key before triggering photo capture
+        val settingsRepository = SettingsRepository.getInstance(this)
+        val apiKey = settingsRepository.getSettings().geminiApiKey
+        if (apiKey.isBlank()) {
+            Log.e(TAG, "API key is not configured, aborting photo capture")
+            bluetoothManager?.sendMessage(Message.aiError("API key not configured. Please set up an API key in Settings."))
+            return
+        }
+        
         Log.d(TAG, "Capturing photo from glasses via CXR SDK...")
         
         // Notify glasses: taking photo
@@ -382,6 +403,20 @@ class PhoneAIService : Service() {
             }
             MessageType.VOICE_START -> {
                 Log.d(TAG, "Voice recording started on glasses")
+                
+                // Check STT service availability before allowing recording
+                if (speechService == null) {
+                    Log.e(TAG, "STT service not available - API key not configured")
+                    val errorMsg = getString(R.string.service_not_ready)
+                    bluetoothManager?.sendMessage(Message.aiError(errorMsg))
+                    ServiceBridge.emitConversation(Message(
+                        type = MessageType.AI_ERROR,
+                        payload = errorMsg
+                    ))
+                    ServiceBridge.notifyApiKeyMissing()
+                    return
+                }
+                
                 // Notify phone UI
                 ServiceBridge.emitConversation(Message(
                     type = MessageType.AI_PROCESSING,

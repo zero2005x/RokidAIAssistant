@@ -40,7 +40,7 @@
     <string name="system_prompt">Lời nhắc hệ thống</string>
     <string name="system_prompt_hint">Nhập lời nhắc hệ thống cho AI…</string>
     <string name="enter_system_prompt">Nhập lời nhắc hệ thống AI…</string>
-    <string name="default_system_prompt">Bạn là một trợ lý AI thân thiện. Vui lòng trả lời câu hỏi một cách ngắn gọn.</string>
+    <string name="default_system_prompt">Bạn là một trợ lý AI thân thiện. Vui lòng trả lời tất cả các câu hỏi bằng tiếng Việt một cách ngắn gọn và rõ ràng.</string>
     
     <!-- Language Settings -->
     <string name="language_settings">Ngôn ngữ</string>

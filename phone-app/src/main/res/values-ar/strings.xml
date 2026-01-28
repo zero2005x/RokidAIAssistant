@@ -40,7 +40,7 @@
     <string name="system_prompt">موجه النظام</string>
     <string name="system_prompt_hint">أدخل موجه نظام الذكاء الاصطناعي…</string>
     <string name="enter_system_prompt">أدخل موجه نظام الذكاء الاصطناعي…</string>
-    <string name="default_system_prompt">أنت مساعد ذكاء اصطناعي ودود. يرجى الإجابة على الأسئلة بإيجاز.</string>
+    <string name="default_system_prompt">أنت مساعد ذكاء اصطناعي ودود. يرجى الإجابة على جميع الأسئلة باللغة العربية بإيجاز ووضوح.</string>
     
     <!-- Language Settings -->
     <string name="language_settings">اللغة</string>

@@ -113,6 +113,54 @@ enum class SttProvider(
         authType = SttAuthType.AK_SK_SIGNED,
         supportsStreaming = true,
         supportsRealtime = true
+    ),
+    REV_AI(
+        displayNameResId = R.string.stt_provider_rev_ai,
+        description = "Rev.ai Speech-to-Text API",
+        website = "https://www.rev.ai/",
+        authType = SttAuthType.API_KEY_HEADER,
+        supportsStreaming = true,
+        supportsRealtime = true
+    ),
+    SPEECHMATICS(
+        displayNameResId = R.string.stt_provider_speechmatics,
+        description = "Speechmatics Enterprise Speech Recognition",
+        website = "https://www.speechmatics.com/",
+        authType = SttAuthType.API_KEY_HEADER,
+        supportsStreaming = true,
+        supportsRealtime = true
+    ),
+    ALIBABA_ASR(
+        displayNameResId = R.string.stt_provider_alibaba_asr,
+        description = "阿里云智能语音识别 ASR",
+        website = "https://www.aliyun.com/product/nls",
+        authType = SttAuthType.AK_SK,
+        supportsStreaming = true,
+        supportsRealtime = true
+    ),
+    TENCENT_ASR(
+        displayNameResId = R.string.stt_provider_tencent_asr,
+        description = "腾讯云语音识别 ASR",
+        website = "https://cloud.tencent.com/product/asr",
+        authType = SttAuthType.SIGNED_REQUEST,
+        supportsStreaming = true,
+        supportsRealtime = true
+    ),
+    BAIDU_ASR(
+        displayNameResId = R.string.stt_provider_baidu_asr,
+        description = "百度智能云语音识别 ASR",
+        website = "https://cloud.baidu.com/product/speech",
+        authType = SttAuthType.API_KEY_SECRET,
+        supportsStreaming = true,
+        supportsRealtime = true
+    ),
+    OTTER_AI(
+        displayNameResId = R.string.stt_provider_otter_ai,
+        description = "Otter.ai Meeting Transcription",
+        website = "https://otter.ai/",
+        authType = SttAuthType.API_KEY_HEADER,
+        supportsStreaming = false,
+        supportsRealtime = false
     );
     
     companion object {
@@ -134,7 +182,8 @@ enum class SttProvider(
         fun getChineseProviders(): List<SttProvider> = listOf(
             GEMINI, OPENAI_WHISPER, GROQ_WHISPER,
             GOOGLE_CLOUD_STT, AZURE_SPEECH, 
-            IFLYTEK, HUAWEI_SIS, VOLCENGINE
+            IFLYTEK, HUAWEI_SIS, VOLCENGINE,
+            ALIBABA_ASR, TENCENT_ASR, BAIDU_ASR
         )
     }
 }
@@ -145,11 +194,12 @@ enum class SttProvider(
 enum class SttAuthType {
     API_KEY,                    // Simple API key (query param or Bearer token)
     API_KEY_HEADER,             // API key in Authorization header (Token scheme)
+    API_KEY_SECRET,             // API Key + Secret Key (Baidu: API Key + Secret Key)
     SERVICE_ACCOUNT_OR_API_KEY, // Google Cloud: Service Account JSON or API Key
     SUBSCRIPTION_KEY_REGION,    // Azure: Subscription Key + Region
     AWS_IAM,                    // AWS: Access Key ID + Secret Access Key + Region
     IBM_IAM,                    // IBM: API Key + Service URL
-    AK_SK,                      // Huawei: Access Key + Secret Key + Region + Project ID
+    AK_SK,                      // Huawei/Alibaba: Access Key + Secret Key + Region
     AK_SK_SIGNED,               // Volcengine: AK/SK with request signing
-    SIGNED_REQUEST              // iFLYTEK: APPID + APIKey + APISecret with HMAC signature
+    SIGNED_REQUEST              // iFLYTEK/Tencent: APPID + APIKey + APISecret with HMAC signature
 }

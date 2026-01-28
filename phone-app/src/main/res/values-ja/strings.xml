@@ -40,7 +40,7 @@
     <string name="system_prompt">システムプロンプト</string>
     <string name="system_prompt_hint">AI システムプロンプトを入力…</string>
     <string name="enter_system_prompt">AI のシステムプロンプトを入力…</string>
-    <string name="default_system_prompt">あなたは親切な AI アシスタントです。質問には簡潔にお答えください。</string>
+    <string name="default_system_prompt">あなたは親切な AI アシスタントです。すべての質問に日本語で簡潔かつ明確にお答えください。</string>
     
     <!-- Language Settings -->
     <string name="language_settings">言語設定</string>

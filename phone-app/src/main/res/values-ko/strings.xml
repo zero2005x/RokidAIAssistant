@@ -40,7 +40,7 @@
     <string name="system_prompt">시스템 프롬프트</string>
     <string name="system_prompt_hint">AI 시스템 프롬프트 입력…</string>
     <string name="enter_system_prompt">AI 시스템 프롬프트 입력…</string>
-    <string name="default_system_prompt">당신은 친절한 AI 어시스턴트입니다. 질문에 간결하게 답변해 주세요.</string>
+    <string name="default_system_prompt">당신은 친절한 AI 어시스턴트입니다. 모든 질문에 한국어로 간결하고 명확하게 답변해 주세요.</string>
     
     <!-- Language Settings -->
     <string name="language_settings">언어 설정</string>

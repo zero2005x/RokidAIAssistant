@@ -40,7 +40,7 @@
     <string name="system_prompt">System Prompt</string>
     <string name="system_prompt_hint">Enter system prompt for AI…</string>
     <string name="enter_system_prompt">Enter AI system prompt…</string>
-    <string name="default_system_prompt">You are a friendly AI assistant. Please answer questions concisely.</string>
+    <string name="default_system_prompt">You are a friendly AI assistant. Please answer all questions in English concisely and clearly.</string>
     
     <!-- Language Settings -->
     <string name="language_settings">Language</string>
@@ -161,9 +161,15 @@
     <string name="stt_provider_ibm_watson">IBM Watson STT</string>
     <string name="stt_provider_deepgram">Deepgram</string>
     <string name="stt_provider_assemblyai">AssemblyAI</string>
-    <string name="stt_provider_iflytek">科大訊飛 iFLYTEK</string>
+    <string name="stt_provider_iflytek">科大讯飞 iFLYTEK</string>
     <string name="stt_provider_huawei">华为云 SIS</string>
     <string name="stt_provider_volcengine">火山引擎 ASR</string>
+    <string name="stt_provider_rev_ai">Rev.ai</string>
+    <string name="stt_provider_speechmatics">Speechmatics</string>
+    <string name="stt_provider_alibaba_asr">阿里云 ASR</string>
+    <string name="stt_provider_tencent_asr">腾讯云 ASR</string>
+    <string name="stt_provider_baidu_asr">百度云 ASR</string>
+    <string name="stt_provider_otter_ai">Otter.ai</string>
     
     <!-- STT Settings -->
     <string name="stt_settings_title">Speech Recognition Settings</string>

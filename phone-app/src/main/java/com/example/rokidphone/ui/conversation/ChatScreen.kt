@@ -37,9 +37,11 @@ fun ChatScreen(
     conversationTitle: String,
     messages: List<Message>,
     isLoading: Boolean,
+    error: String?,
     inputText: String,
     onInputChange: (String) -> Unit,
     onSendMessage: () -> Unit,
+    onClearError: () -> Unit,
     onBack: () -> Unit,
     onClearHistory: () -> Unit,
     onExport: (() -> Unit)? = null,
@@ -49,6 +51,18 @@ fun ChatScreen(
     val coroutineScope = rememberCoroutineScope()
     var showClearDialog by remember { mutableStateOf(false) }
     var showMenu by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    
+    // Show error message
+    LaunchedEffect(error) {
+        error?.let {
+            snackbarHostState.showSnackbar(
+                message = it,
+                duration = SnackbarDuration.Long
+            )
+            onClearError()
+        }
+    }
     
     // Auto-scroll to bottom when new messages arrive
     LaunchedEffect(messages.size) {
@@ -116,6 +130,9 @@ fun ChatScreen(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
             )
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
         }
     ) { padding ->
         Column(

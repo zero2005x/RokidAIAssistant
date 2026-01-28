@@ -46,6 +46,11 @@ class GeminiService(
         return withContext(Dispatchers.IO) {
             Log.d(TAG, "Starting transcription, audio size: ${pcmAudioData.size} bytes")
             
+            if (apiKey.isBlank()) {
+                Log.e(TAG, "API key is not configured")
+                return@withContext SpeechResult.Error("API key not configured. Please set up an API key in Settings.")
+            }
+            
             if (pcmAudioData.size < 1000) {
                 return@withContext SpeechResult.Error("Audio too short, please try again")
             }
@@ -131,6 +136,11 @@ Rules:
         return withContext(Dispatchers.IO) {
             Log.d(TAG, "Chat request: $userMessage")
             
+            if (apiKey.isBlank()) {
+                Log.e(TAG, "API key is not configured")
+                return@withContext "API key not configured. Please set up an API key in Settings."
+            }
+            
             val contents = JSONArray()
             
             // System prompt
@@ -212,6 +222,11 @@ Rules:
     override suspend fun analyzeImage(imageData: ByteArray, prompt: String): String {
         return withContext(Dispatchers.IO) {
             Log.d(TAG, "Image analysis request, size: ${imageData.size} bytes")
+            
+            if (apiKey.isBlank()) {
+                Log.e(TAG, "API key is not configured")
+                return@withContext "Sorry, unable to analyze this image. API key not configured."
+            }
             
             val imageBase64 = Base64.encodeToString(imageData, Base64.NO_WRAP)
             

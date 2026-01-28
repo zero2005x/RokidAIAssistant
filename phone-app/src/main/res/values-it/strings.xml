@@ -40,7 +40,7 @@
     <string name="system_prompt">Prompt di sistema</string>
     <string name="system_prompt_hint">Inserisci il prompt di sistema dell\'IA…</string>
     <string name="enter_system_prompt">Inserisci il prompt di sistema dell\'IA…</string>
-    <string name="default_system_prompt">Sei un assistente IA amichevole. Rispondi alle domande in modo conciso.</string>
+    <string name="default_system_prompt">Sei un assistente IA amichevole. Rispondi a tutte le domande in italiano in modo conciso e chiaro.</string>
     
     <!-- Language Settings -->
     <string name="language_settings">Lingua</string>

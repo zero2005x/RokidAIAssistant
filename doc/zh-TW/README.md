@@ -45,14 +45,15 @@ cp local.properties.template local.properties
 
 ## 功能特色
 
-| 功能             | 說明                                              |
-| ---------------- | ------------------------------------------------- |
-| 🎤 語音互動      | 透過眼鏡或手機與 AI 對話                          |
-| 📷 照片分析      | 使用眼鏡相機拍攝圖片，取得 AI 分析                |
-| 🤖 多 AI 服務商  | Gemini、OpenAI、Anthropic、DeepSeek、Groq、xAI 等 |
-| 🎧 多 STT 服務商 | Google、Azure、AWS、Deepgram 等                   |
-| 📱 手機-眼鏡通訊 | 透過 Rokid CXR SDK 和藍牙 SPP                     |
-| 💬 對話記錄      | Room 資料庫持久儲存                               |
+| 功能             | 說明                                                                                                                                                                                                                                      |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🎤 語音互動      | 透過眼鏡或手機與 AI 對話                                                                                                                                                                                                                  |
+| 📷 照片分析      | 使用眼鏡相機拍攝圖片，取得 AI 分析                                                                                                                                                                                                        |
+| 🤖 多 AI 服務商  | 11 個服務商：Gemini、OpenAI、Anthropic、Claude、DeepSeek、Groq、Baidu、Alibaba (Qwen)、Zhipu (GLM)、Perplexity、xAI                                                                                                                       |
+| 🎧 多 STT 服務商 | 18 個服務商：Gemini、OpenAI Whisper、Groq Whisper、Deepgram、AssemblyAI、Azure Speech、iFLYTEK、Google Cloud STT、AWS Transcribe、Alibaba ASR、Tencent ASR、Baidu ASR、IBM Watson、Huawei SIS、Volcengine、Rev.ai、Speechmatics、Otter.ai |
+| 📱 手機-眼鏡通訊 | 透過 Rokid CXR SDK 和藍牙 SPP                                                                                                                                                                                                             |
+| 💬 對話記錄      | Room 資料庫持久儲存                                                                                                                                                                                                                       |
+| 🌍 多語言支援    | 13 種語言：English、简体中文、繁體中文、日本語、한국어、Español、Français、Italiano、Русский、Українська、العربية、Tiếng Việt、ไทย                                                                                                        |
 
 ---
 
