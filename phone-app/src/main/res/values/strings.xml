@@ -175,6 +175,7 @@
     <string name="stt_settings_title">Speech Recognition Settings</string>
     <string name="stt_provider_label">STT Provider</string>
     <string name="stt_credentials_title">Credentials</string>
+    <string name="stt_uses_main_api_key">Uses the main AI provider API key configured above</string>
     <string name="stt_test_connection">Test Connection</string>
     <string name="stt_test_success">Connection successful!</string>
     <string name="stt_test_failed">Connection failed: %s</string>

@@ -22,6 +22,10 @@ import com.example.rokidphone.data.db.ConversationRepository
 import com.example.rokidphone.service.ai.AiServiceFactory
 import com.example.rokidphone.service.ai.AiServiceProvider
 import com.example.rokidphone.service.cxr.CxrMobileManager
+import com.example.rokidphone.service.stt.SttProvider
+import com.example.rokidphone.service.stt.SttService
+import com.example.rokidphone.service.stt.SttServiceFactory
+import com.example.rokidphone.data.toSttCredentials
 import com.example.rokidphone.service.photo.PhotoData
 import com.example.rokidphone.service.photo.PhotoRepository
 import com.example.rokidphone.service.photo.ReceivedPhoto
@@ -53,6 +57,9 @@ class PhoneAIService : Service() {
     
     // Speech recognition service (may differ from chat service)
     private var speechService: AiServiceProvider? = null
+    
+    // Dedicated STT service (for specialized STT providers like Deepgram, Azure, etc.)
+    private var sttService: SttService? = null
     
     // TTS service
     private var ttsService: TextToSpeechService? = null
@@ -104,6 +111,7 @@ class PhoneAIService : Service() {
         bluetoothManager?.disconnect()
         cxrManager?.release()
         ttsService?.shutdown()
+        sttService?.release()
     }
     
     private fun initializeServices() {
@@ -133,6 +141,10 @@ class PhoneAIService : Service() {
             speechService = createSpeechService(validatedSettings)
             Log.d(TAG, "Speech service created: ${speechService != null}")
             
+            // Create dedicated STT service if a specialized provider is selected
+            sttService = createSttService(validatedSettings)
+            Log.d(TAG, "Dedicated STT service created: ${sttService != null}, provider: ${validatedSettings.sttProvider}")
+            
             Log.d(TAG, "Using AI provider: ${validatedSettings.aiProvider}, model: ${validatedSettings.aiModelId}")
             
             // Monitor settings changes
@@ -142,7 +154,8 @@ class PhoneAIService : Service() {
                     val validatedNewSettings = validateAndCorrectSettings(newSettings)
                     aiService = createAiService(validatedNewSettings)
                     speechService = createSpeechService(validatedNewSettings)
-                    Log.d(TAG, "Services updated: ${validatedNewSettings.aiProvider}, ${validatedNewSettings.aiModelId}")
+                    sttService = createSttService(validatedNewSettings)
+                    Log.d(TAG, "Services updated: ${validatedNewSettings.aiProvider}, STT: ${validatedNewSettings.sttProvider}")
                 }
             }
             
@@ -405,7 +418,7 @@ class PhoneAIService : Service() {
                 Log.d(TAG, "Voice recording started on glasses")
                 
                 // Check STT service availability before allowing recording
-                if (speechService == null) {
+                if (sttService == null && speechService == null) {
                     Log.e(TAG, "STT service not available - API key not configured")
                     val errorMsg = getString(R.string.service_not_ready)
                     bluetoothManager?.sendMessage(Message.aiError(errorMsg))
@@ -547,8 +560,8 @@ class PhoneAIService : Service() {
      */
     private suspend fun processVoiceData(audioData: ByteArray) {
         try {
-            // Check if speech service is available
-            if (speechService == null) {
+            // Check if any speech service is available
+            if (sttService == null && speechService == null) {
                 Log.e(TAG, "Speech service not available - no API key configured")
                 val errorMsg = getString(R.string.service_not_ready)
                 bluetoothManager?.sendMessage(Message.aiError(errorMsg))
@@ -564,9 +577,15 @@ class PhoneAIService : Service() {
             // 1. Notify glasses: recognizing
             bluetoothManager?.sendMessage(Message.aiProcessing(getString(R.string.recognizing_speech)))
             
-            // 2. Speech recognition (using dedicated STT service)
+            // 2. Speech recognition - prefer dedicated STT service if available
             Log.d(TAG, "Starting speech recognition...")
-            val transcriptResult = speechService?.transcribe(audioData)
+            val transcriptResult = if (sttService != null) {
+                Log.d(TAG, "Using dedicated STT service: ${sttService?.provider?.name}")
+                sttService?.transcribe(audioData, "zh-CN")
+            } else {
+                Log.d(TAG, "Using AI-based speech service")
+                speechService?.transcribe(audioData)
+            }
             
             val transcript = when (transcriptResult) {
                 is SpeechResult.Success -> {
@@ -844,9 +863,41 @@ class PhoneAIService : Service() {
     }
     
     /**
+     * Create dedicated STT service for specialized providers
+     * Uses SttServiceFactory for providers like Deepgram, Azure, Aliyun, etc.
+     */
+    private fun createSttService(settings: ApiSettings): SttService? {
+        val sttProvider = settings.sttProvider
+        
+        // Check if this is a provider that uses main AI API keys (handled by speechService)
+        val aiBasedProviders = listOf(
+            SttProvider.GEMINI,
+            SttProvider.OPENAI_WHISPER,
+            SttProvider.GROQ_WHISPER
+        )
+        
+        if (sttProvider in aiBasedProviders) {
+            Log.d(TAG, "STT provider ${sttProvider.name} uses main AI service, no dedicated STT service needed")
+            return null
+        }
+        
+        // Create dedicated STT service using SttServiceFactory
+        val sttCredentials = settings.toSttCredentials()
+        val service = SttServiceFactory.createService(sttCredentials, settings)
+        
+        if (service != null) {
+            Log.d(TAG, "Created dedicated STT service for provider: ${sttProvider.name}")
+        } else {
+            Log.w(TAG, "Failed to create STT service for ${sttProvider.name} - credentials may be missing")
+        }
+        
+        return service
+    }
+    
+    /**
      * Check if speech service is available
      */
-    fun isSpeechServiceAvailable(): Boolean = speechService != null
+    fun isSpeechServiceAvailable(): Boolean = speechService != null || sttService != null
     
     /**
      * Validate and correct settings

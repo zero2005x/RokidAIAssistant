@@ -26,8 +26,23 @@ import javax.crypto.spec.SecretKeySpec
  * 
  * Auth: AWS Access Key ID + Secret Access Key (AWS Signature V4)
  * 
- * Note: This implementation uses the synchronous REST API approach.
- * For production streaming, consider using AWS SDK for Android.
+ * IMPORTANT LIMITATION:
+ * AWS Transcribe does NOT support direct audio byte uploads like other STT services.
+ * It requires one of these approaches:
+ * 
+ * 1. Async Batch API (StartTranscriptionJob):
+ *    - Upload audio to S3 bucket first
+ *    - Start transcription job with S3 URI
+ *    - Poll for completion
+ *    - Fetch results from output S3 URI
+ * 
+ * 2. Real-time Streaming API (TranscribeStreaming):
+ *    - Requires AWS SDK with HTTP/2 support
+ *    - Uses bidirectional streaming with event-based messages
+ *    - Complex signature calculation for streaming
+ * 
+ * For mobile apps, consider using AWS Amplify or AWS SDK for Android.
+ * This stub exists to provide clear error messaging to users.
  */
 class AwsTranscribeSttService(
     private val accessKeyId: String,

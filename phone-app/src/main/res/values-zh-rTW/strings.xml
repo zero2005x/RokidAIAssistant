@@ -175,6 +175,7 @@
     <string name="stt_settings_title">語音辨識設定</string>
     <string name="stt_provider_label">語音辨識服務商</string>
     <string name="stt_credentials_title">憑證設定</string>
+    <string name="stt_uses_main_api_key">使用上方已設定的 AI 服務商 API 金鑰</string>
     <string name="stt_test_connection">測試連線</string>
     <string name="stt_test_success">連線成功！</string>
     <string name="stt_test_failed">連線失敗：%s</string>

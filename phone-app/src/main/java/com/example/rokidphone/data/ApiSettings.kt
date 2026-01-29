@@ -702,6 +702,73 @@ data class ApiSettings(
     val sttProvider: SttProvider = SttProvider.GEMINI,
     val speechLanguage: String = "zh-TW",
     
+    // === STT Provider Credentials ===
+    
+    // Deepgram
+    val deepgramApiKey: String = "",
+    
+    // AssemblyAI
+    val assemblyaiApiKey: String = "",
+    
+    // Google Cloud Speech-to-Text
+    val gcpProjectId: String = "",
+    val gcpApiKey: String = "",
+    val gcpServiceAccountJson: String = "",
+    val gcpUseServiceAccount: Boolean = false,
+    
+    // Microsoft Azure AI Speech
+    val azureSpeechKey: String = "",
+    val azureSpeechRegion: String = "",
+    
+    // Amazon Transcribe
+    val awsAccessKeyId: String = "",
+    val awsSecretAccessKey: String = "",
+    val awsRegion: String = "us-east-1",
+    
+    // IBM Watson Speech to Text
+    val ibmApiKey: String = "",
+    val ibmServiceUrl: String = "",
+    
+    // 科大訊飛 iFLYTEK
+    val iflytekAppId: String = "",
+    val iflytekApiKey: String = "",
+    val iflytekApiSecret: String = "",
+    
+    // 華為雲 SIS
+    val huaweiAk: String = "",
+    val huaweiSk: String = "",
+    val huaweiRegion: String = "cn-north-4",
+    val huaweiProjectId: String = "",
+    
+    // 火山引擎 Volcengine
+    val volcengineAk: String = "",
+    val volcangineSk: String = "",
+    val volcengineAppId: String = "",
+    
+    // 阿里云 ASR
+    val aliyunAccessKeyId: String = "",
+    val aliyunAccessKeySecret: String = "",
+    val aliyunAppKey: String = "",
+    
+    // 腾讯云 ASR
+    val tencentSecretId: String = "",
+    val tencentSecretKey: String = "",
+    val tencentAppId: String = "",
+    val tencentEngineModelType: String = "16k_zh",
+    
+    // 百度云 ASR
+    val baiduAsrApiKey: String = "",
+    val baiduAsrSecretKey: String = "",
+    
+    // Rev.ai
+    val revaiAccessToken: String = "",
+    
+    // Speechmatics
+    val speechmaticsApiKey: String = "",
+    
+    // Otter.ai
+    val otteraiApiKey: String = "",
+    
     // AI response settings
     val responseLanguage: String = "zh-TW",
     // Note: The default value is set to empty string here. 
@@ -890,6 +957,50 @@ fun ApiSettings.validateForSpeech(): SettingsValidationResult {
     } else {
         SettingsValidationResult.Valid
     }
+}
+
+/**
+ * Convert ApiSettings to SttCredentials for use with SttServiceFactory
+ */
+fun ApiSettings.toSttCredentials(): com.example.rokidphone.service.stt.SttCredentials {
+    return com.example.rokidphone.service.stt.SttCredentials(
+        selectedProvider = sttProvider.name,
+        deepgramApiKey = deepgramApiKey,
+        assemblyaiApiKey = assemblyaiApiKey,
+        gcpProjectId = gcpProjectId,
+        gcpApiKey = gcpApiKey,
+        gcpServiceAccountJson = gcpServiceAccountJson,
+        gcpUseServiceAccount = gcpUseServiceAccount,
+        azureSpeechKey = azureSpeechKey,
+        azureSpeechRegion = azureSpeechRegion,
+        awsAccessKeyId = awsAccessKeyId,
+        awsSecretAccessKey = awsSecretAccessKey,
+        awsRegion = awsRegion,
+        ibmApiKey = ibmApiKey,
+        ibmServiceUrl = ibmServiceUrl,
+        iflytekAppId = iflytekAppId,
+        iflytekApiKey = iflytekApiKey,
+        iflytekApiSecret = iflytekApiSecret,
+        huaweiAk = huaweiAk,
+        huaweiSk = huaweiSk,
+        huaweiRegion = huaweiRegion,
+        huaweiProjectId = huaweiProjectId,
+        volcengineAk = volcengineAk,
+        volcangineSk = volcangineSk,
+        volcengineAppId = volcengineAppId,
+        aliyunAccessKeyId = aliyunAccessKeyId,
+        aliyunAccessKeySecret = aliyunAccessKeySecret,
+        aliyunAppKey = aliyunAppKey,
+        tencentSecretId = tencentSecretId,
+        tencentSecretKey = tencentSecretKey,
+        tencentAppId = tencentAppId,
+        tencentEngineModelType = tencentEngineModelType,
+        baiduAsrApiKey = baiduAsrApiKey,
+        baiduAsrSecretKey = baiduAsrSecretKey,
+        revaiAccessToken = revaiAccessToken,
+        speechmaticsApiKey = speechmaticsApiKey,
+        otteraiApiKey = otteraiApiKey
+    )
 }
 
 /**

@@ -51,6 +51,6 @@
     <string name="swipe_down_next">▼ 向下滑動看下頁</string>
     
     <!-- AI System Prompt -->
-    <string name="glasses_system_prompt">你是安裝在 Rokid 智慧眼鏡上的友善 AI 助理。請用使用者的語言簡潔地回答問題，每次回覆不超過 100 字。</string>
+    <string name="glasses_system_prompt">你是安裝在 Rokid 智慧眼鏡上的友善 AI 助理。請用使用者的語言回答問題，每次回覆不超過 100 字。</string>
     <string name="glasses_system_prompt_ack">了解，我是您的 Rokid AI 助理。我會簡潔地協助您。有什麼可以幫您的嗎？</string>
 </resources>

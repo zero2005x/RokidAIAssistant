@@ -51,6 +51,6 @@
     <string name="swipe_down_next">▼ Desliza hacia abajo</string>
     
     <!-- AI System Prompt -->
-    <string name="glasses_system_prompt">Eres un asistente de IA amigable instalado en las gafas inteligentes Rokid. Por favor responde las preguntas de manera concisa en el idioma del usuario, con cada respuesta sin exceder las 100 palabras.</string>
+    <string name="glasses_system_prompt">Eres un asistente de IA amigable instalado en las gafas inteligentes Rokid. Por favor responde las preguntas en el idioma del usuario, con cada respuesta sin exceder las 100 palabras.</string>
     <string name="glasses_system_prompt_ack">Entendido, soy tu asistente IA Rokid. Te ayudaré de manera concisa. ¿En qué puedo ayudarte?</string>
 </resources>

@@ -93,13 +93,7 @@ object SttServiceFactory {
                 }
             }
             
-            // TODO: Implement these providers
-            SttProvider.REV_AI,
-            SttProvider.SPEECHMATICS,
-            SttProvider.OTTER_AI -> {
-                Log.w(TAG, "Provider $provider not yet implemented")
-                null
-            }
+            // REV_AI, SPEECHMATICS, OTTER_AI are now implemented - see Tier 3 section below
             
             SttProvider.GROQ_WHISPER -> {
                 val apiKey = apiSettings.groqApiKey

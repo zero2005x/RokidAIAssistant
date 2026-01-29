@@ -21,7 +21,10 @@ import org.json.JSONObject
  * - Supports multiple languages
  * - High accuracy
  * 
- * Auth: API Key or Service Account JSON
+ * Auth: API Key (with X-Goog-User-Project header for quota tracking)
+ * 
+ * Required Headers:
+ * - X-Goog-User-Project: For quota and billing attribution
  */
 class GoogleCloudSttService(
     private val projectId: String,
@@ -75,6 +78,7 @@ class GoogleCloudSttService(
                 val request = Request.Builder()
                     .url(url)
                     .addHeader("Content-Type", "application/json")
+                    .addHeader("X-Goog-User-Project", projectId)  // Required for quota/billing attribution
                     .apply {
                         if (useServiceAccount) {
                             // TODO: Implement OAuth2 token from service account JSON

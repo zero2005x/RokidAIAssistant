@@ -51,6 +51,6 @@
     <string name="swipe_down_next">▼ 아래로 스와이프 - 다음</string>
     
     <!-- AI System Prompt -->
-    <string name="glasses_system_prompt">당신은 Rokid 스마트 안경에 설치된 친절한 AI 어시스턴트입니다. 사용자의 언어로 간결하게 질문에 답변해 주세요. 각 응답은 100자 이내로 해주세요.</string>
+    <string name="glasses_system_prompt">당신은 Rokid 스마트 안경에 설치된 친절한 AI 어시스턴트입니다. 사용자의 언어로 질문에 답변해 주세요. 각 응답은 100자 이내로 해주세요.</string>
     <string name="glasses_system_prompt_ack">알겠습니다. 저는 Rokid AI 어시스턴트입니다. 간결하게 도와드리겠습니다. 무엇을 도와드릴까요?</string>
 </resources>

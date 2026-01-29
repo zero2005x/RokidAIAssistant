@@ -21,14 +21,18 @@ import kotlin.coroutines.resume
  * Speechmatics Real-time Speech-to-Text Service
  * Implements real-time speech recognition using Speechmatics WebSocket API
  * 
- * API Documentation: https://docs.speechmatics.com/api-ref/realtime-transcription-websocket
+ * API Documentation: https://docs.speechmatics.com/rt-api-ref
  * 
  * Features:
  * - Real-time WebSocket transcription
- * - JWT token authentication
+ * - API key authentication via Authorization: Bearer header
  * - Speaker diarization support
  * - Multiple language support
  * - Entity recognition
+ * 
+ * Authentication:
+ * - Use Authorization: Bearer <api_key> header (recommended for non-browser clients)
+ * - JWT query parameter is for browser-based transcription with temporary keys only
  */
 class SpeechmaticsSttService(
     private val apiKey: String,
@@ -52,18 +56,19 @@ class SpeechmaticsSttService(
             try {
                 Log.d(TAG, "Starting Speechmatics transcription, audio size: ${audioData.size} bytes")
 
-                // Generate JWT token
-                val jwtToken = generateJwtToken()
-                val wsUrl = "$WEBSOCKET_URL?jwt=$jwtToken"
-                Log.d(TAG, "WebSocket URL prepared")
+                // Build WebSocket URL (no JWT in URL - use Authorization header instead)
+                val wsUrl = WEBSOCKET_URL
+                Log.d(TAG, "WebSocket URL: $wsUrl")
 
                 val result = suspendCancellableCoroutine { continuation ->
                     val latch = CountDownLatch(1)
                     var finalTranscript = StringBuilder()
                     var error: Exception? = null
 
+                    // Use Authorization: Bearer header for authentication (recommended for non-browser clients)
                     val request = Request.Builder()
                         .url(wsUrl)
+                        .addHeader("Authorization", "Bearer $apiKey")
                         .build()
 
                     val listener = object : WebSocketListener() {
@@ -251,15 +256,4 @@ class SpeechmaticsSttService(
     }
 
     override fun supportsStreaming(): Boolean = true
-
-    /**
-     * Generate JWT token from API key
-     * Note: This is a simplified version. In production, you should implement proper JWT generation
-     * or use a library like java-jwt
-     */
-    private fun generateJwtToken(): String {
-        // For Speechmatics, the API key IS the JWT token in most cases
-        // If you need to generate a JWT from credentials, implement proper JWT signing here
-        return apiKey
-    }
 }

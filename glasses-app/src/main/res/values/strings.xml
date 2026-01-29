@@ -63,6 +63,6 @@
     <string name="transfer_failed">Transfer failed: %s</string>
     
     <!-- AI System Prompt -->
-    <string name="glasses_system_prompt">You are a friendly AI assistant installed on Rokid smart glasses. Please answer questions concisely in the user\'s language, with each response not exceeding 100 words.</string>
+    <string name="glasses_system_prompt">You are a friendly AI assistant installed on Rokid smart glasses. Answer in the user\'s language, with each response not exceeding 100 words.</string>
     <string name="glasses_system_prompt_ack">Understood, I am your Rokid AI assistant. I will assist you concisely. How can I help you?</string>
 </resources>

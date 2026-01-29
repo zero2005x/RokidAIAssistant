@@ -175,6 +175,7 @@
     <string name="stt_settings_title">语音识别设置</string>
     <string name="stt_provider_label">语音识别服务商</string>
     <string name="stt_credentials_title">凭证配置</string>
+    <string name="stt_uses_main_api_key">使用上方已配置的 AI 服务商 API 密钥</string>
     <string name="stt_test_connection">测试连接</string>
     <string name="stt_test_success">连接成功！</string>
     <string name="stt_test_failed">连接失败：%s</string>

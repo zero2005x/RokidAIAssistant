@@ -253,6 +253,15 @@ This document tracks the implementation status of all 18 Speech-to-Text (STT) pr
 - Fixed duplicate function definitions
 - Corrected getImplementedProviders() list
 
+#### Round 5 - Duplicate When Branches (2026-01-29)
+
+- **Issue**: REV_AI, SPEECHMATICS, OTTER_AI had duplicate when branches
+  - Lines 96-101: Returned `null` with "not yet implemented" log
+  - Lines 241-278: Had full implementation
+- **Impact**: First branch was always matched, providers always returned `null`
+- **Fix**: Removed obsolete TODO branch at lines 96-101
+- **Verification**: Compilation successful after fix
+
 ### Phase 3: Build Verification
 
 - ✅ Kotlin compilation successful (`compileDebugKotlin`)
@@ -375,11 +384,11 @@ Uses `SpeechResult.Error` with:
 - Requires S3 bucket for audio upload
 - Needs AWS SDK integration for production
 
-### 2. Duplicate Branch Warning
+### 2. ~~Duplicate Branch Warning~~ (FIXED 2026-01-29)
 
-- `SttCredentials.kt` line 127-128
-- Duplicate when branches (non-blocking warning)
-- Low priority cleanup
+- ~~`SttCredentials.kt` line 127-128~~
+- ~~Duplicate when branches (non-blocking warning)~~
+- **Fixed**: Removed obsolete TODO branch in `SttServiceFactory.kt`
 
 ### 3. Deprecation Warnings
 
@@ -461,5 +470,6 @@ Legend:
 
 ---
 
-**Last Updated**: 2024
-**Status**: 12/18 providers implemented (67% complete)
+**Last Updated**: 2026-01-29
+**Status**: 18/18 providers implemented (100% complete)
+**Note**: AWS Transcribe is stub only (requires S3 integration)

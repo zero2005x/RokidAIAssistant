@@ -227,6 +227,13 @@ fun SettingsScreen(
                         subtitle = stringResource(settings.sttProvider.displayNameResId),
                         onClick = { showSpeechServiceDialog = true }
                     )
+                    
+                    // Dynamic credential fields based on selected STT provider
+                    SttCredentialsFields(
+                        provider = settings.sttProvider,
+                        settings = settings,
+                        onSettingsChange = onSettingsChange
+                    )
                 }
             }
             
@@ -717,6 +724,311 @@ fun SttProviderSelectionDialog(
                 Text(stringResource(R.string.cancel))
             }
         }
+    )
+}
+
+/**
+ * Dynamic credential input fields based on the selected STT provider
+ */
+@Composable
+fun SttCredentialsFields(
+    provider: SttProvider,
+    settings: ApiSettings,
+    onSettingsChange: (ApiSettings) -> Unit
+) {
+    // Providers that use main AI API keys (no additional credentials needed)
+    val noCredentialsNeeded = listOf(
+        SttProvider.GEMINI,
+        SttProvider.OPENAI_WHISPER,
+        SttProvider.GROQ_WHISPER
+    )
+    
+    if (provider in noCredentialsNeeded) {
+        // These providers use the main AI API key
+        Text(
+            text = stringResource(R.string.stt_uses_main_api_key),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+        return
+    }
+    
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.stt_credentials_title),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary
+        )
+        
+        when (provider) {
+            SttProvider.DEEPGRAM -> {
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_api_key),
+                    value = settings.deepgramApiKey,
+                    onValueChange = { onSettingsChange(settings.copy(deepgramApiKey = it)) }
+                )
+            }
+            
+            SttProvider.ASSEMBLYAI -> {
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_api_key),
+                    value = settings.assemblyaiApiKey,
+                    onValueChange = { onSettingsChange(settings.copy(assemblyaiApiKey = it)) }
+                )
+            }
+            
+            SttProvider.GOOGLE_CLOUD_STT -> {
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_project_id),
+                    value = settings.gcpProjectId,
+                    onValueChange = { onSettingsChange(settings.copy(gcpProjectId = it)) },
+                    isPassword = false
+                )
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_api_key),
+                    value = settings.gcpApiKey,
+                    onValueChange = { onSettingsChange(settings.copy(gcpApiKey = it)) }
+                )
+            }
+            
+            SttProvider.AZURE_SPEECH -> {
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_subscription_key),
+                    value = settings.azureSpeechKey,
+                    onValueChange = { onSettingsChange(settings.copy(azureSpeechKey = it)) }
+                )
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_region),
+                    value = settings.azureSpeechRegion,
+                    onValueChange = { onSettingsChange(settings.copy(azureSpeechRegion = it)) },
+                    isPassword = false,
+                    placeholder = "eastus, westus2, etc."
+                )
+            }
+            
+            SttProvider.AWS_TRANSCRIBE -> {
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_access_key),
+                    value = settings.awsAccessKeyId,
+                    onValueChange = { onSettingsChange(settings.copy(awsAccessKeyId = it)) }
+                )
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_secret_key),
+                    value = settings.awsSecretAccessKey,
+                    onValueChange = { onSettingsChange(settings.copy(awsSecretAccessKey = it)) }
+                )
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_region),
+                    value = settings.awsRegion,
+                    onValueChange = { onSettingsChange(settings.copy(awsRegion = it)) },
+                    isPassword = false,
+                    placeholder = "us-east-1"
+                )
+            }
+            
+            SttProvider.IBM_WATSON -> {
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_api_key),
+                    value = settings.ibmApiKey,
+                    onValueChange = { onSettingsChange(settings.copy(ibmApiKey = it)) }
+                )
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_service_url),
+                    value = settings.ibmServiceUrl,
+                    onValueChange = { onSettingsChange(settings.copy(ibmServiceUrl = it)) },
+                    isPassword = false,
+                    placeholder = "https://api.us-south.speech-to-text.watson.cloud.ibm.com"
+                )
+            }
+            
+            SttProvider.IFLYTEK -> {
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_app_id),
+                    value = settings.iflytekAppId,
+                    onValueChange = { onSettingsChange(settings.copy(iflytekAppId = it)) },
+                    isPassword = false
+                )
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_api_key),
+                    value = settings.iflytekApiKey,
+                    onValueChange = { onSettingsChange(settings.copy(iflytekApiKey = it)) }
+                )
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_api_secret),
+                    value = settings.iflytekApiSecret,
+                    onValueChange = { onSettingsChange(settings.copy(iflytekApiSecret = it)) }
+                )
+            }
+            
+            SttProvider.HUAWEI_SIS -> {
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_access_key),
+                    value = settings.huaweiAk,
+                    onValueChange = { onSettingsChange(settings.copy(huaweiAk = it)) }
+                )
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_secret_key),
+                    value = settings.huaweiSk,
+                    onValueChange = { onSettingsChange(settings.copy(huaweiSk = it)) }
+                )
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_project_id),
+                    value = settings.huaweiProjectId,
+                    onValueChange = { onSettingsChange(settings.copy(huaweiProjectId = it)) },
+                    isPassword = false
+                )
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_region),
+                    value = settings.huaweiRegion,
+                    onValueChange = { onSettingsChange(settings.copy(huaweiRegion = it)) },
+                    isPassword = false,
+                    placeholder = "cn-north-4"
+                )
+            }
+            
+            SttProvider.VOLCENGINE -> {
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_access_key),
+                    value = settings.volcengineAk,
+                    onValueChange = { onSettingsChange(settings.copy(volcengineAk = it)) }
+                )
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_secret_key),
+                    value = settings.volcangineSk,
+                    onValueChange = { onSettingsChange(settings.copy(volcangineSk = it)) }
+                )
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_app_id),
+                    value = settings.volcengineAppId,
+                    onValueChange = { onSettingsChange(settings.copy(volcengineAppId = it)) },
+                    isPassword = false
+                )
+            }
+            
+            SttProvider.ALIBABA_ASR -> {
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_access_key),
+                    value = settings.aliyunAccessKeyId,
+                    onValueChange = { onSettingsChange(settings.copy(aliyunAccessKeyId = it)) }
+                )
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_secret_key),
+                    value = settings.aliyunAccessKeySecret,
+                    onValueChange = { onSettingsChange(settings.copy(aliyunAccessKeySecret = it)) }
+                )
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_app_id),
+                    value = settings.aliyunAppKey,
+                    onValueChange = { onSettingsChange(settings.copy(aliyunAppKey = it)) },
+                    isPassword = false,
+                    placeholder = "NLS AppKey"
+                )
+            }
+            
+            SttProvider.TENCENT_ASR -> {
+                ApiKeyInputField(
+                    label = "Secret ID",
+                    value = settings.tencentSecretId,
+                    onValueChange = { onSettingsChange(settings.copy(tencentSecretId = it)) }
+                )
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_secret_key),
+                    value = settings.tencentSecretKey,
+                    onValueChange = { onSettingsChange(settings.copy(tencentSecretKey = it)) }
+                )
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_app_id),
+                    value = settings.tencentAppId,
+                    onValueChange = { onSettingsChange(settings.copy(tencentAppId = it)) },
+                    isPassword = false
+                )
+            }
+            
+            SttProvider.BAIDU_ASR -> {
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_api_key),
+                    value = settings.baiduAsrApiKey,
+                    onValueChange = { onSettingsChange(settings.copy(baiduAsrApiKey = it)) }
+                )
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_secret_key),
+                    value = settings.baiduAsrSecretKey,
+                    onValueChange = { onSettingsChange(settings.copy(baiduAsrSecretKey = it)) }
+                )
+            }
+            
+            SttProvider.REV_AI -> {
+                ApiKeyInputField(
+                    label = "Access Token",
+                    value = settings.revaiAccessToken,
+                    onValueChange = { onSettingsChange(settings.copy(revaiAccessToken = it)) }
+                )
+            }
+            
+            SttProvider.SPEECHMATICS -> {
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_api_key),
+                    value = settings.speechmaticsApiKey,
+                    onValueChange = { onSettingsChange(settings.copy(speechmaticsApiKey = it)) }
+                )
+            }
+            
+            SttProvider.OTTER_AI -> {
+                ApiKeyInputField(
+                    label = stringResource(R.string.stt_api_key),
+                    value = settings.otteraiApiKey,
+                    onValueChange = { onSettingsChange(settings.copy(otteraiApiKey = it)) }
+                )
+            }
+            
+            else -> {
+                // Fallback for any unhandled providers
+                Text(
+                    text = "Configure credentials for ${provider.name}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ApiKeyInputField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    isPassword: Boolean = true,
+    placeholder: String = ""
+) {
+    var passwordVisible by remember { mutableStateOf(false) }
+    
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        placeholder = if (placeholder.isNotEmpty()) {{ Text(placeholder) }} else null,
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true,
+        visualTransformation = if (isPassword && !passwordVisible) 
+            PasswordVisualTransformation() 
+        else 
+            VisualTransformation.None,
+        keyboardOptions = KeyboardOptions(keyboardType = if (isPassword) KeyboardType.Password else KeyboardType.Text),
+        trailingIcon = if (isPassword) {
+            {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = if (passwordVisible) "Hide" else "Show"
+                    )
+                }
+            }
+        } else null
     )
 }
 
