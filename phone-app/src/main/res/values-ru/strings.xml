@@ -42,6 +42,11 @@
     <string name="enter_system_prompt">Введите системный промпт ИИ…</string>
     <string name="default_system_prompt">Вы дружелюбный ИИ-ассистент. Пожалуйста, отвечайте на все вопросы на русском языке кратко и ясно.</string>
     
+    <!-- Recording Settings -->
+    <string name="recording_settings">Настройки записи</string>
+    <string name="auto_analyze_recordings">Автоматический анализ записей</string>
+    <string name="auto_analyze_recordings_description">Автоматически отправлять записи в ИИ для транскрипции и анализа после остановки</string>
+    
     <!-- Language Settings -->
     <string name="language_settings">Язык</string>
     <string name="select_language">Выбрать язык</string>
@@ -164,11 +169,18 @@
     <string name="stt_provider_iflytek">iFLYTEK</string>
     <string name="stt_provider_huawei">Huawei SIS</string>
     <string name="stt_provider_volcengine">Volcengine</string>
+    <string name="stt_provider_rev_ai">Rev.ai</string>
+    <string name="stt_provider_speechmatics">Speechmatics</string>
+    <string name="stt_provider_alibaba_asr">Alibaba Cloud ASR</string>
+    <string name="stt_provider_tencent_asr">Tencent Cloud ASR</string>
+    <string name="stt_provider_baidu_asr">Baidu Cloud ASR</string>
+    <string name="stt_provider_otter_ai">Otter.ai</string>
     
     <!-- STT Settings -->
     <string name="stt_settings_title">Настройки распознавания речи</string>
     <string name="stt_provider_label">Провайдер STT</string>
     <string name="stt_credentials_title">Учётные данные STT</string>
+    <string name="stt_uses_main_api_key">Использует ключ API основного провайдера ИИ, настроенный выше</string>
     <string name="stt_test_connection">Тест соединения</string>
     <string name="stt_test_success">Соединение успешно</string>
     <string name="stt_test_failed">Тест соединения не пройден</string>
@@ -200,6 +212,7 @@
     <string name="photo_processing_failed">Ошибка обработки фото</string>
     <string name="photo_transfer_failed">Ошибка передачи фото: %s</string>
     <string name="analyzing_photo">Анализ фото…</string>
+    <string name="image_analysis_prompt">Пожалуйста, подробно опишите то, что вы видите на этом изображении. Включите основные объекты, сцену, цвета и другие детали. Будьте кратки и ясны.</string>
     <string name="ai_analysis_unavailable">Анализ изображений ИИ недоступен</string>
     <string name="photo_analysis_failed">Ошибка анализа фото: %s</string>
     <string name="preparing_analysis">Подготовка анализа…</string>
@@ -214,6 +227,17 @@
     <string name="capture">Снять</string>
     <string name="latest_photo">Последнее фото</string>
     <string name="photo_not_found">Фото не найдено</string>
+    <string name="glasses_not_connected_cxr">Очки не подключены через CXR</string>
+    <string name="taking_photo">Съёмка…</string>
+    <string name="photo_empty">Ошибка съёмки: изображение пустое</string>
+    <string name="photo_timeout">Время съёмки истекло, попробуйте снова</string>
+    <string name="photo_capture_failed">Ошибка съёмки: %s</string>
+    <string name="photo_process_failed">Ошибка обработки фото: %s</string>
+    <string name="image_decode_failed">Ошибка декодирования изображения</string>
+    <string name="image_convert_failed">Ошибка конвертации изображения</string>
+    <string name="image_ocr_prompt">Пожалуйста, определите и извлеките весь текстовый контент из этого изображения. Если есть таблицы, сохраните формат. Если текста нет, опишите содержимое изображения.</string>
+    <string name="image_translate_prompt">Пожалуйста, определите текст на изображении и переведите его. Предоставьте как оригинальный, так и переведённый текст.</string>
+    <string name="image_summary_prompt">Пожалуйста, кратко опишите основное содержание этого изображения в одном предложении.</string>
     
     <!-- Conversation History (New) -->
     <string name="new_conversation">Новый разговор</string>
@@ -278,4 +302,67 @@
     <string name="developer_tools">Инструменты разработчика</string>
     <string name="log_viewer">Просмотр журналов</string>
     <string name="log_viewer_description">Просмотр, экспорт и управление журналами приложения</string>
+    
+    <!-- Recordings -->
+    <string name="recordings">Записи</string>
+    <string name="recording_detail">Детали записи</string>
+    <string name="start_recording">Начать запись</string>
+    <string name="stop_recording">Остановить запись</string>
+    <string name="record_from_phone">Записать с телефона</string>
+    <string name="record_from_glasses">Записать с очков</string>
+    <string name="recording_source_phone">Запись с телефона</string>
+    <string name="recording_source_glasses">Запись с очков</string>
+    <string name="no_recordings">Нет записей</string>
+    <string name="no_recordings_found">Записи не найдены</string>
+    <string name="tap_mic_to_record">Нажмите кнопку микрофона, чтобы начать запись</string>
+    <string name="try_different_search">Попробуйте другой поисковый запрос</string>
+    <string name="search_recordings">Поиск записей…</string>
+    <string name="total_recordings">Всего</string>
+    <string name="total_duration">Длительность</string>
+    <string name="delete_recordings">Удалить записи</string>
+    <string name="delete_recordings_confirm">Удалить %d выбранных записей?</string>
+    <string name="delete_recording">Удалить запись</string>
+    <string name="delete_recording_confirm">Вы уверены, что хотите удалить эту запись?</string>
+    <string name="edit_recording">Редактировать запись</string>
+    <string name="title">Название</string>
+    <string name="notes">Заметки</string>
+    <string name="transcript">Транскрипция</string>
+    <string name="transcribe">Транскрибировать</string>
+    <string name="transcribing">Транскрипция…</string>
+    <string name="transcribed_at">Транскрибировано %s</string>
+    <string name="no_transcript">Транскрипции пока нет</string>
+    <string name="ai_response">Ответ ИИ</string>
+    <string name="analyze">Анализировать</string>
+    <string name="analyze_with_ai">Анализировать с ИИ</string>
+    <string name="analyzing">Анализ…</string>
+    <string name="analyzed_by">Проанализировано %s</string>
+    <string name="no_ai_response">Ответа ИИ пока нет</string>
+    <string name="transcribe_first">Сначала транскрибируйте запись</string>
+    <string name="recording_info">Информация о записи</string>
+    <string name="created">Создано</string>
+    <string name="duration">Длительность</string>
+    <string name="file_size">Размер файла</string>
+    <string name="sample_rate">Частота дискретизации</string>
+    <string name="status">Статус</string>
+    <string name="audio_file_not_available">Аудиофайл недоступен</string>
+    <string name="filter_all">Все</string>
+    <string name="filter_phone">Телефон</string>
+    <string name="filter_glasses">Очки</string>
+    <string name="filter_favorites">Избранное</string>
+    <string name="sort_date_desc">Сначала новые</string>
+    <string name="sort_date_asc">Сначала старые</string>
+    <string name="sort_duration_desc">Сначала длинные</string>
+    <string name="sort_duration_asc">Сначала короткие</string>
+    <string name="sort_name_asc">Имя (А-Я)</string>
+    <string name="sort_name_desc">Имя (Я-А)</string>
+    <string name="edit">Редактировать</string>
+    
+    <!-- Recording Control (Home Screen) -->
+    <string name="recording_control">Голосовая запись</string>
+    <string name="recording_ready">Нажмите, чтобы начать запись</string>
+    <string name="record_phone">Телефон</string>
+    <string name="record_glasses">Очки</string>
+    <string name="pause_recording">Пауза</string>
+    <string name="stop_and_send">Стоп и Анализ</string>
+    <string name="stopping">Остановка…</string>
 </resources>

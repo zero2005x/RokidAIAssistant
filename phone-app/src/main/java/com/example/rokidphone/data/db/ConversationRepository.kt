@@ -89,11 +89,12 @@ class ConversationRepository(context: Context) {
             // Search for voice sessions with today's date in the title
             val allConversations = conversationDao.getAllConversationsSync()
             
-            // Find voice sessions created today (title contains "語音對話" or "Voice Session" and today's date)
+            // Find voice sessions created today
+            // Check for "Voice Session" (English) and localized variants for backward compatibility
             val todayVoiceSessions = allConversations.filter { conversation ->
-                (conversation.title.contains("語音對話") || 
-                 conversation.title.contains("Voice Session") ||
-                 conversation.title.contains("语音对话")) && 
+                (conversation.title.contains("Voice Session") || 
+                 conversation.title.contains("語音對話") ||  // Traditional Chinese
+                 conversation.title.contains("语音对话")) &&  // Simplified Chinese
                 conversation.title.contains(todayDate)
             }
             

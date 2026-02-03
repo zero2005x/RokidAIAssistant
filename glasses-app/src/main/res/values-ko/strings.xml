@@ -49,6 +49,26 @@
     <string name="swipe_for_more">위/아래로 스와이프하여 더 보기</string>
     <string name="swipe_up_previous">▲ 위로 스와이프 - 이전</string>
     <string name="swipe_down_next">▼ 아래로 스와이프 - 다음</string>
+    <string name="swipe_left_right_pages">← 스와이프하여 더 많은 페이지 보기 →</string>
+    
+    <!-- Photo Capture -->
+    <string name="bluetooth_not_connected">Bluetooth 연결 안 됨</string>
+    <string name="connect_phone_first">먼저 휴대폰을 연결하세요</string>
+    <string name="capturing_photo">사진 촬영 중...</string>
+    <string name="please_wait_short">잠시 기다려 주세요</string>
+    <string name="compressing_photo">압축 중...</string>
+    <string name="transferring_photo">전송 중...</string>
+    <string name="photo_sent_waiting_ai">전송 완료, AI 분석 대기 중...</string>
+    <string name="photo_analysis_no_result">이 사진을 분석할 수 없습니다</string>
+    <string name="capture_failed">촬영 실패</string>
+    <string name="capture_failed_hint">카메라가 사용 중일 수 있습니다. 나중에 다시 시도해 주세요</string>
+    <string name="transfer_failed">전송 실패: %s</string>
+    <string name="error_message">오류: %s</string>
+    <string name="please_retry">다시 시도해 주세요</string>
+    <string name="camera_service_starting">카메라 서비스 시작 중...</string>
+    <string name="bluetooth_connected_ready">블루투스 연결됨, 준비 완료</string>
+    <string name="waiting_bluetooth_connection">블루투스 연결 대기 중...</string>
+    <string name="camera_permission_missing">카메라 권한이 없습니다</string>
     
     <!-- AI System Prompt -->
     <string name="glasses_system_prompt">당신은 Rokid 스마트 안경에 설치된 친절한 AI 어시스턴트입니다. 사용자의 언어로 질문에 답변해 주세요. 각 응답은 100자 이내로 해주세요.</string>

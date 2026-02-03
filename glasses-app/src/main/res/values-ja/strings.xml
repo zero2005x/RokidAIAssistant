@@ -49,6 +49,26 @@
     <string name="swipe_for_more">上下にスワイプして続きを見る</string>
     <string name="swipe_up_previous">▲ 上にスワイプで前へ</string>
     <string name="swipe_down_next">▼ 下にスワイプで次へ</string>
+    <string name="swipe_left_right_pages">← スワイプして他のページを見る →</string>
+    
+    <!-- Photo Capture -->
+    <string name="bluetooth_not_connected">Bluetooth未接続</string>
+    <string name="connect_phone_first">まずスマートフォンを接続してください</string>
+    <string name="capturing_photo">写真を撮影中...</string>
+    <string name="please_wait_short">お待ちください</string>
+    <string name="compressing_photo">圧縮中...</string>
+    <string name="transferring_photo">転送中...</string>
+    <string name="photo_sent_waiting_ai">送信完了、AI分析を待機中...</string>
+    <string name="photo_analysis_no_result">この写真を分析できません</string>
+    <string name="capture_failed">撮影に失敗しました</string>
+    <string name="capture_failed_hint">カメラが使用中の可能性があります。後でもう一度お試しください</string>
+    <string name="transfer_failed">転送に失敗しました：%s</string>
+    <string name="error_message">エラー：%s</string>
+    <string name="please_retry">もう一度お試しください</string>
+    <string name="camera_service_starting">カメラサービスを起動中...</string>
+    <string name="bluetooth_connected_ready">Bluetooth接続済み、準備完了</string>
+    <string name="waiting_bluetooth_connection">Bluetooth接続を待っています...</string>
+    <string name="camera_permission_missing">カメラ権限がありません</string>
     
     <!-- AI System Prompt -->
     <string name="glasses_system_prompt">あなたは Rokid スマートグラスにインストールされた親切な AI アシスタントです。ユーザーの言語で質問にお答えください。各回答は 100 文字以内でお願いします。</string>

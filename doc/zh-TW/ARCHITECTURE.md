@@ -182,6 +182,46 @@ sealed class CxrMessage {
    └── 眼鏡 → CXR TextDisplay
 ```
 
+### 錄音與自動分析流程（新功能）
+
+```
+1. 使用者開始錄音
+   ├── 手機錄音按鈕
+   └── 眼鏡錄音按鈕
+      │
+      ▼
+2. 停止錄音
+   ├── PCM 轉換 WAV 格式
+   └── 儲存到 Room 資料庫
+      │
+      ▼
+3. 檢查自動分析設定
+   │  (autoAnalyzeRecordings)
+   │
+   ├── 已啟用 → 繼續自動處理
+   └── 已停用 → 結束（僅儲存）
+      │
+      ▼
+4. STT 語音辨識
+   │  (使用已設定的 STT 服務商)
+   │
+      ▼
+5. AI 分析
+   │  (將辨識結果傳送給 AI)
+   │
+      ▼
+6. 輸出結果
+   ├── 更新資料庫
+   ├── 更新 UI 對話記錄
+   └── 眼鏡顯示（如已連接）
+```
+
+**關鍵實作點：**
+
+- `ApiSettings.autoAnalyzeRecordings` 控制自動分析（預設：啟用）
+- `ServiceBridge.transcribeRecordingFlow` 處理錄音事件
+- `PhoneAIService.processPhoneRecording()` 編排完整工作流程
+
 ### 狀態管理
 
 ```kotlin

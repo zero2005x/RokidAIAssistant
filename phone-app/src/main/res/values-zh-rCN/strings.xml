@@ -42,6 +42,11 @@
     <string name="enter_system_prompt">输入 AI 的系统提示词…</string>
     <string name="default_system_prompt">你是一个友善的 AI 助理。请用简体中文简洁清晰地回答所有问题。</string>
     
+    <!-- Recording Settings -->
+    <string name="recording_settings">录音设置</string>
+    <string name="auto_analyze_recordings">自动分析录音</string>
+    <string name="auto_analyze_recordings_description">停止录音后自动发送给 AI 进行语音识别与分析</string>
+    
     <!-- Language Settings -->
     <string name="language_settings">语言设置</string>
     <string name="select_language">选择语言</string>
@@ -207,6 +212,7 @@
     <string name="photo_processing_failed">处理照片失败</string>
     <string name="photo_transfer_failed">照片传输失败：%s</string>
     <string name="analyzing_photo">正在分析照片…</string>
+    <string name="image_analysis_prompt">请详细描述这张图片中你所看到的内容。包括主要对象、场景、颜色等细节。简洁明了。</string>
     <string name="ai_analysis_unavailable">AI 图像分析不可用</string>
     <string name="photo_analysis_failed">照片分析失败：%s</string>
     <string name="preparing_analysis">准备分析中…</string>
@@ -220,6 +226,17 @@
     <string name="capture">拍摄</string>
     <string name="latest_photo">最新照片</string>
     <string name="photo_not_found">找不到照片</string>
+    <string name="glasses_not_connected_cxr">眼镜未通过 CXR 连接</string>
+    <string name="taking_photo">正在拍照…</string>
+    <string name="photo_empty">拍照失败：图像为空</string>
+    <string name="photo_timeout">拍照超时，请重试</string>
+    <string name="photo_capture_failed">拍照失败：%s</string>
+    <string name="photo_process_failed">处理照片失败：%s</string>
+    <string name="image_decode_failed">图像解码失败</string>
+    <string name="image_convert_failed">图像转换失败</string>
+    <string name="image_ocr_prompt">请识别并提取这张图片中的所有文字内容。如果有表格，请保持格式。如果没有文字，请描述图片内容。</string>
+    <string name="image_translate_prompt">请识别图片中的文字并进行翻译。请同时提供原文和译文。</string>
+    <string name="image_summary_prompt">请用一句话总结这张图片的主要内容。</string>
     
     <!-- Conversation History (New) -->
     <string name="new_conversation">新对话</string>
@@ -284,4 +301,67 @@
     <string name="developer_tools">开发者工具</string>
     <string name="log_viewer">日志查看器</string>
     <string name="log_viewer_description">查看、导出和管理应用程序日志</string>
+    
+    <!-- Recordings -->
+    <string name="recordings">录音</string>
+    <string name="recording_detail">录音详情</string>
+    <string name="start_recording">开始录音</string>
+    <string name="stop_recording">停止录音</string>
+    <string name="record_from_phone">从手机录音</string>
+    <string name="record_from_glasses">从眼镜录音</string>
+    <string name="recording_source_phone">手机录音</string>
+    <string name="recording_source_glasses">眼镜录音</string>
+    <string name="no_recordings">没有录音</string>
+    <string name="no_recordings_found">找不到录音</string>
+    <string name="tap_mic_to_record">点击麦克风按钮开始录音</string>
+    <string name="try_different_search">尝试不同的搜索词</string>
+    <string name="search_recordings">搜索录音…</string>
+    <string name="total_recordings">总计</string>
+    <string name="total_duration">总时长</string>
+    <string name="delete_recordings">删除录音</string>
+    <string name="delete_recordings_confirm">删除 %d 个选中的录音？</string>
+    <string name="delete_recording">删除录音</string>
+    <string name="delete_recording_confirm">确定要删除这个录音吗？</string>
+    <string name="edit_recording">编辑录音</string>
+    <string name="title">标题</string>
+    <string name="notes">备注</string>
+    <string name="transcript">转录文字</string>
+    <string name="transcribe">转录</string>
+    <string name="transcribing">正在转录…</string>
+    <string name="transcribed_at">转录于 %s</string>
+    <string name="no_transcript">尚无转录文字</string>
+    <string name="ai_response">AI 回应</string>
+    <string name="analyze">分析</string>
+    <string name="analyze_with_ai">使用 AI 分析</string>
+    <string name="analyzing">正在分析…</string>
+    <string name="analyzed_by">由 %s 分析</string>
+    <string name="no_ai_response">尚无 AI 回应</string>
+    <string name="transcribe_first">请先转录录音</string>
+    <string name="recording_info">录音信息</string>
+    <string name="created">创建时间</string>
+    <string name="duration">时长</string>
+    <string name="file_size">文件大小</string>
+    <string name="sample_rate">采样率</string>
+    <string name="status">状态</string>
+    <string name="audio_file_not_available">音频文件不可用</string>
+    <string name="filter_all">全部</string>
+    <string name="filter_phone">手机</string>
+    <string name="filter_glasses">眼镜</string>
+    <string name="filter_favorites">收藏</string>
+    <string name="sort_date_desc">最新优先</string>
+    <string name="sort_date_asc">最旧优先</string>
+    <string name="sort_duration_desc">最长优先</string>
+    <string name="sort_duration_asc">最短优先</string>
+    <string name="sort_name_asc">名称 (A-Z)</string>
+    <string name="sort_name_desc">名称 (Z-A)</string>
+    <string name="edit">编辑</string>
+    
+    <!-- Recording Control (Home Screen) -->
+    <string name="recording_control">语音录音</string>
+    <string name="recording_ready">点击开始录音</string>
+    <string name="record_phone">手机</string>
+    <string name="record_glasses">眼镜</string>
+    <string name="pause_recording">暂停</string>
+    <string name="stop_and_send">停止并分析</string>
+    <string name="stopping">正在停止…</string>
 </resources>

@@ -49,6 +49,26 @@
     <string name="swipe_for_more">上下滑動查看更多</string>
     <string name="swipe_up_previous">▲ 向上滑動看上頁</string>
     <string name="swipe_down_next">▼ 向下滑動看下頁</string>
+    <string name="swipe_left_right_pages">← 滑動查看更多頁面 →</string>
+    
+    <!-- Photo Capture -->
+    <string name="bluetooth_not_connected">藍牙未連線</string>
+    <string name="connect_phone_first">請先連接手機</string>
+    <string name="capturing_photo">正在拍照...</string>
+    <string name="please_wait_short">請稍候</string>
+    <string name="compressing_photo">正在壓縮...</string>
+    <string name="transferring_photo">正在傳輸...</string>
+    <string name="photo_sent_waiting_ai">已傳送，等待AI分析...</string>
+    <string name="photo_analysis_no_result">無法分析此照片</string>
+    <string name="capture_failed">拍照失敗</string>
+    <string name="capture_failed_hint">相機可能正在使用中，請稍後再試</string>
+    <string name="transfer_failed">傳輸失敗：%s</string>
+    <string name="error_message">錯誤：%s</string>
+    <string name="please_retry">請再試一次</string>
+    <string name="camera_service_starting">相機服務正在啟動...</string>
+    <string name="bluetooth_connected_ready">藍牙已連接，準備就緒</string>
+    <string name="waiting_bluetooth_connection">等待藍牙連接...</string>
+    <string name="camera_permission_missing">缺少相機權限</string>
     
     <!-- AI System Prompt -->
     <string name="glasses_system_prompt">你是安裝在 Rokid 智慧眼鏡上的友善 AI 助理。請用使用者的語言回答問題，每次回覆不超過 100 字。</string>

@@ -20,8 +20,11 @@ object NavRoutes {
     const val CONVERSATION_HISTORY = "conversation_history"
     const val CONVERSATION_DETAIL = "conversation/{conversationId}"
     const val LOG_VIEWER = "log_viewer"
+    const val RECORDINGS = "recordings"
+    const val RECORDING_DETAIL = "recording/{recordingId}"
     
     fun conversationDetail(conversationId: String) = "conversation/$conversationId"
+    fun recordingDetail(recordingId: String) = "recording/$recordingId"
 }
 
 /**

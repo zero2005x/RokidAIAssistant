@@ -42,6 +42,11 @@
     <string name="enter_system_prompt">AI のシステムプロンプトを入力…</string>
     <string name="default_system_prompt">あなたは親切な AI アシスタントです。すべての質問に日本語で簡潔かつ明確にお答えください。</string>
     
+    <!-- Recording Settings -->
+    <string name="recording_settings">録音設定</string>
+    <string name="auto_analyze_recordings">録音を自動分析</string>
+    <string name="auto_analyze_recordings_description">録音停止後に自動的に AI へ送信して文字起こしと分析を行う</string>
+    
     <!-- Language Settings -->
     <string name="language_settings">言語設定</string>
     <string name="select_language">言語を選択</string>
@@ -164,11 +169,18 @@
     <string name="stt_provider_iflytek">科大訊飛 iFLYTEK</string>
     <string name="stt_provider_huawei">華為雲 SIS</string>
     <string name="stt_provider_volcengine">火山引擎 ASR</string>
+    <string name="stt_provider_rev_ai">Rev.ai</string>
+    <string name="stt_provider_speechmatics">Speechmatics</string>
+    <string name="stt_provider_alibaba_asr">Alibaba Cloud ASR</string>
+    <string name="stt_provider_tencent_asr">Tencent Cloud ASR</string>
+    <string name="stt_provider_baidu_asr">Baidu Cloud ASR</string>
+    <string name="stt_provider_otter_ai">Otter.ai</string>
     
     <!-- STT Settings -->
     <string name="stt_settings_title">音声認識設定</string>
     <string name="stt_provider_label">STT プロバイダー</string>
     <string name="stt_credentials_title">認証情報</string>
+    <string name="stt_uses_main_api_key">上記で設定したメインAIプロバイダーのAPIキーを使用します</string>
     <string name="stt_test_connection">接続テスト</string>
     <string name="stt_test_success">接続成功！</string>
     <string name="stt_test_failed">接続失敗：%s</string>
@@ -200,6 +212,7 @@
     <string name="photo_processing_failed">写真の処理に失敗しました</string>
     <string name="photo_transfer_failed">写真転送失敗：%s</string>
     <string name="analyzing_photo">写真を分析中…</string>
+    <string name="image_analysis_prompt">この画像に写っているものを詳しく説明してください。主なオブジェクト、シーン、色、その他の詳細を含めてください。簡潔かつ明確にお願いします。</string>
     <string name="ai_analysis_unavailable">AI 画像分析は利用できません</string>
     <string name="photo_analysis_failed">写真分析失敗：%s</string>
     <string name="preparing_analysis">分析の準備中…</string>
@@ -213,6 +226,17 @@
     <string name="capture">撮影</string>
     <string name="latest_photo">最新の写真</string>
     <string name="photo_not_found">写真が見つかりません</string>
+    <string name="glasses_not_connected_cxr">グラスが CXR 経由で接続されていません</string>
+    <string name="taking_photo">撮影中…</string>
+    <string name="photo_empty">撮影失敗：画像が空です</string>
+    <string name="photo_timeout">撮影がタイムアウトしました。もう一度お試しください</string>
+    <string name="photo_capture_failed">撮影失敗：%s</string>
+    <string name="photo_process_failed">写真の処理に失敗しました：%s</string>
+    <string name="image_decode_failed">画像のデコードに失敗しました</string>
+    <string name="image_convert_failed">画像の変換に失敗しました</string>
+    <string name="image_ocr_prompt">この画像からすべてのテキストを識別して抽出してください。表がある場合は書式を維持してください。テキストがない場合は画像の内容を説明してください。</string>
+    <string name="image_translate_prompt">画像内のテキストを識別して翻訳してください。原文と翻訳文の両方を提供してください。</string>
+    <string name="image_summary_prompt">この画像の主な内容を一文で要約してください。</string>
     
     <!-- Conversation History (New) -->
     <string name="new_conversation">新しい会話</string>
@@ -277,4 +301,67 @@
     <string name="developer_tools">開発者ツール</string>
     <string name="log_viewer">ログビューア</string>
     <string name="log_viewer_description">アプリのログを表示、エクスポート、管理</string>
+    
+    <!-- Recordings -->
+    <string name="recordings">録音</string>
+    <string name="recording_detail">録音の詳細</string>
+    <string name="start_recording">録音を開始</string>
+    <string name="stop_recording">録音を停止</string>
+    <string name="record_from_phone">スマホから録音</string>
+    <string name="record_from_glasses">グラスから録音</string>
+    <string name="recording_source_phone">スマホ録音</string>
+    <string name="recording_source_glasses">グラス録音</string>
+    <string name="no_recordings">録音がありません</string>
+    <string name="no_recordings_found">録音が見つかりません</string>
+    <string name="tap_mic_to_record">マイクボタンをタップして録音を開始</string>
+    <string name="try_different_search">別の検索語をお試しください</string>
+    <string name="search_recordings">録音を検索…</string>
+    <string name="total_recordings">合計</string>
+    <string name="total_duration">合計時間</string>
+    <string name="delete_recordings">録音を削除</string>
+    <string name="delete_recordings_confirm">選択した%d件の録音を削除しますか？</string>
+    <string name="delete_recording">録音を削除</string>
+    <string name="delete_recording_confirm">この録音を削除してもよろしいですか？</string>
+    <string name="edit_recording">録音を編集</string>
+    <string name="title">タイトル</string>
+    <string name="notes">メモ</string>
+    <string name="transcript">文字起こし</string>
+    <string name="transcribe">文字起こしする</string>
+    <string name="transcribing">文字起こし中…</string>
+    <string name="transcribed_at">%s に文字起こし</string>
+    <string name="no_transcript">まだ文字起こしがありません</string>
+    <string name="ai_response">AI 応答</string>
+    <string name="analyze">分析</string>
+    <string name="analyze_with_ai">AI で分析</string>
+    <string name="analyzing">分析中…</string>
+    <string name="analyzed_by">%s で分析</string>
+    <string name="no_ai_response">まだ AI 応答がありません</string>
+    <string name="transcribe_first">先に録音を文字起こししてください</string>
+    <string name="recording_info">録音情報</string>
+    <string name="created">作成日時</string>
+    <string name="duration">長さ</string>
+    <string name="file_size">ファイルサイズ</string>
+    <string name="sample_rate">サンプルレート</string>
+    <string name="status">ステータス</string>
+    <string name="audio_file_not_available">音声ファイルが利用できません</string>
+    <string name="filter_all">すべて</string>
+    <string name="filter_phone">スマホ</string>
+    <string name="filter_glasses">グラス</string>
+    <string name="filter_favorites">お気に入り</string>
+    <string name="sort_date_desc">新しい順</string>
+    <string name="sort_date_asc">古い順</string>
+    <string name="sort_duration_desc">長い順</string>
+    <string name="sort_duration_asc">短い順</string>
+    <string name="sort_name_asc">名前 (A-Z)</string>
+    <string name="sort_name_desc">名前 (Z-A)</string>
+    <string name="edit">編集</string>
+    
+    <!-- Recording Control (Home Screen) -->
+    <string name="recording_control">音声録音</string>
+    <string name="recording_ready">タップして録音を開始</string>
+    <string name="record_phone">スマホ</string>
+    <string name="record_glasses">グラス</string>
+    <string name="pause_recording">一時停止</string>
+    <string name="stop_and_send">停止して分析</string>
+    <string name="stopping">停止中…</string>
 </resources>

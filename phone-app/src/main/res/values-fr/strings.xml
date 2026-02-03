@@ -42,6 +42,11 @@
     <string name="enter_system_prompt">Entrez le prompt système de l\'IA…</string>
     <string name="default_system_prompt">Vous êtes un assistant IA amical. Veuillez répondre à toutes les questions en français de manière concise et claire.</string>
     
+    <!-- Recording Settings -->
+    <string name="recording_settings">Paramètres d\'enregistrement</string>
+    <string name="auto_analyze_recordings">Analyse automatique des enregistrements</string>
+    <string name="auto_analyze_recordings_description">Envoyer automatiquement les enregistrements à l\'IA pour transcription et analyse après l\'arrêt</string>
+    
     <!-- Language Settings -->
     <string name="language_settings">Langue</string>
     <string name="select_language">Sélectionner la langue</string>
@@ -164,11 +169,18 @@
     <string name="stt_provider_iflytek">iFLYTEK</string>
     <string name="stt_provider_huawei">Huawei SIS</string>
     <string name="stt_provider_volcengine">Volcengine</string>
+    <string name="stt_provider_rev_ai">Rev.ai</string>
+    <string name="stt_provider_speechmatics">Speechmatics</string>
+    <string name="stt_provider_alibaba_asr">Alibaba Cloud ASR</string>
+    <string name="stt_provider_tencent_asr">Tencent Cloud ASR</string>
+    <string name="stt_provider_baidu_asr">Baidu Cloud ASR</string>
+    <string name="stt_provider_otter_ai">Otter.ai</string>
     
     <!-- STT Settings -->
     <string name="stt_settings_title">Paramètres de reconnaissance vocale</string>
     <string name="stt_provider_label">Fournisseur STT</string>
     <string name="stt_credentials_title">Identifiants STT</string>
+    <string name="stt_uses_main_api_key">Utilise la clé API du fournisseur d\'IA principal configurée ci-dessus</string>
     <string name="stt_test_connection">Tester la connexion</string>
     <string name="stt_test_success">Connexion réussie</string>
     <string name="stt_test_failed">Échec du test de connexion</string>
@@ -200,6 +212,7 @@
     <string name="photo_processing_failed">Échec du traitement de la photo</string>
     <string name="photo_transfer_failed">Échec du transfert de photo : %s</string>
     <string name="analyzing_photo">Analyse de la photo…</string>
+    <string name="image_analysis_prompt">Veuillez décrire en détail ce que vous voyez dans cette image. Incluez les objets principaux, la scène, les couleurs et autres détails. Soyez concis et clair.</string>
     <string name="ai_analysis_unavailable">Analyse d\'image IA non disponible</string>
     <string name="photo_analysis_failed">Échec de l\'analyse de photo : %s</string>
     <string name="preparing_analysis">Préparation de l\'analyse…</string>
@@ -214,6 +227,17 @@
     <string name="capture">Capturer</string>
     <string name="latest_photo">Dernière photo</string>
     <string name="photo_not_found">Photo non trouvée</string>
+    <string name="glasses_not_connected_cxr">Lunettes non connectées via CXR</string>
+    <string name="taking_photo">Prise de photo…</string>
+    <string name="photo_empty">Échec de capture : image vide</string>
+    <string name="photo_timeout">Délai de capture dépassé, veuillez réessayer</string>
+    <string name="photo_capture_failed">Échec de capture : %s</string>
+    <string name="photo_process_failed">Échec du traitement de la photo : %s</string>
+    <string name="image_decode_failed">Échec du décodage de l\'image</string>
+    <string name="image_convert_failed">Échec de la conversion de l\'image</string>
+    <string name="image_ocr_prompt">Veuillez identifier et extraire tout le contenu textuel de cette image. S\'il y a des tableaux, conservez le format. S\'il n\'y a pas de texte, décrivez le contenu de l\'image.</string>
+    <string name="image_translate_prompt">Veuillez identifier le texte dans l\'image et le traduire. Fournissez à la fois le texte original et traduit.</string>
+    <string name="image_summary_prompt">Veuillez résumer le contenu principal de cette image en une phrase.</string>
     
     <!-- Conversation History (New) -->
     <string name="new_conversation">Nouvelle conversation</string>
@@ -278,4 +302,67 @@
     <string name="developer_tools">Outils de développement</string>
     <string name="log_viewer">Visionneuse de journaux</string>
     <string name="log_viewer_description">Afficher, exporter et gérer les journaux de l\'application</string>
+    
+    <!-- Recordings -->
+    <string name="recordings">Enregistrements</string>
+    <string name="recording_detail">Détail de l\'enregistrement</string>
+    <string name="start_recording">Démarrer l\'enregistrement</string>
+    <string name="stop_recording">Arrêter l\'enregistrement</string>
+    <string name="record_from_phone">Enregistrer depuis le téléphone</string>
+    <string name="record_from_glasses">Enregistrer depuis les lunettes</string>
+    <string name="recording_source_phone">Enregistrement du téléphone</string>
+    <string name="recording_source_glasses">Enregistrement des lunettes</string>
+    <string name="no_recordings">Aucun enregistrement</string>
+    <string name="no_recordings_found">Aucun enregistrement trouvé</string>
+    <string name="tap_mic_to_record">Appuyez sur le bouton du microphone pour démarrer l\'enregistrement</string>
+    <string name="try_different_search">Essayez un autre terme de recherche</string>
+    <string name="search_recordings">Rechercher des enregistrements…</string>
+    <string name="total_recordings">Total</string>
+    <string name="total_duration">Durée</string>
+    <string name="delete_recordings">Supprimer les enregistrements</string>
+    <string name="delete_recordings_confirm">Supprimer %d enregistrement(s) sélectionné(s) ?</string>
+    <string name="delete_recording">Supprimer l\'enregistrement</string>
+    <string name="delete_recording_confirm">Êtes-vous sûr de vouloir supprimer cet enregistrement ?</string>
+    <string name="edit_recording">Modifier l\'enregistrement</string>
+    <string name="title">Titre</string>
+    <string name="notes">Notes</string>
+    <string name="transcript">Transcription</string>
+    <string name="transcribe">Transcrire</string>
+    <string name="transcribing">Transcription en cours…</string>
+    <string name="transcribed_at">Transcrit le %s</string>
+    <string name="no_transcript">Pas encore de transcription</string>
+    <string name="ai_response">Réponse de l\'IA</string>
+    <string name="analyze">Analyser</string>
+    <string name="analyze_with_ai">Analyser avec l\'IA</string>
+    <string name="analyzing">Analyse en cours…</string>
+    <string name="analyzed_by">Analysé par %s</string>
+    <string name="no_ai_response">Pas encore de réponse de l\'IA</string>
+    <string name="transcribe_first">Transcrivez d\'abord l\'enregistrement</string>
+    <string name="recording_info">Info de l\'enregistrement</string>
+    <string name="created">Créé</string>
+    <string name="duration">Durée</string>
+    <string name="file_size">Taille du fichier</string>
+    <string name="sample_rate">Fréquence d\'échantillonnage</string>
+    <string name="status">Statut</string>
+    <string name="audio_file_not_available">Fichier audio non disponible</string>
+    <string name="filter_all">Tous</string>
+    <string name="filter_phone">Téléphone</string>
+    <string name="filter_glasses">Lunettes</string>
+    <string name="filter_favorites">Favoris</string>
+    <string name="sort_date_desc">Plus récents d\'abord</string>
+    <string name="sort_date_asc">Plus anciens d\'abord</string>
+    <string name="sort_duration_desc">Plus longs d\'abord</string>
+    <string name="sort_duration_asc">Plus courts d\'abord</string>
+    <string name="sort_name_asc">Nom (A-Z)</string>
+    <string name="sort_name_desc">Nom (Z-A)</string>
+    <string name="edit">Modifier</string>
+    
+    <!-- Recording Control (Home Screen) -->
+    <string name="recording_control">Enregistrement vocal</string>
+    <string name="recording_ready">Appuyez pour démarrer l\'enregistrement</string>
+    <string name="record_phone">Téléphone</string>
+    <string name="record_glasses">Lunettes</string>
+    <string name="pause_recording">Pause</string>
+    <string name="stop_and_send">Arrêter et Analyser</string>
+    <string name="stopping">Arrêt en cours…</string>
 </resources>

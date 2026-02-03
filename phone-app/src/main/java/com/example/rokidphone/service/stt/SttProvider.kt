@@ -92,7 +92,7 @@ enum class SttProvider(
     ),
     IFLYTEK(
         displayNameResId = R.string.stt_provider_iflytek,
-        description = "科大訊飛 iFLYTEK Speech Recognition",
+        description = "iFLYTEK Speech Recognition (Xunfei)",
         website = "https://www.xfyun.cn",
         authType = SttAuthType.SIGNED_REQUEST,
         supportsStreaming = true,
@@ -100,7 +100,7 @@ enum class SttProvider(
     ),
     HUAWEI_SIS(
         displayNameResId = R.string.stt_provider_huawei,
-        description = "华为云语音交互服务 SIS",
+        description = "Huawei Cloud SIS (Speech Interaction Service)",
         website = "https://www.huaweicloud.com/product/sis.html",
         authType = SttAuthType.AK_SK,
         supportsStreaming = true,
@@ -108,7 +108,7 @@ enum class SttProvider(
     ),
     VOLCENGINE(
         displayNameResId = R.string.stt_provider_volcengine,
-        description = "火山引擎语音识别 ASR",
+        description = "Volcengine ASR (ByteDance Speech Recognition)",
         website = "https://www.volcengine.com/product/asr",
         authType = SttAuthType.AK_SK_SIGNED,
         supportsStreaming = true,
@@ -132,7 +132,7 @@ enum class SttProvider(
     ),
     ALIBABA_ASR(
         displayNameResId = R.string.stt_provider_alibaba_asr,
-        description = "阿里云智能语音识别 ASR",
+        description = "Alibaba Cloud ASR (Aliyun Intelligent Speech)",
         website = "https://www.aliyun.com/product/nls",
         authType = SttAuthType.AK_SK,
         supportsStreaming = true,
@@ -140,7 +140,7 @@ enum class SttProvider(
     ),
     TENCENT_ASR(
         displayNameResId = R.string.stt_provider_tencent_asr,
-        description = "腾讯云语音识别 ASR",
+        description = "Tencent Cloud ASR (Speech Recognition)",
         website = "https://cloud.tencent.com/product/asr",
         authType = SttAuthType.SIGNED_REQUEST,
         supportsStreaming = true,
@@ -148,7 +148,7 @@ enum class SttProvider(
     ),
     BAIDU_ASR(
         displayNameResId = R.string.stt_provider_baidu_asr,
-        description = "百度智能云语音识别 ASR",
+        description = "Baidu Cloud ASR (Intelligent Speech Recognition)",
         website = "https://cloud.baidu.com/product/speech",
         authType = SttAuthType.API_KEY_SECRET,
         supportsStreaming = true,

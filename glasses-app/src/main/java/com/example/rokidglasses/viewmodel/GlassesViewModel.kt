@@ -753,8 +753,8 @@ class GlassesViewModel(
                 _uiState.update { it.copy(
                     isCapturingPhoto = true,
                     isProcessing = true,
-                    displayText = "正在拍照...",
-                    hintText = "請稍候"
+                    displayText = context.getString(R.string.capturing_photo),
+                    hintText = context.getString(R.string.please_wait_short)
                 ) }
                 
                 // Step 1: Capture photo
@@ -768,8 +768,8 @@ class GlassesViewModel(
                     _uiState.update { it.copy(
                         isCapturingPhoto = false,
                         isProcessing = false,
-                        displayText = "拍照失敗",
-                        hintText = "相機可能被系統佔用，請稍後重試"
+                        displayText = context.getString(R.string.capture_failed),
+                        hintText = context.getString(R.string.capture_failed_hint)
                     ) }
                     return@launch
                 }
@@ -777,7 +777,7 @@ class GlassesViewModel(
                 Log.d(TAG, "Photo captured: ${rawImageData.size} bytes using $cameraType")
                 
                 // Step 2: Compress photo
-                _uiState.update { it.copy(displayText = "正在壓縮...") }
+                _uiState.update { it.copy(displayText = context.getString(R.string.compressing_photo)) }
                 val compressedData = withContext(Dispatchers.Default) {
                     ImageCompressor.compressForTransfer(rawImageData)
                 }
@@ -785,7 +785,7 @@ class GlassesViewModel(
                 
                 // Step 3: Send to phone
                 _uiState.update { it.copy(
-                    displayText = "正在傳輸...",
+                    displayText = context.getString(R.string.transferring_photo),
                     photoTransferProgress = 0f
                 ) }
                 
@@ -806,8 +806,8 @@ class GlassesViewModel(
                         Log.d(TAG, "Photo transfer complete: $stats")
                         _uiState.update { it.copy(
                             isCapturingPhoto = false,
-                            displayText = "已發送，等待 AI 分析...",
-                            hintText = "請稍候"
+                            displayText = context.getString(R.string.photo_sent_waiting_ai),
+                            hintText = context.getString(R.string.please_wait_short)
                         ) }
                         // Phone will send AI response via Bluetooth
                     },
@@ -816,8 +816,8 @@ class GlassesViewModel(
                         _uiState.update { it.copy(
                             isCapturingPhoto = false,
                             isProcessing = false,
-                            displayText = "傳輸失敗: ${error.message}",
-                            hintText = "請重試"
+                            displayText = context.getString(R.string.transfer_failed, error.message ?: ""),
+                            hintText = context.getString(R.string.please_retry)
                         ) }
                     }
                 )
@@ -827,8 +827,8 @@ class GlassesViewModel(
                 _uiState.update { it.copy(
                     isCapturingPhoto = false,
                     isProcessing = false,
-                    displayText = "錯誤: ${e.message}",
-                    hintText = "請重試"
+                    displayText = context.getString(R.string.error_message, e.message ?: ""),
+                    hintText = context.getString(R.string.please_retry)
                 ) }
             }
         }

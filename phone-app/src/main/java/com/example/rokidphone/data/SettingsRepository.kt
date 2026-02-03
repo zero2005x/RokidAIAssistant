@@ -45,6 +45,9 @@ class SettingsRepository(private val context: Context) {
         private const val KEY_CUSTOM_BASE_URL = "custom_base_url"
         private const val KEY_CUSTOM_MODEL_NAME = "custom_model_name"
         
+        // Keys for recording settings
+        private const val KEY_AUTO_ANALYZE_RECORDINGS = "auto_analyze_recordings"
+        
         @Volatile
         private var instance: SettingsRepository? = null
         
@@ -84,6 +87,22 @@ class SettingsRepository(private val context: Context) {
      * Load settings
      */
     private fun loadSettings(): ApiSettings {
+        // Get saved system prompt or use current locale's default
+        val savedSystemPrompt = prefs.getString(KEY_SYSTEM_PROMPT, null)
+        val currentLocaleDefault = context.getString(R.string.default_system_prompt)
+        
+        // Sync system prompt with current app language if it's a default prompt from another language
+        val systemPrompt = if (savedSystemPrompt == null) {
+            currentLocaleDefault
+        } else if (isDefaultPromptFromDifferentLocale(savedSystemPrompt)) {
+            // User is using a default prompt but from a different language - update to current locale
+            android.util.Log.d("SettingsRepository", "Syncing system prompt to current locale")
+            prefs.edit().putString(KEY_SYSTEM_PROMPT, currentLocaleDefault).apply()
+            currentLocaleDefault
+        } else {
+            savedSystemPrompt
+        }
+        
         return ApiSettings(
             aiProvider = AiProvider.fromName(
                 prefs.getString(KEY_AI_PROVIDER, AiProvider.GEMINI.name) ?: AiProvider.GEMINI.name
@@ -109,9 +128,35 @@ class SettingsRepository(private val context: Context) {
             ),
             speechLanguage = prefs.getString(KEY_SPEECH_LANGUAGE, "zh-TW") ?: "zh-TW",
             responseLanguage = prefs.getString(KEY_RESPONSE_LANGUAGE, "zh-TW") ?: "zh-TW",
-            systemPrompt = prefs.getString(KEY_SYSTEM_PROMPT, null) 
-                ?: context.getString(R.string.default_system_prompt)
+            systemPrompt = systemPrompt,
+            autoAnalyzeRecordings = prefs.getBoolean(KEY_AUTO_ANALYZE_RECORDINGS, true)
         )
+    }
+    
+    /**
+     * Check if a system prompt is a default prompt from a different locale than the current app locale
+     */
+    private fun isDefaultPromptFromDifferentLocale(prompt: String): Boolean {
+        val currentDefault = context.getString(R.string.default_system_prompt)
+        
+        // If it matches current locale's default, it's fine
+        if (prompt == currentDefault) return false
+        
+        // Check if it's a default prompt from any other language
+        for (lang in AppLanguage.entries) {
+            try {
+                val langDefault = getDefaultSystemPromptForLanguage(lang)
+                if (prompt == langDefault) {
+                    // It's a default prompt from a different language - needs sync
+                    return true
+                }
+            } catch (e: Exception) {
+                // Ignore errors
+            }
+        }
+        
+        // It's a custom prompt, don't touch it
+        return false
     }
     
     /**
@@ -139,6 +184,7 @@ class SettingsRepository(private val context: Context) {
             putString(KEY_SPEECH_LANGUAGE, settings.speechLanguage)
             putString(KEY_RESPONSE_LANGUAGE, settings.responseLanguage)
             putString(KEY_SYSTEM_PROMPT, settings.systemPrompt)
+            putBoolean(KEY_AUTO_ANALYZE_RECORDINGS, settings.autoAnalyzeRecordings)
             apply()
         }
         _settingsFlow.value = settings

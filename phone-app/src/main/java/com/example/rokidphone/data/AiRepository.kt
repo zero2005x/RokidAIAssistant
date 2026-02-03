@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.util.Log
+import com.example.rokidphone.R
 import com.example.rokidphone.service.ai.AiServiceFactory
 import com.example.rokidphone.service.ai.AiServiceProvider
 import kotlinx.coroutines.Dispatchers
@@ -34,19 +35,6 @@ class AiRepository private constructor(
 ) {
     companion object {
         private const val TAG = "AiRepository"
-        
-        // Image analysis prompts
-        private const val PROMPT_IMAGE_DESCRIPTION = 
-            "请详细描述这张图片中你所看到的内容。包括主要对象、场景、颜色、动作等细节。用中文回答，简洁明了。"
-        
-        private const val PROMPT_IMAGE_OCR = 
-            "请识别并提取这张图片中的所有文字内容。如果有表格，请保持格式。如果没有文字，请说明图片内容。用中文回答。"
-        
-        private const val PROMPT_IMAGE_TRANSLATE = 
-            "请识别图片中的文字，并翻译成中文。如果已经是中文，请翻译成英文。同时提供原文和译文。"
-        
-        private const val PROMPT_IMAGE_SUMMARY = 
-            "请用一句话概括这张图片的主要内容。用中文回答。"
         
         // Image processing parameters
         private const val MAX_IMAGE_SIZE = 1024 // Maximum side length
@@ -103,13 +91,13 @@ class AiRepository private constructor(
             // Preprocess image
             val processedData = preprocessImage(imageData)
             
-            // Get prompt
+            // Get prompt from localized strings
             val prompt = when (mode) {
-                AnalysisMode.DESCRIPTION -> PROMPT_IMAGE_DESCRIPTION
-                AnalysisMode.OCR -> PROMPT_IMAGE_OCR
-                AnalysisMode.TRANSLATE -> PROMPT_IMAGE_TRANSLATE
-                AnalysisMode.SUMMARY -> PROMPT_IMAGE_SUMMARY
-                AnalysisMode.CUSTOM -> customPrompt ?: PROMPT_IMAGE_DESCRIPTION
+                AnalysisMode.DESCRIPTION -> context.getString(R.string.image_analysis_prompt)
+                AnalysisMode.OCR -> context.getString(R.string.image_ocr_prompt)
+                AnalysisMode.TRANSLATE -> context.getString(R.string.image_translate_prompt)
+                AnalysisMode.SUMMARY -> context.getString(R.string.image_summary_prompt)
+                AnalysisMode.CUSTOM -> customPrompt ?: context.getString(R.string.image_analysis_prompt)
             }
             
             // Call AI service
@@ -122,7 +110,7 @@ class AiRepository private constructor(
         } catch (e: Exception) {
             Log.e(TAG, "Image analysis failed", e)
             ImageAnalysisResult.Error(
-                message = e.message ?: "分析失败",
+                message = e.message ?: context.getString(R.string.analysis_failed),
                 exception = e
             )
         }
@@ -141,7 +129,7 @@ class AiRepository private constructor(
             analyzeImage(imageData, mode, customPrompt)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to decode base64 image", e)
-            ImageAnalysisResult.Error("图像解码失败", e)
+            ImageAnalysisResult.Error(context.getString(R.string.image_decode_failed), e)
         }
     }
     
@@ -158,7 +146,7 @@ class AiRepository private constructor(
             analyzeImage(imageData, mode, customPrompt)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to convert bitmap", e)
-            ImageAnalysisResult.Error("图像转换失败", e)
+            ImageAnalysisResult.Error(context.getString(R.string.image_convert_failed), e)
         }
     }
     

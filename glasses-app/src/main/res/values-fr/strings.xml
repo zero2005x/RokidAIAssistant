@@ -49,6 +49,26 @@
     <string name="swipe_for_more">Glissez haut/bas pour plus</string>
     <string name="swipe_up_previous">▲ Glissez vers le haut</string>
     <string name="swipe_down_next">▼ Glissez vers le bas</string>
+    <string name="swipe_left_right_pages">← Glissez pour voir plus de pages →</string>
+    
+    <!-- Photo Capture -->
+    <string name="bluetooth_not_connected">Bluetooth non connecté</string>
+    <string name="connect_phone_first">Veuillez d\'abord connecter le téléphone</string>
+    <string name="capturing_photo">Capture de photo...</string>
+    <string name="please_wait_short">Veuillez patienter</string>
+    <string name="compressing_photo">Compression...</string>
+    <string name="transferring_photo">Transfert...</string>
+    <string name="photo_sent_waiting_ai">Envoyé, en attente de l\'analyse IA...</string>
+    <string name="photo_analysis_no_result">Impossible d\'analyser cette photo</string>
+    <string name="capture_failed">Échec de la capture</string>
+    <string name="capture_failed_hint">La caméra est peut-être en cours d\'utilisation, veuillez réessayer plus tard</string>
+    <string name="transfer_failed">Échec du transfert : %s</string>
+    <string name="error_message">Erreur : %s</string>
+    <string name="please_retry">Veuillez réessayer</string>
+    <string name="camera_service_starting">Démarrage du service caméra...</string>
+    <string name="bluetooth_connected_ready">Bluetooth connecté, prêt</string>
+    <string name="waiting_bluetooth_connection">En attente de connexion Bluetooth...</string>
+    <string name="camera_permission_missing">Autorisation caméra manquante</string>
     
     <!-- AI System Prompt -->
     <string name="glasses_system_prompt">Vous êtes un assistant IA amical installé sur les lunettes intelligentes Rokid. Veuillez répondre aux questions dans la langue de l\'utilisateur, avec chaque réponse ne dépassant pas 100 mots.</string>

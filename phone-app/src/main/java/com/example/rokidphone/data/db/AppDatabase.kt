@@ -4,22 +4,24 @@ import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Conversation Database
- * Uses Room for conversation history persistence
+ * App Database
+ * Uses Room for conversation history and recording persistence
  */
 @Database(
     entities = [
         ConversationEntity::class,
-        MessageEntity::class
+        MessageEntity::class,
+        RecordingEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
-@TypeConverters(Converters::class)
+@TypeConverters(Converters::class, RecordingConverters::class)
 abstract class AppDatabase : RoomDatabase() {
     
     abstract fun conversationDao(): ConversationDao
     abstract fun messageDao(): MessageDao
+    abstract fun recordingDao(): RecordingDao
     
     companion object {
         const val DATABASE_NAME = "rokid_ai_database"

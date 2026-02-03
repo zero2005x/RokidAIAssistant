@@ -19,7 +19,7 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 /**
- * 科大訊飛 iFLYTEK Speech-to-Text Service (语音听写 WebAPI)
+ * iFLYTEK (Xunfei) Speech-to-Text Service (Voice Dictation WebAPI)
  * 
  * API Docs: https://www.xfyun.cn/doc/asr/voicedictation/API.html
  * 
@@ -150,18 +150,18 @@ class IflytekSttService(
             })
             put("business", JSONObject().apply {
                 put("language", language)
-                put("domain", "iat")  // 日常用语
-                put("accent", "mandarin")  // 普通话
-                put("vad_eos", 3000)  // 后端点检测 3秒
-                put("dwa", "wpgs")  // 动态修正
-                put("pd", "game")  // 领域个性化
-                put("ptt", 1)  // 标点
-                put("rlang", "zh-cn")  // 返回结果语言
+                put("domain", "iat")  // Daily conversation
+                put("accent", "mandarin")  // Mandarin Chinese
+                put("vad_eos", 3000)  // End-of-speech detection 3 seconds
+                put("dwa", "wpgs")  // Dynamic correction
+                put("pd", "game")  // Domain personalization
+                put("ptt", 1)  // Punctuation
+                put("rlang", "zh-cn")  // Result language
                 put("vinfo", 1)
                 put("nunum", 1)
             })
             put("data", JSONObject().apply {
-                put("status", 2)  // 一次性上传全部音频
+                put("status", 2)  // Upload all audio at once
                 put("format", "audio/L16;rate=16000")
                 put("encoding", "raw")
                 put("audio", audioBase64)
@@ -244,10 +244,10 @@ class IflytekSttService(
                         // Code 0 = success, code 10160 = no speech detected (also valid credentials)
                         when (code) {
                             0, 10160 -> SttValidationResult.Valid
-                            10105 -> SttValidationResult.Invalid(SttValidationError.INVALID_CREDENTIALS)  // 非法应用
-                            10106 -> SttValidationResult.Invalid(SttValidationError.INVALID_CREDENTIALS)  // 应用ID/密钥不正确
-                            10107 -> SttValidationResult.Invalid(SttValidationError.INVALID_CREDENTIALS)  // 应用未创建
-                            10114 -> SttValidationResult.Invalid(SttValidationError.RATE_LIMITED)  // 服务量超限
+                            10105 -> SttValidationResult.Invalid(SttValidationError.INVALID_CREDENTIALS)  // Illegal app
+                            10106 -> SttValidationResult.Invalid(SttValidationError.INVALID_CREDENTIALS)  // Incorrect app ID/key
+                            10107 -> SttValidationResult.Invalid(SttValidationError.INVALID_CREDENTIALS)  // App not created
+                            10114 -> SttValidationResult.Invalid(SttValidationError.RATE_LIMITED)  // Service quota exceeded
                             else -> {
                                 Log.w(TAG, "iFLYTEK validation code: $code")
                                 SttValidationResult.Invalid(SttValidationError.UNKNOWN)

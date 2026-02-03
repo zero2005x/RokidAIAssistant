@@ -42,6 +42,11 @@
     <string name="enter_system_prompt">أدخل موجه نظام الذكاء الاصطناعي…</string>
     <string name="default_system_prompt">أنت مساعد ذكاء اصطناعي ودود. يرجى الإجابة على جميع الأسئلة باللغة العربية بإيجاز ووضوح.</string>
     
+    <!-- Recording Settings -->
+    <string name="recording_settings">إعدادات التسجيل</string>
+    <string name="auto_analyze_recordings">تحليل التسجيلات تلقائياً</string>
+    <string name="auto_analyze_recordings_description">إرسال التسجيلات تلقائياً إلى الذكاء الاصطناعي للنسخ والتحليل بعد التوقف</string>
+    
     <!-- Language Settings -->
     <string name="language_settings">اللغة</string>
     <string name="select_language">اختر اللغة</string>
@@ -164,11 +169,18 @@
     <string name="stt_provider_iflytek">iFLYTEK</string>
     <string name="stt_provider_huawei">Huawei SIS</string>
     <string name="stt_provider_volcengine">Volcengine</string>
+    <string name="stt_provider_rev_ai">Rev.ai</string>
+    <string name="stt_provider_speechmatics">Speechmatics</string>
+    <string name="stt_provider_alibaba_asr">Alibaba Cloud ASR</string>
+    <string name="stt_provider_tencent_asr">Tencent Cloud ASR</string>
+    <string name="stt_provider_baidu_asr">Baidu Cloud ASR</string>
+    <string name="stt_provider_otter_ai">Otter.ai</string>
     
     <!-- STT Settings -->
     <string name="stt_settings_title">إعدادات التعرف على الصوت</string>
     <string name="stt_provider_label">مزود STT</string>
     <string name="stt_credentials_title">بيانات اعتماد STT</string>
+    <string name="stt_uses_main_api_key">يستخدم مفتاح API لمزود الذكاء الاصطناعي الرئيسي المُعد أعلاه</string>
     <string name="stt_test_connection">اختبار الاتصال</string>
     <string name="stt_test_success">الاتصال ناجح</string>
     <string name="stt_test_failed">فشل اختبار الاتصال</string>
@@ -200,6 +212,7 @@
     <string name="photo_processing_failed">فشل معالجة الصورة</string>
     <string name="photo_transfer_failed">فشل نقل الصورة: %s</string>
     <string name="analyzing_photo">جارٍ تحليل الصورة…</string>
+    <string name="image_analysis_prompt">يرجى وصف ما تراه في هذه الصورة بالتفصيل. قم بتضمين الكائنات الرئيسية والمشهد والألوان والتفاصيل الأخرى. كن موجزاً وواضحاً.</string>
     <string name="ai_analysis_unavailable">تحليل الصور بالذكاء الاصطناعي غير متاح</string>
     <string name="photo_analysis_failed">فشل تحليل الصورة: %s</string>
     <string name="preparing_analysis">جارٍ التحضير للتحليل…</string>
@@ -214,6 +227,17 @@
     <string name="capture">التقاط</string>
     <string name="latest_photo">آخر صورة</string>
     <string name="photo_not_found">لم يتم العثور على الصورة</string>
+    <string name="glasses_not_connected_cxr">النظارات غير متصلة عبر CXR</string>
+    <string name="taking_photo">جارٍ التقاط الصورة…</string>
+    <string name="photo_empty">فشل التقاط الصورة: الصورة فارغة</string>
+    <string name="photo_timeout">انتهت مهلة التقاط الصورة، يرجى المحاولة مرة أخرى</string>
+    <string name="photo_capture_failed">فشل التقاط الصورة: %s</string>
+    <string name="photo_process_failed">فشل معالجة الصورة: %s</string>
+    <string name="image_decode_failed">فشل فك تشفير الصورة</string>
+    <string name="image_convert_failed">فشل تحويل الصورة</string>
+    <string name="image_ocr_prompt">يرجى تحديد واستخراج كل محتوى النص من هذه الصورة. إذا كانت هناك جداول، حافظ على التنسيق. إذا لم يكن هناك نص، صف محتوى الصورة.</string>
+    <string name="image_translate_prompt">يرجى تحديد النص في الصورة وترجمته. قدم النص الأصلي والمترجم.</string>
+    <string name="image_summary_prompt">يرجى تلخيص المحتوى الرئيسي لهذه الصورة في جملة واحدة.</string>
     
     <!-- Conversation History (New) -->
     <string name="new_conversation">محادثة جديدة</string>
@@ -278,4 +302,67 @@
     <string name="developer_tools">أدوات المطور</string>
     <string name="log_viewer">عارض السجلات</string>
     <string name="log_viewer_description">عرض وتصدير وإدارة سجلات التطبيق</string>
+    
+    <!-- Recordings -->
+    <string name="recordings">التسجيلات</string>
+    <string name="recording_detail">تفاصيل التسجيل</string>
+    <string name="start_recording">بدء التسجيل</string>
+    <string name="stop_recording">إيقاف التسجيل</string>
+    <string name="record_from_phone">التسجيل من الهاتف</string>
+    <string name="record_from_glasses">التسجيل من النظارات</string>
+    <string name="recording_source_phone">تسجيل الهاتف</string>
+    <string name="recording_source_glasses">تسجيل النظارات</string>
+    <string name="no_recordings">لا توجد تسجيلات</string>
+    <string name="no_recordings_found">لم يتم العثور على تسجيلات</string>
+    <string name="tap_mic_to_record">اضغط على زر الميكروفون لبدء التسجيل</string>
+    <string name="try_different_search">جرب مصطلح بحث مختلف</string>
+    <string name="search_recordings">البحث في التسجيلات…</string>
+    <string name="total_recordings">الإجمالي</string>
+    <string name="total_duration">المدة</string>
+    <string name="delete_recordings">حذف التسجيلات</string>
+    <string name="delete_recordings_confirm">حذف %d تسجيل(ات) محددة؟</string>
+    <string name="delete_recording">حذف التسجيل</string>
+    <string name="delete_recording_confirm">هل أنت متأكد من حذف هذا التسجيل؟</string>
+    <string name="edit_recording">تعديل التسجيل</string>
+    <string name="title">العنوان</string>
+    <string name="notes">ملاحظات</string>
+    <string name="transcript">النص</string>
+    <string name="transcribe">تحويل إلى نص</string>
+    <string name="transcribing">جارٍ التحويل إلى نص…</string>
+    <string name="transcribed_at">تم التحويل في %s</string>
+    <string name="no_transcript">لا يوجد نص بعد</string>
+    <string name="ai_response">استجابة الذكاء الاصطناعي</string>
+    <string name="analyze">تحليل</string>
+    <string name="analyze_with_ai">التحليل بالذكاء الاصطناعي</string>
+    <string name="analyzing">جارٍ التحليل…</string>
+    <string name="analyzed_by">تم التحليل بواسطة %s</string>
+    <string name="no_ai_response">لا توجد استجابة من الذكاء الاصطناعي بعد</string>
+    <string name="transcribe_first">قم بتحويل التسجيل إلى نص أولاً</string>
+    <string name="recording_info">معلومات التسجيل</string>
+    <string name="created">تاريخ الإنشاء</string>
+    <string name="duration">المدة</string>
+    <string name="file_size">حجم الملف</string>
+    <string name="sample_rate">معدل العينة</string>
+    <string name="status">الحالة</string>
+    <string name="audio_file_not_available">ملف الصوت غير متاح</string>
+    <string name="filter_all">الكل</string>
+    <string name="filter_phone">الهاتف</string>
+    <string name="filter_glasses">النظارات</string>
+    <string name="filter_favorites">المفضلة</string>
+    <string name="sort_date_desc">الأحدث أولاً</string>
+    <string name="sort_date_asc">الأقدم أولاً</string>
+    <string name="sort_duration_desc">الأطول أولاً</string>
+    <string name="sort_duration_asc">الأقصر أولاً</string>
+    <string name="sort_name_asc">الاسم (أ-ي)</string>
+    <string name="sort_name_desc">الاسم (ي-أ)</string>
+    <string name="edit">تعديل</string>
+    
+    <!-- Recording Control (Home Screen) -->
+    <string name="recording_control">التسجيل الصوتي</string>
+    <string name="recording_ready">اضغط لبدء التسجيل</string>
+    <string name="record_phone">الهاتف</string>
+    <string name="record_glasses">النظارات</string>
+    <string name="pause_recording">إيقاف مؤقت</string>
+    <string name="stop_and_send">إيقاف وتحليل</string>
+    <string name="stopping">جارٍ الإيقاف…</string>
 </resources>

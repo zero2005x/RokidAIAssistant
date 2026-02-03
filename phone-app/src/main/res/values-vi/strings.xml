@@ -42,6 +42,11 @@
     <string name="enter_system_prompt">Nhập lời nhắc hệ thống AI…</string>
     <string name="default_system_prompt">Bạn là một trợ lý AI thân thiện. Vui lòng trả lời tất cả các câu hỏi bằng tiếng Việt một cách ngắn gọn và rõ ràng.</string>
     
+    <!-- Recording Settings -->
+    <string name="recording_settings">Cài đặt ghi âm</string>
+    <string name="auto_analyze_recordings">Tự động phân tích bản ghi</string>
+    <string name="auto_analyze_recordings_description">Tự động gửi bản ghi âm đến AI để chuyển đổi văn bản và phân tích sau khi dừng</string>
+    
     <!-- Language Settings -->
     <string name="language_settings">Ngôn ngữ</string>
     <string name="select_language">Chọn ngôn ngữ</string>
@@ -164,11 +169,18 @@
     <string name="stt_provider_iflytek">iFLYTEK</string>
     <string name="stt_provider_huawei">Huawei SIS</string>
     <string name="stt_provider_volcengine">Volcengine</string>
+    <string name="stt_provider_rev_ai">Rev.ai</string>
+    <string name="stt_provider_speechmatics">Speechmatics</string>
+    <string name="stt_provider_alibaba_asr">Alibaba Cloud ASR</string>
+    <string name="stt_provider_tencent_asr">Tencent Cloud ASR</string>
+    <string name="stt_provider_baidu_asr">Baidu Cloud ASR</string>
+    <string name="stt_provider_otter_ai">Otter.ai</string>
     
     <!-- STT Settings -->
     <string name="stt_settings_title">Cài đặt nhận dạng giọng nói</string>
     <string name="stt_provider_label">Nhà cung cấp STT</string>
     <string name="stt_credentials_title">Thông tin xác thực STT</string>
+    <string name="stt_uses_main_api_key">Sử dụng khóa API của nhà cung cấp AI chính được cấu hình ở trên</string>
     <string name="stt_test_connection">Kiểm tra kết nối</string>
     <string name="stt_test_success">Kết nối thành công</string>
     <string name="stt_test_failed">Kiểm tra kết nối thất bại</string>
@@ -200,6 +212,7 @@
     <string name="photo_processing_failed">Xử lý ảnh thất bại</string>
     <string name="photo_transfer_failed">Chuyển ảnh thất bại: %s</string>
     <string name="analyzing_photo">Đang phân tích ảnh…</string>
+    <string name="image_analysis_prompt">Vui lòng mô tả chi tiết những gì bạn thấy trong hình ảnh này. Bao gồm các đối tượng chính, cảnh, màu sắc và các chi tiết khác. Hãy ngắn gọn và rõ ràng.</string>
     <string name="ai_analysis_unavailable">Phân tích hình ảnh AI không khả dụng</string>
     <string name="photo_analysis_failed">Phân tích ảnh thất bại: %s</string>
     <string name="preparing_analysis">Đang chuẩn bị phân tích…</string>
@@ -214,6 +227,17 @@
     <string name="capture">Chụp</string>
     <string name="latest_photo">Ảnh mới nhất</string>
     <string name="photo_not_found">Không tìm thấy ảnh</string>
+    <string name="glasses_not_connected_cxr">Kính chưa kết nối qua CXR</string>
+    <string name="taking_photo">Đang chụp ảnh…</string>
+    <string name="photo_empty">Chụp ảnh thất bại: ảnh trống</string>
+    <string name="photo_timeout">Hết thời gian chụp ảnh, vui lòng thử lại</string>
+    <string name="photo_capture_failed">Chụp ảnh thất bại: %s</string>
+    <string name="photo_process_failed">Xử lý ảnh thất bại: %s</string>
+    <string name="image_decode_failed">Giải mã hình ảnh thất bại</string>
+    <string name="image_convert_failed">Chuyển đổi hình ảnh thất bại</string>
+    <string name="image_ocr_prompt">Vui lòng nhận dạng và trích xuất tất cả nội dung văn bản từ hình ảnh này. Nếu có bảng, giữ nguyên định dạng. Nếu không có văn bản, mô tả nội dung hình ảnh.</string>
+    <string name="image_translate_prompt">Vui lòng nhận dạng văn bản trong hình ảnh và dịch nó. Cung cấp cả văn bản gốc và bản dịch.</string>
+    <string name="image_summary_prompt">Vui lòng tóm tắt nội dung chính của hình ảnh này trong một câu.</string>
     
     <!-- Conversation History (New) -->
     <string name="new_conversation">Cuộc trò chuyện mới</string>
@@ -278,4 +302,67 @@
     <string name="developer_tools">Công cụ nhà phát triển</string>
     <string name="log_viewer">Trình xem nhật ký</string>
     <string name="log_viewer_description">Xem, xuất và quản lý nhật ký ứng dụng</string>
+    
+    <!-- Recordings -->
+    <string name="recordings">Bản ghi âm</string>
+    <string name="recording_detail">Chi tiết bản ghi</string>
+    <string name="start_recording">Bắt đầu ghi âm</string>
+    <string name="stop_recording">Dừng ghi âm</string>
+    <string name="record_from_phone">Ghi âm từ điện thoại</string>
+    <string name="record_from_glasses">Ghi âm từ kính</string>
+    <string name="recording_source_phone">Ghi âm từ điện thoại</string>
+    <string name="recording_source_glasses">Ghi âm từ kính</string>
+    <string name="no_recordings">Không có bản ghi</string>
+    <string name="no_recordings_found">Không tìm thấy bản ghi</string>
+    <string name="tap_mic_to_record">Nhấn nút micrô để bắt đầu ghi âm</string>
+    <string name="try_different_search">Thử từ khóa tìm kiếm khác</string>
+    <string name="search_recordings">Tìm kiếm bản ghi…</string>
+    <string name="total_recordings">Tổng cộng</string>
+    <string name="total_duration">Thời lượng</string>
+    <string name="delete_recordings">Xóa bản ghi</string>
+    <string name="delete_recordings_confirm">Xóa %d bản ghi đã chọn?</string>
+    <string name="delete_recording">Xóa bản ghi</string>
+    <string name="delete_recording_confirm">Bạn có chắc chắn muốn xóa bản ghi này không?</string>
+    <string name="edit_recording">Chỉnh sửa bản ghi</string>
+    <string name="title">Tiêu đề</string>
+    <string name="notes">Ghi chú</string>
+    <string name="transcript">Bản chép</string>
+    <string name="transcribe">Chuyển đổi văn bản</string>
+    <string name="transcribing">Đang chuyển đổi…</string>
+    <string name="transcribed_at">Đã chuyển đổi lúc %s</string>
+    <string name="no_transcript">Chưa có bản chép</string>
+    <string name="ai_response">Phản hồi AI</string>
+    <string name="analyze">Phân tích</string>
+    <string name="analyze_with_ai">Phân tích với AI</string>
+    <string name="analyzing">Đang phân tích…</string>
+    <string name="analyzed_by">Phân tích bởi %s</string>
+    <string name="no_ai_response">Chưa có phản hồi AI</string>
+    <string name="transcribe_first">Chuyển đổi văn bản bản ghi trước</string>
+    <string name="recording_info">Thông tin bản ghi</string>
+    <string name="created">Đã tạo</string>
+    <string name="duration">Thời lượng</string>
+    <string name="file_size">Dung lượng</string>
+    <string name="sample_rate">Tốc độ mẫu</string>
+    <string name="status">Trạng thái</string>
+    <string name="audio_file_not_available">Tệp âm thanh không khả dụng</string>
+    <string name="filter_all">Tất cả</string>
+    <string name="filter_phone">Điện thoại</string>
+    <string name="filter_glasses">Kính</string>
+    <string name="filter_favorites">Yêu thích</string>
+    <string name="sort_date_desc">Mới nhất trước</string>
+    <string name="sort_date_asc">Cũ nhất trước</string>
+    <string name="sort_duration_desc">Dài nhất trước</string>
+    <string name="sort_duration_asc">Ngắn nhất trước</string>
+    <string name="sort_name_asc">Tên (A-Z)</string>
+    <string name="sort_name_desc">Tên (Z-A)</string>
+    <string name="edit">Chỉnh sửa</string>
+    
+    <!-- Recording Control (Home Screen) -->
+    <string name="recording_control">Ghi âm giọng nói</string>
+    <string name="recording_ready">Nhấn để bắt đầu ghi âm</string>
+    <string name="record_phone">Điện thoại</string>
+    <string name="record_glasses">Kính</string>
+    <string name="pause_recording">Tạm dừng</string>
+    <string name="stop_and_send">Dừng và Phân tích</string>
+    <string name="stopping">Đang dừng…</string>
 </resources>

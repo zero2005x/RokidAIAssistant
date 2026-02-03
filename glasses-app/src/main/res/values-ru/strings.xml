@@ -49,6 +49,26 @@
     <string name="swipe_for_more">Проведите вверх/вниз для продолжения</string>
     <string name="swipe_up_previous">▲ Вверх - предыдущая</string>
     <string name="swipe_down_next">▼ Вниз - следующая</string>
+    <string name="swipe_left_right_pages">← Проведите для просмотра других страниц →</string>
+    
+    <!-- Photo Capture -->
+    <string name="bluetooth_not_connected">Bluetooth не подключен</string>
+    <string name="connect_phone_first">Сначала подключите телефон</string>
+    <string name="capturing_photo">Съемка фото...</string>
+    <string name="please_wait_short">Подождите</string>
+    <string name="compressing_photo">Сжатие...</string>
+    <string name="transferring_photo">Передача...</string>
+    <string name="photo_sent_waiting_ai">Отправлено, ожидание анализа ИИ...</string>
+    <string name="photo_analysis_no_result">Не удалось проанализировать это фото</string>
+    <string name="capture_failed">Ошибка съемки</string>
+    <string name="capture_failed_hint">Камера может быть занята, попробуйте позже</string>
+    <string name="transfer_failed">Ошибка передачи: %s</string>
+    <string name="error_message">Ошибка: %s</string>
+    <string name="please_retry">Попробуйте еще раз</string>
+    <string name="camera_service_starting">Запуск службы камеры...</string>
+    <string name="bluetooth_connected_ready">Bluetooth подключен, готов</string>
+    <string name="waiting_bluetooth_connection">Ожидание подключения Bluetooth...</string>
+    <string name="camera_permission_missing">Отсутствует разрешение камеры</string>
     
     <!-- AI System Prompt -->
     <string name="glasses_system_prompt">Вы дружелюбный ИИ-ассистент, установленный на умных очках Rokid. Пожалуйста, отвечайте на вопросы на языке пользователя, каждый ответ не должен превышать 100 слов.</string>

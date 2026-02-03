@@ -25,6 +25,8 @@ import com.example.rokidcommon.protocol.ConnectionState
 import com.example.rokidphone.ConversationItem
 import com.example.rokidphone.R
 import com.example.rokidphone.data.AvailableModels
+import com.example.rokidphone.data.db.RecordingSource
+import com.example.rokidphone.data.db.RecordingState
 import com.example.rokidphone.ui.components.*
 import com.example.rokidphone.ui.theme.AppShapeTokens
 import com.example.rokidphone.ui.theme.ExtendedTheme
@@ -43,13 +45,19 @@ fun HomeScreen(
     processingStatus: String?,
     currentModelId: String,
     conversations: List<ConversationItem>,
+    recordingState: RecordingState = RecordingState.Idle,
     onConnect: () -> Unit,
     onDisconnect: () -> Unit,
     onStartService: () -> Unit,
     onStopService: () -> Unit,
     onCapturePhoto: () -> Unit,
+    onStartPhoneRecording: () -> Unit = {},
+    onStartGlassesRecording: () -> Unit = {},
+    onPauseRecording: () -> Unit = {},
+    onStopRecording: () -> Unit = {},
     onViewConversationHistory: () -> Unit = {},
     onViewGallery: () -> Unit = {},
+    onViewRecordings: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val currentModel = AvailableModels.findModel(currentModelId)
@@ -125,6 +133,18 @@ fun HomeScreen(
             }
         }
         
+        // Recording control card
+        item {
+            RecordingControlCard(
+                recordingState = recordingState,
+                isGlassesConnected = connectionState == ConnectionState.CONNECTED,
+                onStartPhoneRecording = onStartPhoneRecording,
+                onStartGlassesRecording = onStartGlassesRecording,
+                onPauseRecording = onPauseRecording,
+                onStopRecording = onStopRecording
+            )
+        }
+        
         // Latest photo (if available)
         latestPhotoPath?.let { photoPath ->
             item {
@@ -162,6 +182,25 @@ fun HomeScreen(
                     onClick = onViewGallery,
                     modifier = Modifier.weight(1f)
                 )
+            }
+        }
+        
+        // Second row of quick access cards
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Recordings quick access
+                QuickAccessCard(
+                    icon = Icons.Default.Mic,
+                    title = stringResource(R.string.recordings),
+                    onClick = onViewRecordings,
+                    modifier = Modifier.weight(1f)
+                )
+                
+                // Placeholder for future feature
+                Spacer(modifier = Modifier.weight(1f))
             }
         }
         
@@ -571,4 +610,197 @@ private fun StatusFooter(
             }
         }
     }
+}
+
+/**
+ * Recording control card with start/pause/stop functionality
+ */
+@Composable
+private fun RecordingControlCard(
+    recordingState: RecordingState,
+    isGlassesConnected: Boolean,
+    onStartPhoneRecording: () -> Unit,
+    onStartGlassesRecording: () -> Unit,
+    onPauseRecording: () -> Unit,
+    onStopRecording: () -> Unit
+) {
+    val isRecording = recordingState is RecordingState.Recording
+    val isStopping = recordingState is RecordingState.Stopping
+    
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(
+            containerColor = when {
+                isRecording -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f)
+                else -> MaterialTheme.colorScheme.surfaceVariant
+            }
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+            // Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    shape = MaterialTheme.shapes.medium,
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        if (isRecording) {
+                            // Pulsing recording indicator
+                            Icon(
+                                imageVector = Icons.Default.FiberManualRecord,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Mic,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.width(16.dp))
+                
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.recording_control),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    
+                    if (isRecording && recordingState is RecordingState.Recording) {
+                        val durationText = formatRecordingDuration(recordingState.durationMs)
+                        val sourceText = when (recordingState.source) {
+                            RecordingSource.PHONE -> stringResource(R.string.recording_source_phone)
+                            RecordingSource.GLASSES -> stringResource(R.string.recording_source_glasses)
+                        }
+                        Text(
+                            text = "$sourceText • $durationText",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.recording_ready),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Control buttons
+            if (isRecording || isStopping) {
+                // Recording controls: Pause & Stop
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Pause button (disabled for now - MediaRecorder pause requires API 24+)
+                    // OutlinedButton(
+                    //     onClick = onPauseRecording,
+                    //     modifier = Modifier.weight(1f),
+                    //     enabled = !isStopping
+                    // ) {
+                    //     Icon(Icons.Default.Pause, contentDescription = null)
+                    //     Spacer(modifier = Modifier.width(8.dp))
+                    //     Text(stringResource(R.string.pause_recording))
+                    // }
+                    
+                    // Stop button
+                    Button(
+                        onClick = onStopRecording,
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isStopping,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        if (isStopping) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.onError
+                            )
+                        } else {
+                            Icon(Icons.Default.Stop, contentDescription = null)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (isStopping) 
+                                stringResource(R.string.stopping) 
+                            else 
+                                stringResource(R.string.stop_and_send)
+                        )
+                    }
+                }
+            } else {
+                // Start recording options
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Phone recording button
+                    Button(
+                        onClick = onStartPhoneRecording,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Icon(Icons.Default.Smartphone, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.record_phone))
+                    }
+                    
+                    // Glasses recording button (only when connected)
+                    Button(
+                        onClick = onStartGlassesRecording,
+                        modifier = Modifier.weight(1f),
+                        enabled = isGlassesConnected,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary
+                        )
+                    ) {
+                        Icon(Icons.Default.Visibility, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.record_glasses))
+                    }
+                }
+            }
+            
+            // Error message
+            if (recordingState is RecordingState.Error) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = recordingState.message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Format recording duration in MM:SS format
+ */
+private fun formatRecordingDuration(durationMs: Long): String {
+    val seconds = (durationMs / 1000) % 60
+    val minutes = (durationMs / 1000) / 60
+    return "%02d:%02d".format(minutes, seconds)
 }

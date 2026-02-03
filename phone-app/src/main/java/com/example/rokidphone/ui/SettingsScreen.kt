@@ -248,6 +248,18 @@ fun SettingsScreen(
                 }
             }
             
+            // Recording settings section
+            item {
+                SettingsSection(title = stringResource(R.string.recording_settings)) {
+                    SettingsRowWithSwitch(
+                        title = stringResource(R.string.auto_analyze_recordings),
+                        subtitle = stringResource(R.string.auto_analyze_recordings_description),
+                        checked = settings.autoAnalyzeRecordings,
+                        onCheckedChange = { onSettingsChange(settings.copy(autoAnalyzeRecordings = it)) }
+                    )
+                }
+            }
+            
             // Status display
             item {
                 val isValid = settings.isValid()
@@ -483,6 +495,40 @@ fun SettingsRow(
                 modifier = Modifier.size(20.dp)
             )
         }
+    }
+}
+
+@Composable
+fun SettingsRowWithSwitch(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp, horizontal = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
     }
 }
 

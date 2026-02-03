@@ -42,6 +42,11 @@
     <string name="enter_system_prompt">Ingrese el prompt del sistema de IA…</string>
     <string name="default_system_prompt">Eres un asistente de IA amigable. Por favor responde todas las preguntas en español de manera concisa y clara.</string>
     
+    <!-- Recording Settings -->
+    <string name="recording_settings">Configuración de grabación</string>
+    <string name="auto_analyze_recordings">Analizar grabaciones automáticamente</string>
+    <string name="auto_analyze_recordings_description">Enviar automáticamente las grabaciones a la IA para transcripción y análisis al detener</string>
+    
     <!-- Language Settings -->
     <string name="language_settings">Idioma</string>
     <string name="select_language">Seleccionar idioma</string>
@@ -164,11 +169,18 @@
     <string name="stt_provider_iflytek">iFLYTEK</string>
     <string name="stt_provider_huawei">Huawei SIS</string>
     <string name="stt_provider_volcengine">Volcengine</string>
+    <string name="stt_provider_rev_ai">Rev.ai</string>
+    <string name="stt_provider_speechmatics">Speechmatics</string>
+    <string name="stt_provider_alibaba_asr">Alibaba Cloud ASR</string>
+    <string name="stt_provider_tencent_asr">Tencent Cloud ASR</string>
+    <string name="stt_provider_baidu_asr">Baidu Cloud ASR</string>
+    <string name="stt_provider_otter_ai">Otter.ai</string>
     
     <!-- STT Settings -->
     <string name="stt_settings_title">Configuración de reconocimiento de voz</string>
     <string name="stt_provider_label">Proveedor STT</string>
     <string name="stt_credentials_title">Credenciales STT</string>
+    <string name="stt_uses_main_api_key">Utiliza la clave API del proveedor de IA principal configurada anteriormente</string>
     <string name="stt_test_connection">Probar conexión</string>
     <string name="stt_test_success">Conexión exitosa</string>
     <string name="stt_test_failed">Prueba de conexión fallida</string>
@@ -200,6 +212,7 @@
     <string name="photo_processing_failed">Error al procesar la foto</string>
     <string name="photo_transfer_failed">Transferencia de foto fallida: %s</string>
     <string name="analyzing_photo">Analizando foto…</string>
+    <string name="image_analysis_prompt">Por favor, describe en detalle lo que ves en esta imagen. Incluye los objetos principales, la escena, los colores y otros detalles. Sé conciso y claro.</string>
     <string name="ai_analysis_unavailable">Análisis de imagen IA no disponible</string>
     <string name="photo_analysis_failed">Análisis de foto fallido: %s</string>
     <string name="preparing_analysis">Preparando análisis…</string>
@@ -214,6 +227,17 @@
     <string name="capture">Capturar</string>
     <string name="latest_photo">Última foto</string>
     <string name="photo_not_found">Foto no encontrada</string>
+    <string name="glasses_not_connected_cxr">Gafas no conectadas vía CXR</string>
+    <string name="taking_photo">Tomando foto…</string>
+    <string name="photo_empty">Captura de foto fallida: imagen vacía</string>
+    <string name="photo_timeout">Tiempo de captura agotado, intente de nuevo</string>
+    <string name="photo_capture_failed">Captura de foto fallida: %s</string>
+    <string name="photo_process_failed">Error al procesar foto: %s</string>
+    <string name="image_decode_failed">Decodificación de imagen fallida</string>
+    <string name="image_convert_failed">Conversión de imagen fallida</string>
+    <string name="image_ocr_prompt">Por favor identifique y extraiga todo el contenido de texto de esta imagen. Si hay tablas, mantenga el formato. Si no hay texto, describa el contenido de la imagen.</string>
+    <string name="image_translate_prompt">Por favor identifique el texto en la imagen y tradúzcalo. Proporcione tanto el texto original como el traducido.</string>
+    <string name="image_summary_prompt">Por favor resuma el contenido principal de esta imagen en una oración.</string>
     
     <!-- Conversation History (New) -->
     <string name="new_conversation">Nueva conversación</string>
@@ -278,4 +302,67 @@
     <string name="developer_tools">Herramientas de desarrollo</string>
     <string name="log_viewer">Visor de registros</string>
     <string name="log_viewer_description">Ver, exportar y gestionar los registros de la aplicación</string>
+    
+    <!-- Recordings -->
+    <string name="recordings">Grabaciones</string>
+    <string name="recording_detail">Detalle de grabación</string>
+    <string name="start_recording">Iniciar grabación</string>
+    <string name="stop_recording">Detener grabación</string>
+    <string name="record_from_phone">Grabar desde teléfono</string>
+    <string name="record_from_glasses">Grabar desde gafas</string>
+    <string name="recording_source_phone">Grabación del teléfono</string>
+    <string name="recording_source_glasses">Grabación de las gafas</string>
+    <string name="no_recordings">Sin grabaciones</string>
+    <string name="no_recordings_found">No se encontraron grabaciones</string>
+    <string name="tap_mic_to_record">Toca el botón del micrófono para iniciar la grabación</string>
+    <string name="try_different_search">Prueba con un término de búsqueda diferente</string>
+    <string name="search_recordings">Buscar grabaciones…</string>
+    <string name="total_recordings">Total</string>
+    <string name="total_duration">Duración</string>
+    <string name="delete_recordings">Eliminar grabaciones</string>
+    <string name="delete_recordings_confirm">¿Eliminar %d grabación(es) seleccionada(s)?</string>
+    <string name="delete_recording">Eliminar grabación</string>
+    <string name="delete_recording_confirm">¿Estás seguro de que quieres eliminar esta grabación?</string>
+    <string name="edit_recording">Editar grabación</string>
+    <string name="title">Título</string>
+    <string name="notes">Notas</string>
+    <string name="transcript">Transcripción</string>
+    <string name="transcribe">Transcribir</string>
+    <string name="transcribing">Transcribiendo…</string>
+    <string name="transcribed_at">Transcrito el %s</string>
+    <string name="no_transcript">Aún sin transcripción</string>
+    <string name="ai_response">Respuesta de IA</string>
+    <string name="analyze">Analizar</string>
+    <string name="analyze_with_ai">Analizar con IA</string>
+    <string name="analyzing">Analizando…</string>
+    <string name="analyzed_by">Analizado por %s</string>
+    <string name="no_ai_response">Aún sin respuesta de IA</string>
+    <string name="transcribe_first">Primero transcribe la grabación</string>
+    <string name="recording_info">Info de grabación</string>
+    <string name="created">Creado</string>
+    <string name="duration">Duración</string>
+    <string name="file_size">Tamaño de archivo</string>
+    <string name="sample_rate">Frecuencia de muestreo</string>
+    <string name="status">Estado</string>
+    <string name="audio_file_not_available">Archivo de audio no disponible</string>
+    <string name="filter_all">Todos</string>
+    <string name="filter_phone">Teléfono</string>
+    <string name="filter_glasses">Gafas</string>
+    <string name="filter_favorites">Favoritos</string>
+    <string name="sort_date_desc">Más recientes primero</string>
+    <string name="sort_date_asc">Más antiguos primero</string>
+    <string name="sort_duration_desc">Más largos primero</string>
+    <string name="sort_duration_asc">Más cortos primero</string>
+    <string name="sort_name_asc">Nombre (A-Z)</string>
+    <string name="sort_name_desc">Nombre (Z-A)</string>
+    <string name="edit">Editar</string>
+    
+    <!-- Recording Control (Home Screen) -->
+    <string name="recording_control">Grabación de voz</string>
+    <string name="recording_ready">Toca para iniciar grabación</string>
+    <string name="record_phone">Teléfono</string>
+    <string name="record_glasses">Gafas</string>
+    <string name="pause_recording">Pausar</string>
+    <string name="stop_and_send">Detener y Analizar</string>
+    <string name="stopping">Deteniendo…</string>
 </resources>

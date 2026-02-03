@@ -237,6 +237,49 @@ app ────────────► common (dev only)
        ▼                                  ▼                                  ▼
 ```
 
+### Recording & Auto-Analysis Flow (NEW)
+
+```
+┌─────────────┐                    ┌─────────────┐                    ┌─────────────┐
+│   User UI   │                    │PhoneAIService│                    │   AI API    │
+└──────┬──────┘                    └──────┬──────┘                    └──────┬──────┘
+       │                                  │                                  │
+       │  1. Start Recording (Phone/Glasses) │                               │
+       ├─────────────────────────────────►│                                  │
+       │                                  │                                  │
+       │  2. Stop Recording               │                                  │
+       ├─────────────────────────────────►│                                  │
+       │                                  │                                  │
+       │                                  │  3. Save WAV to disk             │
+       │                                  │  4. Save to Room DB              │
+       │                                  │                                  │
+       │                                  │  5. Check autoAnalyzeRecordings  │
+       │                                  │     (if enabled)                 │
+       │                                  │                                  │
+       │                                  │  6. STT transcription            │
+       │                                  ├─────────────────────────────────►│
+       │                                  │                                  │
+       │                                  │  7. Transcription result         │
+       │                                  │◄─────────────────────────────────┤
+       │                                  │                                  │
+       │                                  │  8. AI analysis request          │
+       │                                  ├─────────────────────────────────►│
+       │                                  │                                  │
+       │                                  │  9. AI response                  │
+       │                                  │◄─────────────────────────────────┤
+       │                                  │                                  │
+       │  10. Update conversation UI      │                                  │
+       │◄─────────────────────────────────┤                                  │
+       │                                  │                                  │
+       ▼                                  ▼                                  ▼
+```
+
+**Key Implementation Points:**
+
+- `ApiSettings.autoAnalyzeRecordings` controls auto-analysis (default: enabled)
+- `ServiceBridge.transcribeRecordingFlow` handles recording events
+- `PhoneAIService.processPhoneRecording()` orchestrates the full workflow
+
 ---
 
 ## Component Details

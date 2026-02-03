@@ -106,7 +106,7 @@ class CameraService : Service() {
         isRunning = true
         
         createNotificationChannel()
-        startForeground(NOTIFICATION_ID, createNotification("相機服務啟動中..."))
+        startForeground(NOTIFICATION_ID, createNotification(getString(R.string.camera_service_starting)))
         
         // Initialize camera manager
         cameraManager = GlassesCameraManager(this)
@@ -162,10 +162,10 @@ class CameraService : Service() {
                 
                 Log.d(TAG, "Transfer progress: $current / $total (${(progress * 100).toInt()}%)")
             }
-            updateNotification("藍牙已連接，準備就緒")
+            updateNotification(getString(R.string.bluetooth_connected_ready))
         } else {
             transferProtocol = null
-            updateNotification("等待藍牙連接...")
+            updateNotification(getString(R.string.waiting_bluetooth_connection))
         }
     }
     
@@ -177,7 +177,7 @@ class CameraService : Service() {
         try {
             // Check camera permission
             if (cameraManager?.hasCameraPermission() != true) {
-                val error = "缺少相機權限"
+                val error = getString(R.string.camera_permission_missing)
                 _captureState.value = PhotoCaptureState.Error(error)
                 onError?.invoke(error)
                 return@withContext Result.failure(SecurityException(error))
@@ -185,7 +185,7 @@ class CameraService : Service() {
             
             // Check Bluetooth connection
             if (bluetoothSocket == null || !bluetoothSocket!!.isConnected) {
-                val error = "藍牙未連接"
+                val error = getString(R.string.bluetooth_not_connected)
                 _captureState.value = PhotoCaptureState.Error(error)
                 onError?.invoke(error)
                 return@withContext Result.failure(IllegalStateException(error))
@@ -194,11 +194,11 @@ class CameraService : Service() {
             // Step 1: Capture photo
             Log.d(TAG, "Step 1: Capturing photo...")
             _captureState.value = PhotoCaptureState.Capturing
-            updateNotification("正在拍照...")
+            updateNotification(getString(R.string.capturing_photo))
             
             val rawImageData = cameraManager?.capturePhoto()
             if (rawImageData == null) {
-                val error = "拍照失敗"
+                val error = getString(R.string.capture_failed)
                 _captureState.value = PhotoCaptureState.Error(error)
                 onError?.invoke(error)
                 return@withContext Result.failure(Exception(error))
@@ -210,7 +210,7 @@ class CameraService : Service() {
             // Step 2: Compress photo
             Log.d(TAG, "Step 2: Compressing photo...")
             _captureState.value = PhotoCaptureState.Compressing
-            updateNotification("正在壓縮...")
+            updateNotification("Compressing...")
             
             val compressedData = ImageCompressor.compressForTransfer(rawImageData)
             Log.d(TAG, "Compressed: ${rawImageData.size} -> ${compressedData.size} bytes")
@@ -218,12 +218,12 @@ class CameraService : Service() {
             // Step 3: Transfer to phone
             Log.d(TAG, "Step 3: Transferring to phone...")
             _captureState.value = PhotoCaptureState.Transferring(0f)
-            updateNotification("正在傳輸...")
+            updateNotification("Transferring...")
             
             val transferResult = transferProtocol?.sendPhoto(compressedData)
             
             if (transferResult == null) {
-                val error = "傳輸協議未初始化"
+                val error = "Transfer protocol not initialized"
                 _captureState.value = PhotoCaptureState.Error(error)
                 return@withContext Result.failure(IllegalStateException(error))
             }
@@ -232,7 +232,7 @@ class CameraService : Service() {
                 onSuccess = { stats ->
                     Log.d(TAG, "Transfer complete: $stats")
                     _captureState.value = PhotoCaptureState.Success(stats.elapsedTimeMs)
-                    updateNotification("傳輸完成 (${stats.elapsedTimeMs}ms)")
+                    updateNotification("Transfer complete (${stats.elapsedTimeMs}ms)")
                     onTransferComplete?.invoke(stats)
                     
                     // Reset to idle after delay
@@ -240,7 +240,7 @@ class CameraService : Service() {
                         delay(3000)
                         if (_captureState.value is PhotoCaptureState.Success) {
                             _captureState.value = PhotoCaptureState.Idle
-                            updateNotification("準備就緒")
+                            updateNotification("Ready")
                         }
                     }
                     
@@ -248,18 +248,18 @@ class CameraService : Service() {
                 },
                 onFailure = { error ->
                     Log.e(TAG, "Transfer failed", error)
-                    _captureState.value = PhotoCaptureState.Error(error.message ?: "傳輸失敗")
-                    updateNotification("傳輸失敗")
-                    onError?.invoke(error.message ?: "傳輸失敗")
+                    _captureState.value = PhotoCaptureState.Error(error.message ?: "Transfer failed")
+                    updateNotification("Transfer failed")
+                    onError?.invoke(error.message ?: "Transfer failed")
                     Result.failure(error)
                 }
             )
             
         } catch (e: Exception) {
             Log.e(TAG, "Capture and send failed", e)
-            _captureState.value = PhotoCaptureState.Error(e.message ?: "未知錯誤")
-            updateNotification("錯誤: ${e.message}")
-            onError?.invoke(e.message ?: "未知錯誤")
+            _captureState.value = PhotoCaptureState.Error(e.message ?: "Unknown error")
+            updateNotification("Error: ${e.message}")
+            onError?.invoke(e.message ?: "Unknown error")
             Result.failure(e)
         }
     }
@@ -271,23 +271,23 @@ class CameraService : Service() {
     suspend fun captureOnly(): ByteArray? = withContext(Dispatchers.IO) {
         try {
             _captureState.value = PhotoCaptureState.Capturing
-            updateNotification("正在拍照...")
+            updateNotification("Taking photo...")
             
             val imageData = cameraManager?.capturePhoto()
             
             if (imageData != null) {
                 _captureState.value = PhotoCaptureState.Success(0)
-                updateNotification("拍照完成")
+                updateNotification("Photo captured")
                 onCaptureComplete?.invoke(imageData)
             } else {
-                _captureState.value = PhotoCaptureState.Error("拍照失敗")
+                _captureState.value = PhotoCaptureState.Error("Capture failed")
             }
             
             imageData
             
         } catch (e: Exception) {
             Log.e(TAG, "Capture failed", e)
-            _captureState.value = PhotoCaptureState.Error(e.message ?: "拍照失敗")
+            _captureState.value = PhotoCaptureState.Error(e.message ?: "Capture failed")
             null
         }
     }
@@ -298,10 +298,10 @@ class CameraService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "相機服務",
+                "Camera Service",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Rokid 眼鏡相機服務"
+                description = "Rokid Glasses Camera Service"
                 setShowBadge(false)
             }
             
@@ -326,11 +326,11 @@ class CameraService : Service() {
         )
         
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Rokid 相機")
+            .setContentTitle("Rokid Camera")
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
-            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "停止", stopIntent)
+            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Stop", stopIntent)
             .setOngoing(true)
             .build()
     }

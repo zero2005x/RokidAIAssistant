@@ -42,6 +42,11 @@
     <string name="enter_system_prompt">ป้อนพรอมต์ระบบ AI…</string>
     <string name="default_system_prompt">คุณเป็นผู้ช่วย AI ที่เป็นมิตร กรุณาตอบคำถามทั้งหมดเป็นภาษาไทยอย่างกระชับและชัดเจน</string>
     
+    <!-- Recording Settings -->
+    <string name="recording_settings">การตั้งค่าการบันทึก</string>
+    <string name="auto_analyze_recordings">วิเคราะห์การบันทึกอัตโนมัติ</string>
+    <string name="auto_analyze_recordings_description">ส่งการบันทึกไปยัง AI โดยอัตโนมัติเพื่อถอดความและวิเคราะห์หลังจากหยุด</string>
+    
     <!-- Language Settings -->
     <string name="language_settings">ภาษา</string>
     <string name="select_language">เลือกภาษา</string>
@@ -145,11 +150,18 @@
     <string name="stt_provider_iflytek">iFLYTEK</string>
     <string name="stt_provider_huawei">Huawei SIS</string>
     <string name="stt_provider_volcengine">Volcengine</string>
+    <string name="stt_provider_rev_ai">Rev.ai</string>
+    <string name="stt_provider_speechmatics">Speechmatics</string>
+    <string name="stt_provider_alibaba_asr">Alibaba Cloud ASR</string>
+    <string name="stt_provider_tencent_asr">Tencent Cloud ASR</string>
+    <string name="stt_provider_baidu_asr">Baidu Cloud ASR</string>
+    <string name="stt_provider_otter_ai">Otter.ai</string>
     
     <!-- STT Settings -->
     <string name="stt_settings_title">การตั้งค่าการรู้จำเสียง</string>
     <string name="stt_provider_label">ผู้ให้บริการ STT</string>
     <string name="stt_credentials_title">ข้อมูลรับรอง STT</string>
+    <string name="stt_uses_main_api_key">ใช้คีย์ API ของผู้ให้บริการ AI หลักที่กำหนดค่าไว้ด้านบน</string>
     <string name="stt_test_connection">ทดสอบการเชื่อมต่อ</string>
     <string name="stt_test_success">เชื่อมต่อสำเร็จ</string>
     <string name="stt_test_failed">ทดสอบการเชื่อมต่อล้มเหลว</string>
@@ -202,6 +214,7 @@
     <string name="photo_processing_failed">การประมวลผลรูปภาพล้มเหลว</string>
     <string name="photo_transfer_failed">การถ่ายโอนรูปภาพล้มเหลว: %s</string>
     <string name="analyzing_photo">กำลังวิเคราะห์รูปภาพ…</string>
+    <string name="image_analysis_prompt">กรุณาอธิบายรายละเอียดสิ่งที่คุณเห็นในภาพนี้ รวมถึงวัตถุหลัก ฉาก สี และรายละเอียดอื่นๆ กรุณากระชับและชัดเจน</string>
     <string name="ai_analysis_unavailable">การวิเคราะห์ภาพ AI ไม่พร้อมใช้งาน</string>
     <string name="photo_analysis_failed">การวิเคราะห์รูปภาพล้มเหลว: %s</string>
     <string name="preparing_analysis">กำลังเตรียมการวิเคราะห์…</string>
@@ -216,6 +229,17 @@
     <string name="capture">ถ่าย</string>
     <string name="latest_photo">รูปภาพล่าสุด</string>
     <string name="photo_not_found">ไม่พบรูปภาพ</string>
+    <string name="glasses_not_connected_cxr">แว่นไม่ได้เชื่อมต่อผ่าน CXR</string>
+    <string name="taking_photo">กำลังถ่ายรูป…</string>
+    <string name="photo_empty">ถ่ายรูปล้มเหลว: รูปภาพว่างเปล่า</string>
+    <string name="photo_timeout">หมดเวลาถ่ายรูป กรุณาลองอีกครั้ง</string>
+    <string name="photo_capture_failed">ถ่ายรูปล้มเหลว: %s</string>
+    <string name="photo_process_failed">ประมวลผลรูปภาพล้มเหลว: %s</string>
+    <string name="image_decode_failed">ถอดรหัสรูปภาพล้มเหลว</string>
+    <string name="image_convert_failed">แปลงรูปภาพล้มเหลว</string>
+    <string name="image_ocr_prompt">กรุณาระบุและดึงข้อความทั้งหมดจากภาพนี้ หากมีตาราง ให้รักษารูปแบบไว้ หากไม่มีข้อความ ให้อธิบายเนื้อหาของภาพ</string>
+    <string name="image_translate_prompt">กรุณาระบุข้อความในภาพและแปล ให้ทั้งข้อความต้นฉบับและคำแปล</string>
+    <string name="image_summary_prompt">กรุณาสรุปเนื้อหาหลักของภาพนี้ในประโยคเดียว</string>
     
     <!-- Conversation History (New) -->
     <string name="new_conversation">การสนทนาใหม่</string>
@@ -280,4 +304,67 @@
     <string name="developer_tools">เครื่องมือนักพัฒนา</string>
     <string name="log_viewer">ตัวดูบันทึก</string>
     <string name="log_viewer_description">ดู ส่งออก และจัดการบันทึกของแอป</string>
+    
+    <!-- Recordings -->
+    <string name="recordings">การบันทึก</string>
+    <string name="recording_detail">รายละเอียดการบันทึก</string>
+    <string name="start_recording">เริ่มบันทึก</string>
+    <string name="stop_recording">หยุดบันทึก</string>
+    <string name="record_from_phone">บันทึกจากโทรศัพท์</string>
+    <string name="record_from_glasses">บันทึกจากแว่น</string>
+    <string name="recording_source_phone">การบันทึกจากโทรศัพท์</string>
+    <string name="recording_source_glasses">การบันทึกจากแว่น</string>
+    <string name="no_recordings">ไม่มีการบันทึก</string>
+    <string name="no_recordings_found">ไม่พบการบันทึก</string>
+    <string name="tap_mic_to_record">แตะปุ่มไมโครโฟนเพื่อเริ่มบันทึก</string>
+    <string name="try_different_search">ลองใช้คำค้นหาอื่น</string>
+    <string name="search_recordings">ค้นหาการบันทึก…</string>
+    <string name="total_recordings">ทั้งหมด</string>
+    <string name="total_duration">ระยะเวลา</string>
+    <string name="delete_recordings">ลบการบันทึก</string>
+    <string name="delete_recordings_confirm">ลบ %d การบันทึกที่เลือก?</string>
+    <string name="delete_recording">ลบการบันทึก</string>
+    <string name="delete_recording_confirm">คุณแน่ใจหรือไม่ว่าต้องการลบการบันทึกนี้?</string>
+    <string name="edit_recording">แก้ไขการบันทึก</string>
+    <string name="title">ชื่อเรื่อง</string>
+    <string name="notes">บันทึกช่วยจำ</string>
+    <string name="transcript">การถอดความ</string>
+    <string name="transcribe">ถอดความ</string>
+    <string name="transcribing">กำลังถอดความ…</string>
+    <string name="transcribed_at">ถอดความเมื่อ %s</string>
+    <string name="no_transcript">ยังไม่มีการถอดความ</string>
+    <string name="ai_response">การตอบกลับ AI</string>
+    <string name="analyze">วิเคราะห์</string>
+    <string name="analyze_with_ai">วิเคราะห์ด้วย AI</string>
+    <string name="analyzing">กำลังวิเคราะห์…</string>
+    <string name="analyzed_by">วิเคราะห์โดย %s</string>
+    <string name="no_ai_response">ยังไม่มีการตอบกลับจาก AI</string>
+    <string name="transcribe_first">ถอดความการบันทึกก่อน</string>
+    <string name="recording_info">ข้อมูลการบันทึก</string>
+    <string name="created">สร้างเมื่อ</string>
+    <string name="duration">ระยะเวลา</string>
+    <string name="file_size">ขนาดไฟล์</string>
+    <string name="sample_rate">อัตราสุ่มตัวอย่าง</string>
+    <string name="status">สถานะ</string>
+    <string name="audio_file_not_available">ไฟล์เสียงไม่พร้อมใช้งาน</string>
+    <string name="filter_all">ทั้งหมด</string>
+    <string name="filter_phone">โทรศัพท์</string>
+    <string name="filter_glasses">แว่น</string>
+    <string name="filter_favorites">รายการโปรด</string>
+    <string name="sort_date_desc">ใหม่สุดก่อน</string>
+    <string name="sort_date_asc">เก่าสุดก่อน</string>
+    <string name="sort_duration_desc">ยาวสุดก่อน</string>
+    <string name="sort_duration_asc">สั้นสุดก่อน</string>
+    <string name="sort_name_asc">ชื่อ (ก-ฮ)</string>
+    <string name="sort_name_desc">ชื่อ (ฮ-ก)</string>
+    <string name="edit">แก้ไข</string>
+    
+    <!-- Recording Control (Home Screen) -->
+    <string name="recording_control">การบันทึกเสียง</string>
+    <string name="recording_ready">แตะเพื่อเริ่มบันทึก</string>
+    <string name="record_phone">โทรศัพท์</string>
+    <string name="record_glasses">แว่น</string>
+    <string name="pause_recording">หยุดชั่วคราว</string>
+    <string name="stop_and_send">หยุดและวิเคราะห์</string>
+    <string name="stopping">กำลังหยุด…</string>
 </resources>

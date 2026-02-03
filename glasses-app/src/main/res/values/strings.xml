@@ -55,12 +55,20 @@
     <string name="bluetooth_not_connected">Bluetooth not connected</string>
     <string name="connect_phone_first">Please connect phone first</string>
     <string name="capturing_photo">Capturing photo...</string>
+    <string name="please_wait_short">Please wait</string>
     <string name="compressing_photo">Compressing...</string>
     <string name="transferring_photo">Transferring...</string>
     <string name="photo_sent_waiting_ai">Sent, waiting for AI analysis...</string>
     <string name="photo_analysis_no_result">Unable to analyze this photo</string>
     <string name="capture_failed">Capture failed</string>
+    <string name="capture_failed_hint">Camera may be in use, please try again later</string>
     <string name="transfer_failed">Transfer failed: %s</string>
+    <string name="error_message">Error: %s</string>
+    <string name="please_retry">Please try again</string>
+    <string name="camera_service_starting">Camera service starting...</string>
+    <string name="bluetooth_connected_ready">Bluetooth connected, ready</string>
+    <string name="waiting_bluetooth_connection">Waiting for Bluetooth connection...</string>
+    <string name="camera_permission_missing">Camera permission missing</string>
     
     <!-- AI System Prompt -->
     <string name="glasses_system_prompt">You are a friendly AI assistant installed on Rokid smart glasses. Answer in the user\'s language, with each response not exceeding 100 words.</string>

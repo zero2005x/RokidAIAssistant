@@ -1,11 +1,15 @@
 package com.example.rokidphone.viewmodel
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.rokidcommon.protocol.ConnectionState
 import com.example.rokidcommon.protocol.MessageType
 import com.example.rokidphone.ConversationItem
+import com.example.rokidphone.data.db.RecordingRepository
+import com.example.rokidphone.data.db.RecordingSource
+import com.example.rokidphone.data.db.RecordingState
 import com.example.rokidphone.service.BluetoothConnectionState
 import com.example.rokidphone.service.ServiceBridge
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,15 +31,26 @@ data class PhoneUiState(
     val availableDevices: List<String> = emptyList(),
     val showApiKeyWarning: Boolean = false,  // Flag to show API key warning dialog
     val showInitialSetup: Boolean = false,   // Flag to show initial setup dialog (no API key configured)
-    val latestPhotoPath: String? = null      // Path to the latest received photo
+    val latestPhotoPath: String? = null,     // Path to the latest received photo
+    val recordingState: RecordingState = RecordingState.Idle  // Recording state
 )
 
-class PhoneViewModel : ViewModel() {
+class PhoneViewModel(application: Application) : AndroidViewModel(application) {
     
     private val _uiState = MutableStateFlow(PhoneUiState())
     val uiState: StateFlow<PhoneUiState> = _uiState.asStateFlow()
     
+    // Recording repository
+    private val recordingRepository = RecordingRepository.getInstance(application, viewModelScope)
+    
     init {
+        // Listen to recording state
+        viewModelScope.launch {
+            recordingRepository.recordingState.collect { state ->
+                _uiState.update { it.copy(recordingState = state) }
+            }
+        }
+        
         // Listen to service state
         viewModelScope.launch {
             ServiceBridge.serviceStateFlow.collect { isRunning ->
@@ -46,6 +61,7 @@ class PhoneViewModel : ViewModel() {
         // Listen to Bluetooth connection state
         viewModelScope.launch {
             ServiceBridge.bluetoothStateFlow.collect { state ->
+                Log.d(TAG, "Bluetooth state updated: $state")
                 val connectionState = when (state) {
                     BluetoothConnectionState.DISCONNECTED -> ConnectionState.DISCONNECTED
                     BluetoothConnectionState.LISTENING -> ConnectionState.DISCONNECTED
@@ -55,9 +71,17 @@ class PhoneViewModel : ViewModel() {
                 
                 _uiState.update { it.copy(
                     bluetoothState = state,
-                    connectionState = connectionState,
-                    connectedGlassesName = if (state == BluetoothConnectionState.CONNECTED) 
-                        "Rokid Glasses" else null
+                    connectionState = connectionState
+                ) }
+            }
+        }
+        
+        // Listen to connected device name
+        viewModelScope.launch {
+            ServiceBridge.connectedDeviceNameFlow.collect { name ->
+                Log.d(TAG, "Connected device name updated: $name")
+                _uiState.update { it.copy(
+                    connectedGlassesName = name
                 ) }
             }
         }
@@ -103,17 +127,28 @@ class PhoneViewModel : ViewModel() {
         }
     }
     
+    /**
+     * Request service to start Bluetooth listening
+     * This restarts the server socket to accept new connections
+     */
     fun startScanning() {
-        // Service will automatically start listening for Bluetooth connection
-        // No additional operation needed here
+        viewModelScope.launch {
+            _uiState.update { it.copy(connectionState = ConnectionState.CONNECTING) }
+            ServiceBridge.requestStartListening()
+        }
     }
     
+    /**
+     * Request service to disconnect current Bluetooth connection
+     * Note: UI state will be updated automatically through the bluetoothStateFlow
+     */
     fun disconnect() {
-        // Server side will handle disconnection
-        _uiState.update { it.copy(
-            connectionState = ConnectionState.DISCONNECTED,
-            connectedGlassesName = null
-        ) }
+        viewModelScope.launch {
+            Log.d(TAG, "Requesting disconnect")
+            ServiceBridge.requestDisconnect()
+            // Don't manually override state here - let the flow update it naturally
+            // This ensures UI stays in sync with actual Bluetooth state
+        }
     }
     
     fun updateServiceStatus(isRunning: Boolean) {
@@ -163,6 +198,72 @@ class PhoneViewModel : ViewModel() {
     fun requestCapturePhoto() {
         viewModelScope.launch {
             ServiceBridge.requestCapturePhoto()
+        }
+    }
+    
+    // ==================== Recording Control ====================
+    
+    /**
+     * Start recording from phone microphone
+     */
+    fun startPhoneRecording() {
+        viewModelScope.launch {
+            val result = recordingRepository.startPhoneRecording()
+            result.onFailure { error ->
+                Log.e(TAG, "Failed to start phone recording", error)
+            }
+        }
+    }
+    
+    /**
+     * Start recording from glasses microphone
+     */
+    fun startGlassesRecording() {
+        viewModelScope.launch {
+            val result = recordingRepository.startGlassesRecording()
+            result.onSuccess { recordingId ->
+                // Send command to glasses to start recording
+                ServiceBridge.requestStartGlassesRecording(recordingId)
+            }
+            result.onFailure { error ->
+                Log.e(TAG, "Failed to start glasses recording", error)
+            }
+        }
+    }
+    
+    /**
+     * Pause current recording (if supported)
+     */
+    fun pauseRecording() {
+        viewModelScope.launch {
+            recordingRepository.pauseRecording()
+        }
+    }
+    
+    /**
+     * Stop current recording and send to AI for analysis
+     */
+    fun stopRecording() {
+        viewModelScope.launch {
+            val result = recordingRepository.stopRecording()
+            result.onSuccess { recording ->
+                recording?.let {
+                    Log.d(TAG, "Recording stopped: ${it.id}, source: ${it.source}, duration: ${it.durationMs}ms")
+                    
+                    // Only request transcription for phone recordings
+                    // Glasses recordings are processed via Bluetooth when the audio data arrives
+                    if (it.source == RecordingSource.PHONE && it.filePath.isNotBlank()) {
+                        ServiceBridge.requestTranscribeRecording(it.id, it.filePath)
+                    } else if (it.source == RecordingSource.GLASSES) {
+                        Log.d(TAG, "Glasses recording stopped, audio will be processed when received via Bluetooth")
+                        // Send stop command to glasses - audio data will be received via Bluetooth
+                        // The processVoiceData() in PhoneAIService will handle transcription
+                    }
+                }
+            }
+            result.onFailure { error ->
+                Log.e(TAG, "Failed to stop recording", error)
+            }
         }
     }
 }

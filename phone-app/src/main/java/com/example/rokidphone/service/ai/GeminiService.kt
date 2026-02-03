@@ -116,6 +116,11 @@ Rules:
                         }
                     } else {
                         Log.e(TAG, "API error: ${response.code}, body: $responseBody")
+                        // Handle 503 (overloaded) with longer delay
+                        if (response.code == 503 || response.code == 429) {
+                            Log.w(TAG, "Server overloaded (${response.code}), will retry with longer delay...")
+                            kotlinx.coroutines.delay(2000L * attempt) // Exponential backoff
+                        }
                         null
                     }
                 }
@@ -207,6 +212,11 @@ Rules:
                         } else null
                     } else {
                         Log.e(TAG, "API error: ${response.code}, body: $responseBody")
+                        // Handle 503 (overloaded) with longer delay
+                        if (response.code == 503 || response.code == 429) {
+                            Log.w(TAG, "Server overloaded (${response.code}), will retry with longer delay...")
+                            kotlinx.coroutines.delay(2000L * attempt) // Exponential backoff
+                        }
                         null
                     }
                 }
@@ -277,6 +287,11 @@ Rules:
                             }
                         } else {
                             Log.e(TAG, "API error: ${response.code}, body: $responseBody")
+                            // Handle 503 (overloaded) with longer delay
+                            if (response.code == 503 || response.code == 429) {
+                                Log.w(TAG, "Server overloaded (${response.code}), will retry with longer delay...")
+                                kotlinx.coroutines.delay(2000L * attempt) // Exponential backoff
+                            }
                             // Parse error message if available
                             try {
                                 val errorJson = JSONObject(responseBody ?: "{}")

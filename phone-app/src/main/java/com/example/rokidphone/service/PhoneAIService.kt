@@ -19,6 +19,7 @@ import com.example.rokidphone.data.ApiSettings
 import com.example.rokidphone.data.AvailableModels
 import com.example.rokidphone.data.SettingsRepository
 import com.example.rokidphone.data.db.ConversationRepository
+import com.example.rokidphone.data.db.RecordingRepository
 import com.example.rokidphone.service.ai.AiServiceFactory
 import com.example.rokidphone.service.ai.AiServiceProvider
 import com.example.rokidphone.service.cxr.CxrMobileManager
@@ -76,6 +77,9 @@ class PhoneAIService : Service() {
     // Conversation repository for persisting voice conversations
     private var conversationRepository: ConversationRepository? = null
     
+    // Recording repository for saving glasses recordings
+    private var recordingRepository: RecordingRepository? = null
+    
     // Current voice conversation ID (for grouping voice interactions)
     private var currentVoiceConversationId: String? = null
     
@@ -87,10 +91,8 @@ class PhoneAIService : Service() {
         initializeServices()
         startForeground(Constants.NOTIFICATION_ID, createNotification())
         
-        // Notify UI service has started
-        serviceScope.launch {
-            ServiceBridge.updateServiceState(true)
-        }
+        // Notify UI service has started (immediate state update)
+        ServiceBridge.updateServiceState(true)
     }
     
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -102,10 +104,8 @@ class PhoneAIService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         
-        // Notify UI service has stopped
-        kotlinx.coroutines.runBlocking {
-            ServiceBridge.updateServiceState(false)
-        }
+        // Notify UI service has stopped (immediate state update)
+        ServiceBridge.updateServiceState(false)
         
         serviceScope.cancel()
         bluetoothManager?.disconnect()
@@ -181,44 +181,75 @@ class PhoneAIService : Service() {
             
             // Monitor Bluetooth connection state
             serviceScope.launch {
-                bluetoothManager?.connectionState?.collect { state ->
-                    Log.d(TAG, "Bluetooth state: $state")
-                    ServiceBridge.updateBluetoothState(state)
-                    
-                    // Update notification
-                    updateNotification(state)
-                    
-                    // Initialize CXR Bluetooth when SPP connected
-                    if (state == BluetoothConnectionState.CONNECTED) {
-                        bluetoothManager?.connectedDevice?.let { device ->
-                            Log.d(TAG, "Initializing CXR Bluetooth with device: ${device.name}")
-                            cxrManager?.initBluetooth(device)
+                try {
+                    bluetoothManager?.connectionState?.collect { state ->
+                        Log.d(TAG, "Bluetooth state: $state")
+                        ServiceBridge.updateBluetoothState(state)
+                        
+                        // Update notification
+                        updateNotification(state)
+                        
+                        // Initialize CXR Bluetooth when SPP connected
+                        if (state == BluetoothConnectionState.CONNECTED) {
+                            bluetoothManager?.connectedDevice?.let { device ->
+                                Log.d(TAG, "Initializing CXR Bluetooth with device: ${device.name}")
+                                cxrManager?.initBluetooth(device)
+                            }
                         }
                     }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error in Bluetooth state collector", e)
+                }
+            }
+            
+            // Monitor connected device name
+            serviceScope.launch {
+                try {
+                    bluetoothManager?.connectedDeviceName?.collect { name ->
+                        Log.d(TAG, "Connected device name: $name")
+                        ServiceBridge.updateConnectedDeviceName(name)
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error in device name collector", e)
                 }
             }
             
             // Listen for messages from glasses
             serviceScope.launch {
-                bluetoothManager?.messageFlow?.collect { message ->
-                    handleGlassesMessage(message)
+                try {
+                    bluetoothManager?.messageFlow?.collect { message ->
+                        handleGlassesMessage(message)
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error in message flow collector", e)
                 }
             }
             
             // Initialize photo repository
             photoRepository = PhotoRepository(this, serviceScope)
             
+            // Initialize recording repository for saving glasses recordings
+            recordingRepository = RecordingRepository.getInstance(this, serviceScope)
+            
             // Listen for received photos from glasses
             serviceScope.launch {
-                bluetoothManager?.receivedPhoto?.collect { receivedPhoto ->
-                    handleReceivedPhoto(receivedPhoto)
+                try {
+                    bluetoothManager?.receivedPhoto?.collect { receivedPhoto ->
+                        handleReceivedPhoto(receivedPhoto)
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error in received photo collector", e)
                 }
             }
             
             // Monitor photo transfer state
             serviceScope.launch {
-                bluetoothManager?.photoTransferState?.collect { state ->
-                    handlePhotoTransferState(state)
+                try {
+                    bluetoothManager?.photoTransferState?.collect { state ->
+                        handlePhotoTransferState(state)
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error in photo transfer state collector", e)
                 }
             }
         } catch (e: Exception) {
@@ -230,6 +261,41 @@ class PhoneAIService : Service() {
             ServiceBridge.capturePhotoFlow.collect {
                 Log.d(TAG, "Capture photo request from UI")
                 requestGlassesToCapturePhoto()
+            }
+        }
+        
+        // Listen for connection control requests from UI
+        serviceScope.launch {
+            ServiceBridge.startListeningFlow.collect {
+                Log.d(TAG, "Start listening request from UI")
+                bluetoothManager?.let { manager ->
+                    // Restart Bluetooth listening
+                    manager.stopListening()
+                    kotlinx.coroutines.delay(300) // Wait for socket cleanup
+                    if (manager.hasBluetoothPermission()) {
+                        manager.startListening()
+                        Log.d(TAG, "Bluetooth listening restarted")
+                    }
+                }
+            }
+        }
+        
+        serviceScope.launch {
+            ServiceBridge.disconnectFlow.collect {
+                Log.d(TAG, "Disconnect request from UI")
+                bluetoothManager?.disconnect(restartListening = true)
+            }
+        }
+        
+        // Listen for transcription requests from UI (phone recordings)
+        serviceScope.launch {
+            try {
+                ServiceBridge.transcribeRecordingFlow.collect { request ->
+                    Log.d(TAG, "Transcription request received: ${request.recordingId}")
+                    processPhoneRecording(request.recordingId, request.filePath)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in transcription request collector", e)
             }
         }
         
@@ -330,7 +396,7 @@ class PhoneAIService : Service() {
         
         if (!cxr.isBluetoothConnected()) {
             Log.w(TAG, "CXR not connected to glasses")
-            bluetoothManager?.sendMessage(Message.aiError("眼镜未通过 CXR 连接"))
+            bluetoothManager?.sendMessage(Message.aiError(getString(R.string.glasses_not_connected_cxr)))
             return
         }
         
@@ -346,7 +412,7 @@ class PhoneAIService : Service() {
         Log.d(TAG, "Capturing photo from glasses via CXR SDK...")
         
         // Notify glasses: taking photo
-        cxr.sendTtsContent("正在拍照...")
+        cxr.sendTtsContent(getString(R.string.taking_photo))
         
         // Take photo using CXR SDK
         val status = cxr.takePhoto(
@@ -362,16 +428,16 @@ class PhoneAIService : Service() {
                             handleCxrPhotoResult(photoData)
                         } else {
                             Log.e(TAG, "CXR photo is empty")
-                            bluetoothManager?.sendMessage(Message.aiError("拍照失败：照片为空"))
+                            bluetoothManager?.sendMessage(Message.aiError(getString(R.string.photo_empty)))
                         }
                     }
                     ValueUtil.CxrStatus.RESPONSE_TIMEOUT -> {
                         Log.e(TAG, "CXR photo timeout")
-                        bluetoothManager?.sendMessage(Message.aiError("拍照超时，请重试"))
+                        bluetoothManager?.sendMessage(Message.aiError(getString(R.string.photo_timeout)))
                     }
                     else -> {
                         Log.e(TAG, "CXR photo failed: $resultStatus")
-                        bluetoothManager?.sendMessage(Message.aiError("拍照失败: $resultStatus"))
+                        bluetoothManager?.sendMessage(Message.aiError(getString(R.string.photo_capture_failed, resultStatus)))
                     }
                 }
             }
@@ -399,7 +465,7 @@ class PhoneAIService : Service() {
             
         } catch (e: Exception) {
             Log.e(TAG, "Failed to process CXR photo", e)
-            bluetoothManager?.sendMessage(Message.aiError("处理照片失败: ${e.message}"))
+            bluetoothManager?.sendMessage(Message.aiError(getString(R.string.photo_process_failed, e.message ?: "")))
         }
     }
     
@@ -518,10 +584,10 @@ class PhoneAIService : Service() {
                 payload = getString(R.string.analyzing_photo)
             ))
             
-            // Use AI service to analyze the image (Chinese prompt)
+            // Use AI service to analyze the image with localized prompt
             val analysisResult = aiService?.analyzeImage(
                 photoBytes, 
-                "请详细描述这张图片中你所看到的内容。包括主要对象、场景、颜色等细节。用中文回答，简洁明了。"
+                getString(R.string.image_analysis_prompt)
             ) ?: getString(R.string.ai_analysis_unavailable)
             
             // Clean markdown for glasses display
@@ -650,6 +716,20 @@ class PhoneAIService : Service() {
             val settings = SettingsRepository.getInstance(this).getSettings()
             saveAssistantMessage(aiResponse, settings.aiModelId)
             
+            // 6.2 Save glasses recording to database (with transcript and AI response)
+            try {
+                recordingRepository?.saveGlassesRecording(
+                    audioData = audioData,
+                    transcript = transcript,
+                    aiResponse = aiResponse,
+                    providerId = settings.aiProvider.name,
+                    modelId = settings.aiModelId
+                )
+                Log.d(TAG, "Glasses recording saved to database")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to save glasses recording", e)
+            }
+            
             // 7. TTS voice playback (optional)
             ttsService?.speak(aiResponse) { }
             
@@ -660,6 +740,134 @@ class PhoneAIService : Service() {
         } catch (e: Exception) {
             Log.e(TAG, "Error processing voice data", e)
             bluetoothManager?.sendMessage(Message.aiError(getString(R.string.processing_failed, e.message ?: "")))
+        }
+    }
+    
+    /**
+     * Process phone recording - transcribe and analyze with AI
+     * Called when user stops recording from phone microphone
+     * @param recordingId The ID of the recording in database
+     * @param filePath The path to the WAV file
+     */
+    private suspend fun processPhoneRecording(recordingId: String, filePath: String) {
+        try {
+            // Early check for empty file path
+            if (filePath.isBlank()) {
+                Log.w(TAG, "Recording $recordingId has empty file path, skipping")
+                return
+            }
+            
+            // Check settings - should we auto-analyze?
+            val settings = SettingsRepository.getInstance(this).getSettings()
+            if (!settings.autoAnalyzeRecordings) {
+                Log.d(TAG, "Auto-analyze disabled, skipping recording: $recordingId")
+                return
+            }
+            
+            Log.d(TAG, "Processing phone recording: $recordingId, path: $filePath")
+            
+            // Check if any speech service is available
+            if (sttService == null && speechService == null) {
+                Log.e(TAG, "Speech service not available - no API key configured")
+                recordingRepository?.markError(recordingId, getString(R.string.service_not_ready))
+                ServiceBridge.notifyApiKeyMissing()
+                return
+            }
+            
+            // Read audio file
+            val audioFile = java.io.File(filePath)
+            if (!audioFile.exists()) {
+                Log.e(TAG, "Recording file not found: $filePath")
+                recordingRepository?.markError(recordingId, "File not found")
+                return
+            }
+            
+            val audioData = audioFile.readBytes()
+            Log.d(TAG, "Read audio file: ${audioData.size} bytes")
+            
+            // Notify UI: transcribing
+            ServiceBridge.emitConversation(Message(
+                type = MessageType.AI_PROCESSING,
+                payload = getString(R.string.recognizing_speech)
+            ))
+            
+            // 1. Speech recognition
+            Log.d(TAG, "Starting speech recognition for phone recording...")
+            val transcriptResult = if (sttService != null) {
+                Log.d(TAG, "Using dedicated STT service: ${sttService?.provider?.name}")
+                sttService?.transcribe(audioData, settings.speechLanguage)
+            } else {
+                Log.d(TAG, "Using AI-based speech service")
+                speechService?.transcribe(audioData)
+            }
+            
+            val transcript = when (transcriptResult) {
+                is SpeechResult.Success -> {
+                    Log.d(TAG, "Phone recording transcript: ${transcriptResult.text}")
+                    transcriptResult.text
+                }
+                is SpeechResult.Error -> {
+                    Log.e(TAG, "Phone recording transcription error: ${transcriptResult.message}")
+                    recordingRepository?.markError(recordingId, transcriptResult.message)
+                    return
+                }
+                null -> {
+                    val errorMsg = getString(R.string.service_not_ready)
+                    recordingRepository?.markError(recordingId, errorMsg)
+                    ServiceBridge.notifyApiKeyMissing()
+                    return
+                }
+            }
+            
+            // 2. Update recording with transcript
+            recordingRepository?.updateTranscript(recordingId, transcript)
+            
+            // 3. Notify UI: analyzing
+            ServiceBridge.emitConversation(Message(
+                type = MessageType.AI_PROCESSING,
+                payload = getString(R.string.thinking)
+            ))
+            
+            // 4. AI conversation
+            Log.d(TAG, "Getting AI response for phone recording...")
+            val rawAiResponse = aiService?.chat(transcript) ?: getString(R.string.ai_analysis_unavailable)
+            val aiResponse = cleanMarkdown(rawAiResponse)
+            
+            Log.d(TAG, "Phone recording AI response: $aiResponse")
+            
+            // 5. Update recording with AI response
+            recordingRepository?.updateAiResponse(
+                id = recordingId,
+                response = aiResponse,
+                providerId = settings.aiProvider.name,
+                modelId = settings.aiModelId
+            )
+            
+            // 6. Show result in UI
+            ServiceBridge.emitConversation(Message(
+                type = MessageType.USER_TRANSCRIPT,
+                payload = transcript
+            ))
+            ServiceBridge.emitConversation(Message(
+                type = MessageType.AI_RESPONSE_TEXT,
+                payload = aiResponse
+            ))
+            
+            // 7. Save to conversation history
+            saveUserMessage(transcript)
+            saveAssistantMessage(aiResponse, settings.aiModelId)
+            
+            // 8. TTS playback (optional)
+            ttsService?.speak(aiResponse) { }
+            
+            Log.d(TAG, "Phone recording processed successfully: $recordingId")
+            
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            Log.d(TAG, "Phone recording processing cancelled (service stopping)")
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Error processing phone recording", e)
+            recordingRepository?.markError(recordingId, e.message ?: "Unknown error")
         }
     }
     

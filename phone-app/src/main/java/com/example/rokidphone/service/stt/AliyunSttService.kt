@@ -22,7 +22,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 /**
- * Aliyun (阿里云) NLS Speech Recognition Service
+ * Alibaba Cloud (Aliyun) NLS Speech Recognition Service
  * 
  * API Documentation: https://help.aliyun.com/document_detail/90727.html
  * Token API: https://help.aliyun.com/zh/isi/getting-started/use-http-or-https-to-obtain-an-access-token

@@ -225,13 +225,14 @@ ANTHROPIC_API_KEY=your_anthropic_api_key_here
 
 其他 API 金鑰可在應用的**設定**畫面中配置：
 
-| 設定       | 應用內位置           | 用途                  |
-| ---------- | -------------------- | --------------------- |
-| AI 服務商  | 設定 → AI Provider   | 選擇 Gemini/OpenAI 等 |
-| 模型       | 設定 → Model         | 選擇特定模型          |
-| 自訂端點   | 設定 → Custom        | 用於 Ollama/LM Studio |
-| STT 服務商 | 設定 → Speech        | 設定 STT              |
-| 系統提示詞 | 設定 → System Prompt | 自訂 AI 行為          |
+| 設定         | 應用內位置           | 用途                           |
+| ------------ | -------------------- | ------------------------------ |
+| AI 服務商    | 設定 → AI Provider   | 選擇 Gemini/OpenAI 等          |
+| 模型         | 設定 → Model         | 選擇特定模型                   |
+| 自訂端點     | 設定 → Custom        | 用於 Ollama/LM Studio          |
+| STT 服務商   | 設定 → Speech        | 設定 STT                       |
+| 系統提示詞   | 設定 → System Prompt | 自訂 AI 行為                   |
+| 自動分析錄音 | 設定 → 錄音設定      | 錄音結束後自動傳送 AI 進行辨識 |
 
 **檔案路徑**: `phone-app/src/.../ui/settings/SettingsScreen.kt`
 

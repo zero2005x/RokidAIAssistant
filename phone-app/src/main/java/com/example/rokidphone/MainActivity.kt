@@ -200,15 +200,28 @@ fun PhoneMainScreen(
                         label = { Text(stringResource(destination.labelResId)) },
                         selected = selected,
                         onClick = {
-                            navController.navigate(destination.route) {
-                                // Pop up to start destination to avoid building up stack
-                                popUpTo(navController.graph.startDestinationId) {
-                                    saveState = true
+                            // Navigate to the selected destination
+                            if (currentDestination?.route != destination.route) {
+                                if (destination.route == NavRoutes.HOME) {
+                                    // For HOME: clear entire back stack and go to HOME
+                                    navController.navigate(destination.route) {
+                                        popUpTo(navController.graph.startDestinationId) {
+                                            inclusive = true
+                                        }
+                                        launchSingleTop = true
+                                    }
+                                } else {
+                                    // For other bottom nav items: navigate normally
+                                    navController.navigate(destination.route) {
+                                        // Pop back to HOME but keep HOME in stack
+                                        popUpTo(NavRoutes.HOME) {
+                                            saveState = false
+                                            inclusive = false
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = false
+                                    }
                                 }
-                                // Avoid multiple copies of same destination
-                                launchSingleTop = true
-                                // Restore state when reselecting
-                                restoreState = true
                             }
                         }
                     )
@@ -232,13 +245,43 @@ fun PhoneMainScreen(
                     processingStatus = uiState.processingStatus,
                     currentModelId = settings.aiModelId,
                     conversations = uiState.conversations,
+                    recordingState = uiState.recordingState,
                     onConnect = { viewModel.startScanning() },
                     onDisconnect = { viewModel.disconnect() },
                     onStartService = onStartService,
                     onStopService = onStopService,
                     onCapturePhoto = { viewModel.requestCapturePhoto() },
+                    onStartPhoneRecording = { viewModel.startPhoneRecording() },
+                    onStartGlassesRecording = { viewModel.startGlassesRecording() },
+                    onPauseRecording = { viewModel.pauseRecording() },
+                    onStopRecording = { viewModel.stopRecording() },
                     onViewConversationHistory = { navController.navigate(NavRoutes.CHAT) },
-                    onViewGallery = { navController.navigate(NavRoutes.GALLERY) }
+                    onViewGallery = { navController.navigate(NavRoutes.GALLERY) },
+                    onViewRecordings = { navController.navigate(NavRoutes.RECORDINGS) }
+                )
+            }
+            
+            composable(NavRoutes.RECORDINGS) {
+                com.example.rokidphone.ui.recording.RecordingsScreen(
+                    onBack = { navController.popBackStack() },
+                    onRecordingDetail = { recordingId ->
+                        navController.navigate(NavRoutes.recordingDetail(recordingId))
+                    }
+                )
+            }
+            
+            composable(
+                route = NavRoutes.RECORDING_DETAIL,
+                arguments = listOf(
+                    androidx.navigation.navArgument("recordingId") { 
+                        type = androidx.navigation.NavType.StringType 
+                    }
+                )
+            ) { backStackEntry ->
+                val recordingId = backStackEntry.arguments?.getString("recordingId") ?: ""
+                com.example.rokidphone.ui.recording.RecordingDetailScreen(
+                    recordingId = recordingId,
+                    onBack = { navController.popBackStack() }
                 )
             }
             

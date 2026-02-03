@@ -17,7 +17,7 @@ import javax.crypto.spec.SecretKeySpec
 import kotlin.coroutines.resume
 
 /**
- * Tencent Cloud (腾讯云) Real-time ASR Service
+ * Tencent Cloud Real-time ASR Service
  * 
  * API Documentation: https://cloud.tencent.com/document/product/1093/48982
  * 

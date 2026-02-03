@@ -49,6 +49,26 @@
     <string name="swipe_for_more">Desliza arriba/abajo para más</string>
     <string name="swipe_up_previous">▲ Desliza hacia arriba</string>
     <string name="swipe_down_next">▼ Desliza hacia abajo</string>
+    <string name="swipe_left_right_pages">← Desliza para ver más páginas →</string>
+    
+    <!-- Photo Capture -->
+    <string name="bluetooth_not_connected">Bluetooth no conectado</string>
+    <string name="connect_phone_first">Conecte el teléfono primero</string>
+    <string name="capturing_photo">Capturando foto...</string>
+    <string name="please_wait_short">Espere por favor</string>
+    <string name="compressing_photo">Comprimiendo...</string>
+    <string name="transferring_photo">Transfiriendo...</string>
+    <string name="photo_sent_waiting_ai">Enviado, esperando análisis de IA...</string>
+    <string name="photo_analysis_no_result">No se puede analizar esta foto</string>
+    <string name="capture_failed">Error de captura</string>
+    <string name="capture_failed_hint">La cámara puede estar en uso, inténtelo más tarde</string>
+    <string name="transfer_failed">Error de transferencia: %s</string>
+    <string name="error_message">Error: %s</string>
+    <string name="please_retry">Inténtelo de nuevo</string>
+    <string name="camera_service_starting">Iniciando servicio de cámara...</string>
+    <string name="bluetooth_connected_ready">Bluetooth conectado, listo</string>
+    <string name="waiting_bluetooth_connection">Esperando conexión Bluetooth...</string>
+    <string name="camera_permission_missing">Falta permiso de cámara</string>
     
     <!-- AI System Prompt -->
     <string name="glasses_system_prompt">Eres un asistente de IA amigable instalado en las gafas inteligentes Rokid. Por favor responde las preguntas en el idioma del usuario, con cada respuesta sin exceder las 100 palabras.</string>

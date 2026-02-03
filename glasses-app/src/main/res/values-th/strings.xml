@@ -49,6 +49,26 @@
     <string name="swipe_for_more">ปัดขึ้น/ลงเพื่อดูเพิ่มเติม</string>
     <string name="swipe_up_previous">▲ ปัดขึ้น - หน้าก่อน</string>
     <string name="swipe_down_next">▼ ปัดลง - หน้าถัดไป</string>
+    <string name="swipe_left_right_pages">← ปัดเพื่อดูหน้าเพิ่มเติม →</string>
+    
+    <!-- Photo Capture -->
+    <string name="bluetooth_not_connected">บลูทูธไม่ได้เชื่อมต่อ</string>
+    <string name="connect_phone_first">กรุณาเชื่อมต่อโทรศัพท์ก่อน</string>
+    <string name="capturing_photo">กำลังถ่ายภาพ...</string>
+    <string name="please_wait_short">กรุณารอสักครู่</string>
+    <string name="compressing_photo">กำลังบีบอัด...</string>
+    <string name="transferring_photo">กำลังถ่ายโอน...</string>
+    <string name="photo_sent_waiting_ai">ส่งแล้ว รอการวิเคราะห์ AI...</string>
+    <string name="photo_analysis_no_result">ไม่สามารถวิเคราะห์ภาพนี้ได้</string>
+    <string name="capture_failed">ถ่ายภาพไม่สำเร็จ</string>
+    <string name="capture_failed_hint">กล้องอาจกำลังใช้งานอยู่ กรุณาลองอีกครั้งภายหลัง</string>
+    <string name="transfer_failed">ถ่ายโอนไม่สำเร็จ: %s</string>
+    <string name="error_message">ข้อผิดพลาด: %s</string>
+    <string name="please_retry">กรุณาลองอีกครั้ง</string>
+    <string name="camera_service_starting">กำลังเริ่มบริการกล้อง...</string>
+    <string name="bluetooth_connected_ready">บลูทูธเชื่อมต่อแล้ว พร้อมใช้งาน</string>
+    <string name="waiting_bluetooth_connection">รอการเชื่อมต่อบลูทูธ...</string>
+    <string name="camera_permission_missing">ไม่มีสิทธิ์เข้าถึงกล้อง</string>
     
     <!-- AI System Prompt -->
     <string name="glasses_system_prompt">คุณคือผู้ช่วย AI ที่เป็นมิตรซึ่งติดตั้งบนแว่นตาอัจฉริยะ Rokid กรุณาตอบคำถามในภาษาของผู้ใช้ แต่ละคำตอบไม่เกิน 100 คำ</string>

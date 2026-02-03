@@ -151,7 +151,7 @@ sealed class ProviderSetting {
     @Serializable
     data class Alibaba(
         override val id: String = "alibaba",
-        override val displayName: String = "通義千問",
+        override val displayName: String = "Alibaba Qwen",
         override val enabled: Boolean = true,
         val apiKey: String = "",
         val modelId: String = "qwen3-max",
@@ -170,7 +170,7 @@ sealed class ProviderSetting {
     @Serializable
     data class Zhipu(
         override val id: String = "zhipu",
-        override val displayName: String = "智譜 GLM",
+        override val displayName: String = "Zhipu GLM",
         override val enabled: Boolean = true,
         val apiKey: String = "",
         val modelId: String = "glm-4-plus",
@@ -190,7 +190,7 @@ sealed class ProviderSetting {
     @Serializable
     data class Baidu(
         override val id: String = "baidu",
-        override val displayName: String = "百度文心",
+        override val displayName: String = "Baidu Ernie",
         override val enabled: Boolean = true,
         val apiKey: String = "",
         val secretKey: String = "",

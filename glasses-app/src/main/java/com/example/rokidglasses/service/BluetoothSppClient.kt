@@ -64,6 +64,16 @@ class BluetoothSppClient(
     // Heartbeat interval (10 seconds)
     private val HEARTBEAT_INTERVAL = 10_000L
     
+    // Maximum missed heartbeats before triggering reconnection
+    private val MAX_MISSED_HEARTBEATS = 3
+    
+    // Counter for heartbeats sent without receiving ACK
+    @Volatile
+    private var missedHeartbeatCount = 0
+    
+    // Last device we were connected to (for auto-reconnect)
+    private var lastConnectedDevice: BluetoothDevice? = null
+    
     // Connection state
     private val _connectionState = MutableStateFlow(BluetoothClientState.DISCONNECTED)
     val connectionState: StateFlow<BluetoothClientState> = _connectionState.asStateFlow()
@@ -144,6 +154,8 @@ class BluetoothSppClient(
                     
                     _connectionState.value = BluetoothClientState.CONNECTED
                     _connectedDeviceName.value = device.name
+                    lastConnectedDevice = device
+                    missedHeartbeatCount = 0
                     
                     Log.d(TAG, "Connected to ${device.name}")
                     
@@ -298,23 +310,67 @@ class BluetoothSppClient(
     /**
      * Start heartbeat to keep connection alive
      * Sends HEARTBEAT message every 10 seconds
+     * Detects connection loss if too many heartbeats go unanswered
      */
     private fun startHeartbeat() {
         heartbeatJob?.cancel()
+        missedHeartbeatCount = 0
+        
         heartbeatJob = scope.launch(Dispatchers.IO) {
             while (isActive && _connectionState.value == BluetoothClientState.CONNECTED) {
                 delay(HEARTBEAT_INTERVAL)
                 
                 if (_connectionState.value == BluetoothClientState.CONNECTED) {
                     try {
+                        // Increment missed heartbeat count before sending
+                        // This will be reset to 0 when we receive HEARTBEAT_ACK
+                        missedHeartbeatCount++
+                        
                         val heartbeatMsg = Message(type = MessageType.HEARTBEAT)
                         sendMessage(heartbeatMsg)
-                        Log.d(TAG, "Heartbeat sent")
+                        Log.d(TAG, "Heartbeat sent (missed count: $missedHeartbeatCount)")
+                        
+                        // Check if too many heartbeats were missed
+                        if (missedHeartbeatCount >= MAX_MISSED_HEARTBEATS) {
+                            Log.w(TAG, "Too many missed heartbeats ($missedHeartbeatCount), connection may be dead")
+                            // Trigger reconnection
+                            handleConnectionLost()
+                            break
+                        }
                     } catch (e: Exception) {
                         Log.w(TAG, "Failed to send heartbeat: ${e.message}")
                     }
                 }
             }
+        }
+    }
+    
+    /**
+     * Called when HEARTBEAT_ACK is received
+     * Resets the missed heartbeat counter
+     */
+    fun onHeartbeatAckReceived() {
+        missedHeartbeatCount = 0
+    }
+    
+    /**
+     * Handle connection lost (too many missed heartbeats)
+     * Attempts to reconnect to the last connected device
+     */
+    private suspend fun handleConnectionLost() {
+        Log.d(TAG, "Handling connection lost...")
+        
+        val deviceToReconnect = lastConnectedDevice
+        
+        // Close current connection
+        closeSocket()
+        _connectionState.value = BluetoothClientState.DISCONNECTED
+        
+        // Try to reconnect if we have a device
+        if (deviceToReconnect != null) {
+            Log.d(TAG, "Attempting to reconnect to ${deviceToReconnect.name}...")
+            delay(1000) // Wait a bit before reconnecting
+            connect(deviceToReconnect)
         }
     }
     
@@ -442,6 +498,11 @@ class BluetoothSppClient(
             
             val type = MessageType.fromCode(typeValue)
             if (type != null) {
+                // Handle HEARTBEAT_ACK internally to reset missed heartbeat counter
+                if (type == MessageType.HEARTBEAT_ACK) {
+                    onHeartbeatAckReceived()
+                }
+                
                 val message = Message(
                     type = type,
                     payload = payload,

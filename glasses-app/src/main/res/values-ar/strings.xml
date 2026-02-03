@@ -49,6 +49,26 @@
     <string name="swipe_for_more">اسحب لأعلى/لأسفل لعرض المزيد</string>
     <string name="swipe_up_previous">▲ اسحب لأعلى للسابق</string>
     <string name="swipe_down_next">▼ اسحب لأسفل للتالي</string>
+    <string name="swipe_left_right_pages">← اسحب لرؤية المزيد من الصفحات →</string>
+    
+    <!-- Photo Capture -->
+    <string name="bluetooth_not_connected">البلوتوث غير متصل</string>
+    <string name="connect_phone_first">يرجى توصيل الهاتف أولاً</string>
+    <string name="capturing_photo">جارٍ التقاط الصورة...</string>
+    <string name="please_wait_short">يرجى الانتظار</string>
+    <string name="compressing_photo">جارٍ الضغط...</string>
+    <string name="transferring_photo">جارٍ النقل...</string>
+    <string name="photo_sent_waiting_ai">تم الإرسال، في انتظار تحليل الذكاء الاصطناعي...</string>
+    <string name="photo_analysis_no_result">تعذر تحليل هذه الصورة</string>
+    <string name="capture_failed">فشل الالتقاط</string>
+    <string name="capture_failed_hint">قد تكون الكاميرا قيد الاستخدام، يرجى المحاولة لاحقًا</string>
+    <string name="transfer_failed">فشل النقل: %s</string>
+    <string name="error_message">خطأ: %s</string>
+    <string name="please_retry">يرجى المحاولة مرة أخرى</string>
+    <string name="camera_service_starting">جاري تشغيل خدمة الكاميرا...</string>
+    <string name="bluetooth_connected_ready">البلوتوث متصل، جاهز</string>
+    <string name="waiting_bluetooth_connection">في انتظار اتصال البلوتوث...</string>
+    <string name="camera_permission_missing">إذن الكاميرا مفقود</string>
     
     <!-- AI System Prompt -->
     <string name="glasses_system_prompt">أنت مساعد ذكاء اصطناعي ودود مثبت على نظارات Rokid الذكية. يرجى الإجابة على الأسئلة بلغة المستخدم، مع عدم تجاوز كل إجابة 100 كلمة.</string>

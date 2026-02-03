@@ -729,34 +729,34 @@ data class ApiSettings(
     val ibmApiKey: String = "",
     val ibmServiceUrl: String = "",
     
-    // 科大訊飛 iFLYTEK
+    // iFLYTEK (Xunfei)
     val iflytekAppId: String = "",
     val iflytekApiKey: String = "",
     val iflytekApiSecret: String = "",
     
-    // 華為雲 SIS
+    // Huawei Cloud SIS
     val huaweiAk: String = "",
     val huaweiSk: String = "",
     val huaweiRegion: String = "cn-north-4",
     val huaweiProjectId: String = "",
     
-    // 火山引擎 Volcengine
+    // Volcengine (ByteDance)
     val volcengineAk: String = "",
     val volcangineSk: String = "",
     val volcengineAppId: String = "",
     
-    // 阿里云 ASR
+    // Alibaba Cloud ASR
     val aliyunAccessKeyId: String = "",
     val aliyunAccessKeySecret: String = "",
     val aliyunAppKey: String = "",
     
-    // 腾讯云 ASR
+    // Tencent Cloud ASR
     val tencentSecretId: String = "",
     val tencentSecretKey: String = "",
     val tencentAppId: String = "",
     val tencentEngineModelType: String = "16k_zh",
     
-    // 百度云 ASR
+    // Baidu Cloud ASR
     val baiduAsrApiKey: String = "",
     val baiduAsrSecretKey: String = "",
     
@@ -773,7 +773,11 @@ data class ApiSettings(
     val responseLanguage: String = "zh-TW",
     // Note: The default value is set to empty string here. 
     // The actual default (localized) is provided by SettingsRepository.getDefaultSystemPrompt()
-    val systemPrompt: String = ""
+    val systemPrompt: String = "",
+    
+    // Recording settings
+    // Auto-analyze recordings with AI after stopping (default: true)
+    val autoAnalyzeRecordings: Boolean = true
 ) {
     /**
      * Get current AI provider's API Key

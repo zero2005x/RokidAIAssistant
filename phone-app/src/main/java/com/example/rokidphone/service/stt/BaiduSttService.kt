@@ -13,7 +13,7 @@ import org.json.JSONObject
 import java.net.URLEncoder
 
 /**
- * Baidu Cloud (百度云) ASR Service
+ * Baidu Cloud ASR Service
  * 
  * API Documentation: https://cloud.baidu.com/doc/SPEECH/s/Vkh8j0x7z
  * 
@@ -21,7 +21,7 @@ import java.net.URLEncoder
  * - REST API for short audio
  * - High accuracy for Chinese
  * 
- * Auth: API Key + Secret Key (获取 Access Token)
+ * Auth: API Key + Secret Key (to obtain Access Token)
  */
 class BaiduSttService(
     private val apiKey: String,

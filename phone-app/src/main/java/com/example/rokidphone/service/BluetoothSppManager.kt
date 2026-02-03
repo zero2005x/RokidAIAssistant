@@ -138,6 +138,7 @@ class BluetoothSppManager(
     /**
      * Start listening for connections (as server)
      * Uses insecure RFCOMM for better compatibility with various devices
+     * Continuously accepts reconnections when the current connection is lost
      */
     fun startListening() {
         if (!hasBluetoothPermission()) {
@@ -153,46 +154,75 @@ class BluetoothSppManager(
         stopListening()
         
         acceptJob = scope.launch(Dispatchers.IO) {
-            try {
-                _connectionState.value = BluetoothConnectionState.LISTENING
-                Log.d(TAG, "Starting Bluetooth server...")
-                
-                // Use insecure RFCOMM for better compatibility
-                // This works better across different Android versions and devices
-                serverSocket = try {
-                    bluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(
-                        SERVICE_NAME, APP_UUID
-                    ).also {
-                        Log.d(TAG, "Server socket created (insecure mode for compatibility)")
+            while (isActive) {
+                try {
+                    _connectionState.value = BluetoothConnectionState.LISTENING
+                    Log.d(TAG, "Starting Bluetooth server...")
+                    
+                    // Use insecure RFCOMM for better compatibility
+                    // This works better across different Android versions and devices
+                    serverSocket = try {
+                        bluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(
+                            SERVICE_NAME, APP_UUID
+                        ).also {
+                            Log.d(TAG, "Server socket created (insecure mode for compatibility)")
+                        }
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Insecure socket failed, trying secure: ${e.message}")
+                        bluetoothAdapter.listenUsingRfcommWithServiceRecord(
+                            SERVICE_NAME, APP_UUID
+                        ).also {
+                            Log.d(TAG, "Server socket created (secure mode)")
+                        }
                     }
-                } catch (e: Exception) {
-                    Log.w(TAG, "Insecure socket failed, trying secure: ${e.message}")
-                    bluetoothAdapter.listenUsingRfcommWithServiceRecord(
-                        SERVICE_NAME, APP_UUID
-                    ).also {
-                        Log.d(TAG, "Server socket created (secure mode)")
+                    
+                    Log.d(TAG, "Waiting for connection...")
+                    
+                    // Wait for connection
+                    val socket = serverSocket?.accept()
+                    
+                    if (socket != null) {
+                        Log.d(TAG, "Connection accepted from: ${socket.remoteDevice.name}")
+                        handleConnection(socket)
+                        
+                        // Wait for this connection to be disconnected before accepting new ones
+                        // The read job will handle disconnection detection
+                        readJob?.join()
+                        
+                        Log.d(TAG, "Connection ended, preparing to accept new connections...")
+                        
+                        // Small delay before re-creating server socket
+                        delay(300)
                     }
-                }
-                
-                Log.d(TAG, "Waiting for connection...")
-                
-                // Wait for connection
-                val socket = serverSocket?.accept()
-                
-                if (socket != null) {
-                    Log.d(TAG, "Connection accepted from: ${socket.remoteDevice.name}")
-                    handleConnection(socket)
-                }
-                
-            } catch (e: SecurityException) {
-                Log.e(TAG, "Security exception", e)
-                _connectionState.value = BluetoothConnectionState.DISCONNECTED
-            } catch (e: IOException) {
-                if (_connectionState.value != BluetoothConnectionState.DISCONNECTED) {
-                    Log.e(TAG, "Accept failed", e)
+                    
+                } catch (e: SecurityException) {
+                    Log.e(TAG, "Security exception", e)
                     _connectionState.value = BluetoothConnectionState.DISCONNECTED
+                    break // Exit loop on security exception
+                } catch (e: IOException) {
+                    if (_connectionState.value != BluetoothConnectionState.DISCONNECTED) {
+                        Log.e(TAG, "Accept failed: ${e.message}")
+                        // Don't break, try to restart the server socket
+                        delay(500)
+                    } else {
+                        // Intentional disconnect, exit the loop
+                        break
+                    }
+                } catch (e: CancellationException) {
+                    Log.d(TAG, "Accept job cancelled")
+                    break
+                } finally {
+                    // Close server socket to free up the port
+                    try {
+                        serverSocket?.close()
+                    } catch (e: IOException) {
+                        Log.w(TAG, "Error closing server socket: ${e.message}")
+                    }
+                    serverSocket = null
                 }
             }
+            
+            Log.d(TAG, "Accept loop exited")
         }
     }
     
@@ -492,6 +522,7 @@ class BluetoothSppManager(
     
     /**
      * Handle disconnection from read thread (internal use)
+     * The acceptJob loop will automatically accept new connections after readJob completes
      */
     private fun handleDisconnection() {
         synchronized(disconnectLock) {
@@ -529,19 +560,13 @@ class BluetoothSppManager(
         
         audioBuffer.clear()
         
-        // Reset flag before restarting (important!)
+        // Reset the flag - the acceptJob loop will automatically accept new connections
+        // after readJob completes (readJob?.join() in startListening)
         synchronized(disconnectLock) {
             isDisconnecting = false
         }
         
-        // Restart listening with delay to ensure socket is fully closed
-        scope.launch(Dispatchers.IO) {
-            delay(500) // Wait for socket cleanup
-            Log.d(TAG, "Restarting Bluetooth server after disconnection...")
-            stopListening()
-            delay(200) // Small delay between stop and start
-            startListening()
-        }
+        Log.d(TAG, "Disconnection handled, ready for reconnection")
     }
     
     /**
@@ -589,19 +614,27 @@ class BluetoothSppManager(
         
         audioBuffer.clear()
         
-        // Reset flag before restarting (important!)
-        synchronized(disconnectLock) {
-            isDisconnecting = false
-        }
-        
         // Stop old server socket and restart listening with delay
+        // Reset flag only AFTER restart completes to prevent race conditions
         if (restartListening) {
             scope.launch(Dispatchers.IO) {
-                delay(500) // Wait for socket cleanup
-                stopListening()
-                delay(200) // Small delay between stop and start
-                Log.d(TAG, "Restarting Bluetooth server after disconnect...")
-                startListening()
+                try {
+                    delay(500) // Wait for socket cleanup
+                    stopListening()
+                    delay(200) // Small delay between stop and start
+                    Log.d(TAG, "Restarting Bluetooth server after disconnect...")
+                    startListening()
+                } finally {
+                    // Reset flag after restart completes
+                    synchronized(disconnectLock) {
+                        isDisconnecting = false
+                    }
+                }
+            }
+        } else {
+            // If not restarting, reset flag immediately
+            synchronized(disconnectLock) {
+                isDisconnecting = false
             }
         }
     }

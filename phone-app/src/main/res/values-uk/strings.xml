@@ -42,6 +42,11 @@
     <string name="enter_system_prompt">Введіть системний промпт ШІ…</string>
     <string name="default_system_prompt">Ви дружній ШІ-асистент. Будь ласка, відповідайте на всі питання українською мовою стисло і зрозуміло.</string>
     
+    <!-- Recording Settings -->
+    <string name="recording_settings">Налаштування запису</string>
+    <string name="auto_analyze_recordings">Автоматичний аналіз записів</string>
+    <string name="auto_analyze_recordings_description">Автоматично надсилати записи до ШІ для транскрипції та аналізу після зупинки</string>
+    
     <!-- Language Settings -->
     <string name="language_settings">Мова</string>
     <string name="select_language">Вибрати мову</string>
@@ -164,11 +169,18 @@
     <string name="stt_provider_iflytek">iFLYTEK</string>
     <string name="stt_provider_huawei">Huawei SIS</string>
     <string name="stt_provider_volcengine">Volcengine</string>
+    <string name="stt_provider_rev_ai">Rev.ai</string>
+    <string name="stt_provider_speechmatics">Speechmatics</string>
+    <string name="stt_provider_alibaba_asr">Alibaba Cloud ASR</string>
+    <string name="stt_provider_tencent_asr">Tencent Cloud ASR</string>
+    <string name="stt_provider_baidu_asr">Baidu Cloud ASR</string>
+    <string name="stt_provider_otter_ai">Otter.ai</string>
     
     <!-- STT Settings -->
     <string name="stt_settings_title">Налаштування розпізнавання мови</string>
     <string name="stt_provider_label">Постачальник STT</string>
     <string name="stt_credentials_title">Облікові дані STT</string>
+    <string name="stt_uses_main_api_key">Використовує ключ API основного провайдера ШІ, налаштований вище</string>
     <string name="stt_test_connection">Тест з\'єднання</string>
     <string name="stt_test_success">З\'єднання успішне</string>
     <string name="stt_test_failed">Тест з\'єднання не пройдено</string>
@@ -200,6 +212,7 @@
     <string name="photo_processing_failed">Помилка обробки фото</string>
     <string name="photo_transfer_failed">Помилка передачі фото: %s</string>
     <string name="analyzing_photo">Аналіз фото…</string>
+    <string name="image_analysis_prompt">Будь ласка, детально опишіть те, що ви бачите на цьому зображенні. Включіть основні об\'єкти, сцену, кольори та інші деталі. Будьте стислими та зрозумілими.</string>
     <string name="ai_analysis_unavailable">Аналіз зображень ШІ недоступний</string>
     <string name="photo_analysis_failed">Помилка аналізу фото: %s</string>
     <string name="preparing_analysis">Підготовка до аналізу…</string>
@@ -214,6 +227,17 @@
     <string name="capture">Зняти</string>
     <string name="latest_photo">Останнє фото</string>
     <string name="photo_not_found">Фото не знайдено</string>
+    <string name="glasses_not_connected_cxr">Окуляри не підключені через CXR</string>
+    <string name="taking_photo">Фотографування…</string>
+    <string name="photo_empty">Помилка зйомки: зображення порожнє</string>
+    <string name="photo_timeout">Час зйомки вичерпано, спробуйте ще раз</string>
+    <string name="photo_capture_failed">Помилка зйомки: %s</string>
+    <string name="photo_process_failed">Помилка обробки фото: %s</string>
+    <string name="image_decode_failed">Помилка декодування зображення</string>
+    <string name="image_convert_failed">Помилка конвертації зображення</string>
+    <string name="image_ocr_prompt">Будь ласка, визначте та витягніть весь текстовий вміст з цього зображення. Якщо є таблиці, збережіть формат. Якщо тексту немає, опишіть вміст зображення.</string>
+    <string name="image_translate_prompt">Будь ласка, визначте текст на зображенні та перекладіть його. Надайте як оригінальний, так і перекладений текст.</string>
+    <string name="image_summary_prompt">Будь ласка, підсумуйте основний зміст цього зображення в одному реченні.</string>
     
     <!-- Conversation History (New) -->
     <string name="new_conversation">Нова розмова</string>
@@ -278,4 +302,67 @@
     <string name="developer_tools">Інструменти розробника</string>
     <string name="log_viewer">Перегляд журналів</string>
     <string name="log_viewer_description">Перегляд, експорт та керування журналами додатку</string>
+    
+    <!-- Recordings -->
+    <string name="recordings">Записи</string>
+    <string name="recording_detail">Деталі запису</string>
+    <string name="start_recording">Почати запис</string>
+    <string name="stop_recording">Зупинити запис</string>
+    <string name="record_from_phone">Записати з телефону</string>
+    <string name="record_from_glasses">Записати з окулярів</string>
+    <string name="recording_source_phone">Запис з телефону</string>
+    <string name="recording_source_glasses">Запис з окулярів</string>
+    <string name="no_recordings">Немає записів</string>
+    <string name="no_recordings_found">Записи не знайдено</string>
+    <string name="tap_mic_to_record">Натисніть кнопку мікрофона, щоб почати запис</string>
+    <string name="try_different_search">Спробуйте інший пошуковий запит</string>
+    <string name="search_recordings">Пошук записів…</string>
+    <string name="total_recordings">Всього</string>
+    <string name="total_duration">Тривалість</string>
+    <string name="delete_recordings">Видалити записи</string>
+    <string name="delete_recordings_confirm">Видалити %d вибраних записів?</string>
+    <string name="delete_recording">Видалити запис</string>
+    <string name="delete_recording_confirm">Ви впевнені, що хочете видалити цей запис?</string>
+    <string name="edit_recording">Редагувати запис</string>
+    <string name="title">Назва</string>
+    <string name="notes">Нотатки</string>
+    <string name="transcript">Транскрипція</string>
+    <string name="transcribe">Транскрибувати</string>
+    <string name="transcribing">Транскрибування…</string>
+    <string name="transcribed_at">Транскрибовано %s</string>
+    <string name="no_transcript">Транскрипції поки немає</string>
+    <string name="ai_response">Відповідь ШІ</string>
+    <string name="analyze">Аналізувати</string>
+    <string name="analyze_with_ai">Аналізувати з ШІ</string>
+    <string name="analyzing">Аналіз…</string>
+    <string name="analyzed_by">Проаналізовано %s</string>
+    <string name="no_ai_response">Відповіді ШІ поки немає</string>
+    <string name="transcribe_first">Спочатку транскрибуйте запис</string>
+    <string name="recording_info">Інформація про запис</string>
+    <string name="created">Створено</string>
+    <string name="duration">Тривалість</string>
+    <string name="file_size">Розмір файлу</string>
+    <string name="sample_rate">Частота дискретизації</string>
+    <string name="status">Статус</string>
+    <string name="audio_file_not_available">Аудіофайл недоступний</string>
+    <string name="filter_all">Всі</string>
+    <string name="filter_phone">Телефон</string>
+    <string name="filter_glasses">Окуляри</string>
+    <string name="filter_favorites">Обране</string>
+    <string name="sort_date_desc">Спочатку нові</string>
+    <string name="sort_date_asc">Спочатку старі</string>
+    <string name="sort_duration_desc">Спочатку довгі</string>
+    <string name="sort_duration_asc">Спочатку короткі</string>
+    <string name="sort_name_asc">Ім\'я (А-Я)</string>
+    <string name="sort_name_desc">Ім\'я (Я-А)</string>
+    <string name="edit">Редагувати</string>
+    
+    <!-- Recording Control (Home Screen) -->
+    <string name="recording_control">Голосовий запис</string>
+    <string name="recording_ready">Натисніть, щоб почати запис</string>
+    <string name="record_phone">Телефон</string>
+    <string name="record_glasses">Окуляри</string>
+    <string name="pause_recording">Пауза</string>
+    <string name="stop_and_send">Стоп та Аналіз</string>
+    <string name="stopping">Зупинка…</string>
 </resources>

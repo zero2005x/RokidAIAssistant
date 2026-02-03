@@ -289,13 +289,14 @@ Access in code via `BuildConfig.GEMINI_API_KEY`.
 
 Additional API keys can be configured in the app's **Settings** screen:
 
-| Setting         | Location in App          | Purpose                   |
-| --------------- | ------------------------ | ------------------------- |
-| AI Provider     | Settings → AI Provider   | Select Gemini/OpenAI/etc. |
-| Model           | Settings → Model         | Choose specific model     |
-| Custom Endpoint | Settings → Custom        | For Ollama/LM Studio      |
-| STT Provider    | Settings → Speech        | Configure STT             |
-| System Prompt   | Settings → System Prompt | Customize AI behavior     |
+| Setting                 | Location in App               | Purpose                                      |
+| ----------------------- | ----------------------------- | -------------------------------------------- |
+| AI Provider             | Settings → AI Provider        | Select Gemini/OpenAI/etc.                    |
+| Model                   | Settings → Model              | Choose specific model                        |
+| Custom Endpoint         | Settings → Custom             | For Ollama/LM Studio                         |
+| STT Provider            | Settings → Speech             | Configure STT                                |
+| System Prompt           | Settings → System Prompt      | Customize AI behavior                        |
+| Auto Analyze Recordings | Settings → Recording Settings | Auto-send recordings to AI for transcription |
 
 **Path**: `phone-app/src/.../ui/settings/SettingsScreen.kt`
 

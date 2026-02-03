@@ -49,6 +49,26 @@
     <string name="swipe_for_more">Проведіть вгору/вниз для продовження</string>
     <string name="swipe_up_previous">▲ Вгору - попередня</string>
     <string name="swipe_down_next">▼ Вниз - наступна</string>
+    <string name="swipe_left_right_pages">← Проведіть, щоб побачити інші сторінки →</string>
+    
+    <!-- Photo Capture -->
+    <string name="bluetooth_not_connected">Bluetooth не підключено</string>
+    <string name="connect_phone_first">Спочатку підключіть телефон</string>
+    <string name="capturing_photo">Зйомка фото...</string>
+    <string name="please_wait_short">Зачекайте</string>
+    <string name="compressing_photo">Стиснення...</string>
+    <string name="transferring_photo">Передавання...</string>
+    <string name="photo_sent_waiting_ai">Надіслано, очікування аналізу ШІ...</string>
+    <string name="photo_analysis_no_result">Не вдалося проаналізувати це фото</string>
+    <string name="capture_failed">Помилка зйомки</string>
+    <string name="capture_failed_hint">Камера може бути зайнята, спробуйте пізніше</string>
+    <string name="transfer_failed">Помилка передавання: %s</string>
+    <string name="error_message">Помилка: %s</string>
+    <string name="please_retry">Спробуйте ще раз</string>
+    <string name="camera_service_starting">Запуск служби камери...</string>
+    <string name="bluetooth_connected_ready">Bluetooth підключено, готово</string>
+    <string name="waiting_bluetooth_connection">Очікування підключення Bluetooth...</string>
+    <string name="camera_permission_missing">Відсутній дозвіл камери</string>
     
     <!-- AI System Prompt -->
     <string name="glasses_system_prompt">Ви дружній ШІ-асистент, встановлений на розумних окулярах Rokid. Будь ласка, відповідайте на запитання мовою користувача, кожна відповідь не повинна перевищувати 100 слів.</string>

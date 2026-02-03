@@ -49,6 +49,26 @@
     <string name="swipe_for_more">Vuốt lên/xuống để xem thêm</string>
     <string name="swipe_up_previous">▲ Vuốt lên - trang trước</string>
     <string name="swipe_down_next">▼ Vuốt xuống - trang sau</string>
+    <string name="swipe_left_right_pages">← Vuốt để xem thêm trang →</string>
+    
+    <!-- Photo Capture -->
+    <string name="bluetooth_not_connected">Bluetooth chưa kết nối</string>
+    <string name="connect_phone_first">Vui lòng kết nối điện thoại trước</string>
+    <string name="capturing_photo">Đang chụp ảnh...</string>
+    <string name="please_wait_short">Vui lòng chờ</string>
+    <string name="compressing_photo">Đang nén...</string>
+    <string name="transferring_photo">Đang truyền...</string>
+    <string name="photo_sent_waiting_ai">Đã gửi, đang chờ AI phân tích...</string>
+    <string name="photo_analysis_no_result">Không thể phân tích ảnh này</string>
+    <string name="capture_failed">Chụp ảnh thất bại</string>
+    <string name="capture_failed_hint">Camera có thể đang được sử dụng, vui lòng thử lại sau</string>
+    <string name="transfer_failed">Truyền thất bại: %s</string>
+    <string name="error_message">Lỗi: %s</string>
+    <string name="please_retry">Vui lòng thử lại</string>
+    <string name="camera_service_starting">Đang khởi động dịch vụ camera...</string>
+    <string name="bluetooth_connected_ready">Bluetooth đã kết nối, sẵn sàng</string>
+    <string name="waiting_bluetooth_connection">Đang chờ kết nối Bluetooth...</string>
+    <string name="camera_permission_missing">Thiếu quyền truy cập camera</string>
     
     <!-- AI System Prompt -->
     <string name="glasses_system_prompt">Bạn là trợ lý AI thân thiện được cài đặt trên kính thông minh Rokid. Vui lòng trả lời câu hỏi bằng ngôn ngữ của người dùng, mỗi câu trả lời không quá 100 từ.</string>

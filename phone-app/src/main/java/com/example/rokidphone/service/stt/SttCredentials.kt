@@ -43,35 +43,35 @@ data class SttCredentials(
     val ibmApiKey: String = "",
     val ibmServiceUrl: String = "",  // e.g., "https://api.us-south.speech-to-text.watson.cloud.ibm.com"
     
-    // === 科大訊飛 iFLYTEK ===
+    // === iFLYTEK (Xunfei) ===
     val iflytekAppId: String = "",
     val iflytekApiKey: String = "",
     val iflytekApiSecret: String = "",
     
-    // === 華為雲 SIS ===
+    // === Huawei Cloud SIS ===
     val huaweiAk: String = "",  // Access Key
     val huaweiSk: String = "",  // Secret Key
     val huaweiRegion: String = "cn-north-4",
     val huaweiProjectId: String = "",
     
-    // === 火山引擎 Volcengine ===
+    // === Volcengine (ByteDance) ===
     val volcengineAk: String = "",  // Access Key
     val volcangineSk: String = "",  // Secret Key
     val volcengineRegion: String = "",  // Optional
     val volcengineAppId: String = "",  // Application ID
     
-    // === 阿里云 ASR ===
+    // === Alibaba Cloud ASR ===
     val aliyunAccessKeyId: String = "",
     val aliyunAccessKeySecret: String = "",
     val aliyunAppKey: String = "",  // NLS AppKey
     
-    // === 腾讯云 ASR ===
+    // === Tencent Cloud ASR ===
     val tencentSecretId: String = "",
     val tencentSecretKey: String = "",
     val tencentAppId: String = "",
     val tencentEngineModelType: String = "16k_zh",  // Engine model type
     
-    // === 百度云 ASR ===
+    // === Baidu Cloud ASR ===
     val baiduAsrApiKey: String = "",
     val baiduAsrSecretKey: String = "",
     

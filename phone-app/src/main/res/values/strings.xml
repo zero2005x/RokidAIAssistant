@@ -42,6 +42,11 @@
     <string name="enter_system_prompt">Enter AI system prompt…</string>
     <string name="default_system_prompt">You are a friendly AI assistant. Please answer all questions in English concisely and clearly.</string>
     
+    <!-- Recording Settings -->
+    <string name="recording_settings">Recording Settings</string>
+    <string name="auto_analyze_recordings">Auto-Analyze Recordings</string>
+    <string name="auto_analyze_recordings_description">Automatically send recordings to AI for transcription and analysis after stopping</string>
+    
     <!-- Language Settings -->
     <string name="language_settings">Language</string>
     <string name="select_language">Select Language</string>
@@ -207,6 +212,10 @@
     <string name="photo_processing_failed">Failed to process photo</string>
     <string name="photo_transfer_failed">Photo transfer failed: %s</string>
     <string name="analyzing_photo">Analyzing photo…</string>
+    <string name="image_analysis_prompt">Please describe in detail what you see in this image. Include main objects, scene, colors and other details. Be concise and clear.</string>
+    <string name="image_ocr_prompt">Please identify and extract all text content from this image. If there are tables, maintain the format. If there is no text, describe the image content.</string>
+    <string name="image_translate_prompt">Please identify the text in the image and translate it. Provide both the original and translated text.</string>
+    <string name="image_summary_prompt">Please summarize the main content of this image in one sentence.</string>
     <string name="ai_analysis_unavailable">AI image analysis not available</string>
     <string name="photo_analysis_failed">Photo analysis failed: %s</string>
     <string name="preparing_analysis">Preparing for analysis…</string>
@@ -221,6 +230,14 @@
     <string name="capture">Capture</string>
     <string name="latest_photo">Latest Photo</string>
     <string name="photo_not_found">Photo not found</string>
+    <string name="glasses_not_connected_cxr">Glasses not connected via CXR</string>
+    <string name="taking_photo">Taking photo…</string>
+    <string name="photo_empty">Photo capture failed: image is empty</string>
+    <string name="photo_timeout">Photo capture timed out, please try again</string>
+    <string name="photo_capture_failed">Photo capture failed: %s</string>
+    <string name="photo_process_failed">Failed to process photo: %s</string>
+    <string name="image_decode_failed">Image decoding failed</string>
+    <string name="image_convert_failed">Image conversion failed</string>
     
     <!-- Conversation History (New) -->
     <string name="new_conversation">New Conversation</string>
@@ -285,4 +302,67 @@
     <string name="developer_tools">Developer Tools</string>
     <string name="log_viewer">Log Viewer</string>
     <string name="log_viewer_description">View, export, and manage app logs</string>
+    
+    <!-- Recordings -->
+    <string name="recordings">Recordings</string>
+    <string name="recording_detail">Recording Detail</string>
+    <string name="start_recording">Start Recording</string>
+    <string name="stop_recording">Stop Recording</string>
+    <string name="record_from_phone">Record from Phone</string>
+    <string name="record_from_glasses">Record from Glasses</string>
+    <string name="recording_source_phone">Phone Recording</string>
+    <string name="recording_source_glasses">Glasses Recording</string>
+    <string name="no_recordings">No Recordings</string>
+    <string name="no_recordings_found">No recordings found</string>
+    <string name="tap_mic_to_record">Tap the microphone button to start recording</string>
+    <string name="try_different_search">Try a different search term</string>
+    <string name="search_recordings">Search recordings…</string>
+    <string name="total_recordings">Total</string>
+    <string name="total_duration">Duration</string>
+    <string name="delete_recordings">Delete Recordings</string>
+    <string name="delete_recordings_confirm">Delete %d selected recording(s)?</string>
+    <string name="delete_recording">Delete Recording</string>
+    <string name="delete_recording_confirm">Are you sure you want to delete this recording?</string>
+    <string name="edit_recording">Edit Recording</string>
+    <string name="title">Title</string>
+    <string name="notes">Notes</string>
+    <string name="transcript">Transcript</string>
+    <string name="transcribe">Transcribe</string>
+    <string name="transcribing">Transcribing…</string>
+    <string name="transcribed_at">Transcribed at %s</string>
+    <string name="no_transcript">No transcript yet</string>
+    <string name="ai_response">AI Response</string>
+    <string name="analyze">Analyze</string>
+    <string name="analyze_with_ai">Analyze with AI</string>
+    <string name="analyzing">Analyzing…</string>
+    <string name="analyzed_by">Analyzed by %s</string>
+    <string name="no_ai_response">No AI response yet</string>
+    <string name="transcribe_first">Transcribe the recording first</string>
+    <string name="recording_info">Recording Info</string>
+    <string name="created">Created</string>
+    <string name="duration">Duration</string>
+    <string name="file_size">File Size</string>
+    <string name="sample_rate">Sample Rate</string>
+    <string name="status">Status</string>
+    <string name="audio_file_not_available">Audio file not available</string>
+    <string name="filter_all">All</string>
+    <string name="filter_phone">Phone</string>
+    <string name="filter_glasses">Glasses</string>
+    <string name="filter_favorites">Favorites</string>
+    <string name="sort_date_desc">Newest First</string>
+    <string name="sort_date_asc">Oldest First</string>
+    <string name="sort_duration_desc">Longest First</string>
+    <string name="sort_duration_asc">Shortest First</string>
+    <string name="sort_name_asc">Name (A-Z)</string>
+    <string name="sort_name_desc">Name (Z-A)</string>
+    <string name="edit">Edit</string>
+    
+    <!-- Recording Control (Home Screen) -->
+    <string name="recording_control">Voice Recording</string>
+    <string name="recording_ready">Tap to start recording</string>
+    <string name="record_phone">Phone</string>
+    <string name="record_glasses">Glasses</string>
+    <string name="pause_recording">Pause</string>
+    <string name="stop_and_send">Stop &amp; Analyze</string>
+    <string name="stopping">Stopping…</string>
 </resources>
