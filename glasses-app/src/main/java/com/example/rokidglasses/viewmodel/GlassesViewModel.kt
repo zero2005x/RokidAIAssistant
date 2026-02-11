@@ -54,7 +54,10 @@ data class GlassesUiState(
     val cxrConnectedPhoneName: String? = null,
     // Photo capture state
     val isCapturingPhoto: Boolean = false,
-    val photoTransferProgress: Float = 0f
+    val photoTransferProgress: Float = 0f,
+    // Gemini Live mode state
+    val isLiveModeActive: Boolean = false,
+    val liveTranscription: String = ""
 )
 
 /**
@@ -106,6 +109,20 @@ class GlassesViewModel(
     
     // Audio buffer - collects recording data
     private val audioBuffer = ByteArrayOutputStream()
+    
+    // ========== Gemini Live Mode Related ==========
+    
+    // Live mode activation status (notified by phone)
+    private var isLiveModeActive = false
+    
+    // Real-time video streaming job (~1fps camera frame capture and send to phone)
+    private var videoStreamingJob: Job? = null
+    
+    // Video streaming frame rate control (milliseconds)
+    private val videoFrameIntervalMs = 1000L  // ~1fps
+    
+    // Video streaming JPEG compression quality (0-100)
+    private val videoFrameQuality = 50
     
     init {
         initializeBluetooth()
@@ -548,6 +565,45 @@ class GlassesViewModel(
                 captureAndSendPhoto()
             }
             
+            // ========== Gemini Live Mode Message Handling ==========
+            
+            MessageType.LIVE_SESSION_START -> {
+                // Phone started Live mode
+                Log.d(TAG, "Live session started by phone")
+                isLiveModeActive = true
+                _uiState.update { it.copy(
+                    isLiveModeActive = true,
+                    displayText = "🎙️ Live mode activated",
+                    hintText = "Real-time voice conversation...",
+                    liveTranscription = ""
+                ) }
+                // Start real-time video streaming to phone
+                startVideoStreaming()
+            }
+            
+            MessageType.LIVE_SESSION_END -> {
+                // Phone ended Live mode
+                Log.d(TAG, "Live session ended by phone")
+                isLiveModeActive = false
+                stopVideoStreaming()
+                _uiState.update { it.copy(
+                    isLiveModeActive = false,
+                    displayText = "Live mode ended",
+                    hintText = context.getString(R.string.tap_touchpad_start),
+                    liveTranscription = ""
+                ) }
+            }
+            
+            MessageType.LIVE_TRANSCRIPTION -> {
+                // Real-time transcription text (user voice or AI response)
+                val text = message.payload ?: ""
+                Log.d(TAG, "Live transcription: $text")
+                _uiState.update { it.copy(
+                    liveTranscription = text,
+                    displayText = text
+                ) }
+            }
+            
             MessageType.PHOTO_ANALYSIS_RESULT -> {
                 // Received photo analysis result from phone
                 Log.d(TAG, "Photo analysis result: ${message.payload}")
@@ -578,6 +634,9 @@ class GlassesViewModel(
                     isPaginated = isPaginated
                 ) }
             }
+            
+            // HEARTBEAT_ACK is handled internally by BluetoothSppClient
+            MessageType.HEARTBEAT_ACK -> { /* no-op */ }
             
             else -> { 
                 Log.d(TAG, "Unhandled message type: ${message.type}")
@@ -721,10 +780,87 @@ class GlassesViewModel(
     override fun onCleared() {
         super.onCleared()
         recordingJob?.cancel()
+        videoStreamingJob?.cancel()
         audioRecord?.release()
         bluetoothClient.disconnect()
         cameraManager?.release()
         cxrServiceManager?.release()
+    }
+    
+    // ==================== Live Mode: Real-time Video Streaming ====================
+    
+    /**
+     * Start real-time video streaming
+     * Captures camera frames at ~1fps, compresses to JPEG and sends to phone via Bluetooth,
+     * which then forwards to GeminiLiveService's WebSocket.
+     *
+     * Notes:
+     * - Requires CAMERA permission
+     * - Uses Camera2 API (UnifiedCameraManager)
+     * - JPEG compression quality reduced to 50% to reduce Bluetooth bandwidth
+     * - Errors won't interrupt streaming, only logged
+     */
+    private fun startVideoStreaming() {
+        if (videoStreamingJob?.isActive == true) {
+            Log.w(TAG, "Video streaming already active")
+            return
+        }
+        
+        if (cameraManager == null) {
+            Log.w(TAG, "Camera not available for video streaming")
+            return
+        }
+        
+        Log.d(TAG, "Starting Live mode video streaming (~1fps, quality=$videoFrameQuality)")
+        
+        videoStreamingJob = viewModelScope.launch(Dispatchers.IO) {
+            while (isActive && isLiveModeActive) {
+                try {
+                    // Capture one camera frame
+                    val rawImageData = cameraManager?.capturePhoto()
+                    
+                    if (rawImageData != null) {
+                        // Compress to low-quality JPEG to reduce transfer size (video frames use smaller dimensions)
+                        val compressedFrame = withContext(Dispatchers.Default) {
+                            ImageCompressor.compressForTransfer(
+                                rawImageData,
+                                targetWidth = 640,
+                                targetHeight = 480,
+                                quality = videoFrameQuality
+                            )
+                        }
+                        
+                        Log.d(TAG, "Video frame captured: ${compressedFrame.size} bytes")
+                        
+                        // Send VIDEO_FRAME message to phone via Bluetooth
+                        bluetoothClient.sendMessage(
+                            Message(
+                                type = MessageType.VIDEO_FRAME,
+                                binaryData = compressedFrame
+                            )
+                        )
+                    } else {
+                        Log.w(TAG, "Failed to capture video frame")
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error capturing video frame", e)
+                }
+                
+                // Wait until next frame (~1fps)
+                delay(videoFrameIntervalMs)
+            }
+            
+            Log.d(TAG, "Video streaming loop ended")
+        }
+    }
+    
+    /**
+     * Stop real-time video streaming
+     */
+    private fun stopVideoStreaming() {
+        videoStreamingJob?.cancel()
+        videoStreamingJob = null
+        Log.d(TAG, "Video streaming stopped")
     }
     
     // ==================== Photo Capture ====================

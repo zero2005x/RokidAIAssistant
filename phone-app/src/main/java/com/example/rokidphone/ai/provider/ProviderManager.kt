@@ -141,6 +141,7 @@ class ProviderManager private constructor(
             AiProvider.ZHIPU -> settingsRepository.updateZhipuApiKey(apiKey)
             AiProvider.BAIDU -> settingsRepository.updateBaiduApiKey(apiKey)
             AiProvider.PERPLEXITY -> settingsRepository.updatePerplexityApiKey(apiKey)
+            AiProvider.GEMINI_LIVE -> settingsRepository.updateGeminiApiKey(apiKey)  // Shares Gemini API key
             AiProvider.CUSTOM -> settingsRepository.updateCustomApiKey(apiKey)
         }
         cachedService = null
@@ -220,6 +221,10 @@ class ProviderManager private constructor(
                 apiKey = settings.customApiKey,
                 modelId = settings.customModelName,
                 baseUrl = settings.customBaseUrl
+            )
+            AiProvider.GEMINI_LIVE -> ProviderSetting.Gemini(
+                apiKey = settings.geminiApiKey,
+                modelId = settings.aiModelId
             )
         }
     }

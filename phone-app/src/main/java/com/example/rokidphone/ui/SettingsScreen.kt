@@ -213,6 +213,15 @@ fun SettingsScreen(
                                     isActive = true
                                 )
                             }
+                            AiProvider.GEMINI_LIVE -> {
+                                // Gemini Live shares the Gemini API key
+                                ApiKeyField(
+                                    label = stringResource(R.string.gemini_api_key),
+                                    value = settings.geminiApiKey,
+                                    onValueChange = { onSettingsChange(settings.copy(geminiApiKey = it)) },
+                                    isActive = true
+                                )
+                            }
                             else -> {}
                         }
                     }

@@ -100,6 +100,18 @@ object AiServiceFactory {
                 systemPrompt = systemPrompt,
                 providerType = AiProvider.CUSTOM
             )
+
+            AiProvider.GEMINI_LIVE -> {
+                // Gemini Live uses WebSocket streaming, not REST API.
+                // Return a standard GeminiService as fallback for non-live operations
+                // (e.g., analyzeImage). The actual live session is managed by
+                // GeminiLiveSession in PhoneAIService.
+                GeminiService(
+                    apiKey = apiKey,
+                    modelId = "gemini-2.5-flash",
+                    systemPrompt = systemPrompt
+                )
+            }
         }
     }
     
@@ -108,7 +120,7 @@ object AiServiceFactory {
      */
     fun createTestService(settings: ApiSettings): OpenAiCompatibleService? {
         return when (settings.aiProvider) {
-            AiProvider.GEMINI, AiProvider.ANTHROPIC, AiProvider.BAIDU -> null // Not OpenAI-compatible
+            AiProvider.GEMINI, AiProvider.ANTHROPIC, AiProvider.BAIDU, AiProvider.GEMINI_LIVE -> null // Not OpenAI-compatible
             
             AiProvider.OPENAI, AiProvider.DEEPSEEK, AiProvider.GROQ, 
             AiProvider.XAI, AiProvider.ALIBABA, AiProvider.ZHIPU, AiProvider.PERPLEXITY -> OpenAiCompatibleService(

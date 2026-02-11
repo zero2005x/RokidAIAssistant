@@ -40,7 +40,7 @@ class DeepSeekService(
      * Speech Recognition - DeepSeek currently does not support STT
      * Recommend using with other STT services (like Whisper)
      */
-    override suspend fun transcribe(pcmAudioData: ByteArray): SpeechResult {
+    override suspend fun transcribe(pcmAudioData: ByteArray, languageCode: String): SpeechResult {
         return SpeechResult.Error("DeepSeek does not support speech recognition, please use another service")
     }
     

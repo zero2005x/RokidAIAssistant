@@ -130,7 +130,7 @@ class BaiduService(
     /**
      * Speech Recognition - Baidu does not support STT through this API
      */
-    override suspend fun transcribe(pcmAudioData: ByteArray): SpeechResult {
+    override suspend fun transcribe(pcmAudioData: ByteArray, languageCode: String): SpeechResult {
         return SpeechResult.Error("Baidu Ernie does not support speech recognition through this API")
     }
     

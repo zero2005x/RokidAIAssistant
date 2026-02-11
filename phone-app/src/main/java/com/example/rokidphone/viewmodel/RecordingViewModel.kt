@@ -335,6 +335,13 @@ class RecordingViewModel(application: Application) : AndroidViewModel(applicatio
                     return@launch
                 }
                 
+                // Skip if already transcribed and has AI response (prevent duplicate processing)
+                if (!recording.transcript.isNullOrBlank() && !recording.aiResponse.isNullOrBlank()) {
+                    Log.d(TAG, "Recording $id already transcribed, skipping")
+                    _uiState.update { it.copy(processingRecordingId = null) }
+                    return@launch
+                }
+                
                 // Check if file exists
                 val file = java.io.File(recording.filePath)
                 if (!file.exists()) {

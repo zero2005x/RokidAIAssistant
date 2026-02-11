@@ -72,7 +72,7 @@ class OpenAiCompatibleService(
     /**
      * Speech Recognition - Using Whisper API (if supported)
      */
-    override suspend fun transcribe(pcmAudioData: ByteArray): SpeechResult {
+    override suspend fun transcribe(pcmAudioData: ByteArray, languageCode: String): SpeechResult {
         return withContext(Dispatchers.IO) {
             when (providerType) {
                 AiProvider.CUSTOM -> {

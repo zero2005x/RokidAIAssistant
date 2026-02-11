@@ -11,6 +11,7 @@ import com.rokid.cxr.client.utils.ValueUtil
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.*
 
 /**
  * CXR-M SDK Manager (Phone Side)
@@ -27,6 +28,9 @@ class CxrMobileManager(private val context: Context) {
     
     companion object {
         private const val TAG = "CxrMobileManager"
+        private const val MAX_RETRY_COUNT = 5
+        private const val INITIAL_RETRY_DELAY_MS = 5000L  // 5 seconds
+        private const val MAX_RETRY_DELAY_MS = 60000L     // 60 seconds
         
         // Check if SDK is available
         fun isSdkAvailable(): Boolean {
@@ -68,6 +72,12 @@ class CxrMobileManager(private val context: Context) {
     private var glassSocketUuid: String? = null
     private var glassMacAddress: String? = null
     
+    // Auto-retry state for BLE connection
+    private var retryCount = 0
+    private var lastConnectedDevice: BluetoothDevice? = null
+    private var retryJob: Job? = null
+    private val retryScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    
     // CXR API instance
     private val cxrApi: CxrApi by lazy {
         CxrApi.getInstance().also {
@@ -100,6 +110,8 @@ class CxrMobileManager(private val context: Context) {
         
         override fun onConnected() {
             Log.d(TAG, "Bluetooth connected")
+            retryCount = 0  // Reset retry counter on successful connection
+            retryJob?.cancel()
             val uuid = glassSocketUuid ?: ""
             val mac = glassMacAddress ?: ""
             _bluetoothState.value = BluetoothState.Connected(uuid, mac)
@@ -120,6 +132,9 @@ class CxrMobileManager(private val context: Context) {
             }
             Log.e(TAG, "Bluetooth connection failed: $errorMsg")
             _bluetoothState.value = BluetoothState.Failed(errorMsg)
+            
+            // Auto-retry with exponential backoff for BLE connection failures
+            scheduleRetry()
         }
     }
     
@@ -159,6 +174,9 @@ class CxrMobileManager(private val context: Context) {
                 return false
             }
             
+            retryCount = 0
+            retryJob?.cancel()
+            lastConnectedDevice = device
             _bluetoothState.value = BluetoothState.Connecting
             Log.d(TAG, "Initializing Bluetooth with device: ${device.name}")
             
@@ -201,11 +219,48 @@ class CxrMobileManager(private val context: Context) {
      */
     fun disconnectBluetooth() {
         try {
+            retryJob?.cancel()
+            retryCount = 0
+            lastConnectedDevice = null
             cxrApi.deinitBluetooth()
             _bluetoothState.value = BluetoothState.Disconnected
             Log.d(TAG, "Bluetooth disconnected")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to disconnect Bluetooth", e)
+        }
+    }
+    
+    /**
+     * Schedule auto-retry for BLE connection with exponential backoff
+     */
+    private fun scheduleRetry() {
+        val device = lastConnectedDevice ?: run {
+            Log.w(TAG, "No device to retry connection")
+            return
+        }
+        
+        if (retryCount >= MAX_RETRY_COUNT) {
+            Log.w(TAG, "CXR BLE max retries ($MAX_RETRY_COUNT) reached, giving up")
+            return
+        }
+        
+        retryCount++
+        val delayMs = (INITIAL_RETRY_DELAY_MS * (1L shl (retryCount - 1).coerceAtMost(4)))
+            .coerceAtMost(MAX_RETRY_DELAY_MS)
+        
+        Log.d(TAG, "Scheduling CXR BLE retry $retryCount/$MAX_RETRY_COUNT in ${delayMs}ms")
+        
+        retryJob?.cancel()
+        retryJob = retryScope.launch {
+            delay(delayMs)
+            Log.d(TAG, "Retrying CXR BLE connection (attempt $retryCount/$MAX_RETRY_COUNT)")
+            _bluetoothState.value = BluetoothState.Connecting
+            try {
+                cxrApi.initBluetooth(context, device, bluetoothCallback)
+            } catch (e: Exception) {
+                Log.e(TAG, "CXR BLE retry failed", e)
+                _bluetoothState.value = BluetoothState.Failed(e.message ?: "Retry failed")
+            }
         }
     }
     
@@ -355,6 +410,8 @@ class CxrMobileManager(private val context: Context) {
      */
     fun release() {
         try {
+            retryJob?.cancel()
+            retryScope.cancel()
             removeAiEventListener()
             disconnectBluetooth()
             Log.d(TAG, "CxrMobileManager released")

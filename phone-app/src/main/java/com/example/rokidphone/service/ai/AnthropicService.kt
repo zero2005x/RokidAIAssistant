@@ -39,7 +39,7 @@ class AnthropicService(
     /**
      * Speech Recognition - Anthropic does not support STT
      */
-    override suspend fun transcribe(pcmAudioData: ByteArray): SpeechResult {
+    override suspend fun transcribe(pcmAudioData: ByteArray, languageCode: String): SpeechResult {
         return SpeechResult.Error("Anthropic Claude does not support speech recognition, please use another service")
     }
     

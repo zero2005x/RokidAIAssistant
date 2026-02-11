@@ -150,6 +150,7 @@
     <string name="provider_baidu">Baidu 원신일언</string>
     <string name="provider_perplexity">Perplexity</string>
     <string name="provider_custom">사용자 지정 / 셀프 호스팅</string>
+    <string name="provider_gemini_live">Gemini Live</string>
     
     <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Gemini 음성 인식</string>

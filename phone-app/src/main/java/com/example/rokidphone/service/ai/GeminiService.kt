@@ -42,9 +42,9 @@ class GeminiService(
     /**
      * Speech Recognition - Gemini native audio support
      */
-    override suspend fun transcribe(pcmAudioData: ByteArray): SpeechResult {
+    override suspend fun transcribe(pcmAudioData: ByteArray, languageCode: String): SpeechResult {
         return withContext(Dispatchers.IO) {
-            Log.d(TAG, "Starting transcription, audio size: ${pcmAudioData.size} bytes")
+            Log.d(TAG, "Starting transcription, audio size: ${pcmAudioData.size} bytes, language: $languageCode")
             
             if (apiKey.isBlank()) {
                 Log.e(TAG, "API key is not configured")
@@ -70,6 +70,7 @@ class GeminiService(
                             })
                             put(JSONObject().apply {
                                 put("text", """Transcribe the speech in this audio to text.
+The speaker is speaking ${getLanguageDisplayName(languageCode)}. Output the transcription in the original language spoken.
 Rules:
 1. Only output the actual spoken words, nothing else
 2. If the audio contains no clear speech, only noise, silence, or unintelligible sounds, respond with exactly: Unable to recognize
@@ -403,5 +404,27 @@ Rules:
         }
         
         return false
+    }
+    
+    /**
+     * Convert language code to display name for transcription prompt
+     */
+    private fun getLanguageDisplayName(languageCode: String): String {
+        return when {
+            languageCode.startsWith("zh-TW") || languageCode.startsWith("zh-Hant") -> "Traditional Chinese (繁體中文)"
+            languageCode.startsWith("zh-CN") || languageCode.startsWith("zh-Hans") || languageCode.startsWith("zh") -> "Simplified Chinese (简体中文)"
+            languageCode.startsWith("ja") -> "Japanese (日本語)"
+            languageCode.startsWith("ko") -> "Korean (한국어)"
+            languageCode.startsWith("en") -> "English"
+            languageCode.startsWith("fr") -> "French (Français)"
+            languageCode.startsWith("es") -> "Spanish (Español)"
+            languageCode.startsWith("it") -> "Italian (Italiano)"
+            languageCode.startsWith("ru") -> "Russian (Русский)"
+            languageCode.startsWith("uk") -> "Ukrainian (Українська)"
+            languageCode.startsWith("th") -> "Thai (ไทย)"
+            languageCode.startsWith("vi") -> "Vietnamese (Tiếng Việt)"
+            languageCode.startsWith("ar") -> "Arabic (العربية)"
+            else -> "the language with code '$languageCode'"
+        }
     }
 }

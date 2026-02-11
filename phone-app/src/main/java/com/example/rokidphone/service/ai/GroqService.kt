@@ -40,7 +40,7 @@ class GroqService(
     /**
      * Speech Recognition - Using Groq Whisper API (ultra-fast)
      */
-    override suspend fun transcribe(pcmAudioData: ByteArray): SpeechResult {
+    override suspend fun transcribe(pcmAudioData: ByteArray, languageCode: String): SpeechResult {
         return withContext(Dispatchers.IO) {
             Log.d(TAG, "Starting transcription with Groq Whisper, audio size: ${pcmAudioData.size} bytes")
             
@@ -52,7 +52,7 @@ class GroqService(
             
             // Use multipart form data to upload audio
             val boundary = "----WebKitFormBoundary${System.currentTimeMillis()}"
-            val requestBody = buildMultipartBody(boundary, wavData)
+            val requestBody = buildMultipartBody(boundary, wavData, languageCode)
             
             val result = executeWithRetry(TAG) { attempt ->
                 Log.d(TAG, "Sending Groq Whisper request (attempt $attempt)")
@@ -93,7 +93,7 @@ class GroqService(
         }
     }
     
-    private fun buildMultipartBody(boundary: String, wavData: ByteArray): ByteArray {
+    private fun buildMultipartBody(boundary: String, wavData: ByteArray, languageCode: String): ByteArray {
         val output = java.io.ByteArrayOutputStream()
         val writer = output.bufferedWriter()
         
@@ -113,7 +113,7 @@ class GroqService(
         // language field
         writer.write("--$boundary\r\n")
         writer.write("Content-Disposition: form-data; name=\"language\"\r\n\r\n")
-        writer.write("zh\r\n")
+        writer.write("${languageCode.substringBefore("-")}\r\n")
         
         writer.write("--$boundary--\r\n")
         writer.flush()

@@ -22,11 +22,13 @@ import com.example.rokidphone.data.db.ConversationRepository
 import com.example.rokidphone.data.db.RecordingRepository
 import com.example.rokidphone.service.ai.AiServiceFactory
 import com.example.rokidphone.service.ai.AiServiceProvider
+import com.example.rokidphone.service.ai.GeminiLiveSession
 import com.example.rokidphone.service.cxr.CxrMobileManager
 import com.example.rokidphone.service.stt.SttProvider
 import com.example.rokidphone.service.stt.SttService
 import com.example.rokidphone.service.stt.SttServiceFactory
 import com.example.rokidphone.data.toSttCredentials
+import com.example.rokidphone.service.ServiceBridge.notifyApiKeyMissing
 import com.example.rokidphone.service.photo.PhotoData
 import com.example.rokidphone.service.photo.PhotoRepository
 import com.example.rokidphone.service.photo.ReceivedPhoto
@@ -71,6 +73,9 @@ class PhoneAIService : Service() {
     // CXR-M SDK Manager (for Rokid glasses connection and photo capture)
     private var cxrManager: CxrMobileManager? = null
     
+    // Gemini Live session (real-time bidirectional voice)
+    private var liveSession: GeminiLiveSession? = null
+    
     // Photo repository for managing received photos
     private var photoRepository: PhotoRepository? = null
     
@@ -82,6 +87,9 @@ class PhoneAIService : Service() {
     
     // Current voice conversation ID (for grouping voice interactions)
     private var currentVoiceConversationId: String? = null
+    
+    // Track recording IDs currently being processed to prevent duplicate transcription
+    private val processingRecordingIds = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
     
     private val _messageFlow = MutableSharedFlow<Message>()
     val messageFlow = _messageFlow.asSharedFlow()
@@ -108,6 +116,8 @@ class PhoneAIService : Service() {
         ServiceBridge.updateServiceState(false)
         
         serviceScope.cancel()
+        liveSession?.release()
+        liveSession = null
         bluetoothManager?.disconnect()
         cxrManager?.release()
         ttsService?.shutdown()
@@ -155,6 +165,10 @@ class PhoneAIService : Service() {
                     aiService = createAiService(validatedNewSettings)
                     speechService = createSpeechService(validatedNewSettings)
                     sttService = createSttService(validatedNewSettings)
+                    
+                    // Handle Live mode transitions
+                    handleLiveModeTransition(validatedNewSettings)
+                    
                     Log.d(TAG, "Services updated: ${validatedNewSettings.aiProvider}, STT: ${validatedNewSettings.sttProvider}")
                 }
             }
@@ -318,7 +332,7 @@ class PhoneAIService : Service() {
         if (apiKey.isBlank()) {
             Log.e(TAG, "API key is not configured, aborting photo capture")
             // Notify UI to show API key warning dialog
-            ServiceBridge.notifyApiKeyMissing()
+            notifyApiKeyMissing()
             // Also send error message to glasses
             bluetoothManager?.sendMessage(Message.aiError("API key not configured. Please set up an API key in Settings."))
             return
@@ -477,11 +491,25 @@ class PhoneAIService : Service() {
                 // Voice input ended, audio data is in binaryData
                 message.binaryData?.let { audioData ->
                     Log.d(TAG, "Processing voice data: ${audioData.size} bytes")
-                    processVoiceData(audioData)
+                    
+                    // If Live mode is active, audio is already streamed in real-time.
+                    // VOICE_END only signals end-of-turn for the live session.
+                    if (liveSession != null && liveSession?.sessionState?.value == GeminiLiveSession.SessionState.ACTIVE) {
+                        Log.d(TAG, "Live mode active, signaling end of turn")
+                        liveSession?.endOfTurn()
+                    } else {
+                        processVoiceData(audioData)
+                    }
                 }
             }
             MessageType.VOICE_START -> {
                 Log.d(TAG, "Voice recording started on glasses")
+                
+                // In Live mode, audio is streamed in real-time — no STT step needed
+                if (liveSession != null && liveSession?.sessionState?.value == GeminiLiveSession.SessionState.ACTIVE) {
+                    Log.d(TAG, "Live mode active, audio streams directly to Gemini")
+                    return
+                }
                 
                 // Check STT service availability before allowing recording
                 if (sttService == null && speechService == null) {
@@ -492,7 +520,7 @@ class PhoneAIService : Service() {
                         type = MessageType.AI_ERROR,
                         payload = errorMsg
                     ))
-                    ServiceBridge.notifyApiKeyMissing()
+                    notifyApiKeyMissing()
                     return
                 }
                 
@@ -504,6 +532,27 @@ class PhoneAIService : Service() {
             }
             MessageType.HEARTBEAT -> {
                 bluetoothManager?.sendMessage(Message(type = MessageType.HEARTBEAT_ACK))
+            }
+            // Receive real-time video frames from glasses and forward to Gemini Live Session
+            MessageType.VIDEO_FRAME -> {
+                message.binaryData?.let { frameData ->
+                    if (liveSession != null && liveSession?.sessionState?.value == GeminiLiveSession.SessionState.ACTIVE) {
+                        Log.d(TAG, "Forwarding video frame to Live session: ${frameData.size} bytes")
+                        liveSession?.sendVideoFrame(frameData)
+                    } else {
+                        Log.w(TAG, "Received VIDEO_FRAME but Live session is not active")
+                    }
+                }
+            }
+            // Receive real-time transcription text from glasses and forward to phone UI
+            MessageType.LIVE_TRANSCRIPTION -> {
+                message.payload?.let { text ->
+                    Log.d(TAG, "Received live transcription from glasses: $text")
+                    ServiceBridge.emitConversation(Message(
+                        type = MessageType.LIVE_TRANSCRIPTION,
+                        payload = text
+                    ))
+                }
             }
             else -> { 
                 Log.d(TAG, "Unhandled message type: ${message.type}")
@@ -636,7 +685,7 @@ class PhoneAIService : Service() {
                     payload = errorMsg
                 ))
                 // Notify UI to show settings prompt
-                ServiceBridge.notifyApiKeyMissing()
+                notifyApiKeyMissing()
                 return
             }
             
@@ -645,12 +694,13 @@ class PhoneAIService : Service() {
             
             // 2. Speech recognition - prefer dedicated STT service if available
             Log.d(TAG, "Starting speech recognition...")
+            val settings = SettingsRepository.getInstance(this).getSettings()
             val transcriptResult = if (sttService != null) {
                 Log.d(TAG, "Using dedicated STT service: ${sttService?.provider?.name}")
-                sttService?.transcribe(audioData, "zh-CN")
+                sttService?.transcribe(audioData, settings.speechLanguage)
             } else {
-                Log.d(TAG, "Using AI-based speech service")
-                speechService?.transcribe(audioData)
+                Log.d(TAG, "Using AI-based speech service, language: ${settings.speechLanguage}")
+                speechService?.transcribe(audioData, settings.speechLanguage)
             }
             
             val transcript = when (transcriptResult) {
@@ -666,14 +716,14 @@ class PhoneAIService : Service() {
                         transcriptResult.message.contains("key", ignoreCase = true) ||
                         transcriptResult.message.contains("401") ||
                         transcriptResult.message.contains("403")) {
-                        ServiceBridge.notifyApiKeyMissing()
+                        notifyApiKeyMissing()
                     }
                     return
                 }
                 null -> {
                     val errorMsg = getString(R.string.service_not_ready)
                     bluetoothManager?.sendMessage(Message.aiError(errorMsg))
-                    ServiceBridge.notifyApiKeyMissing()
+                    notifyApiKeyMissing()
                     return
                 }
             }
@@ -713,7 +763,6 @@ class PhoneAIService : Service() {
             ))
             
             // 6.1 Save AI response to database for history
-            val settings = SettingsRepository.getInstance(this).getSettings()
             saveAssistantMessage(aiResponse, settings.aiModelId)
             
             // 6.2 Save glasses recording to database (with transcript and AI response)
@@ -743,6 +792,144 @@ class PhoneAIService : Service() {
         }
     }
     
+    // ========== Gemini Live Mode ==========
+    
+    /**
+     * Handle provider transitions to/from Live mode.
+     * Called whenever settings change.
+     */
+    private fun handleLiveModeTransition(settings: ApiSettings) {
+        if (settings.aiProvider == AiProvider.GEMINI_LIVE) {
+            // Start Live session if not already active
+            if (liveSession == null || liveSession?.sessionState?.value == GeminiLiveSession.SessionState.IDLE
+                || liveSession?.sessionState?.value == GeminiLiveSession.SessionState.ERROR) {
+                startLiveSession(settings)
+            }
+        } else {
+            // Stop Live session if switching away from Live mode
+            if (liveSession != null) {
+                Log.d(TAG, "Switching away from Live mode, stopping session")
+                liveSession?.release()
+                liveSession = null
+                
+                // Notify glasses that live session ended
+                serviceScope.launch {
+                    bluetoothManager?.sendMessage(Message(type = MessageType.LIVE_SESSION_END))
+                }
+            }
+        }
+    }
+    
+    /**
+     * Start a Gemini Live session for real-time bidirectional voice.
+     */
+    private fun startLiveSession(settings: ApiSettings) {
+        val apiKey = settings.geminiApiKey
+        if (apiKey.isBlank()) {
+            Log.e(TAG, "Cannot start Live session: Gemini API key not configured")
+            serviceScope.launch { notifyApiKeyMissing() }
+            return
+        }
+        
+        Log.d(TAG, "Starting Gemini Live session")
+        
+        liveSession = GeminiLiveSession(
+            context = this,
+            apiKey = apiKey,
+            modelId = settings.aiModelId.ifBlank { "gemini-2.5-flash-preview-native-audio-dialog" },
+            systemPrompt = settings.systemPrompt
+        )
+        
+        // Collect Live session events
+        collectLiveSessionEvents()
+        
+        // Start the session
+        val started = liveSession?.start() ?: false
+        if (started) {
+            Log.d(TAG, "Live session started successfully")
+            serviceScope.launch {
+                bluetoothManager?.sendMessage(Message(type = MessageType.LIVE_SESSION_START))
+            }
+        } else {
+            Log.e(TAG, "Failed to start Live session")
+        }
+    }
+    
+    /**
+     * Collect event flows from the Live session and forward to glasses/UI.
+     */
+    private fun collectLiveSessionEvents() {
+        val session = liveSession ?: return
+        
+        // User speech transcription
+        serviceScope.launch {
+            session.inputTranscription.collect { text ->
+                Log.d(TAG, "Live input transcription: $text")
+                bluetoothManager?.sendMessage(Message(
+                    type = MessageType.LIVE_TRANSCRIPTION,
+                    payload = text
+                ))
+                ServiceBridge.emitConversation(Message(
+                    type = MessageType.USER_TRANSCRIPT,
+                    payload = text
+                ))
+                saveUserMessage(text)
+            }
+        }
+        
+        // AI response transcription
+        serviceScope.launch {
+            session.outputTranscription.collect { text ->
+                Log.d(TAG, "Live output transcription: $text")
+                bluetoothManager?.sendMessage(Message(
+                    type = MessageType.AI_RESPONSE_TEXT,
+                    payload = text
+                ))
+                ServiceBridge.emitConversation(Message(
+                    type = MessageType.AI_RESPONSE_TEXT,
+                    payload = text
+                ))
+                val settings = SettingsRepository.getInstance(this@PhoneAIService).getSettings()
+                saveAssistantMessage(text, settings.aiModelId)
+            }
+        }
+        
+        // Turn complete
+        serviceScope.launch {
+            session.turnComplete.collect {
+                Log.d(TAG, "Live turn complete")
+            }
+        }
+        
+        // Interrupted
+        serviceScope.launch {
+            session.interrupted.collect {
+                Log.d(TAG, "Live session interrupted by user")
+            }
+        }
+        
+        // Session state changes
+        serviceScope.launch {
+            session.sessionState.collect { state ->
+                Log.d(TAG, "Live session state: $state")
+                when (state) {
+                    GeminiLiveSession.SessionState.ERROR -> {
+                        val error = session.errorMessage.value ?: "Live session error"
+                        Log.e(TAG, "Live session error: $error")
+                        serviceScope.launch {
+                            bluetoothManager?.sendMessage(Message.aiError(error))
+                            bluetoothManager?.sendMessage(Message(type = MessageType.LIVE_SESSION_END))
+                        }
+                    }
+                    GeminiLiveSession.SessionState.IDLE -> {
+                        // Session stopped
+                    }
+                    else -> { /* CONNECTING, ACTIVE, PAUSED, DISCONNECTING */ }
+                }
+            }
+        }
+    }
+    
     /**
      * Process phone recording - transcribe and analyze with AI
      * Called when user stops recording from phone microphone
@@ -750,6 +937,12 @@ class PhoneAIService : Service() {
      * @param filePath The path to the WAV file
      */
     private suspend fun processPhoneRecording(recordingId: String, filePath: String) {
+        // Deduplicate: skip if this recording is already being processed
+        if (!processingRecordingIds.add(recordingId)) {
+            Log.w(TAG, "Recording $recordingId is already being processed, skipping duplicate request")
+            return
+        }
+        
         try {
             // Early check for empty file path
             if (filePath.isBlank()) {
@@ -770,7 +963,7 @@ class PhoneAIService : Service() {
             if (sttService == null && speechService == null) {
                 Log.e(TAG, "Speech service not available - no API key configured")
                 recordingRepository?.markError(recordingId, getString(R.string.service_not_ready))
-                ServiceBridge.notifyApiKeyMissing()
+                notifyApiKeyMissing()
                 return
             }
             
@@ -797,8 +990,8 @@ class PhoneAIService : Service() {
                 Log.d(TAG, "Using dedicated STT service: ${sttService?.provider?.name}")
                 sttService?.transcribe(audioData, settings.speechLanguage)
             } else {
-                Log.d(TAG, "Using AI-based speech service")
-                speechService?.transcribe(audioData)
+                Log.d(TAG, "Using AI-based speech service, language: ${settings.speechLanguage}")
+                speechService?.transcribe(audioData, settings.speechLanguage)
             }
             
             val transcript = when (transcriptResult) {
@@ -814,7 +1007,7 @@ class PhoneAIService : Service() {
                 null -> {
                     val errorMsg = getString(R.string.service_not_ready)
                     recordingRepository?.markError(recordingId, errorMsg)
-                    ServiceBridge.notifyApiKeyMissing()
+                    notifyApiKeyMissing()
                     return
                 }
             }
@@ -868,6 +1061,8 @@ class PhoneAIService : Service() {
         } catch (e: Exception) {
             Log.e(TAG, "Error processing phone recording", e)
             recordingRepository?.markError(recordingId, e.message ?: "Unknown error")
+        } finally {
+            processingRecordingIds.remove(recordingId)
         }
     }
     

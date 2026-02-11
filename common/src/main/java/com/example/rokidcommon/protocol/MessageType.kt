@@ -39,6 +39,12 @@ enum class MessageType(val code: Int) {
     PHOTO_ANALYSIS_RESULT(0x46), // Phone -> Glasses: AI analysis result
     CAPTURE_PHOTO(0x47),         // Phone -> Glasses: Request to capture photo
     
+    // Live mode (0x50-0x5F)
+    LIVE_SESSION_START(0x50),    // Phone -> Glasses: Live session started
+    LIVE_SESSION_END(0x51),      // Phone -> Glasses: Live session ended
+    LIVE_TRANSCRIPTION(0x52),    // Bidirectional: Real-time transcription
+    VIDEO_FRAME(0x53),           // Glasses -> Phone: Video frame for Live mode
+    
     // System control (0xF0-0xFF)
     SYSTEM_STATUS(0xF0),         // Bidirectional: System status
     SYSTEM_CONFIG(0xF1),         // Phone -> Glasses: Config update

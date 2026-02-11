@@ -131,6 +131,7 @@
     <string name="provider_baidu">Baidu Ernie</string>
     <string name="provider_perplexity">Perplexity</string>
     <string name="provider_custom">กำหนดเอง / โฮสต์เอง</string>
+    <string name="provider_gemini_live">Gemini Live</string>
     
     <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">การรู้จำเสียง Gemini</string>

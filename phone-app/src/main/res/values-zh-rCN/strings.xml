@@ -150,6 +150,7 @@
     <string name="provider_baidu">百度文心一言</string>
     <string name="provider_perplexity">Perplexity</string>
     <string name="provider_custom">自定义 / 自托管</string>
+    <string name="provider_gemini_live">Gemini Live</string>
     
     <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Gemini 语音识别</string>

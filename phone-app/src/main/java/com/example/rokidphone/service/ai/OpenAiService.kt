@@ -35,7 +35,7 @@ class OpenAiService(
     /**
      * Speech Recognition - Using Whisper API
      */
-    override suspend fun transcribe(pcmAudioData: ByteArray): SpeechResult {
+    override suspend fun transcribe(pcmAudioData: ByteArray, languageCode: String): SpeechResult {
         return withContext(Dispatchers.IO) {
             Log.d(TAG, "Starting transcription, audio size: ${pcmAudioData.size} bytes")
             
@@ -47,7 +47,7 @@ class OpenAiService(
             
             // Use multipart form data to upload audio
             val boundary = "----WebKitFormBoundary${System.currentTimeMillis()}"
-            val requestBody = buildMultipartBody(boundary, wavData)
+            val requestBody = buildMultipartBody(boundary, wavData, languageCode)
             
             val result = executeWithRetry(TAG) { attempt ->
                 Log.d(TAG, "Sending Whisper request (attempt $attempt)")
@@ -88,7 +88,7 @@ class OpenAiService(
         }
     }
     
-    private fun buildMultipartBody(boundary: String, wavData: ByteArray): ByteArray {
+    private fun buildMultipartBody(boundary: String, wavData: ByteArray, languageCode: String): ByteArray {
         val output = java.io.ByteArrayOutputStream()
         val writer = output.bufferedWriter()
         
@@ -108,7 +108,7 @@ class OpenAiService(
         // language field (optional, helps accuracy)
         writer.write("--$boundary\r\n")
         writer.write("Content-Disposition: form-data; name=\"language\"\r\n\r\n")
-        writer.write("zh\r\n")
+        writer.write("${languageCode.substringBefore("-")}\r\n")
         
         writer.write("--$boundary--\r\n")
         writer.flush()

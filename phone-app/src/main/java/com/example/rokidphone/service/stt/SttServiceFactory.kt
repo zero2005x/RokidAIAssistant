@@ -323,7 +323,7 @@ private class GeminiSttAdapter(
     override val provider = SttProvider.GEMINI
     
     override suspend fun transcribe(audioData: ByteArray, languageCode: String): com.example.rokidphone.service.SpeechResult {
-        return geminiService.transcribe(audioData)
+        return geminiService.transcribe(audioData, languageCode)
     }
     
     override suspend fun validateCredentials(): SttValidationResult {
@@ -355,7 +355,7 @@ private class OpenAiWhisperSttAdapter(
     override val provider = SttProvider.OPENAI_WHISPER
     
     override suspend fun transcribe(audioData: ByteArray, languageCode: String): com.example.rokidphone.service.SpeechResult {
-        return openAiService.transcribe(audioData)
+        return openAiService.transcribe(audioData, languageCode)
     }
     
     override suspend fun validateCredentials(): SttValidationResult {
@@ -386,7 +386,7 @@ private class GroqWhisperSttAdapter(
     override val provider = SttProvider.GROQ_WHISPER
     
     override suspend fun transcribe(audioData: ByteArray, languageCode: String): com.example.rokidphone.service.SpeechResult {
-        return groqService.transcribe(audioData)
+        return groqService.transcribe(audioData, languageCode)
     }
     
     override suspend fun validateCredentials(): SttValidationResult {

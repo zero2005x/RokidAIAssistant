@@ -17,9 +17,10 @@ interface AiServiceProvider {
     /**
      * Speech to text
      * @param pcmAudioData PCM format audio data
+     * @param languageCode Language code for speech recognition (e.g. "zh-TW", "en-US", "ko-KR")
      * @return Speech recognition result
      */
-    suspend fun transcribe(pcmAudioData: ByteArray): SpeechResult
+    suspend fun transcribe(pcmAudioData: ByteArray, languageCode: String = "zh-TW"): SpeechResult
     
     /**
      * Text chat

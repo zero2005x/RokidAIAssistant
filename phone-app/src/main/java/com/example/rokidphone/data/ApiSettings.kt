@@ -106,6 +106,15 @@ enum class AiProvider(
         supportsSpeech = false,
         supportsVision = false
     ),
+    GEMINI_LIVE(
+        displayNameResId = R.string.provider_gemini_live,
+        description = "Gemini Live API - real-time bidirectional voice conversation",
+        website = "https://ai.google.dev",
+        defaultBaseUrl = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent",
+        isOpenAiCompatible = false,
+        supportsSpeech = true,
+        supportsVision = true
+    ),
     CUSTOM(
         displayNameResId = R.string.provider_custom,
         description = "OpenAI-compatible API (Ollama, LM Studio, etc.)",
@@ -638,6 +647,25 @@ object AvailableModels {
         )
     )
     
+    val geminiLiveModels = listOf(
+        ModelOption(
+            id = "gemini-2.5-flash-preview-native-audio-dialog",
+            displayName = "Gemini 2.5 Flash (Live Audio)",
+            provider = AiProvider.GEMINI_LIVE,
+            supportsAudio = true,
+            supportsVision = true,
+            description = "Real-time bidirectional audio conversation with native voice"
+        ),
+        ModelOption(
+            id = "gemini-2.0-flash-live-001",
+            displayName = "Gemini 2.0 Flash (Live)",
+            provider = AiProvider.GEMINI_LIVE,
+            supportsAudio = true,
+            supportsVision = true,
+            description = "Stable live streaming model for real-time voice interactions"
+        )
+    )
+
     fun getModelsForProvider(provider: AiProvider): List<ModelOption> {
         return when (provider) {
             AiProvider.GEMINI -> geminiModels
@@ -650,6 +678,7 @@ object AvailableModels {
             AiProvider.ZHIPU -> zhipuModels
             AiProvider.BAIDU -> baiduModels
             AiProvider.PERPLEXITY -> perplexityModels
+            AiProvider.GEMINI_LIVE -> geminiLiveModels
             AiProvider.CUSTOM -> customModels
         }
     }
@@ -660,7 +689,7 @@ object AvailableModels {
     
     val allModels: List<ModelOption>
         get() = geminiModels + openaiModels + anthropicModels + deepseekModels + groqModels + 
-                xaiModels + alibabaModels + zhipuModels + baiduModels + perplexityModels + customModels
+                xaiModels + alibabaModels + zhipuModels + baiduModels + perplexityModels + geminiLiveModels + customModels
 }
 
 /**
@@ -794,6 +823,7 @@ data class ApiSettings(
             AiProvider.ZHIPU -> zhipuApiKey
             AiProvider.BAIDU -> baiduApiKey
             AiProvider.PERPLEXITY -> perplexityApiKey
+            AiProvider.GEMINI_LIVE -> geminiApiKey  // Shares Gemini API key
             AiProvider.CUSTOM -> customApiKey
         }
     }
@@ -813,6 +843,7 @@ data class ApiSettings(
             AiProvider.ZHIPU -> zhipuApiKey
             AiProvider.BAIDU -> baiduApiKey
             AiProvider.PERPLEXITY -> perplexityApiKey
+            AiProvider.GEMINI_LIVE -> geminiApiKey  // Shares Gemini API key
             AiProvider.CUSTOM -> customApiKey
         }
     }
@@ -855,6 +886,7 @@ data class ApiSettings(
         return when (provider) {
             AiProvider.CUSTOM -> customBaseUrl.isNotBlank() && isValidUrl(customBaseUrl)
             AiProvider.BAIDU -> baiduApiKey.isNotBlank() && baiduSecretKey.isNotBlank()
+            AiProvider.GEMINI_LIVE -> geminiApiKey.isNotBlank()  // Shares Gemini API key
             else -> getApiKeyForProvider(provider).isNotBlank()
         }
     }
