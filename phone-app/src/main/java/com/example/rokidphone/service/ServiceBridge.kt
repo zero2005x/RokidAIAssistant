@@ -39,6 +39,44 @@ object ServiceBridge {
     private val _apiKeyMissingFlow = MutableSharedFlow<Unit>(replay = 0)
     val apiKeyMissingFlow: SharedFlow<Unit> = _apiKeyMissingFlow.asSharedFlow()
     
+    // Send message to glasses (from text chat ViewModel)
+    private val _sendToGlassesFlow = MutableSharedFlow<Message>(replay = 0)
+    val sendToGlassesFlow: SharedFlow<Message> = _sendToGlassesFlow.asSharedFlow()
+
+    /**
+     * Send a message to glasses via PhoneAIService (called by ViewModel)
+     */
+    suspend fun sendToGlasses(message: Message) {
+        Log.d(TAG, "Sending message to glasses: type=${message.type}")
+        _sendToGlassesFlow.emit(message)
+    }
+
+    /**
+     * Clean markdown formatting for better display on glasses
+     */
+    fun cleanMarkdown(text: String): String {
+        return text
+            // Remove bold/italic markers
+            .replace(Regex("\\*\\*(.+?)\\*\\*"), "$1")  // **bold**
+            .replace(Regex("\\*(.+?)\\*"), "$1")        // *italic*
+            .replace(Regex("__(.+?)__"), "$1")          // __bold__
+            .replace(Regex("_(.+?)_"), "$1")            // _italic_
+            // Remove headers
+            .replace(Regex("^#{1,6}\\s*", RegexOption.MULTILINE), "")
+            // Remove code blocks
+            .replace(Regex("```[\\s\\S]*?```"), "")
+            .replace(Regex("`(.+?)`"), "$1")
+            // Remove links but keep text
+            .replace(Regex("\\[(.+?)]\\(.+?\\)"), "$1")
+            // Remove bullet points
+            .replace(Regex("^[\\-*+]\\s+", RegexOption.MULTILINE), "• ")
+            // Remove numbered lists formatting
+            .replace(Regex("^\\d+\\.\\s+", RegexOption.MULTILINE), "")
+            // Clean up extra whitespace
+            .replace(Regex("\\n{3,}"), "\n\n")
+            .trim()
+    }
+
     // Capture photo request from UI
     private val _capturePhotoFlow = MutableSharedFlow<Unit>(replay = 0)
     val capturePhotoFlow: SharedFlow<Unit> = _capturePhotoFlow.asSharedFlow()
@@ -136,6 +174,10 @@ object ServiceBridge {
     private val _startGlassesRecordingFlow = MutableSharedFlow<String>(replay = 0)
     val startGlassesRecordingFlow: SharedFlow<String> = _startGlassesRecordingFlow.asSharedFlow()
     
+    // Stop glasses recording request
+    private val _stopGlassesRecordingFlow = MutableSharedFlow<Unit>(replay = 0)
+    val stopGlassesRecordingFlow: SharedFlow<Unit> = _stopGlassesRecordingFlow.asSharedFlow()
+    
     // Transcription request - use extraBufferCapacity to prevent loss when no collector
     data class TranscriptionRequest(val recordingId: String, val filePath: String)
     private val _transcribeRecordingFlow = MutableSharedFlow<TranscriptionRequest>(
@@ -150,6 +192,14 @@ object ServiceBridge {
     suspend fun requestStartGlassesRecording(recordingId: String) {
         Log.d(TAG, "Requesting glasses recording: $recordingId")
         _startGlassesRecordingFlow.emit(recordingId)
+    }
+    
+    /**
+     * Request glasses to stop recording (called by ViewModel)
+     */
+    suspend fun requestStopGlassesRecording() {
+        Log.d(TAG, "Requesting glasses stop recording")
+        _stopGlassesRecordingFlow.emit(Unit)
     }
     
     /**

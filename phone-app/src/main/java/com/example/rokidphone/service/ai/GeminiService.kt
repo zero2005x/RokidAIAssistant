@@ -136,6 +136,103 @@ Rules:
     }
     
     /**
+     * Transcribe pre-encoded audio file (M4A, MP3, etc.)
+     * Sends encoded audio directly to Gemini with the correct MIME type,
+     * bypassing the PCM-to-WAV conversion used by transcribe().
+     */
+    override suspend fun transcribeAudioFile(audioData: ByteArray, mimeType: String, languageCode: String): SpeechResult {
+        return withContext(Dispatchers.IO) {
+            Log.d(TAG, "Starting audio file transcription, size: ${audioData.size} bytes, mimeType: $mimeType, language: $languageCode")
+            
+            if (apiKey.isBlank()) {
+                Log.e(TAG, "API key is not configured")
+                return@withContext SpeechResult.Error("API key not configured. Please set up an API key in Settings.")
+            }
+            
+            if (audioData.size < 1000) {
+                return@withContext SpeechResult.Error("Audio too short, please try again")
+            }
+            
+            // Send encoded audio directly (no PCM-to-WAV conversion)
+            val audioBase64 = Base64.encodeToString(audioData, Base64.NO_WRAP)
+            
+            val requestJson = JSONObject().apply {
+                put("contents", JSONArray().apply {
+                    put(JSONObject().apply {
+                        put("parts", JSONArray().apply {
+                            put(JSONObject().apply {
+                                put("inline_data", JSONObject().apply {
+                                    put("mime_type", mimeType)
+                                    put("data", audioBase64)
+                                })
+                            })
+                            put(JSONObject().apply {
+                                put("text", """Transcribe the speech in this audio to text.
+The speaker is speaking ${getLanguageDisplayName(languageCode)}. Output the transcription in the original language spoken.
+Rules:
+1. Only output the actual spoken words, nothing else
+2. If the audio contains no clear speech, only noise, silence, or unintelligible sounds, respond with exactly: Unable to recognize
+3. Do not output timestamps, time codes, or numbers like "00:00"
+4. Do not describe the audio or add any explanation
+5. If you hear beeps, static, or mechanical sounds instead of speech, respond with: Unable to recognize""")
+                            })
+                        })
+                    })
+                })
+                put("generationConfig", JSONObject().apply {
+                    put("temperature", 0.1)
+                    put("maxOutputTokens", 500)
+                })
+            }
+            
+            val result = executeWithRetry(TAG) { attempt ->
+                Log.d(TAG, "Sending audio file transcription request to Gemini (attempt $attempt)")
+                
+                val request = Request.Builder()
+                    .url("$apiUrl?key=$apiKey")
+                    .addHeader("Content-Type", "application/json")
+                    .post(requestJson.toString().toRequestBody("application/json".toMediaType()))
+                    .build()
+                
+                client.newCall(request).execute().use { response ->
+                    val responseBody = response.body?.string()
+                    
+                    if (response.isSuccessful && responseBody != null) {
+                        val json = JSONObject(responseBody)
+                        val text = extractTextFromResponse(json)
+                        
+                        if (text.isNullOrEmpty() || 
+                            text.contains("Unable to recognize") || 
+                            isGeminiErrorResponse(text) ||
+                            isInvalidTranscription(text)) {
+                            if (!text.isNullOrEmpty()) {
+                                Log.d(TAG, "Filtered invalid transcription: $text")
+                            }
+                            null
+                        } else {
+                            Log.d(TAG, "Audio file transcription: $text")
+                            text
+                        }
+                    } else {
+                        Log.e(TAG, "API error: ${response.code}, body: $responseBody")
+                        if (response.code == 503 || response.code == 429) {
+                            Log.w(TAG, "Server overloaded (${response.code}), will retry with longer delay...")
+                            kotlinx.coroutines.delay(2000L * attempt)
+                        }
+                        null
+                    }
+                }
+            }
+            
+            if (result != null) {
+                SpeechResult.Success(result)
+            } else {
+                SpeechResult.Error("Unable to recognize speech, please try again")
+            }
+        }
+    }
+    
+    /**
      * Text Chat
      */
     override suspend fun chat(userMessage: String): String {

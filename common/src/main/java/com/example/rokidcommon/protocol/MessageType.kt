@@ -16,6 +16,8 @@ enum class MessageType(val code: Int) {
     VOICE_DATA(0x11),            // Glasses -> Phone: Audio data
     VOICE_END(0x12),             // Glasses -> Phone: End recording
     VOICE_CANCEL(0x13),          // Glasses -> Phone: Cancel recording
+    REMOTE_RECORD_START(0x14),   // Phone -> Glasses: Start recording remotely
+    REMOTE_RECORD_STOP(0x15),    // Phone -> Glasses: Stop recording remotely
     
     // AI processing (0x20-0x2F)
     AI_PROCESSING(0x20),         // Phone -> Glasses: Processing

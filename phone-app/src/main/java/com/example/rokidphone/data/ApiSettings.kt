@@ -68,7 +68,7 @@ enum class AiProvider(
         defaultBaseUrl = "https://api.x.ai/v1/",
         isOpenAiCompatible = true,
         supportsSpeech = false,
-        supportsVision = true
+        supportsVision = false
     ),
     ALIBABA(
         displayNameResId = R.string.provider_alibaba,
@@ -86,7 +86,7 @@ enum class AiProvider(
         defaultBaseUrl = "https://open.bigmodel.cn/api/paas/v4/",
         isOpenAiCompatible = true,
         supportsSpeech = false,
-        supportsVision = true
+        supportsVision = false
     ),
     BAIDU(
         displayNameResId = R.string.provider_baidu,
@@ -105,6 +105,15 @@ enum class AiProvider(
         isOpenAiCompatible = true,
         supportsSpeech = false,
         supportsVision = false
+    ),
+    MOONSHOT(
+        displayNameResId = R.string.provider_moonshot,
+        description = "Kimi series, multimodal with video support",
+        website = "https://moonshot.cn",
+        defaultBaseUrl = "https://api.moonshot.cn/v1/",
+        isOpenAiCompatible = true,
+        supportsSpeech = false,
+        supportsVision = true
     ),
     GEMINI_LIVE(
         displayNameResId = R.string.provider_gemini_live,
@@ -167,12 +176,28 @@ data class ModelOption(
 object AvailableModels {
     val geminiModels = listOf(
         ModelOption(
+            id = "gemini-3-pro",
+            displayName = "Gemini 3 Pro",
+            provider = AiProvider.GEMINI,
+            supportsAudio = true,
+            supportsVision = true,
+            description = "Google's next-gen flagship with enhanced reasoning and multimodal capabilities"
+        ),
+        ModelOption(
+            id = "gemini-3-flash",
+            displayName = "Gemini 3 Flash",
+            provider = AiProvider.GEMINI,
+            supportsAudio = true,
+            supportsVision = true,
+            description = "Fast and efficient next-gen model for high-throughput tasks"
+        ),
+        ModelOption(
             id = "gemini-2.5-pro",
             displayName = "Gemini 2.5 Pro",
             provider = AiProvider.GEMINI,
             supportsAudio = true,
             supportsVision = true,
-            description = "Google's most capable AI model, native multimodal reasoning"
+            description = "Google's most capable 2.5 model, native multimodal reasoning"
         ),
         ModelOption(
             id = "gemini-2.5-flash",
@@ -189,18 +214,26 @@ object AvailableModels {
             supportsAudio = true,
             supportsVision = true,
             description = "Extremely cost-effective lightweight model for low-latency applications"
+        ),
+        ModelOption(
+            id = "gemini-2.0-flash",
+            displayName = "Gemini 2.0 Flash",
+            provider = AiProvider.GEMINI,
+            supportsAudio = true,
+            supportsVision = true,
+            description = "Previous generation fast model, stable and widely supported"
+        ),
+        ModelOption(
+            id = "gemini-2.0-flash-lite",
+            displayName = "Gemini 2.0 Flash-Lite",
+            provider = AiProvider.GEMINI,
+            supportsAudio = true,
+            supportsVision = true,
+            description = "Lightweight 2.0 model for cost-sensitive applications"
         )
     )
     
     val openaiModels = listOf(
-        ModelOption(
-            id = "gpt-5",
-            displayName = "GPT-5 (Omni)",
-            provider = AiProvider.OPENAI,
-            supportsAudio = false,
-            supportsVision = true,
-            description = "Flagship multimodal model with state-of-the-art vision analysis"
-        ),
         ModelOption(
             id = "gpt-5.2",
             displayName = "GPT-5.2",
@@ -210,24 +243,24 @@ object AvailableModels {
             description = "OpenAI's latest flagship. Unmatched general intelligence"
         ),
         ModelOption(
-            id = "gpt-4o",
-            displayName = "GPT-4o",
+            id = "gpt-5.2-instant",
+            displayName = "GPT-5.2 Instant",
             provider = AiProvider.OPENAI,
             supportsAudio = false,
             supportsVision = true,
-            description = "High-performance multimodal model, excellent for OCR and scene understanding"
+            description = "Fast variant of GPT-5.2, optimized for low-latency responses"
         ),
         ModelOption(
-            id = "gpt-4o-mini",
-            displayName = "GPT-4o Mini",
+            id = "gpt-5",
+            displayName = "GPT-5",
             provider = AiProvider.OPENAI,
             supportsAudio = false,
             supportsVision = true,
-            description = "Cost-efficient vision model, good for simple object detection"
+            description = "Flagship multimodal model with state-of-the-art vision analysis"
         ),
         ModelOption(
-            id = "o3-pro",
-            displayName = "o3 Pro (Reasoning)",
+            id = "o3",
+            displayName = "o3 (Reasoning)",
             provider = AiProvider.OPENAI,
             supportsAudio = false,
             supportsVision = false,
@@ -245,51 +278,42 @@ object AvailableModels {
     
     val anthropicModels = listOf(
         ModelOption(
-            id = "claude-opus-4-5",
-            displayName = "Claude 4.5 Opus",
+            id = "claude-opus-4.6",
+            displayName = "Claude Opus 4.6",
             provider = AiProvider.ANTHROPIC,
             supportsAudio = false,
             supportsVision = true,
-            description = "Anthropic's most powerful model, excelling in complex nuance"
+            description = "Anthropic's most capable model with thinking mode for deep reasoning"
         ),
         ModelOption(
-            id = "claude-sonnet-4-5",
-            displayName = "Claude 4.5 Sonnet",
+            id = "claude-sonnet-4.5",
+            displayName = "Claude Sonnet 4.5",
             provider = AiProvider.ANTHROPIC,
             supportsAudio = false,
             supportsVision = true,
             description = "The best balance of intelligence and speed for enterprise workloads"
         ),
         ModelOption(
-            id = "claude-haiku-4-5",
-            displayName = "Claude 4.5 Haiku",
+            id = "claude-haiku-4.5",
+            displayName = "Claude Haiku 4.5",
             provider = AiProvider.ANTHROPIC,
             supportsAudio = false,
             supportsVision = true,
             description = "Blazing fast model for instant responses and simple tasks"
         ),
-        // Legacy Claude 3.5 models for backward compatibility
         ModelOption(
-            id = "claude-3-5-sonnet-latest",
-            displayName = "Claude 3.5 Sonnet (Legacy)",
+            id = "claude-4",
+            displayName = "Claude 4",
             provider = AiProvider.ANTHROPIC,
             supportsAudio = false,
             supportsVision = true,
-            description = "Previous generation Sonnet model for stability"
-        ),
-        ModelOption(
-            id = "claude-3-5-haiku-latest",
-            displayName = "Claude 3.5 Haiku (Legacy)",
-            provider = AiProvider.ANTHROPIC,
-            supportsAudio = false,
-            supportsVision = true,
-            description = "Previous generation Haiku model for simple tasks"
+            description = "Balanced Claude model with strong overall performance"
         )
     )
     
     val deepseekModels = listOf(
         ModelOption(
-            id = "deepseek-chat",
+            id = "deepseek-v3.2",
             displayName = "DeepSeek V3.2",
             provider = AiProvider.DEEPSEEK,
             supportsAudio = false,
@@ -297,24 +321,56 @@ object AvailableModels {
             description = "Latest V3.2 generation. Highly capable general-purpose model"
         ),
         ModelOption(
-            id = "deepseek-reasoner",
-            displayName = "DeepSeek R1 (2025)",
+            id = "deepseek-v3",
+            displayName = "DeepSeek V3",
+            provider = AiProvider.DEEPSEEK,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Previous V3 generation, stable and cost-effective"
+        ),
+        ModelOption(
+            id = "deepseek-r1",
+            displayName = "DeepSeek R1",
             provider = AiProvider.DEEPSEEK,
             supportsAudio = false,
             supportsVision = false,
             description = "Specialized reasoning model (Chain of Thought) for complex logic"
         ),
         ModelOption(
-            id = "deepseek-vl-3",
-            displayName = "DeepSeek VL 3",
+            id = "deepseek-r2",
+            displayName = "DeepSeek R2",
             provider = AiProvider.DEEPSEEK,
             supportsAudio = false,
-            supportsVision = true,
-            description = "Dedicated vision-language model decoupled from main chat for cost efficiency"
+            supportsVision = false,
+            description = "Next-gen reasoning model with improved Chain of Thought capabilities"
         )
     )
     
     val groqModels = listOf(
+        ModelOption(
+            id = "llama-4-scout",
+            displayName = "Llama 4 Scout",
+            provider = AiProvider.GROQ,
+            supportsAudio = false,
+            supportsVision = true,
+            description = "Meta's latest MoE model (109B total), fast and vision-capable on Groq"
+        ),
+        ModelOption(
+            id = "llama-4-maverick",
+            displayName = "Llama 4 Maverick",
+            provider = AiProvider.GROQ,
+            supportsAudio = false,
+            supportsVision = true,
+            description = "Meta's most powerful MoE model (400B total), top-tier open model"
+        ),
+        ModelOption(
+            id = "llama-4-70b-versatile",
+            displayName = "Llama 4 70B",
+            provider = AiProvider.GROQ,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Llama 4 dense 70B model, reliable for general tasks"
+        ),
         ModelOption(
             id = "llama-3.3-70b-versatile",
             displayName = "Llama 3.3 70B",
@@ -324,44 +380,20 @@ object AvailableModels {
             description = "Reliable and powerful open model, optimized for tool use"
         ),
         ModelOption(
+            id = "llama-3.1-70b-versatile",
+            displayName = "Llama 3.1 70B",
+            provider = AiProvider.GROQ,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Previous generation 70B model, stable and proven"
+        ),
+        ModelOption(
             id = "llama-3.1-8b-instant",
             displayName = "Llama 3.1 8B",
             provider = AiProvider.GROQ,
             supportsAudio = false,
             supportsVision = false,
             description = "Fast and cost-effective model for simple tasks"
-        ),
-        ModelOption(
-            id = "llama-3.2-11b-vision-preview",
-            displayName = "Llama 3.2 11B Vision",
-            provider = AiProvider.GROQ,
-            supportsAudio = false,
-            supportsVision = true,
-            description = "Lightweight vision model perfect for fast image description"
-        ),
-        ModelOption(
-            id = "llama-3.2-90b-vision-preview",
-            displayName = "Llama 3.2 90B Vision",
-            provider = AiProvider.GROQ,
-            supportsAudio = false,
-            supportsVision = true,
-            description = "Meta's open multimodal powerhouse running at extreme speeds on Groq"
-        ),
-        ModelOption(
-            id = "mixtral-8x7b-32768",
-            displayName = "Mixtral 8x7B",
-            provider = AiProvider.GROQ,
-            supportsAudio = false,
-            supportsVision = false,
-            description = "Mistral's mixture-of-experts model with 32K context"
-        ),
-        ModelOption(
-            id = "gemma2-9b-it",
-            displayName = "Gemma 2 9B",
-            provider = AiProvider.GROQ,
-            supportsAudio = false,
-            supportsVision = false,
-            description = "Google's lightweight and efficient open model"
         )
     )
     
@@ -410,40 +442,88 @@ object AvailableModels {
     
     val xaiModels = listOf(
         ModelOption(
+            id = "grok-4.1",
+            displayName = "Grok 4.1",
+            provider = AiProvider.XAI,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "xAI's latest and most capable flagship model"
+        ),
+        ModelOption(
+            id = "grok-4.1-thinking",
+            displayName = "Grok 4.1 Thinking",
+            provider = AiProvider.XAI,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Extended thinking variant of Grok 4.1 for deep reasoning"
+        ),
+        ModelOption(
+            id = "grok-4.1-fast",
+            displayName = "Grok 4.1 Fast",
+            provider = AiProvider.XAI,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Low-latency version of Grok 4.1 for quick interactions"
+        ),
+        ModelOption(
+            id = "grok-4",
+            displayName = "Grok 4",
+            provider = AiProvider.XAI,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Powerful reasoning model with strong capabilities"
+        ),
+        ModelOption(
+            id = "grok-4-fast",
+            displayName = "Grok 4 Fast",
+            provider = AiProvider.XAI,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Speed-optimized Grok 4 for rapid responses"
+        ),
+        ModelOption(
+            id = "grok-4-heavy",
+            displayName = "Grok 4 Heavy",
+            provider = AiProvider.XAI,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Maximum capability variant for complex analysis tasks"
+        ),
+        ModelOption(
             id = "grok-3",
             displayName = "Grok 3",
             provider = AiProvider.XAI,
             supportsAudio = false,
             supportsVision = false,
-            description = "xAI's most powerful model with strong reasoning capabilities"
+            description = "Previous generation model, stable and reliable"
         ),
         ModelOption(
-            id = "grok-3-fast",
-            displayName = "Grok 3 Fast",
+            id = "grok-3-mini",
+            displayName = "Grok 3 Mini",
             provider = AiProvider.XAI,
             supportsAudio = false,
             supportsVision = false,
-            description = "Low-latency version of Grok 3 for quick interactions"
+            description = "Lightweight Grok 3 for cost-effective simple tasks"
         ),
         ModelOption(
-            id = "grok-2-latest",
-            displayName = "Grok 2",
+            id = "grok-beta",
+            displayName = "Grok Beta",
             provider = AiProvider.XAI,
             supportsAudio = false,
             supportsVision = false,
-            description = "Previous flagship, stable performance with real-time knowledge"
-        ),
-        ModelOption(
-            id = "grok-2-vision-latest",
-            displayName = "Grok 2 Vision",
-            provider = AiProvider.XAI,
-            supportsAudio = false,
-            supportsVision = true,
-            description = "xAI's vision-capable model, strong at document analysis"
+            description = "Experimental model for testing new capabilities"
         )
     )
     
     val alibabaModels = listOf(
+        ModelOption(
+            id = "qwen3-max-thinking",
+            displayName = "Qwen 3 Max (Thinking)",
+            provider = AiProvider.ALIBABA,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Qwen 3 Max with step-by-step reasoning mode for complex problems"
+        ),
         ModelOption(
             id = "qwen3-max",
             displayName = "Qwen 3 Max",
@@ -453,56 +533,56 @@ object AvailableModels {
             description = "Alibaba's most powerful model, top-tier performance"
         ),
         ModelOption(
-            id = "qwen3-plus",
-            displayName = "Qwen 3 Plus",
+            id = "qwen-plus",
+            displayName = "Qwen Plus",
             provider = AiProvider.ALIBABA,
             supportsAudio = false,
             supportsVision = false,
             description = "Balanced model offering strong performance at a lower cost"
         ),
         ModelOption(
-            id = "qwen3-turbo",
-            displayName = "Qwen 3 Turbo",
+            id = "qwen-turbo",
+            displayName = "Qwen Turbo",
             provider = AiProvider.ALIBABA,
             supportsAudio = false,
             supportsVision = false,
             description = "High-speed model optimized for simple queries and high throughput"
         ),
         ModelOption(
-            id = "qwen3-vl-max",
-            displayName = "Qwen 3 VL Max",
+            id = "qwen2.5-vl-72b",
+            displayName = "Qwen 2.5 VL 72B",
             provider = AiProvider.ALIBABA,
             supportsAudio = false,
             supportsVision = true,
-            description = "Flagship vision-language model. State-of-the-art OCR and diagram understanding"
+            description = "Flagship 72B vision-language model with top-tier OCR and diagram understanding"
         ),
         ModelOption(
-            id = "qwen3-vl-plus",
-            displayName = "Qwen 3 VL Plus",
+            id = "qwen2.5-vl-32b",
+            displayName = "Qwen 2.5 VL 32B",
             provider = AiProvider.ALIBABA,
             supportsAudio = false,
             supportsVision = true,
-            description = "Optimized visual understanding model, balancing resolution and speed"
+            description = "Balanced 32B vision model, strong performance at moderate cost"
         ),
         ModelOption(
-            id = "qwen-vl-max",
-            displayName = "Qwen-VL Max",
+            id = "qwen2.5-vl-7b",
+            displayName = "Qwen 2.5 VL 7B",
             provider = AiProvider.ALIBABA,
             supportsAudio = false,
             supportsVision = true,
-            description = "Top-tier visual understanding from Alibaba (Qwen 2.5/3 VL based)"
-        ),
-        ModelOption(
-            id = "qwen-vl-plus",
-            displayName = "Qwen-VL Plus",
-            provider = AiProvider.ALIBABA,
-            supportsAudio = false,
-            supportsVision = true,
-            description = "Balanced speed/performance for vision tasks"
+            description = "Lightweight 7B vision model for cost-effective image tasks"
         )
     )
     
     val zhipuModels = listOf(
+        ModelOption(
+            id = "glm-5",
+            displayName = "GLM-5",
+            provider = AiProvider.ZHIPU,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Zhipu's 744B MoE flagship. Ultimate Chinese/English bilingual model"
+        ),
         ModelOption(
             id = "glm-4.7",
             displayName = "GLM-4.7",
@@ -510,6 +590,14 @@ object AvailableModels {
             supportsAudio = false,
             supportsVision = false,
             description = "Zhipu's 2026 flagship. State-of-the-art Chinese/English bilingual"
+        ),
+        ModelOption(
+            id = "glm-4.6",
+            displayName = "GLM-4.6",
+            provider = AiProvider.ZHIPU,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "355B parameter model, strong capabilities at lower cost"
         ),
         ModelOption(
             id = "glm-4-plus",
@@ -520,106 +608,58 @@ object AvailableModels {
             description = "Enhanced version of GLM-4 with better long-context handling"
         ),
         ModelOption(
+            id = "glm-4-air",
+            displayName = "GLM-4 Air",
+            provider = AiProvider.ZHIPU,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Lightweight GLM-4 variant optimized for speed and cost"
+        ),
+        ModelOption(
             id = "glm-4-flash",
             displayName = "GLM-4 Flash",
             provider = AiProvider.ZHIPU,
             supportsAudio = false,
             supportsVision = false,
             description = "Free/Low-cost high speed model"
-        ),
-        ModelOption(
-            id = "glm-4v-plus",
-            displayName = "GLM-4V Plus",
-            provider = AiProvider.ZHIPU,
-            supportsAudio = false,
-            supportsVision = true,
-            description = "Flagship multimodal model for Chinese UI understanding and video analysis"
-        ),
-        ModelOption(
-            id = "glm-4v-flash",
-            displayName = "GLM-4V Flash",
-            provider = AiProvider.ZHIPU,
-            supportsAudio = false,
-            supportsVision = true,
-            description = "High-speed vision model, ideal for real-time video frame processing"
-        ),
-        ModelOption(
-            id = "glm-4v",
-            displayName = "GLM-4V",
-            provider = AiProvider.ZHIPU,
-            supportsAudio = false,
-            supportsVision = true,
-            description = "Standard vision model for image dialogue"
         )
     )
     
     val baiduModels = listOf(
         ModelOption(
-            id = "ernie-5.0",
-            displayName = "ERNIE 5.0",
+            id = "ernie-4.0-8k",
+            displayName = "ERNIE 4.0 8K",
             provider = AiProvider.BAIDU,
             supportsAudio = false,
             supportsVision = false,
-            description = "Baidu's latest foundation model, massive knowledge base update"
+            description = "Baidu's flagship ERNIE model with 8K context window"
         ),
         ModelOption(
-            id = "ernie-x1",
-            displayName = "ERNIE X1 (Reasoning)",
+            id = "ernie-3.5-8k",
+            displayName = "ERNIE 3.5 8K",
             provider = AiProvider.BAIDU,
             supportsAudio = false,
             supportsVision = false,
-            description = "Specialized model for complex reasoning and logic tasks"
-        ),
-        ModelOption(
-            id = "ernie-4.5-turbo",
-            displayName = "ERNIE 4.5 Turbo",
-            provider = AiProvider.BAIDU,
-            supportsAudio = false,
-            supportsVision = false,
-            description = "Speed-optimized version of the highly capable Ernie 4.5"
-        ),
-        ModelOption(
-            id = "ernie-vision-pro",
-            displayName = "ERNIE Vision Pro",
-            provider = AiProvider.BAIDU,
-            supportsAudio = false,
-            supportsVision = true,
-            description = "Enterprise-grade vision endpoint, specialized in document and receipt parsing"
-        ),
-        ModelOption(
-            id = "ERNIE-Bot-4",
-            displayName = "ERNIE 4.0 (Vision)",
-            provider = AiProvider.BAIDU,
-            supportsAudio = false,
-            supportsVision = true,
-            description = "Flagship model supports image inputs in latest API versions"
-        ),
-        ModelOption(
-            id = "Fuyu-8B",
-            displayName = "Fuyu-8B",
-            provider = AiProvider.BAIDU,
-            supportsAudio = false,
-            supportsVision = true,
-            description = "Specialized vision-language model available on Qianfan platform"
+            description = "Cost-effective ERNIE model for general tasks"
         )
     )
     
     val perplexityModels = listOf(
-        ModelOption(
-            id = "sonar-pro",
-            displayName = "Sonar Pro",
-            provider = AiProvider.PERPLEXITY,
-            supportsAudio = false,
-            supportsVision = false,
-            description = "Enterprise-grade model with high-fidelity web search and complex reasoning"
-        ),
         ModelOption(
             id = "sonar",
             displayName = "Sonar",
             provider = AiProvider.PERPLEXITY,
             supportsAudio = false,
             supportsVision = false,
-            description = "Optimized for speed and efficiency, ideal for real-time search queries"
+            description = "Lightweight, cost-effective search model with grounding"
+        ),
+        ModelOption(
+            id = "sonar-pro",
+            displayName = "Sonar Pro",
+            provider = AiProvider.PERPLEXITY,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Advanced search offering with grounding, supporting complex queries and follow-ups"
         ),
         ModelOption(
             id = "sonar-reasoning-pro",
@@ -627,42 +667,61 @@ object AvailableModels {
             provider = AiProvider.PERPLEXITY,
             supportsAudio = false,
             supportsVision = false,
-            description = "Advanced reasoning model powered by DeepSeek-R1, showing Chain-of-Thought"
+            description = "Precise reasoning offering with Chain of Thought (CoT)"
         ),
         ModelOption(
-            id = "sonar-reasoning",
-            displayName = "Sonar Reasoning",
+            id = "sonar-deep-research",
+            displayName = "Sonar Deep Research",
             provider = AiProvider.PERPLEXITY,
             supportsAudio = false,
             supportsVision = false,
-            description = "Cost-effective reasoning model for logical queries with web grounding"
-        ),
-        ModelOption(
-            id = "r1-1776",
-            displayName = "Perplexity R1",
-            provider = AiProvider.PERPLEXITY,
-            supportsAudio = false,
-            supportsVision = false,
-            description = "DeepSeek R1 distilled by Perplexity for enhanced reasoning"
+            description = "Expert-level research model conducting exhaustive searches and generating comprehensive reports"
         )
     )
     
-    val geminiLiveModels = listOf(
+    val moonshotModels = listOf(
         ModelOption(
-            id = "gemini-2.5-flash-preview-native-audio-dialog",
-            displayName = "Gemini 2.5 Flash (Live Audio)",
-            provider = AiProvider.GEMINI_LIVE,
-            supportsAudio = true,
+            id = "kimi-k2.5",
+            displayName = "Kimi K2.5",
+            provider = AiProvider.MOONSHOT,
+            supportsAudio = false,
             supportsVision = true,
-            description = "Real-time bidirectional audio conversation with native voice"
+            description = "Latest Kimi model with multimodal and video understanding"
         ),
         ModelOption(
-            id = "gemini-2.0-flash-live-001",
-            displayName = "Gemini 2.0 Flash (Live)",
+            id = "moonshot-v1-128k",
+            displayName = "Moonshot V1 128K",
+            provider = AiProvider.MOONSHOT,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "128K context window for long document processing"
+        ),
+        ModelOption(
+            id = "moonshot-v1-32k",
+            displayName = "Moonshot V1 32K",
+            provider = AiProvider.MOONSHOT,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Balanced 32K context for everyday tasks"
+        ),
+        ModelOption(
+            id = "moonshot-v1-8k",
+            displayName = "Moonshot V1 8K",
+            provider = AiProvider.MOONSHOT,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Fast and cost-effective model for short conversations"
+        )
+    )
+
+    val geminiLiveModels = listOf(
+        ModelOption(
+            id = "gemini-2.0-flash-exp",
+            displayName = "Gemini 2.0 Flash (Live Exp)",
             provider = AiProvider.GEMINI_LIVE,
             supportsAudio = true,
             supportsVision = true,
-            description = "Stable live streaming model for real-time voice interactions"
+            description = "Experimental live streaming model for real-time voice interactions"
         )
     )
 
@@ -678,6 +737,7 @@ object AvailableModels {
             AiProvider.ZHIPU -> zhipuModels
             AiProvider.BAIDU -> baiduModels
             AiProvider.PERPLEXITY -> perplexityModels
+            AiProvider.MOONSHOT -> moonshotModels
             AiProvider.GEMINI_LIVE -> geminiLiveModels
             AiProvider.CUSTOM -> customModels
         }
@@ -689,7 +749,7 @@ object AvailableModels {
     
     val allModels: List<ModelOption>
         get() = geminiModels + openaiModels + anthropicModels + deepseekModels + groqModels + 
-                xaiModels + alibabaModels + zhipuModels + baiduModels + perplexityModels + geminiLiveModels + customModels
+                xaiModels + alibabaModels + zhipuModels + baiduModels + perplexityModels + moonshotModels + geminiLiveModels + customModels
 }
 
 /**
@@ -721,6 +781,7 @@ data class ApiSettings(
     val baiduApiKey: String = "",
     val baiduSecretKey: String = "",  // Baidu requires both API Key and Secret Key
     val perplexityApiKey: String = "",
+    val moonshotApiKey: String = "",
     val customApiKey: String = "",
     
     // Custom base URLs (for providers that support it)
@@ -806,7 +867,13 @@ data class ApiSettings(
     
     // Recording settings
     // Auto-analyze recordings with AI after stopping (default: true)
-    val autoAnalyzeRecordings: Boolean = true
+    val autoAnalyzeRecordings: Boolean = true,
+    
+    // Glasses push settings
+    // Send text chat AI responses to glasses display (default: true)
+    val pushChatToGlasses: Boolean = true,
+    // Send phone recording results (transcript + AI response) to glasses display (default: true)
+    val pushRecordingToGlasses: Boolean = true
 ) {
     /**
      * Get current AI provider's API Key
@@ -823,6 +890,7 @@ data class ApiSettings(
             AiProvider.ZHIPU -> zhipuApiKey
             AiProvider.BAIDU -> baiduApiKey
             AiProvider.PERPLEXITY -> perplexityApiKey
+            AiProvider.MOONSHOT -> moonshotApiKey
             AiProvider.GEMINI_LIVE -> geminiApiKey  // Shares Gemini API key
             AiProvider.CUSTOM -> customApiKey
         }
@@ -843,6 +911,7 @@ data class ApiSettings(
             AiProvider.ZHIPU -> zhipuApiKey
             AiProvider.BAIDU -> baiduApiKey
             AiProvider.PERPLEXITY -> perplexityApiKey
+            AiProvider.MOONSHOT -> moonshotApiKey
             AiProvider.GEMINI_LIVE -> geminiApiKey  // Shares Gemini API key
             AiProvider.CUSTOM -> customApiKey
         }
@@ -933,6 +1002,7 @@ data class ApiSettings(
                zhipuApiKey.isNotBlank() ||
                (baiduApiKey.isNotBlank() && baiduSecretKey.isNotBlank()) ||
                perplexityApiKey.isNotBlank() ||
+               moonshotApiKey.isNotBlank() ||
                (customApiKey.isNotBlank() || customBaseUrl.isNotBlank())
     }
     

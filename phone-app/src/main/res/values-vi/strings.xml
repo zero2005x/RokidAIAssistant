@@ -46,6 +46,10 @@
     <string name="recording_settings">Cài đặt ghi âm</string>
     <string name="auto_analyze_recordings">Tự động phân tích bản ghi</string>
     <string name="auto_analyze_recordings_description">Tự động gửi bản ghi âm đến AI để chuyển đổi văn bản và phân tích sau khi dừng</string>
+    <string name="push_chat_to_glasses">Gửi trò chuyện đến kính</string>
+    <string name="push_chat_to_glasses_description">Hiển thị phản hồi AI của trò chuyện văn bản trên kính</string>
+    <string name="push_recording_to_glasses">Gửi bản ghi đến kính</string>
+    <string name="push_recording_to_glasses_description">Hiển thị kết quả bản ghi âm (phiên âm và phản hồi AI) trên kính</string>
     
     <!-- Language Settings -->
     <string name="language_settings">Ngôn ngữ</string>
@@ -115,6 +119,7 @@
     <string name="baidu_api_key">Khóa API Baidu</string>
     <string name="baidu_secret_key">Khóa bí mật Baidu</string>
     <string name="perplexity_api_key">Khóa API Perplexity</string>
+    <string name="moonshot_api_key">Khóa API Moonshot</string>
     <string name="custom_api_key">Khóa API tùy chỉnh (Tùy chọn)</string>
     
     <!-- Custom Provider Settings -->
@@ -149,6 +154,7 @@
     <string name="provider_zhipu">Zhipu AI (ChatGLM)</string>
     <string name="provider_baidu">Baidu Ernie</string>
     <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_moonshot">Moonshot (Kimi)</string>
     <string name="provider_custom">Tùy chỉnh / Tự lưu trữ</string>
     <string name="provider_gemini_live">Gemini Live</string>
     

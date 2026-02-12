@@ -22,6 +22,19 @@ interface SttService {
     suspend fun transcribe(audioData: ByteArray, languageCode: String = "zh-CN"): SpeechResult
     
     /**
+     * Transcribe pre-encoded audio file (e.g. M4A, MP3, OGG)
+     * Unlike transcribe() which expects raw PCM data, this accepts encoded audio with its MIME type.
+     * Default implementation falls back to transcribe() (treating data as PCM).
+     * @param audioData Encoded audio data
+     * @param mimeType MIME type of the audio (e.g. "audio/mp4", "audio/aac")
+     * @param languageCode Language code (e.g., "zh-CN", "en-US")
+     * @return Transcription result
+     */
+    suspend fun transcribeAudioFile(audioData: ByteArray, mimeType: String, languageCode: String = "zh-CN"): SpeechResult {
+        return transcribe(audioData, languageCode)
+    }
+    
+    /**
      * Validate credentials by making a minimal API call
      * @return ValidationResult indicating success or error details
      */

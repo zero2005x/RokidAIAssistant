@@ -46,6 +46,10 @@
     <string name="recording_settings">녹음 설정</string>
     <string name="auto_analyze_recordings">녹음 자동 분석</string>
     <string name="auto_analyze_recordings_description">녹음 중지 후 자동으로 AI에 전송하여 음성 인식 및 분석</string>
+    <string name="push_chat_to_glasses">채팅을 안경으로 전송</string>
+    <string name="push_chat_to_glasses_description">텍스트 채팅 AI 응답을 안경 화면에 전송</string>
+    <string name="push_recording_to_glasses">녹음을 안경으로 전송</string>
+    <string name="push_recording_to_glasses_description">휴대폰 녹음 결과(음성 인식 및 AI 응답)를 안경 화면에 전송</string>
     
     <!-- Language Settings -->
     <string name="language_settings">언어 설정</string>
@@ -115,6 +119,7 @@
     <string name="baidu_api_key">Baidu API 키</string>
     <string name="baidu_secret_key">Baidu Secret 키</string>
     <string name="perplexity_api_key">Perplexity API 키</string>
+    <string name="moonshot_api_key">Moonshot API 키</string>
     <string name="custom_api_key">사용자 지정 API 키 (선택 사항)</string>
     
     <!-- Custom Provider Settings -->
@@ -149,6 +154,7 @@
     <string name="provider_zhipu">Zhipu AI (ChatGLM)</string>
     <string name="provider_baidu">Baidu 원신일언</string>
     <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_moonshot">Moonshot (Kimi)</string>
     <string name="provider_custom">사용자 지정 / 셀프 호스팅</string>
     <string name="provider_gemini_live">Gemini Live</string>
     

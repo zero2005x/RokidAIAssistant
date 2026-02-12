@@ -8,10 +8,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.rokidphone.ai.provider.ProviderManager
 import com.example.rokidphone.data.SettingsRepository
+import com.example.rokidcommon.protocol.Message as ProtocolMessage
 import com.example.rokidphone.data.db.Conversation
 import com.example.rokidphone.data.db.ConversationRepository
 import com.example.rokidphone.data.db.Message
 import com.example.rokidphone.data.db.MessageRole
+import com.example.rokidphone.service.ServiceBridge
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.File
@@ -216,6 +218,21 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
                 content = response,
                 modelId = settings.aiModelId
             )
+            
+            // Push AI response to glasses (if enabled in settings)
+            val pushToGlasses = settingsRepository.getSettings().pushChatToGlasses
+            if (pushToGlasses) {
+                try {
+                    val cleanedResponse = ServiceBridge.cleanMarkdown(response)
+                    ServiceBridge.sendToGlasses(ProtocolMessage.aiProcessing("Thinking..."))
+                    ServiceBridge.sendToGlasses(ProtocolMessage.aiResponseText(cleanedResponse))
+                    Log.d(TAG, "AI response pushed to glasses")
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to push AI response to glasses", e)
+                }
+            } else {
+                Log.d(TAG, "Push chat to glasses disabled, skipping")
+            }
             
             // Auto-generate title (if this is the first message)
             val messageCount = conversationRepository.getMessageCount(conversationId)

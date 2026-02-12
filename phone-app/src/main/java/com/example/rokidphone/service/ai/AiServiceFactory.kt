@@ -93,6 +93,14 @@ object AiServiceFactory {
                 providerType = AiProvider.PERPLEXITY
             )
             
+            AiProvider.MOONSHOT -> OpenAiCompatibleService(
+                apiKey = apiKey,
+                baseUrl = settings.aiProvider.defaultBaseUrl,
+                modelId = modelId,
+                systemPrompt = systemPrompt,
+                providerType = AiProvider.MOONSHOT
+            )
+            
             AiProvider.CUSTOM -> OpenAiCompatibleService(
                 apiKey = settings.customApiKey,
                 baseUrl = settings.getCurrentBaseUrl(),
@@ -123,7 +131,8 @@ object AiServiceFactory {
             AiProvider.GEMINI, AiProvider.ANTHROPIC, AiProvider.BAIDU, AiProvider.GEMINI_LIVE -> null // Not OpenAI-compatible
             
             AiProvider.OPENAI, AiProvider.DEEPSEEK, AiProvider.GROQ, 
-            AiProvider.XAI, AiProvider.ALIBABA, AiProvider.ZHIPU, AiProvider.PERPLEXITY -> OpenAiCompatibleService(
+            AiProvider.XAI, AiProvider.ALIBABA, AiProvider.ZHIPU, AiProvider.PERPLEXITY,
+            AiProvider.MOONSHOT -> OpenAiCompatibleService(
                 apiKey = settings.getCurrentApiKey(),
                 baseUrl = settings.aiProvider.defaultBaseUrl,
                 modelId = settings.getCurrentModelId(),

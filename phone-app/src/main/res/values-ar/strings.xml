@@ -46,6 +46,10 @@
     <string name="recording_settings">إعدادات التسجيل</string>
     <string name="auto_analyze_recordings">تحليل التسجيلات تلقائياً</string>
     <string name="auto_analyze_recordings_description">إرسال التسجيلات تلقائياً إلى الذكاء الاصطناعي للنسخ والتحليل بعد التوقف</string>
+    <string name="push_chat_to_glasses">إرسال الدردشة إلى النظارات</string>
+    <string name="push_chat_to_glasses_description">عرض ردود الذكاء الاصطناعي للدردشة النصية على النظارات</string>
+    <string name="push_recording_to_glasses">إرسال التسجيل إلى النظارات</string>
+    <string name="push_recording_to_glasses_description">عرض نتائج التسجيل (النسخ والرد بالذكاء الاصطناعي) على النظارات</string>
     
     <!-- Language Settings -->
     <string name="language_settings">اللغة</string>
@@ -115,6 +119,7 @@
     <string name="baidu_api_key">مفتاح API Baidu</string>
     <string name="baidu_secret_key">المفتاح السري Baidu</string>
     <string name="perplexity_api_key">مفتاح API Perplexity</string>
+    <string name="moonshot_api_key">مفتاح API لـ Moonshot</string>
     <string name="custom_api_key">مفتاح API مخصص (اختياري)</string>
     
     <!-- Custom Provider Settings -->
@@ -149,6 +154,7 @@
     <string name="provider_zhipu">Zhipu AI (ChatGLM)</string>
     <string name="provider_baidu">Baidu Ernie</string>
     <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_moonshot">Moonshot (Kimi)</string>
     <string name="provider_custom">مخصص / مستضاف ذاتياً</string>
     <string name="provider_gemini_live">Gemini Live</string>
     

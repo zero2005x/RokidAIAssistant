@@ -46,6 +46,10 @@
     <string name="recording_settings">Paramètres d\'enregistrement</string>
     <string name="auto_analyze_recordings">Analyse automatique des enregistrements</string>
     <string name="auto_analyze_recordings_description">Envoyer automatiquement les enregistrements à l\'IA pour transcription et analyse après l\'arrêt</string>
+    <string name="push_chat_to_glasses">Envoyer le chat aux lunettes</string>
+    <string name="push_chat_to_glasses_description">Afficher les réponses IA du chat textuel sur les lunettes</string>
+    <string name="push_recording_to_glasses">Envoyer l\'enregistrement aux lunettes</string>
+    <string name="push_recording_to_glasses_description">Afficher les résultats d\'enregistrement (transcription et réponse IA) sur les lunettes</string>
     
     <!-- Language Settings -->
     <string name="language_settings">Langue</string>
@@ -115,6 +119,7 @@
     <string name="baidu_api_key">Clé API Baidu</string>
     <string name="baidu_secret_key">Clé secrète Baidu</string>
     <string name="perplexity_api_key">Clé API Perplexity</string>
+    <string name="moonshot_api_key">Clé API Moonshot</string>
     <string name="custom_api_key">Clé API personnalisée (optionnel)</string>
     
     <!-- Custom Provider Settings -->
@@ -149,6 +154,7 @@
     <string name="provider_zhipu">Zhipu AI (ChatGLM)</string>
     <string name="provider_baidu">Baidu Ernie</string>
     <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_moonshot">Moonshot (Kimi)</string>
     <string name="provider_custom">Personnalisé / Auto-hébergé</string>
     <string name="provider_gemini_live">Gemini Live</string>
     

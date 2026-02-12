@@ -46,6 +46,10 @@
     <string name="recording_settings">การตั้งค่าการบันทึก</string>
     <string name="auto_analyze_recordings">วิเคราะห์การบันทึกอัตโนมัติ</string>
     <string name="auto_analyze_recordings_description">ส่งการบันทึกไปยัง AI โดยอัตโนมัติเพื่อถอดความและวิเคราะห์หลังจากหยุด</string>
+    <string name="push_chat_to_glasses">ส่งแชทไปยังแว่นตา</string>
+    <string name="push_chat_to_glasses_description">แสดงการตอบกลับ AI จากแชทข้อความบนแว่นตา</string>
+    <string name="push_recording_to_glasses">ส่งการบันทึกไปยังแว่นตา</string>
+    <string name="push_recording_to_glasses_description">แสดงผลการบันทึกเสียง (ถอดความและการตอบกลับ AI) บนแว่นตา</string>
     
     <!-- Language Settings -->
     <string name="language_settings">ภาษา</string>
@@ -105,6 +109,7 @@
     <string name="baidu_api_key">คีย์ API Baidu</string>
     <string name="baidu_secret_key">คีย์ลับ Baidu</string>
     <string name="perplexity_api_key">คีย์ API Perplexity</string>
+    <string name="moonshot_api_key">คีย์ API Moonshot</string>
     <string name="custom_api_key">คีย์ API แบบกำหนดเอง (ไม่บังคับ)</string>
     <string name="custom_provider_settings">การตั้งค่าผู้ให้บริการแบบกำหนดเอง</string>
     <string name="base_url">URL พื้นฐาน</string>
@@ -130,6 +135,7 @@
     <string name="provider_zhipu">Zhipu AI (ChatGLM)</string>
     <string name="provider_baidu">Baidu Ernie</string>
     <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_moonshot">Moonshot (Kimi)</string>
     <string name="provider_custom">กำหนดเอง / โฮสต์เอง</string>
     <string name="provider_gemini_live">Gemini Live</string>
     

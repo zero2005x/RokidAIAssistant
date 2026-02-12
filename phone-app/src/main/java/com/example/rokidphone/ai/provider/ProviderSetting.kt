@@ -58,7 +58,7 @@ sealed class ProviderSetting {
         override val displayName: String = "OpenAI",
         override val enabled: Boolean = true,
         val apiKey: String = "",
-        val modelId: String = "gpt-4o",
+        val modelId: String = "gpt-5.2",
         val baseUrl: String = "https://api.openai.com/v1/",
         val organizationId: String = ""
     ) : ProviderSetting() {
@@ -97,7 +97,7 @@ sealed class ProviderSetting {
         override val displayName: String = "DeepSeek",
         override val enabled: Boolean = true,
         val apiKey: String = "",
-        val modelId: String = "deepseek-chat",
+        val modelId: String = "deepseek-v3.2",
         val baseUrl: String = "https://api.deepseek.com/"
     ) : ProviderSetting() {
         @Transient
@@ -116,7 +116,7 @@ sealed class ProviderSetting {
         override val displayName: String = "Groq",
         override val enabled: Boolean = true,
         val apiKey: String = "",
-        val modelId: String = "llama-4-70b-versatile",
+        val modelId: String = "llama-4-scout",
         val baseUrl: String = "https://api.groq.com/openai/v1/"
     ) : ProviderSetting() {
         @Transient
@@ -135,7 +135,7 @@ sealed class ProviderSetting {
         override val displayName: String = "xAI Grok",
         override val enabled: Boolean = true,
         val apiKey: String = "",
-        val modelId: String = "grok-4",
+        val modelId: String = "grok-4.1",
         val baseUrl: String = "https://api.x.ai/v1/"
     ) : ProviderSetting() {
         @Transient
@@ -194,7 +194,7 @@ sealed class ProviderSetting {
         override val enabled: Boolean = true,
         val apiKey: String = "",
         val secretKey: String = "",
-        val modelId: String = "ernie-4.5-8k-preview",
+        val modelId: String = "ernie-4.0-8k",
         val baseUrl: String = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/"
     ) : ProviderSetting() {
         @Transient
@@ -213,8 +213,27 @@ sealed class ProviderSetting {
         override val displayName: String = "Perplexity",
         override val enabled: Boolean = true,
         val apiKey: String = "",
-        val modelId: String = "sonar-pro",
+        val modelId: String = "sonar",
         val baseUrl: String = "https://api.perplexity.ai/"
+    ) : ProviderSetting() {
+        @Transient
+        override val providerApiKey: String = apiKey
+        @Transient
+        override val providerBaseUrl: String = baseUrl
+        override fun isValid(): Boolean = apiKey.isNotBlank()
+    }
+    
+    /**
+     * Moonshot (Kimi) Provider Settings
+     */
+    @Serializable
+    data class Moonshot(
+        override val id: String = "moonshot",
+        override val displayName: String = "Moonshot (Kimi)",
+        override val enabled: Boolean = true,
+        val apiKey: String = "",
+        val modelId: String = "kimi-k2.5",
+        val baseUrl: String = "https://api.moonshot.cn/v1/"
     ) : ProviderSetting() {
         @Transient
         override val providerApiKey: String = apiKey
@@ -259,6 +278,7 @@ sealed class ProviderSetting {
             Zhipu(),
             Baidu(),
             Perplexity(),
+            Moonshot(),
             Custom()
         )
         
@@ -276,6 +296,7 @@ sealed class ProviderSetting {
             "zhipu" -> Zhipu()
             "baidu" -> Baidu()
             "perplexity" -> Perplexity()
+            "moonshot" -> Moonshot()
             "custom" -> Custom()
             else -> null
         }

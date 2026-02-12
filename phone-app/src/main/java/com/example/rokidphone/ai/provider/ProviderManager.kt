@@ -141,6 +141,7 @@ class ProviderManager private constructor(
             AiProvider.ZHIPU -> settingsRepository.updateZhipuApiKey(apiKey)
             AiProvider.BAIDU -> settingsRepository.updateBaiduApiKey(apiKey)
             AiProvider.PERPLEXITY -> settingsRepository.updatePerplexityApiKey(apiKey)
+            AiProvider.MOONSHOT -> settingsRepository.updateMoonshotApiKey(apiKey)
             AiProvider.GEMINI_LIVE -> settingsRepository.updateGeminiApiKey(apiKey)  // Shares Gemini API key
             AiProvider.CUSTOM -> settingsRepository.updateCustomApiKey(apiKey)
         }
@@ -217,6 +218,10 @@ class ProviderManager private constructor(
                 apiKey = settings.perplexityApiKey,
                 modelId = settings.aiModelId
             )
+            AiProvider.MOONSHOT -> ProviderSetting.Moonshot(
+                apiKey = settings.moonshotApiKey,
+                modelId = settings.aiModelId
+            )
             AiProvider.CUSTOM -> ProviderSetting.Custom(
                 apiKey = settings.customApiKey,
                 modelId = settings.customModelName,
@@ -266,6 +271,9 @@ class ProviderManager private constructor(
             }
             if (settings.perplexityApiKey.isNotBlank()) {
                 add(ProviderSetting.Perplexity(apiKey = settings.perplexityApiKey))
+            }
+            if (settings.moonshotApiKey.isNotBlank()) {
+                add(ProviderSetting.Moonshot(apiKey = settings.moonshotApiKey))
             }
             if (settings.customBaseUrl.isNotBlank()) {
                 add(ProviderSetting.Custom(

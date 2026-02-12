@@ -213,6 +213,14 @@ fun SettingsScreen(
                                     isActive = true
                                 )
                             }
+                            AiProvider.MOONSHOT -> {
+                                ApiKeyField(
+                                    label = stringResource(R.string.moonshot_api_key),
+                                    value = settings.moonshotApiKey,
+                                    onValueChange = { onSettingsChange(settings.copy(moonshotApiKey = it)) },
+                                    isActive = true
+                                )
+                            }
                             AiProvider.GEMINI_LIVE -> {
                                 // Gemini Live shares the Gemini API key
                                 ApiKeyField(
@@ -265,6 +273,18 @@ fun SettingsScreen(
                         subtitle = stringResource(R.string.auto_analyze_recordings_description),
                         checked = settings.autoAnalyzeRecordings,
                         onCheckedChange = { onSettingsChange(settings.copy(autoAnalyzeRecordings = it)) }
+                    )
+                    SettingsRowWithSwitch(
+                        title = stringResource(R.string.push_chat_to_glasses),
+                        subtitle = stringResource(R.string.push_chat_to_glasses_description),
+                        checked = settings.pushChatToGlasses,
+                        onCheckedChange = { onSettingsChange(settings.copy(pushChatToGlasses = it)) }
+                    )
+                    SettingsRowWithSwitch(
+                        title = stringResource(R.string.push_recording_to_glasses),
+                        subtitle = stringResource(R.string.push_recording_to_glasses_description),
+                        checked = settings.pushRecordingToGlasses,
+                        onCheckedChange = { onSettingsChange(settings.copy(pushRecordingToGlasses = it)) }
                     )
                 }
             }
@@ -408,7 +428,10 @@ fun SettingsScreen(
                 currentLanguage = language
                 
                 // Update settings: system prompt and speech language
-                var updatedSettings = settings.copy(speechLanguage = newSpeechLanguage)
+                var updatedSettings = settings.copy(
+                    speechLanguage = newSpeechLanguage,
+                    responseLanguage = newSpeechLanguage
+                )
                 if (isUsingDefaultPrompt) {
                     updatedSettings = updatedSettings.copy(systemPrompt = newDefaultPrompt)
                 }
@@ -635,7 +658,9 @@ fun ModelSelectionDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.select_model)) },
         text = {
-            Column {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
                 models.forEach { model ->
                     Row(
                         modifier = Modifier

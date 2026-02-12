@@ -255,9 +255,10 @@ class PhoneViewModel(application: Application) : AndroidViewModel(application) {
                     if (it.source == RecordingSource.PHONE && it.filePath.isNotBlank()) {
                         ServiceBridge.requestTranscribeRecording(it.id, it.filePath)
                     } else if (it.source == RecordingSource.GLASSES) {
-                        Log.d(TAG, "Glasses recording stopped, audio will be processed when received via Bluetooth")
+                        Log.d(TAG, "Glasses recording stopped, sending stop command and waiting for audio via Bluetooth")
                         // Send stop command to glasses - audio data will be received via Bluetooth
                         // The processVoiceData() in PhoneAIService will handle transcription
+                        ServiceBridge.requestStopGlassesRecording()
                     }
                 }
             }

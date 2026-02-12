@@ -46,6 +46,10 @@
     <string name="recording_settings">Налаштування запису</string>
     <string name="auto_analyze_recordings">Автоматичний аналіз записів</string>
     <string name="auto_analyze_recordings_description">Автоматично надсилати записи до ШІ для транскрипції та аналізу після зупинки</string>
+    <string name="push_chat_to_glasses">Надіслати чат на окуляри</string>
+    <string name="push_chat_to_glasses_description">Відображати відповіді ШІ текстового чату на окулярах</string>
+    <string name="push_recording_to_glasses">Надіслати запис на окуляри</string>
+    <string name="push_recording_to_glasses_description">Відображати результати запису (транскрипція та відповідь ШІ) на окулярах</string>
     
     <!-- Language Settings -->
     <string name="language_settings">Мова</string>
@@ -115,6 +119,7 @@
     <string name="baidu_api_key">Ключ API Baidu</string>
     <string name="baidu_secret_key">Секретний ключ Baidu</string>
     <string name="perplexity_api_key">Ключ API Perplexity</string>
+    <string name="moonshot_api_key">Ключ API Moonshot</string>
     <string name="custom_api_key">Користувацький ключ API (необов\'язково)</string>
     
     <!-- Custom Provider Settings -->
@@ -149,6 +154,7 @@
     <string name="provider_zhipu">Zhipu AI (ChatGLM)</string>
     <string name="provider_baidu">Baidu Ernie</string>
     <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_moonshot">Moonshot (Kimi)</string>
     <string name="provider_custom">Користувацький / Власний хостинг</string>
     <string name="provider_gemini_live">Gemini Live</string>
     

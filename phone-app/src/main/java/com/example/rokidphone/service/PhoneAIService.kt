@@ -270,6 +270,14 @@ class PhoneAIService : Service() {
             Log.e(TAG, "Error initializing Bluetooth manager", e)
         }
         
+        // Listen for send-to-glasses requests from text chat
+        serviceScope.launch {
+            ServiceBridge.sendToGlassesFlow.collect { message ->
+                Log.d(TAG, "Forwarding message to glasses: type=${message.type}")
+                bluetoothManager?.sendMessage(message)
+            }
+        }
+
         // Listen for capture photo requests from UI
         serviceScope.launch {
             ServiceBridge.capturePhotoFlow.collect {
@@ -310,6 +318,34 @@ class PhoneAIService : Service() {
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error in transcription request collector", e)
+            }
+        }
+        
+        // Listen for glasses recording start requests from UI
+        serviceScope.launch {
+            try {
+                ServiceBridge.startGlassesRecordingFlow.collect { recordingId ->
+                    Log.d(TAG, "Glasses recording start command: $recordingId")
+                    bluetoothManager?.sendMessage(
+                        Message(type = MessageType.REMOTE_RECORD_START, payload = recordingId)
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in glasses recording start collector", e)
+            }
+        }
+        
+        // Listen for glasses recording stop requests from UI
+        serviceScope.launch {
+            try {
+                ServiceBridge.stopGlassesRecordingFlow.collect {
+                    Log.d(TAG, "Glasses recording stop command")
+                    bluetoothManager?.sendMessage(
+                        Message(type = MessageType.REMOTE_RECORD_STOP)
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in glasses recording stop collector", e)
             }
         }
         
@@ -950,6 +986,15 @@ class PhoneAIService : Service() {
                 return
             }
             
+            // Check if already processed in database (prevents duplicate processing)
+            val existingRecording = recordingRepository?.getRecordingById(recordingId)
+            if (existingRecording != null && 
+                !existingRecording.transcript.isNullOrBlank() && 
+                !existingRecording.aiResponse.isNullOrBlank()) {
+                Log.d(TAG, "Recording $recordingId already has transcript and AI response, skipping duplicate")
+                return
+            }
+            
             // Check settings - should we auto-analyze?
             val settings = SettingsRepository.getInstance(this).getSettings()
             if (!settings.autoAnalyzeRecordings) {
@@ -978,20 +1023,45 @@ class PhoneAIService : Service() {
             val audioData = audioFile.readBytes()
             Log.d(TAG, "Read audio file: ${audioData.size} bytes")
             
-            // Notify UI: transcribing
+            // Notify UI and glasses: transcribing
+            if (settings.pushRecordingToGlasses) {
+                bluetoothManager?.sendMessage(Message.aiProcessing(getString(R.string.recognizing_speech)))
+            }
             ServiceBridge.emitConversation(Message(
                 type = MessageType.AI_PROCESSING,
                 payload = getString(R.string.recognizing_speech)
             ))
             
             // 1. Speech recognition
-            Log.d(TAG, "Starting speech recognition for phone recording...")
+            // Detect audio format from file extension to use correct transcription method
+            val isEncodedAudio = filePath.endsWith(".m4a", ignoreCase = true) || 
+                                 filePath.endsWith(".mp4", ignoreCase = true) ||
+                                 filePath.endsWith(".aac", ignoreCase = true) ||
+                                 filePath.endsWith(".mp3", ignoreCase = true) ||
+                                 filePath.endsWith(".ogg", ignoreCase = true)
+            val audioMimeType = when {
+                filePath.endsWith(".m4a", ignoreCase = true) || filePath.endsWith(".mp4", ignoreCase = true) -> "audio/mp4"
+                filePath.endsWith(".aac", ignoreCase = true) -> "audio/aac"
+                filePath.endsWith(".mp3", ignoreCase = true) -> "audio/mpeg"
+                filePath.endsWith(".ogg", ignoreCase = true) -> "audio/ogg"
+                else -> "audio/wav"
+            }
+            
+            Log.d(TAG, "Starting speech recognition for phone recording... (encoded=$isEncodedAudio, mimeType=$audioMimeType)")
             val transcriptResult = if (sttService != null) {
                 Log.d(TAG, "Using dedicated STT service: ${sttService?.provider?.name}")
-                sttService?.transcribe(audioData, settings.speechLanguage)
+                if (isEncodedAudio) {
+                    sttService?.transcribeAudioFile(audioData, audioMimeType, settings.speechLanguage)
+                } else {
+                    sttService?.transcribe(audioData, settings.speechLanguage)
+                }
             } else {
                 Log.d(TAG, "Using AI-based speech service, language: ${settings.speechLanguage}")
-                speechService?.transcribe(audioData, settings.speechLanguage)
+                if (isEncodedAudio) {
+                    speechService?.transcribeAudioFile(audioData, audioMimeType, settings.speechLanguage)
+                } else {
+                    speechService?.transcribe(audioData, settings.speechLanguage)
+                }
             }
             
             val transcript = when (transcriptResult) {
@@ -1002,11 +1072,25 @@ class PhoneAIService : Service() {
                 is SpeechResult.Error -> {
                     Log.e(TAG, "Phone recording transcription error: ${transcriptResult.message}")
                     recordingRepository?.markError(recordingId, transcriptResult.message)
+                    if (settings.pushRecordingToGlasses) {
+                        bluetoothManager?.sendMessage(Message.aiError(transcriptResult.message))
+                    }
+                    ServiceBridge.emitConversation(Message(
+                        type = MessageType.AI_ERROR,
+                        payload = transcriptResult.message
+                    ))
                     return
                 }
                 null -> {
                     val errorMsg = getString(R.string.service_not_ready)
                     recordingRepository?.markError(recordingId, errorMsg)
+                    if (settings.pushRecordingToGlasses) {
+                        bluetoothManager?.sendMessage(Message.aiError(errorMsg))
+                    }
+                    ServiceBridge.emitConversation(Message(
+                        type = MessageType.AI_ERROR,
+                        payload = errorMsg
+                    ))
                     notifyApiKeyMissing()
                     return
                 }
@@ -1015,7 +1099,10 @@ class PhoneAIService : Service() {
             // 2. Update recording with transcript
             recordingRepository?.updateTranscript(recordingId, transcript)
             
-            // 3. Notify UI: analyzing
+            // 3. Notify UI and glasses: analyzing
+            if (settings.pushRecordingToGlasses) {
+                bluetoothManager?.sendMessage(Message.aiProcessing(getString(R.string.thinking)))
+            }
             ServiceBridge.emitConversation(Message(
                 type = MessageType.AI_PROCESSING,
                 payload = getString(R.string.thinking)
@@ -1036,7 +1123,12 @@ class PhoneAIService : Service() {
                 modelId = settings.aiModelId
             )
             
-            // 6. Show result in UI
+            // 6. Send result to glasses (if enabled) and phone UI
+            if (settings.pushRecordingToGlasses) {
+                bluetoothManager?.sendMessage(Message(type = MessageType.USER_TRANSCRIPT, payload = transcript))
+                bluetoothManager?.sendMessage(Message.aiResponseText(aiResponse))
+            }
+            
             ServiceBridge.emitConversation(Message(
                 type = MessageType.USER_TRANSCRIPT,
                 payload = transcript
@@ -1060,7 +1152,18 @@ class PhoneAIService : Service() {
             throw e
         } catch (e: Exception) {
             Log.e(TAG, "Error processing phone recording", e)
-            recordingRepository?.markError(recordingId, e.message ?: "Unknown error")
+            val errorMsg = e.message ?: "Unknown error"
+            recordingRepository?.markError(recordingId, errorMsg)
+            try {
+                val settings = SettingsRepository.getInstance(this).getSettings()
+                if (settings.pushRecordingToGlasses) {
+                    bluetoothManager?.sendMessage(Message.aiError(errorMsg))
+                }
+                ServiceBridge.emitConversation(Message(
+                    type = MessageType.AI_ERROR,
+                    payload = errorMsg
+                ))
+            } catch (_: Exception) { }
         } finally {
             processingRecordingIds.remove(recordingId)
         }
@@ -1239,12 +1342,12 @@ class PhoneAIService : Service() {
         for (provider in sttProviders) {
             val apiKey = settings.getApiKeyForProvider(provider)
             if (apiKey.isNotBlank()) {
-                val defaultModel = AvailableModels.getModelsForProvider(provider).firstOrNull()
-                if (defaultModel != null) {
-                    Log.d(TAG, "Using ${provider.name} for speech recognition")
+                val sttModel = getSttFallbackModelId(provider)
+                if (sttModel != null) {
+                    Log.d(TAG, "Using ${provider.name} for speech recognition, model: $sttModel")
                     return AiServiceFactory.createService(settings.copy(
                         aiProvider = provider,
-                        aiModelId = defaultModel.id
+                        aiModelId = sttModel
                     ))
                 }
             }
@@ -1263,6 +1366,22 @@ class PhoneAIService : Service() {
         // No speech service available
         Log.e(TAG, "No speech recognition service available!")
         return null
+    }
+    
+    /**
+     * Get known-working STT model for a provider.
+     * Uses stable model IDs that are confirmed to exist in each provider's API,
+     * rather than picking the first model from the display list (which may include
+     * unreleased/preview models like gemini-3-pro).
+     */
+    private fun getSttFallbackModelId(provider: AiProvider): String? {
+        return when (provider) {
+            AiProvider.GEMINI -> "gemini-2.5-flash"
+            AiProvider.OPENAI -> "gpt-4o-mini"
+            AiProvider.GROQ -> "whisper-large-v3"
+            AiProvider.XAI -> "grok-2-latest"
+            else -> AvailableModels.getModelsForProvider(provider).firstOrNull()?.id
+        }
     }
     
     /**
@@ -1307,17 +1426,26 @@ class PhoneAIService : Service() {
      * Ensure selected model is compatible with AI provider
      */
     private fun validateAndCorrectSettings(settings: ApiSettings): ApiSettings {
-        val modelInfo = AvailableModels.findModel(settings.aiModelId)
+        // Migrate deprecated model IDs to their replacements
+        val deprecatedModelMigrations = mapOf(
+            "sonar-reasoning" to "sonar-reasoning-pro"
+        )
+        val migratedSettings = deprecatedModelMigrations[settings.aiModelId]?.let { replacement ->
+            Log.w(TAG, "Model '${settings.aiModelId}' is deprecated, migrating to '$replacement'")
+            settings.copy(aiModelId = replacement)
+        } ?: settings
+        
+        val modelInfo = AvailableModels.findModel(migratedSettings.aiModelId)
         
         // If model info not found, use provider's default model
         if (modelInfo == null) {
-            Log.w(TAG, "Unknown model: ${settings.aiModelId}, using default model for ${settings.aiProvider}")
-            val defaultModel = AvailableModels.getModelsForProvider(settings.aiProvider).firstOrNull()
+            Log.w(TAG, "Unknown model: ${migratedSettings.aiModelId}, using default model for ${migratedSettings.aiProvider}")
+            val defaultModel = AvailableModels.getModelsForProvider(migratedSettings.aiProvider).firstOrNull()
             return if (defaultModel != null) {
-                settings.copy(aiModelId = defaultModel.id)
+                migratedSettings.copy(aiModelId = defaultModel.id)
             } else {
                 // Fall back to Gemini
-                settings.copy(
+                migratedSettings.copy(
                     aiProvider = AiProvider.GEMINI,
                     aiModelId = "gemini-2.5-flash"
                 )
@@ -1325,22 +1453,22 @@ class PhoneAIService : Service() {
         }
         
         // If model doesn't match provider, correct the provider
-        if (modelInfo.provider != settings.aiProvider) {
-            Log.w(TAG, "Model ${settings.aiModelId} belongs to ${modelInfo.provider}, correcting provider")
-            return settings.copy(aiProvider = modelInfo.provider)
+        if (modelInfo.provider != migratedSettings.aiProvider) {
+            Log.w(TAG, "Model ${migratedSettings.aiModelId} belongs to ${modelInfo.provider}, correcting provider")
+            return migratedSettings.copy(aiProvider = modelInfo.provider)
         }
         
         // Check if provider has API key
-        if (settings.getCurrentApiKey().isBlank()) {
-            Log.w(TAG, "No API key for ${settings.aiProvider}, checking for fallback")
+        if (migratedSettings.getCurrentApiKey().isBlank()) {
+            Log.w(TAG, "No API key for ${migratedSettings.aiProvider}, checking for fallback")
             // Try to use provider that has API key
             for (provider in AiProvider.entries) {
-                val apiKey = settings.getApiKeyForProvider(provider)
+                val apiKey = migratedSettings.getApiKeyForProvider(provider)
                 if (apiKey.isNotBlank()) {
                     val defaultModel = AvailableModels.getModelsForProvider(provider).firstOrNull()
                     if (defaultModel != null) {
                         Log.d(TAG, "Falling back to ${provider.name}")
-                        return settings.copy(
+                        return migratedSettings.copy(
                             aiProvider = provider,
                             aiModelId = defaultModel.id
                         )
@@ -1349,7 +1477,7 @@ class PhoneAIService : Service() {
             }
         }
         
-        return settings
+        return migratedSettings
     }
 }
 

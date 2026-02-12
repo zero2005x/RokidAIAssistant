@@ -46,6 +46,10 @@
     <string name="recording_settings">录音设置</string>
     <string name="auto_analyze_recordings">自动分析录音</string>
     <string name="auto_analyze_recordings_description">停止录音后自动发送给 AI 进行语音识别与分析</string>
+    <string name="push_chat_to_glasses">发送聊天至眼镜</string>
+    <string name="push_chat_to_glasses_description">将文字聊天的 AI 回复推送到眼镜显示</string>
+    <string name="push_recording_to_glasses">发送录音至眼镜</string>
+    <string name="push_recording_to_glasses_description">将手机录音结果（语音识别与 AI 回复）推送到眼镜显示</string>
     
     <!-- Language Settings -->
     <string name="language_settings">语言设置</string>
@@ -124,6 +128,7 @@
     <string name="baidu_api_key">百度 API 密钥</string>
     <string name="baidu_secret_key">百度 Secret 密钥</string>
     <string name="perplexity_api_key">Perplexity API 密钥</string>
+    <string name="moonshot_api_key">Moonshot API 密钥</string>
     <string name="custom_api_key">自定义 API 密钥（可选）</string>
     <string name="custom_provider_settings">自定义提供商设置</string>
     <string name="base_url">基础网址</string>
@@ -149,6 +154,7 @@
     <string name="provider_zhipu">智谱清言 (ChatGLM)</string>
     <string name="provider_baidu">百度文心一言</string>
     <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_moonshot">Moonshot（Kimi）</string>
     <string name="provider_custom">自定义 / 自托管</string>
     <string name="provider_gemini_live">Gemini Live</string>
     

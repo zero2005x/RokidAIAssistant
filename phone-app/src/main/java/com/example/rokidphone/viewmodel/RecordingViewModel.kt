@@ -4,7 +4,9 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.rokidphone.data.SettingsRepository
 import com.example.rokidphone.data.db.*
+import com.example.rokidphone.service.EnhancedAIService
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -384,12 +386,25 @@ class RecordingViewModel(application: Application) : AndroidViewModel(applicatio
                     return@launch
                 }
                 
-                // TODO: Integrate with AI service
                 Log.d(TAG, "Analyzing recording with AI: $id")
                 
-                // This would be replaced with actual AI call
-                // val response = aiRepository.chat(recording.transcript)
-                // repository.updateAiResponse(id, response, providerId, modelId)
+                val enhancedAIService = EnhancedAIService.getInstance(getApplication())
+                val result = enhancedAIService.quickChat(recording.transcript)
+                
+                result.onSuccess { response ->
+                    val settings = SettingsRepository.getInstance(getApplication()).getSettings()
+                    repository.updateAiResponse(
+                        id = id,
+                        response = response,
+                        providerId = settings.aiProvider.name,
+                        modelId = settings.aiModelId
+                    )
+                    Log.d(TAG, "AI analysis completed for recording: $id")
+                }.onFailure { e ->
+                    Log.e(TAG, "AI analysis failed", e)
+                    repository.markError(id, e.message ?: "AI analysis failed")
+                    _uiState.update { it.copy(error = e.message) }
+                }
                 
             } catch (e: Exception) {
                 Log.e(TAG, "AI analysis failed", e)

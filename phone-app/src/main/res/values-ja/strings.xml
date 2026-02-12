@@ -46,6 +46,10 @@
     <string name="recording_settings">録音設定</string>
     <string name="auto_analyze_recordings">録音を自動分析</string>
     <string name="auto_analyze_recordings_description">録音停止後に自動的に AI へ送信して文字起こしと分析を行う</string>
+    <string name="push_chat_to_glasses">チャットをメガネに送信</string>
+    <string name="push_chat_to_glasses_description">テキストチャットのAI応答をメガネに表示</string>
+    <string name="push_recording_to_glasses">録音をメガネに送信</string>
+    <string name="push_recording_to_glasses_description">スマホの録音結果（文字起こしとAI応答）をメガネに表示</string>
     
     <!-- Language Settings -->
     <string name="language_settings">言語設定</string>
@@ -115,6 +119,7 @@
     <string name="baidu_api_key">Baidu API キー</string>
     <string name="baidu_secret_key">Baidu Secret キー</string>
     <string name="perplexity_api_key">Perplexity API キー</string>
+    <string name="moonshot_api_key">Moonshot APIキー</string>
     <string name="custom_api_key">カスタム API キー（任意）</string>
     
     <!-- Custom Provider Settings -->
@@ -149,6 +154,7 @@
     <string name="provider_zhipu">智譜AI (ChatGLM)</string>
     <string name="provider_baidu">Baidu 文心一言</string>
     <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_moonshot">Moonshot (Kimi)</string>
     <string name="provider_custom">カスタム / セルフホスト</string>
     <string name="provider_gemini_live">Gemini Live</string>
     

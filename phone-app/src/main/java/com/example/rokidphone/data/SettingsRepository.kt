@@ -39,6 +39,7 @@ class SettingsRepository(private val context: Context) {
         private const val KEY_BAIDU_API_KEY = "baidu_api_key"
         private const val KEY_BAIDU_SECRET_KEY = "baidu_secret_key"
         private const val KEY_PERPLEXITY_API_KEY = "perplexity_api_key"
+        private const val KEY_MOONSHOT_API_KEY = "moonshot_api_key"
         private const val KEY_CUSTOM_API_KEY = "custom_api_key"
         
         // Keys for custom provider settings
@@ -47,6 +48,8 @@ class SettingsRepository(private val context: Context) {
         
         // Keys for recording settings
         private const val KEY_AUTO_ANALYZE_RECORDINGS = "auto_analyze_recordings"
+        private const val KEY_PUSH_CHAT_TO_GLASSES = "push_chat_to_glasses"
+        private const val KEY_PUSH_RECORDING_TO_GLASSES = "push_recording_to_glasses"
         
         @Volatile
         private var instance: SettingsRepository? = null
@@ -119,6 +122,7 @@ class SettingsRepository(private val context: Context) {
             baiduApiKey = prefs.getString(KEY_BAIDU_API_KEY, "") ?: "",
             baiduSecretKey = prefs.getString(KEY_BAIDU_SECRET_KEY, "") ?: "",
             perplexityApiKey = prefs.getString(KEY_PERPLEXITY_API_KEY, "") ?: "",
+            moonshotApiKey = prefs.getString(KEY_MOONSHOT_API_KEY, "") ?: "",
             customApiKey = prefs.getString(KEY_CUSTOM_API_KEY, "") ?: "",
             customBaseUrl = prefs.getString(KEY_CUSTOM_BASE_URL, "http://localhost:11434/v1/") 
                 ?: "http://localhost:11434/v1/",
@@ -129,7 +133,9 @@ class SettingsRepository(private val context: Context) {
             speechLanguage = prefs.getString(KEY_SPEECH_LANGUAGE, "zh-TW") ?: "zh-TW",
             responseLanguage = prefs.getString(KEY_RESPONSE_LANGUAGE, "zh-TW") ?: "zh-TW",
             systemPrompt = systemPrompt,
-            autoAnalyzeRecordings = prefs.getBoolean(KEY_AUTO_ANALYZE_RECORDINGS, true)
+            autoAnalyzeRecordings = prefs.getBoolean(KEY_AUTO_ANALYZE_RECORDINGS, true),
+            pushChatToGlasses = prefs.getBoolean(KEY_PUSH_CHAT_TO_GLASSES, true),
+            pushRecordingToGlasses = prefs.getBoolean(KEY_PUSH_RECORDING_TO_GLASSES, true)
         )
     }
     
@@ -177,6 +183,7 @@ class SettingsRepository(private val context: Context) {
             putString(KEY_BAIDU_API_KEY, settings.baiduApiKey)
             putString(KEY_BAIDU_SECRET_KEY, settings.baiduSecretKey)
             putString(KEY_PERPLEXITY_API_KEY, settings.perplexityApiKey)
+            putString(KEY_MOONSHOT_API_KEY, settings.moonshotApiKey)
             putString(KEY_CUSTOM_API_KEY, settings.customApiKey)
             putString(KEY_CUSTOM_BASE_URL, settings.customBaseUrl)
             putString(KEY_CUSTOM_MODEL_NAME, settings.customModelName)
@@ -185,6 +192,8 @@ class SettingsRepository(private val context: Context) {
             putString(KEY_RESPONSE_LANGUAGE, settings.responseLanguage)
             putString(KEY_SYSTEM_PROMPT, settings.systemPrompt)
             putBoolean(KEY_AUTO_ANALYZE_RECORDINGS, settings.autoAnalyzeRecordings)
+            putBoolean(KEY_PUSH_CHAT_TO_GLASSES, settings.pushChatToGlasses)
+            putBoolean(KEY_PUSH_RECORDING_TO_GLASSES, settings.pushRecordingToGlasses)
             apply()
         }
         _settingsFlow.value = settings
@@ -247,6 +256,10 @@ class SettingsRepository(private val context: Context) {
     
     fun updatePerplexityApiKey(apiKey: String) {
         saveSettings(getSettings().copy(perplexityApiKey = apiKey))
+    }
+    
+    fun updateMoonshotApiKey(apiKey: String) {
+        saveSettings(getSettings().copy(moonshotApiKey = apiKey))
     }
     
     fun updateCustomApiKey(apiKey: String) {

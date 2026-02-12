@@ -635,6 +635,26 @@ class GlassesViewModel(
                 ) }
             }
             
+            MessageType.REMOTE_RECORD_START -> {
+                // Phone requested glasses to start recording
+                Log.d(TAG, "Remote recording start command from phone")
+                if (!_uiState.value.isListening) {
+                    startRecording()
+                } else {
+                    Log.d(TAG, "Already recording, ignoring remote start command")
+                }
+            }
+            
+            MessageType.REMOTE_RECORD_STOP -> {
+                // Phone requested glasses to stop recording
+                Log.d(TAG, "Remote recording stop command from phone")
+                if (_uiState.value.isListening) {
+                    stopRecording()
+                } else {
+                    Log.d(TAG, "Not recording, ignoring remote stop command")
+                }
+            }
+            
             // HEARTBEAT_ACK is handled internally by BluetoothSppClient
             MessageType.HEARTBEAT_ACK -> { /* no-op */ }
             
