@@ -42,6 +42,24 @@
     <string name="enter_system_prompt">Ingrese el prompt del sistema de IA…</string>
     <string name="default_system_prompt">Eres un asistente de IA amigable. Por favor responde todas las preguntas en español de manera concisa y clara.</string>
     
+    <!-- LLM Parameters -->
+    <string name="llm_parameters">Parámetros LLM</string>
+    <string name="llm_parameters_subtitle">Temperature, Max Tokens, Top P…</string>
+    <string name="llm_parameters_description">Ajusta los parámetros de generación del modelo de IA. Estos valores afectan a todos los proveedores de IA y controlan cómo el modelo genera respuestas.</string>
+    <string name="llm_parameters_note">Nota: No todos los parámetros son compatibles con todos los proveedores. Los parámetros no compatibles se ignorarán silenciosamente. Frequency Penalty y Presence Penalty solo se aplican a proveedores compatibles con OpenAI.</string>
+    <string name="param_temperature">Temperatura (Temperature)</string>
+    <string name="param_temperature_desc">Controla la aleatoriedad. Valores más bajos generan respuestas más enfocadas y deterministas, valores más altos las hacen más creativas y diversas.</string>
+    <string name="param_max_tokens">Max Tokens</string>
+    <string name="param_max_tokens_desc">Número máximo de tokens en la respuesta de IA. Valores más altos permiten respuestas más largas pero pueden aumentar la latencia y el costo.</string>
+    <string name="param_top_p">Top P (muestreo por núcleo)</string>
+    <string name="param_top_p_desc">Controla la diversidad mediante muestreo por núcleo. 0.1 significa que solo se consideran los tokens en el 10% superior de la masa de probabilidad.</string>
+    <string name="param_frequency_penalty">Penalización de frecuencia</string>
+    <string name="param_frequency_penalty_desc">Penaliza los tokens según su frecuencia de aparición en el texto, reduciendo la repetición de palabras frecuentes.</string>
+    <string name="param_presence_penalty">Penalización de presencia</string>
+    <string name="param_presence_penalty_desc">Penaliza los tokens que ya han aparecido en el texto, animando al modelo a hablar sobre nuevos temas.</string>
+    <string name="param_presets">Ajustes preestablecidos</string>
+    <string name="reset_defaults">Restablecer valores predeterminados</string>
+    
     <!-- Recording Settings -->
     <string name="recording_settings">Configuración de grabación</string>
     <string name="auto_analyze_recordings">Analizar grabaciones automáticamente</string>
@@ -190,7 +208,7 @@
     <string name="stt_uses_main_api_key">Utiliza la clave API del proveedor de IA principal configurada anteriormente</string>
     <string name="stt_test_connection">Probar conexión</string>
     <string name="stt_test_success">Conexión exitosa</string>
-    <string name="stt_test_failed">Prueba de conexión fallida</string>
+    <string name="stt_test_failed">Conexión fallida: %s</string>
     <string name="stt_api_key">Clave API</string>
     <string name="stt_api_secret">Secreto API</string>
     <string name="stt_app_id">ID de aplicación</string>

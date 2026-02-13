@@ -42,6 +42,24 @@
     <string name="enter_system_prompt">AI のシステムプロンプトを入力…</string>
     <string name="default_system_prompt">あなたは親切な AI アシスタントです。すべての質問に日本語で簡潔かつ明確にお答えください。</string>
     
+    <!-- LLM Parameters -->
+    <string name="llm_parameters">LLM パラメータ</string>
+    <string name="llm_parameters_subtitle">Temperature、Max Tokens、Top P…</string>
+    <string name="llm_parameters_description">AI モデルの生成パラメータを調整します。これらの値はすべての AI プロバイダーに影響し、モデルの応答生成方法を制御します。</string>
+    <string name="llm_parameters_note">注意：すべてのパラメータがすべてのプロバイダーでサポートされているわけではありません。サポートされていないパラメータは自動的に無視されます。Frequency Penalty と Presence Penalty は OpenAI 互換プロバイダーにのみ適用されます。</string>
+    <string name="param_temperature">温度 (Temperature)</string>
+    <string name="param_temperature_desc">ランダム性を制御します。低い値はより集中的で決定論的な応答を、高い値はより創造的で多様な応答を生成します。</string>
+    <string name="param_max_tokens">最大トークン数</string>
+    <string name="param_max_tokens_desc">AI 応答の最大トークン数。高い値はより長い応答を許可しますが、遅延やコストが増加する場合があります。</string>
+    <string name="param_top_p">Top P（核サンプリング）</string>
+    <string name="param_top_p_desc">核サンプリングによる多様性の制御。0.1 は確率質量の上位 10% のトークンのみを考慮します。</string>
+    <string name="param_frequency_penalty">頻度ペナルティ</string>
+    <string name="param_frequency_penalty_desc">テキスト中に出現する頻度に基づいてトークンにペナルティを課し、頻出語の繰り返しを減らします。</string>
+    <string name="param_presence_penalty">存在ペナルティ</string>
+    <string name="param_presence_penalty_desc">テキスト中に既に出現したトークンにペナルティを課し、モデルが新しいトピックについて話すよう促します。</string>
+    <string name="param_presets">プリセット</string>
+    <string name="reset_defaults">デフォルトにリセット</string>
+    
     <!-- Recording Settings -->
     <string name="recording_settings">録音設定</string>
     <string name="auto_analyze_recordings">録音を自動分析</string>

@@ -42,6 +42,24 @@
     <string name="enter_system_prompt">أدخل موجه نظام الذكاء الاصطناعي…</string>
     <string name="default_system_prompt">أنت مساعد ذكاء اصطناعي ودود. يرجى الإجابة على جميع الأسئلة باللغة العربية بإيجاز ووضوح.</string>
     
+    <!-- LLM Parameters -->
+    <string name="llm_parameters">معلمات LLM</string>
+    <string name="llm_parameters_subtitle">Temperature, Max Tokens, Top P…</string>
+    <string name="llm_parameters_description">اضبط معلمات توليد نموذج الذكاء الاصطناعي. تؤثر هذه القيم على جميع مزودي الذكاء الاصطناعي وتتحكم في كيفية توليد النموذج للاستجابات.</string>
+    <string name="llm_parameters_note">ملاحظة: لا يتم دعم جميع المعلمات من قبل كل مزود. سيتم تجاهل المعلمات غير المدعومة تلقائياً. Frequency Penalty و Presence Penalty ينطبقان فقط على المزودين المتوافقين مع OpenAI.</string>
+    <string name="param_temperature">الحرارة (Temperature)</string>
+    <string name="param_temperature_desc">يتحكم في العشوائية. القيم المنخفضة تجعل الاستجابات أكثر تركيزاً وحتمية، والقيم المرتفعة تجعلها أكثر إبداعاً وتنوعاً.</string>
+    <string name="param_max_tokens">الحد الأقصى للرموز</string>
+    <string name="param_max_tokens_desc">الحد الأقصى لعدد الرموز في استجابة الذكاء الاصطناعي. القيم الأعلى تسمح باستجابات أطول ولكن قد تزيد من التأخير والتكلفة.</string>
+    <string name="param_top_p">Top P (أخذ العينات النووي)</string>
+    <string name="param_top_p_desc">يتحكم في التنوع عبر أخذ العينات النووي. 0.1 يعني أنه يتم النظر فقط في الرموز الموجودة في أعلى 10% من كتلة الاحتمال.</string>
+    <string name="param_frequency_penalty">عقوبة التكرار</string>
+    <string name="param_frequency_penalty_desc">يعاقب الرموز بناءً على تكرار ظهورها في النص، مما يقلل من تكرار الكلمات المتكررة.</string>
+    <string name="param_presence_penalty">عقوبة الوجود</string>
+    <string name="param_presence_penalty_desc">يعاقب الرموز التي ظهرت بالفعل في النص، مما يشجع النموذج على التحدث عن مواضيع جديدة.</string>
+    <string name="param_presets">إعدادات مسبقة</string>
+    <string name="reset_defaults">إعادة التعيين إلى الافتراضي</string>
+    
     <!-- Recording Settings -->
     <string name="recording_settings">إعدادات التسجيل</string>
     <string name="auto_analyze_recordings">تحليل التسجيلات تلقائياً</string>
@@ -190,7 +208,7 @@
     <string name="stt_uses_main_api_key">يستخدم مفتاح API لمزود الذكاء الاصطناعي الرئيسي المُعد أعلاه</string>
     <string name="stt_test_connection">اختبار الاتصال</string>
     <string name="stt_test_success">الاتصال ناجح</string>
-    <string name="stt_test_failed">فشل اختبار الاتصال</string>
+    <string name="stt_test_failed">فشل الاتصال: %s</string>
     <string name="stt_api_key">مفتاح API</string>
     <string name="stt_api_secret">سر API</string>
     <string name="stt_app_id">معرف التطبيق</string>

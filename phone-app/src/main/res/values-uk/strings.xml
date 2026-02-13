@@ -42,6 +42,24 @@
     <string name="enter_system_prompt">Введіть системний промпт ШІ…</string>
     <string name="default_system_prompt">Ви дружній ШІ-асистент. Будь ласка, відповідайте на всі питання українською мовою стисло і зрозуміло.</string>
     
+    <!-- LLM Parameters -->
+    <string name="llm_parameters">Параметри LLM</string>
+    <string name="llm_parameters_subtitle">Temperature, Max Tokens, Top P…</string>
+    <string name="llm_parameters_description">Налаштуйте параметри генерації моделі ШІ. Ці значення впливають на всіх постачальників ШІ та контролюють спосіб генерації відповідей моделлю.</string>
+    <string name="llm_parameters_note">Примітка: не всі параметри підтримуються кожним постачальником. Непідтримувані параметри будуть автоматично проігноровані. Frequency Penalty та Presence Penalty застосовуються лише до OpenAI-сумісних постачальників.</string>
+    <string name="param_temperature">Температура (Temperature)</string>
+    <string name="param_temperature_desc">Контролює випадковість. Нижчі значення роблять відповіді більш зосередженими та детермінованими, вищі — більш креативними та різноманітними.</string>
+    <string name="param_max_tokens">Макс. токенів</string>
+    <string name="param_max_tokens_desc">Максимальна кількість токенів у відповіді ШІ. Вищі значення дозволяють довші відповіді, але можуть збільшити затримку та вартість.</string>
+    <string name="param_top_p">Top P (ядерна вибірка)</string>
+    <string name="param_top_p_desc">Контролює різноманітність через ядерну вибірку. 0.1 означає, що розглядаються лише токени у верхніх 10% ймовірнісної маси.</string>
+    <string name="param_frequency_penalty">Штраф за частоту</string>
+    <string name="param_frequency_penalty_desc">Штрафує токени на основі частоти їх появи в тексті, зменшуючи повторення частих слів.</string>
+    <string name="param_presence_penalty">Штраф за присутність</string>
+    <string name="param_presence_penalty_desc">Штрафує токени, що вже з\'явилися в тексті, спонукаючи модель обговорювати нові теми.</string>
+    <string name="param_presets">Попередні налаштування</string>
+    <string name="reset_defaults">Скинути до значень за замовчуванням</string>
+    
     <!-- Recording Settings -->
     <string name="recording_settings">Налаштування запису</string>
     <string name="auto_analyze_recordings">Автоматичний аналіз записів</string>
@@ -190,7 +208,7 @@
     <string name="stt_uses_main_api_key">Використовує ключ API основного провайдера ШІ, налаштований вище</string>
     <string name="stt_test_connection">Тест з\'єднання</string>
     <string name="stt_test_success">З\'єднання успішне</string>
-    <string name="stt_test_failed">Тест з\'єднання не пройдено</string>
+    <string name="stt_test_failed">Помилка з\'єднання: %s</string>
     <string name="stt_api_key">API-ключ</string>
     <string name="stt_api_secret">API-секрет</string>
     <string name="stt_app_id">ID додатку</string>

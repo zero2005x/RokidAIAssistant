@@ -5,6 +5,7 @@ import android.util.Log
 import com.example.rokidphone.service.SpeechErrorCode
 import com.example.rokidphone.service.SpeechResult
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeout
 import okhttp3.Request
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
@@ -89,15 +90,17 @@ class TencentSttService(
     }
     
     override suspend fun transcribe(audioData: ByteArray, languageCode: String): SpeechResult {
-        return suspendCancellableCoroutine { continuation ->
-            try {
-                if (isAudioTooShort(audioData)) {
-                    continuation.resume(SpeechResult.Error(
-                        message = "Audio too short",
-                        errorCode = SpeechErrorCode.AUDIO_TOO_SHORT
-                    ))
-                    return@suspendCancellableCoroutine
-                }
+        return try {
+            withTimeout(60_000L) {
+                suspendCancellableCoroutine { continuation ->
+                    try {
+                        if (isAudioTooShort(audioData)) {
+                            continuation.resume(SpeechResult.Error(
+                                message = "Audio too short",
+                                errorCode = SpeechErrorCode.AUDIO_TOO_SHORT
+                            ))
+                            return@suspendCancellableCoroutine
+                        }
                 
                 Log.d(TAG, "Tencent ASR: ${audioData.size} bytes")
                 
@@ -205,6 +208,14 @@ class TencentSttService(
                     ))
                 }
             }
+        }
+            }
+        } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+            Log.e(TAG, "Tencent ASR transcription timed out after 60s")
+            SpeechResult.Error(
+                message = "Tencent ASR recognition timeout",
+                errorCode = SpeechErrorCode.TRANSCRIPTION_TIMEOUT
+            )
         }
     }
     

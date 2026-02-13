@@ -33,6 +33,7 @@ import com.example.rokidphone.data.SettingsRepository
 import com.example.rokidphone.data.validateForChat
 import com.example.rokidphone.data.validateForSpeech
 import com.example.rokidphone.service.PhoneAIService
+import com.example.rokidphone.ui.LlmParametersScreen
 import com.example.rokidphone.ui.SettingsScreen
 import com.example.rokidphone.ui.conversation.ChatScreen
 import com.example.rokidphone.ui.conversation.ConversationHistoryScreen
@@ -456,7 +457,18 @@ fun PhoneMainScreen(
                         settingsRepository.saveSettings(newSettings)
                     },
                     onBack = { navController.popBackStack() },
-                    onNavigateToLogViewer = { navController.navigate(NavRoutes.LOG_VIEWER) }
+                    onNavigateToLogViewer = { navController.navigate(NavRoutes.LOG_VIEWER) },
+                    onNavigateToLlmParameters = { navController.navigate(NavRoutes.LLM_PARAMETERS) }
+                )
+            }
+            
+            composable(NavRoutes.LLM_PARAMETERS) {
+                LlmParametersScreen(
+                    settings = settings,
+                    onSettingsChange = { newSettings ->
+                        settingsRepository.saveSettings(newSettings)
+                    },
+                    onBack = { navController.popBackStack() }
                 )
             }
             

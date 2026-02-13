@@ -42,6 +42,24 @@
     <string name="enter_system_prompt">AI 시스템 프롬프트 입력…</string>
     <string name="default_system_prompt">당신은 친절한 AI 어시스턴트입니다. 모든 질문에 한국어로 간결하고 명확하게 답변해 주세요.</string>
     
+    <!-- LLM Parameters -->
+    <string name="llm_parameters">LLM 매개변수</string>
+    <string name="llm_parameters_subtitle">Temperature, Max Tokens, Top P…</string>
+    <string name="llm_parameters_description">AI 모델 생성 매개변수를 조정합니다. 이 값들은 모든 AI 제공업체에 영향을 미치며 모델의 응답 생성 방식을 제어합니다.</string>
+    <string name="llm_parameters_note">참고: 모든 매개변수가 모든 제공업체에서 지원되는 것은 아닙니다. 지원되지 않는 매개변수는 자동으로 무시됩니다. Frequency Penalty와 Presence Penalty는 OpenAI 호환 제공업체에만 적용됩니다.</string>
+    <string name="param_temperature">온도 (Temperature)</string>
+    <string name="param_temperature_desc">무작위성을 제어합니다. 낮은 값은 더 집중적이고 결정론적인 응답을, 높은 값은 더 창의적이고 다양한 응답을 생성합니다.</string>
+    <string name="param_max_tokens">최대 토큰 수</string>
+    <string name="param_max_tokens_desc">AI 응답의 최대 토큰 수입니다. 높은 값은 더 긴 응답을 허용하지만 지연 시간과 비용이 증가할 수 있습니다.</string>
+    <string name="param_top_p">Top P (핵 샘플링)</string>
+    <string name="param_top_p_desc">핵 샘플링을 통한 다양성 제어. 0.1은 확률 질량 상위 10%의 토큰만 고려합니다.</string>
+    <string name="param_frequency_penalty">빈도 페널티</string>
+    <string name="param_frequency_penalty_desc">텍스트에서 토큰이 나타나는 빈도에 따라 페널티를 부과하여 빈번한 단어의 반복을 줄입니다.</string>
+    <string name="param_presence_penalty">존재 페널티</string>
+    <string name="param_presence_penalty_desc">텍스트에 이미 나타난 토큰에 페널티를 부과하여 모델이 새로운 주제에 대해 이야기하도록 유도합니다.</string>
+    <string name="param_presets">프리셋</string>
+    <string name="reset_defaults">기본값으로 재설정</string>
+    
     <!-- Recording Settings -->
     <string name="recording_settings">녹음 설정</string>
     <string name="auto_analyze_recordings">녹음 자동 분석</string>

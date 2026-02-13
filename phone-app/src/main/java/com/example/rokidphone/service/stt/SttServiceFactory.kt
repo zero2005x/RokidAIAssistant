@@ -342,14 +342,19 @@ private class GeminiSttAdapter(
 }
 
 /**
- * Adapter to use existing OpenAiService Whisper as SttService
+ * Adapter to use OpenAiCompatibleService Whisper as SttService
  */
 private class OpenAiWhisperSttAdapter(
     private val apiKey: String
 ) : BaseSttService() {
     
     private val openAiService by lazy {
-        com.example.rokidphone.service.ai.OpenAiService(apiKey)
+        com.example.rokidphone.service.ai.OpenAiCompatibleService(
+            apiKey = apiKey,
+            baseUrl = com.example.rokidphone.data.AiProvider.OPENAI.defaultBaseUrl,
+            modelId = "gpt-4o",
+            providerType = com.example.rokidphone.data.AiProvider.OPENAI
+        )
     }
     
     override val provider = SttProvider.OPENAI_WHISPER
@@ -373,14 +378,19 @@ private class OpenAiWhisperSttAdapter(
 }
 
 /**
- * Adapter to use GroqService Whisper as SttService
+ * Adapter to use OpenAiCompatibleService with Groq Whisper as SttService
  */
 private class GroqWhisperSttAdapter(
     private val apiKey: String
 ) : BaseSttService() {
     
     private val groqService by lazy {
-        com.example.rokidphone.service.ai.GroqService(apiKey)
+        com.example.rokidphone.service.ai.OpenAiCompatibleService(
+            apiKey = apiKey,
+            baseUrl = com.example.rokidphone.data.AiProvider.GROQ.defaultBaseUrl,
+            modelId = "llama-4-70b-versatile",
+            providerType = com.example.rokidphone.data.AiProvider.GROQ
+        )
     }
     
     override val provider = SttProvider.GROQ_WHISPER

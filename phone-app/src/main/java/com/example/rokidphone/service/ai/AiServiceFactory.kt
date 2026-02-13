@@ -21,7 +21,10 @@ object AiServiceFactory {
             AiProvider.GEMINI -> GeminiService(
                 apiKey = apiKey,
                 modelId = modelId,
-                systemPrompt = systemPrompt
+                systemPrompt = systemPrompt,
+                temperature = settings.temperature,
+                maxTokens = settings.maxTokens,
+                topP = settings.topP
             )
             
             AiProvider.OPENAI -> OpenAiCompatibleService(
@@ -29,13 +32,21 @@ object AiServiceFactory {
                 baseUrl = settings.aiProvider.defaultBaseUrl,
                 modelId = modelId,
                 systemPrompt = systemPrompt,
-                providerType = AiProvider.OPENAI
+                providerType = AiProvider.OPENAI,
+                temperature = settings.temperature,
+                maxTokens = settings.maxTokens,
+                topP = settings.topP,
+                frequencyPenalty = settings.frequencyPenalty,
+                presencePenalty = settings.presencePenalty
             )
             
             AiProvider.ANTHROPIC -> AnthropicService(
                 apiKey = apiKey,
                 modelId = modelId,
-                systemPrompt = systemPrompt
+                systemPrompt = systemPrompt,
+                temperature = settings.temperature,
+                maxTokens = settings.maxTokens,
+                topP = settings.topP
             )
             
             AiProvider.DEEPSEEK -> OpenAiCompatibleService(
@@ -43,7 +54,12 @@ object AiServiceFactory {
                 baseUrl = settings.aiProvider.defaultBaseUrl,
                 modelId = modelId,
                 systemPrompt = systemPrompt,
-                providerType = AiProvider.DEEPSEEK
+                providerType = AiProvider.DEEPSEEK,
+                temperature = settings.temperature,
+                maxTokens = settings.maxTokens,
+                topP = settings.topP,
+                frequencyPenalty = settings.frequencyPenalty,
+                presencePenalty = settings.presencePenalty
             )
             
             AiProvider.GROQ -> OpenAiCompatibleService(
@@ -51,7 +67,12 @@ object AiServiceFactory {
                 baseUrl = settings.aiProvider.defaultBaseUrl,
                 modelId = modelId,
                 systemPrompt = systemPrompt,
-                providerType = AiProvider.GROQ
+                providerType = AiProvider.GROQ,
+                temperature = settings.temperature,
+                maxTokens = settings.maxTokens,
+                topP = settings.topP,
+                frequencyPenalty = settings.frequencyPenalty,
+                presencePenalty = settings.presencePenalty
             )
             
             AiProvider.XAI -> OpenAiCompatibleService(
@@ -59,7 +80,12 @@ object AiServiceFactory {
                 baseUrl = settings.aiProvider.defaultBaseUrl,
                 modelId = modelId,
                 systemPrompt = systemPrompt,
-                providerType = AiProvider.XAI
+                providerType = AiProvider.XAI,
+                temperature = settings.temperature,
+                maxTokens = settings.maxTokens,
+                topP = settings.topP,
+                frequencyPenalty = settings.frequencyPenalty,
+                presencePenalty = settings.presencePenalty
             )
             
             AiProvider.ALIBABA -> OpenAiCompatibleService(
@@ -67,7 +93,12 @@ object AiServiceFactory {
                 baseUrl = settings.aiProvider.defaultBaseUrl,
                 modelId = modelId,
                 systemPrompt = systemPrompt,
-                providerType = AiProvider.ALIBABA
+                providerType = AiProvider.ALIBABA,
+                temperature = settings.temperature,
+                maxTokens = settings.maxTokens,
+                topP = settings.topP,
+                frequencyPenalty = settings.frequencyPenalty,
+                presencePenalty = settings.presencePenalty
             )
             
             AiProvider.ZHIPU -> OpenAiCompatibleService(
@@ -75,14 +106,21 @@ object AiServiceFactory {
                 baseUrl = settings.aiProvider.defaultBaseUrl,
                 modelId = modelId,
                 systemPrompt = systemPrompt,
-                providerType = AiProvider.ZHIPU
+                providerType = AiProvider.ZHIPU,
+                temperature = settings.temperature,
+                maxTokens = settings.maxTokens,
+                topP = settings.topP,
+                frequencyPenalty = settings.frequencyPenalty,
+                presencePenalty = settings.presencePenalty
             )
             
             AiProvider.BAIDU -> BaiduService(
                 apiKey = settings.baiduApiKey,
                 secretKey = settings.baiduSecretKey,
                 modelId = modelId,
-                systemPrompt = systemPrompt
+                systemPrompt = systemPrompt,
+                temperature = settings.temperature,
+                topP = settings.topP
             )
             
             AiProvider.PERPLEXITY -> OpenAiCompatibleService(
@@ -90,7 +128,12 @@ object AiServiceFactory {
                 baseUrl = settings.aiProvider.defaultBaseUrl,
                 modelId = modelId,
                 systemPrompt = systemPrompt,
-                providerType = AiProvider.PERPLEXITY
+                providerType = AiProvider.PERPLEXITY,
+                temperature = settings.temperature,
+                maxTokens = settings.maxTokens,
+                topP = settings.topP,
+                frequencyPenalty = settings.frequencyPenalty,
+                presencePenalty = settings.presencePenalty
             )
             
             AiProvider.MOONSHOT -> OpenAiCompatibleService(
@@ -98,7 +141,12 @@ object AiServiceFactory {
                 baseUrl = settings.aiProvider.defaultBaseUrl,
                 modelId = modelId,
                 systemPrompt = systemPrompt,
-                providerType = AiProvider.MOONSHOT
+                providerType = AiProvider.MOONSHOT,
+                temperature = settings.temperature,
+                maxTokens = settings.maxTokens,
+                topP = settings.topP,
+                frequencyPenalty = settings.frequencyPenalty,
+                presencePenalty = settings.presencePenalty
             )
             
             AiProvider.CUSTOM -> OpenAiCompatibleService(
@@ -106,7 +154,12 @@ object AiServiceFactory {
                 baseUrl = settings.getCurrentBaseUrl(),
                 modelId = settings.customModelName.ifBlank { modelId },
                 systemPrompt = systemPrompt,
-                providerType = AiProvider.CUSTOM
+                providerType = AiProvider.CUSTOM,
+                temperature = settings.temperature,
+                maxTokens = settings.maxTokens,
+                topP = settings.topP,
+                frequencyPenalty = settings.frequencyPenalty,
+                presencePenalty = settings.presencePenalty
             )
 
             AiProvider.GEMINI_LIVE -> {
@@ -117,7 +170,10 @@ object AiServiceFactory {
                 GeminiService(
                     apiKey = apiKey,
                     modelId = "gemini-2.5-flash",
-                    systemPrompt = systemPrompt
+                    systemPrompt = systemPrompt,
+                    temperature = settings.temperature,
+                    maxTokens = settings.maxTokens,
+                    topP = settings.topP
                 )
             }
         }

@@ -19,12 +19,13 @@ import org.json.JSONObject
  * Format: Authorization: Token YOUR_API_KEY
  */
 class DeepgramSttService(
-    private val apiKey: String
+    private val apiKey: String,
+    internal val baseUrl: String = DEFAULT_BASE_URL
 ) : BaseSttService() {
     
     companion object {
         private const val TAG = "DeepgramSttService"
-        private const val BASE_URL = "https://api.deepgram.com/v1"
+        internal const val DEFAULT_BASE_URL = "https://api.deepgram.com/v1"
     }
     
     override val provider = SttProvider.DEEPGRAM
@@ -44,7 +45,7 @@ class DeepgramSttService(
             
             // Build URL with query parameters
             val url = buildString {
-                append("$BASE_URL/listen?")
+                append("$baseUrl/listen?")
                 append("model=nova-2&")  // Latest model
                 append("language=$languageCode&")
                 append("punctuate=true&")
@@ -112,7 +113,7 @@ class DeepgramSttService(
             try {
                 // Use projects endpoint to validate API key
                 val request = Request.Builder()
-                    .url("$BASE_URL/projects")
+                    .url("$baseUrl/projects")
                     .addHeader("Authorization", "Token $apiKey")
                     .get()
                     .build()

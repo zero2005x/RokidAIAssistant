@@ -42,6 +42,24 @@
     <string name="enter_system_prompt">输入 AI 的系统提示词…</string>
     <string name="default_system_prompt">你是一个友善的 AI 助理。请用简体中文简洁清晰地回答所有问题。</string>
     
+    <!-- LLM Parameters -->
+    <string name="llm_parameters">LLM 参数设置</string>
+    <string name="llm_parameters_subtitle">Temperature、Max Tokens、Top P…</string>
+    <string name="llm_parameters_description">调整 AI 模型生成参数。这些数值会影响所有 AI 服务提供商，控制模型如何生成回应。</string>
+    <string name="llm_parameters_note">注意：并非所有参数都被每个提供商支持。不支持的参数会被自动忽略。Frequency Penalty 和 Presence Penalty 仅适用于 OpenAI 兼容的提供商。</string>
+    <string name="param_temperature">温度 (Temperature)</string>
+    <string name="param_temperature_desc">控制随机性。较低的值使回应更集中和确定，较高的值使回应更有创意和多样性。</string>
+    <string name="param_max_tokens">最大 Token 数</string>
+    <string name="param_max_tokens_desc">AI 回应的最大 Token 数量。较高的值允许更长的回应，但可能增加延迟和成本。</string>
+    <string name="param_top_p">Top P（核采样）</string>
+    <string name="param_top_p_desc">通过核采样控制多样性。0.1 表示只考虑概率质量前 10% 的 Token。</string>
+    <string name="param_frequency_penalty">频率惩罚</string>
+    <string name="param_frequency_penalty_desc">根据 Token 在文本中出现的频率进行惩罚，减少频繁用词的重复。</string>
+    <string name="param_presence_penalty">存在惩罚</string>
+    <string name="param_presence_penalty_desc">对已经出现在文本中的 Token 进行惩罚，鼓励模型讨论新话题。</string>
+    <string name="param_presets">预设值</string>
+    <string name="reset_defaults">重置为默认值</string>
+
     <!-- Recording Settings -->
     <string name="recording_settings">录音设置</string>
     <string name="auto_analyze_recordings">自动分析录音</string>

@@ -25,13 +25,15 @@ import java.net.URLEncoder
  */
 class BaiduSttService(
     private val apiKey: String,
-    private val secretKey: String
+    private val secretKey: String,
+    internal val tokenUrl: String = DEFAULT_TOKEN_URL,
+    internal val asrUrl: String = DEFAULT_ASR_URL
 ) : BaseSttService() {
     
     companion object {
         private const val TAG = "BaiduSTT"
-        private const val TOKEN_URL = "https://aip.baidubce.com/oauth/2.0/token"
-        private const val ASR_URL = "https://vop.baidu.com/server_api"
+        internal const val DEFAULT_TOKEN_URL = "https://aip.baidubce.com/oauth/2.0/token"
+        internal const val DEFAULT_ASR_URL = "https://vop.baidu.com/server_api"
     }
     
     override val provider = SttProvider.BAIDU_ASR
@@ -47,7 +49,7 @@ class BaiduSttService(
         
         return withContext(Dispatchers.IO) {
             try {
-                val url = "$TOKEN_URL?grant_type=client_credentials&client_id=$apiKey&client_secret=$secretKey"
+                val url = "$tokenUrl?grant_type=client_credentials&client_id=$apiKey&client_secret=$secretKey"
                 
                 val request = Request.Builder()
                     .url(url)
@@ -97,6 +99,15 @@ class BaiduSttService(
                 val audioBase64 = Base64.encodeToString(audioData, Base64.NO_WRAP)
                 val audioLen = audioData.size
                 
+                // Map languageCode to Baidu dev_pid:
+                // 1537 = Mandarin (with punctuation), 1737 = English (with punctuation)
+                // 1936 = Cantonese
+                val devPid = when {
+                    languageCode.startsWith("en") -> 1737
+                    languageCode.startsWith("yue") || languageCode == "zh-HK" -> 1936
+                    else -> 1537  // Default: Mandarin
+                }
+                
                 // Build request JSON
                 val requestJson = JSONObject().apply {
                     put("format", "pcm")
@@ -106,11 +117,11 @@ class BaiduSttService(
                     put("token", token)
                     put("speech", audioBase64)
                     put("len", audioLen)
-                    put("dev_pid", 1537) // 1537: Mandarin, 1737: English
+                    put("dev_pid", devPid)
                 }
                 
                 val request = Request.Builder()
-                    .url(ASR_URL)
+                    .url(asrUrl)
                     .addHeader("Content-Type", "application/json")
                     .post(requestJson.toString().toRequestBody("application/json".toMediaType()))
                     .build()

@@ -51,6 +51,13 @@ class SettingsRepository(private val context: Context) {
         private const val KEY_PUSH_CHAT_TO_GLASSES = "push_chat_to_glasses"
         private const val KEY_PUSH_RECORDING_TO_GLASSES = "push_recording_to_glasses"
         
+        // Keys for LLM parameters
+        private const val KEY_TEMPERATURE = "llm_temperature"
+        private const val KEY_MAX_TOKENS = "llm_max_tokens"
+        private const val KEY_TOP_P = "llm_top_p"
+        private const val KEY_FREQUENCY_PENALTY = "llm_frequency_penalty"
+        private const val KEY_PRESENCE_PENALTY = "llm_presence_penalty"
+        
         @Volatile
         private var instance: SettingsRepository? = null
         
@@ -135,7 +142,12 @@ class SettingsRepository(private val context: Context) {
             systemPrompt = systemPrompt,
             autoAnalyzeRecordings = prefs.getBoolean(KEY_AUTO_ANALYZE_RECORDINGS, true),
             pushChatToGlasses = prefs.getBoolean(KEY_PUSH_CHAT_TO_GLASSES, true),
-            pushRecordingToGlasses = prefs.getBoolean(KEY_PUSH_RECORDING_TO_GLASSES, true)
+            pushRecordingToGlasses = prefs.getBoolean(KEY_PUSH_RECORDING_TO_GLASSES, true),
+            temperature = prefs.getFloat(KEY_TEMPERATURE, 0.7f),
+            maxTokens = prefs.getInt(KEY_MAX_TOKENS, 2048),
+            topP = prefs.getFloat(KEY_TOP_P, 1.0f),
+            frequencyPenalty = prefs.getFloat(KEY_FREQUENCY_PENALTY, 0.0f),
+            presencePenalty = prefs.getFloat(KEY_PRESENCE_PENALTY, 0.0f)
         )
     }
     
@@ -194,6 +206,11 @@ class SettingsRepository(private val context: Context) {
             putBoolean(KEY_AUTO_ANALYZE_RECORDINGS, settings.autoAnalyzeRecordings)
             putBoolean(KEY_PUSH_CHAT_TO_GLASSES, settings.pushChatToGlasses)
             putBoolean(KEY_PUSH_RECORDING_TO_GLASSES, settings.pushRecordingToGlasses)
+            putFloat(KEY_TEMPERATURE, settings.temperature)
+            putInt(KEY_MAX_TOKENS, settings.maxTokens)
+            putFloat(KEY_TOP_P, settings.topP)
+            putFloat(KEY_FREQUENCY_PENALTY, settings.frequencyPenalty)
+            putFloat(KEY_PRESENCE_PENALTY, settings.presencePenalty)
             apply()
         }
         _settingsFlow.value = settings

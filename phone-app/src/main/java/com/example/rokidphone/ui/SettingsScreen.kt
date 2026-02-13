@@ -35,6 +35,7 @@ fun SettingsScreen(
     onSettingsChange: (ApiSettings) -> Unit,
     onBack: () -> Unit,
     onNavigateToLogViewer: () -> Unit = {},
+    onNavigateToLlmParameters: () -> Unit = {},
     onTestConnection: (ApiSettings) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -257,6 +258,15 @@ fun SettingsScreen(
             // Advanced settings section
             item {
                 SettingsSection(title = stringResource(R.string.advanced_settings)) {
+                    SettingsRow(
+                        title = stringResource(R.string.llm_parameters),
+                        subtitle = stringResource(R.string.llm_parameters_subtitle),
+                        onClick = onNavigateToLlmParameters,
+                        icon = Icons.Default.Tune
+                    )
+                    
+                    HorizontalDivider()
+                    
                     SettingsRow(
                         title = stringResource(R.string.system_prompt),
                         subtitle = settings.systemPrompt.take(50) + if (settings.systemPrompt.length > 50) "..." else "",

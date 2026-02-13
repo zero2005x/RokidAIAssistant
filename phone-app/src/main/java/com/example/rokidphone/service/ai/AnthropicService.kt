@@ -24,14 +24,18 @@ import org.json.JSONObject
  */
 class AnthropicService(
     apiKey: String,
-    modelId: String = "claude-3-5-sonnet-20241022",
-    systemPrompt: String = ""
-) : BaseAiService(apiKey, modelId, systemPrompt), AiServiceProvider {
+    modelId: String = "claude-sonnet-4-5",
+    systemPrompt: String = "",
+    temperature: Float = 0.7f,
+    maxTokens: Int = 2048,
+    topP: Float = 1.0f,
+    internal val baseUrl: String = DEFAULT_BASE_URL
+) : BaseAiService(apiKey, modelId, systemPrompt, temperature, maxTokens, topP), AiServiceProvider {
     
     companion object {
         private const val TAG = "AnthropicService"
-        private const val BASE_URL = "https://api.anthropic.com/v1"
-        private const val API_VERSION = "2023-06-01"
+        internal const val DEFAULT_BASE_URL = "https://api.anthropic.com/v1"
+        internal const val API_VERSION = "2023-06-01"
     }
     
     override val provider = AiProvider.ANTHROPIC
@@ -68,7 +72,9 @@ class AnthropicService(
             
             val requestJson = JSONObject().apply {
                 put("model", modelId)
-                put("max_tokens", 500)
+                put("max_tokens", maxTokens)
+                put("temperature", temperature.toDouble())
+                put("top_p", topP.toDouble())
                 put("system", getFullSystemPrompt())
                 put("messages", messages)
             }
@@ -77,7 +83,7 @@ class AnthropicService(
                 Log.d(TAG, "Sending chat request to Anthropic (attempt $attempt)")
                 
                 val request = Request.Builder()
-                    .url("$BASE_URL/messages")
+                    .url("$baseUrl/messages")
                     .addHeader("x-api-key", apiKey)
                     .addHeader("anthropic-version", API_VERSION)
                     .addHeader("Content-Type", "application/json")
@@ -139,7 +145,7 @@ class AnthropicService(
             
             val requestJson = JSONObject().apply {
                 put("model", modelId)
-                put("max_tokens", 500)
+                put("max_tokens", maxTokens.coerceAtMost(4096))
                 put("system", "You are an image analysis assistant. Please provide objective descriptions based on the image content. If unable to determine, please explain.")
                 put("messages", messages)
             }
@@ -148,7 +154,7 @@ class AnthropicService(
                 Log.d(TAG, "Sending image analysis request to Anthropic (attempt $attempt)")
                 
                 val request = Request.Builder()
-                    .url("$BASE_URL/messages")
+                    .url("$baseUrl/messages")
                     .addHeader("x-api-key", apiKey)
                     .addHeader("anthropic-version", API_VERSION)
                     .addHeader("Content-Type", "application/json")

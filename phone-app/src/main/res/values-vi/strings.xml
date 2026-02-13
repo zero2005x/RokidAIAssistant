@@ -42,6 +42,24 @@
     <string name="enter_system_prompt">Nhập lời nhắc hệ thống AI…</string>
     <string name="default_system_prompt">Bạn là một trợ lý AI thân thiện. Vui lòng trả lời tất cả các câu hỏi bằng tiếng Việt một cách ngắn gọn và rõ ràng.</string>
     
+    <!-- LLM Parameters -->
+    <string name="llm_parameters">Tham số LLM</string>
+    <string name="llm_parameters_subtitle">Temperature, Max Tokens, Top P…</string>
+    <string name="llm_parameters_description">Điều chỉnh các tham số tạo sinh của mô hình AI. Các giá trị này ảnh hưởng đến tất cả nhà cung cấp AI và kiểm soát cách mô hình tạo phản hồi.</string>
+    <string name="llm_parameters_note">Lưu ý: Không phải tất cả các tham số đều được hỗ trợ bởi mọi nhà cung cấp. Các tham số không được hỗ trợ sẽ tự động bị bỏ qua. Frequency Penalty và Presence Penalty chỉ áp dụng cho các nhà cung cấp tương thích OpenAI.</string>
+    <string name="param_temperature">Nhiệt độ (Temperature)</string>
+    <string name="param_temperature_desc">Kiểm soát tính ngẫu nhiên. Giá trị thấp hơn tạo phản hồi tập trung và xác định hơn, giá trị cao hơn tạo phản hồi sáng tạo và đa dạng hơn.</string>
+    <string name="param_max_tokens">Token tối đa</string>
+    <string name="param_max_tokens_desc">Số lượng token tối đa trong phản hồi AI. Giá trị cao hơn cho phép phản hồi dài hơn nhưng có thể tăng độ trễ và chi phí.</string>
+    <string name="param_top_p">Top P (lấy mẫu hạt nhân)</string>
+    <string name="param_top_p_desc">Kiểm soát sự đa dạng thông qua lấy mẫu hạt nhân. 0.1 có nghĩa là chỉ xem xét các token trong 10% xác suất hàng đầu.</string>
+    <string name="param_frequency_penalty">Hình phạt tần suất</string>
+    <string name="param_frequency_penalty_desc">Phạt các token dựa trên tần suất xuất hiện trong văn bản, giảm sự lặp lại của các từ thường xuyên.</string>
+    <string name="param_presence_penalty">Hình phạt sự hiện diện</string>
+    <string name="param_presence_penalty_desc">Phạt các token đã xuất hiện trong văn bản, khuyến khích mô hình nói về các chủ đề mới.</string>
+    <string name="param_presets">Cài đặt sẵn</string>
+    <string name="reset_defaults">Đặt lại giá trị mặc định</string>
+    
     <!-- Recording Settings -->
     <string name="recording_settings">Cài đặt ghi âm</string>
     <string name="auto_analyze_recordings">Tự động phân tích bản ghi</string>
@@ -190,7 +208,7 @@
     <string name="stt_uses_main_api_key">Sử dụng khóa API của nhà cung cấp AI chính được cấu hình ở trên</string>
     <string name="stt_test_connection">Kiểm tra kết nối</string>
     <string name="stt_test_success">Kết nối thành công</string>
-    <string name="stt_test_failed">Kiểm tra kết nối thất bại</string>
+    <string name="stt_test_failed">Kết nối thất bại: %s</string>
     <string name="stt_api_key">Khóa API</string>
     <string name="stt_api_secret">Bí mật API</string>
     <string name="stt_app_id">ID ứng dụng</string>

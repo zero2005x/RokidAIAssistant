@@ -21,14 +21,17 @@ import org.json.JSONObject
  * Note: AssemblyAI uses an async workflow - upload audio, create transcript, poll for result
  */
 class AssemblyAiSttService(
-    private val apiKey: String
+    private val apiKey: String,
+    internal val baseUrl: String = DEFAULT_BASE_URL,
+    internal val pollIntervalMs: Long = DEFAULT_POLL_INTERVAL_MS,
+    internal val maxPollAttempts: Int = DEFAULT_MAX_POLL_ATTEMPTS
 ) : BaseSttService() {
     
     companion object {
         private const val TAG = "AssemblyAiSttService"
-        private const val BASE_URL = "https://api.assemblyai.com/v2"
-        private const val POLL_INTERVAL_MS = 1000L
-        private const val MAX_POLL_ATTEMPTS = 60  // 60 seconds max wait
+        internal const val DEFAULT_BASE_URL = "https://api.assemblyai.com/v2"
+        internal const val DEFAULT_POLL_INTERVAL_MS = 1000L
+        internal const val DEFAULT_MAX_POLL_ATTEMPTS = 60  // 60 seconds max wait
     }
     
     override val provider = SttProvider.ASSEMBLYAI
@@ -90,7 +93,7 @@ class AssemblyAiSttService(
         Log.d(TAG, "Uploading audio to AssemblyAI...")
         
         val request = Request.Builder()
-            .url("$BASE_URL/upload")
+            .url("$baseUrl/upload")
             .addHeader("Authorization", apiKey)
             .addHeader("Content-Type", "audio/wav")
             .post(audioData.toRequestBody("audio/wav".toMediaType()))
@@ -135,7 +138,7 @@ class AssemblyAiSttService(
         }
         
         val request = Request.Builder()
-            .url("$BASE_URL/transcript")
+            .url("$baseUrl/transcript")
             .addHeader("Authorization", apiKey)
             .addHeader("Content-Type", "application/json")
             .post(requestBody.toString().toRequestBody("application/json".toMediaType()))
@@ -163,9 +166,9 @@ class AssemblyAiSttService(
     private suspend fun pollForResult(transcriptId: String): String? {
         Log.d(TAG, "Polling for transcript result...")
         
-        repeat(MAX_POLL_ATTEMPTS) { attempt ->
+        repeat(maxPollAttempts) { attempt ->
             val request = Request.Builder()
-                .url("$BASE_URL/transcript/$transcriptId")
+                .url("$baseUrl/transcript/$transcriptId")
                 .addHeader("Authorization", apiKey)
                 .get()
                 .build()
@@ -198,10 +201,10 @@ class AssemblyAiSttService(
                 Log.e(TAG, "Poll error: ${e.message}")
             }
             
-            kotlinx.coroutines.delay(POLL_INTERVAL_MS)
+            kotlinx.coroutines.delay(pollIntervalMs)
         }
         
-        Log.e(TAG, "Polling timed out after $MAX_POLL_ATTEMPTS attempts")
+        Log.e(TAG, "Polling timed out after $maxPollAttempts attempts")
         return null
     }
     
@@ -210,7 +213,7 @@ class AssemblyAiSttService(
             try {
                 // Use a simple GET request to check API key
                 val request = Request.Builder()
-                    .url("$BASE_URL/transcript")  // List transcripts endpoint
+                    .url("$baseUrl/transcript")  // List transcripts endpoint
                     .addHeader("Authorization", apiKey)
                     .get()
                     .build()

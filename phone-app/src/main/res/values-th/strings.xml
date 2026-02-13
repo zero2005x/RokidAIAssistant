@@ -42,6 +42,24 @@
     <string name="enter_system_prompt">ป้อนพรอมต์ระบบ AI…</string>
     <string name="default_system_prompt">คุณเป็นผู้ช่วย AI ที่เป็นมิตร กรุณาตอบคำถามทั้งหมดเป็นภาษาไทยอย่างกระชับและชัดเจน</string>
     
+    <!-- LLM Parameters -->
+    <string name="llm_parameters">พารามิเตอร์ LLM</string>
+    <string name="llm_parameters_subtitle">Temperature, Max Tokens, Top P…</string>
+    <string name="llm_parameters_description">ปรับพารามิเตอร์การสร้างของโมเดล AI ค่าเหล่านี้มีผลต่อผู้ให้บริการ AI ทั้งหมดและควบคุมวิธีที่โมเดลสร้างการตอบสนอง</string>
+    <string name="llm_parameters_note">หมายเหตุ: ไม่ใช่ทุกพารามิเตอร์จะรองรับโดยทุกผู้ให้บริการ พารามิเตอร์ที่ไม่รองรับจะถูกละเว้นโดยอัตโนมัติ Frequency Penalty และ Presence Penalty ใช้ได้เฉพาะกับผู้ให้บริการที่เข้ากันได้กับ OpenAI เท่านั้น</string>
+    <string name="param_temperature">อุณหภูมิ (Temperature)</string>
+    <string name="param_temperature_desc">ควบคุมความสุ่ม ค่าต่ำทำให้การตอบสนองมีความเฉพาะเจาะจงและแน่นอนมากขึ้น ค่าสูงทำให้สร้างสรรค์และหลากหลายมากขึ้น</string>
+    <string name="param_max_tokens">โทเค็นสูงสุด</string>
+    <string name="param_max_tokens_desc">จำนวนโทเค็นสูงสุดในการตอบสนองของ AI ค่าที่สูงขึ้นอนุญาตให้ตอบสนองยาวขึ้น แต่อาจเพิ่มเวลาแฝงและค่าใช้จ่าย</string>
+    <string name="param_top_p">Top P (การสุ่มตัวอย่างนิวเคลียส)</string>
+    <string name="param_top_p_desc">ควบคุมความหลากหลายผ่านการสุ่มตัวอย่างนิวเคลียส 0.1 หมายความว่าพิจารณาเฉพาะโทเค็นที่อยู่ใน 10% บนสุดของมวลความน่าจะเป็น</string>
+    <string name="param_frequency_penalty">บทลงโทษความถี่</string>
+    <string name="param_frequency_penalty_desc">ลงโทษโทเค็นตามความถี่ที่ปรากฏในข้อความ ลดการซ้ำของคำที่ใช้บ่อย</string>
+    <string name="param_presence_penalty">บทลงโทษการมีอยู่</string>
+    <string name="param_presence_penalty_desc">ลงโทษโทเค็นที่ปรากฏในข้อความแล้ว กระตุ้นให้โมเดลพูดถึงหัวข้อใหม่</string>
+    <string name="param_presets">ค่าที่ตั้งไว้ล่วงหน้า</string>
+    <string name="reset_defaults">รีเซ็ตเป็นค่าเริ่มต้น</string>
+    
     <!-- Recording Settings -->
     <string name="recording_settings">การตั้งค่าการบันทึก</string>
     <string name="auto_analyze_recordings">วิเคราะห์การบันทึกอัตโนมัติ</string>
@@ -64,7 +82,7 @@
     <string name="select_ai_provider">เลือกผู้ให้บริการ AI</string>
     <string name="select_model">เลือกโมเดล</string>
     <string name="select_speech_service">เลือกบริการรู้จำเสียง</string>
-    <string name="supports_audio">✓ รองรับเสียง</string>
+    <string name="supports_audio">เสียง</string>
     
     <!-- AI Processing -->
     <string name="processing_voice">กำลังประมวลผลเสียง…</string>
@@ -171,7 +189,7 @@
     <string name="stt_uses_main_api_key">ใช้คีย์ API ของผู้ให้บริการ AI หลักที่กำหนดค่าไว้ด้านบน</string>
     <string name="stt_test_connection">ทดสอบการเชื่อมต่อ</string>
     <string name="stt_test_success">เชื่อมต่อสำเร็จ</string>
-    <string name="stt_test_failed">ทดสอบการเชื่อมต่อล้มเหลว</string>
+    <string name="stt_test_failed">การเชื่อมต่อล้มเหลว: %s</string>
     <string name="stt_api_key">คีย์ API</string>
     <string name="stt_api_secret">ซีเคร็ต API</string>
     <string name="stt_app_id">ID แอป</string>

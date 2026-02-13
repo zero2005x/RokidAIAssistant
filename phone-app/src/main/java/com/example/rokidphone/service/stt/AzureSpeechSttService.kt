@@ -22,7 +22,9 @@ import org.json.JSONObject
  */
 class AzureSpeechSttService(
     private val subscriptionKey: String,
-    private val region: String
+    private val region: String,
+    internal val baseEndpoint: String? = null,
+    internal val baseTokenEndpoint: String? = null
 ) : BaseSttService() {
     
     companion object {
@@ -32,7 +34,7 @@ class AzureSpeechSttService(
     override val provider = SttProvider.AZURE_SPEECH
     
     private val endpoint: String
-        get() = "https://$region.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1"
+        get() = baseEndpoint ?: "https://$region.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1"
     
     override suspend fun transcribe(audioData: ByteArray, languageCode: String): SpeechResult {
         return withContext(Dispatchers.IO) {
@@ -148,7 +150,7 @@ class AzureSpeechSttService(
                 // Send a minimal audio request to validate credentials
                 // Azure doesn't have a simple health check endpoint that validates the key
                 // So we'll use the token endpoint to validate
-                val tokenUrl = "https://$region.api.cognitive.microsoft.com/sts/v1.0/issueToken"
+                val tokenUrl = baseTokenEndpoint ?: "https://$region.api.cognitive.microsoft.com/sts/v1.0/issueToken"
                 
                 val request = Request.Builder()
                     .url(tokenUrl)

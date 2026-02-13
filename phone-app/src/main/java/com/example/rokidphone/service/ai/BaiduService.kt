@@ -31,13 +31,17 @@ class BaiduService(
     private val apiKey: String,
     private val secretKey: String,
     private val modelId: String = "ernie-4.0-8k",
-    private val systemPrompt: String = ""
+    private val systemPrompt: String = "",
+    private val temperature: Float = 0.7f,
+    private val topP: Float = 1.0f,
+    internal val tokenUrl: String = DEFAULT_TOKEN_URL,
+    internal val baseChatUrl: String = DEFAULT_BASE_CHAT_URL
 ) : AiServiceProvider {
     
     companion object {
         private const val TAG = "BaiduService"
-        private const val TOKEN_URL = "https://aip.baidubce.com/oauth/2.0/token"
-        private const val BASE_CHAT_URL = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat"
+        internal const val DEFAULT_TOKEN_URL = "https://aip.baidubce.com/oauth/2.0/token"
+        internal const val DEFAULT_BASE_CHAT_URL = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat"
         
         // Token cache with thread-safe access
         private var cachedToken: String? = null
@@ -85,7 +89,7 @@ class BaiduService(
             withContext(Dispatchers.IO) {
                 try {
                     val tokenRequest = Request.Builder()
-                        .url("$TOKEN_URL?grant_type=client_credentials&client_id=$apiKey&client_secret=$secretKey")
+                        .url("$tokenUrl?grant_type=client_credentials&client_id=$apiKey&client_secret=$secretKey")
                         .post("".toRequestBody("application/json".toMediaType()))
                         .build()
                     
@@ -124,7 +128,7 @@ class BaiduService(
      */
     private fun getChatEndpoint(modelId: String): String {
         val endpoint = modelEndpoints[modelId] ?: "completions"
-        return "$BASE_CHAT_URL/$endpoint"
+        return "$baseChatUrl/$endpoint"
     }
     
     /**
@@ -168,7 +172,8 @@ class BaiduService(
             val requestJson = JSONObject().apply {
                 put("messages", messages)
                 put("system", getFullSystemPrompt())
-                put("temperature", 0.7)
+                put("temperature", temperature.toDouble())
+                put("top_p", topP.toDouble())
                 put("stream", false)
             }
             

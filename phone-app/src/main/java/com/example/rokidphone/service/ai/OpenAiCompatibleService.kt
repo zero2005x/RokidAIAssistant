@@ -6,12 +6,10 @@ import com.example.rokidphone.service.SpeechResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.concurrent.TimeUnit
 
 /**
  * OpenAI-Compatible Service Implementation
@@ -24,29 +22,23 @@ import java.util.concurrent.TimeUnit
  * This is a generic implementation that works with any OpenAI-compatible endpoint.
  */
 class OpenAiCompatibleService(
-    private val apiKey: String,
+    apiKey: String,
     private val baseUrl: String,
-    private val modelId: String,
-    private val systemPrompt: String = "",
-    private val providerType: AiProvider = AiProvider.OPENAI
-) : AiServiceProvider {
+    modelId: String,
+    systemPrompt: String = "",
+    private val providerType: AiProvider = AiProvider.OPENAI,
+    temperature: Float = 0.7f,
+    maxTokens: Int = 2048,
+    topP: Float = 1.0f,
+    frequencyPenalty: Float = 0.0f,
+    presencePenalty: Float = 0.0f
+) : BaseAiService(apiKey, modelId, systemPrompt, temperature, maxTokens, topP, frequencyPenalty, presencePenalty), AiServiceProvider {
     
     companion object {
         private const val TAG = "OpenAiCompatibleService"
-        private const val MAX_RETRIES = 3
-        private const val RETRY_DELAY_MS = 1000L
     }
     
     override val provider = providerType
-    
-    private val client: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(60, TimeUnit.SECONDS)
-        .readTimeout(120, TimeUnit.SECONDS)
-        .writeTimeout(120, TimeUnit.SECONDS)
-        .build()
-    
-    // Conversation history
-    private val conversationHistory = mutableListOf<Pair<String, String>>()
     
     /**
      * Build the full endpoint URL
@@ -205,8 +197,11 @@ class OpenAiCompatibleService(
             val requestJson = JSONObject().apply {
                 put("model", modelId)
                 put("messages", messages)
-                put("temperature", 0.7)
-                put("max_tokens", 500)
+                put("temperature", temperature.toDouble())
+                put("max_tokens", maxTokens)
+                put("top_p", topP.toDouble())
+                if (frequencyPenalty != 0.0f) put("frequency_penalty", frequencyPenalty.toDouble())
+                if (presencePenalty != 0.0f) put("presence_penalty", presencePenalty.toDouble())
                 put("stream", false)
             }
             
@@ -290,7 +285,8 @@ class OpenAiCompatibleService(
             val requestJson = JSONObject().apply {
                 put("model", modelId)
                 put("messages", messages)
-                put("max_tokens", 500)
+                put("max_tokens", maxTokens.coerceAtMost(4096))
+                put("temperature", temperature.toDouble())
             }
             
             val url = buildUrl("chat/completions")
@@ -427,87 +423,5 @@ class OpenAiCompatibleService(
         } catch (e: Exception) {
             null
         }
-    }
-    
-    /**
-     * Get current date time string
-     */
-    private fun getCurrentDateTime(): String {
-        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd EEEE HH:mm", java.util.Locale.getDefault())
-        return dateFormat.format(java.util.Date())
-    }
-    
-    /**
-     * Get full system prompt with date
-     */
-    private fun getFullSystemPrompt(): String {
-        return "$systemPrompt\n\nCurrent date/time: ${getCurrentDateTime()}"
-    }
-    
-    /**
-     * Convert PCM to WAV
-     */
-    private fun pcmToWav(
-        pcmData: ByteArray,
-        sampleRate: Int = 16000,
-        channels: Int = 1,
-        bitsPerSample: Int = 16
-    ): ByteArray {
-        val byteRate = sampleRate * channels * bitsPerSample / 8
-        val blockAlign = channels * bitsPerSample / 8
-        val dataSize = pcmData.size
-        val totalSize = 36 + dataSize
-        
-        val output = java.io.ByteArrayOutputStream()
-        
-        // RIFF header
-        output.write("RIFF".toByteArray())
-        output.write(intToBytes(totalSize, 4))
-        output.write("WAVE".toByteArray())
-        
-        // fmt chunk
-        output.write("fmt ".toByteArray())
-        output.write(intToBytes(16, 4))
-        output.write(intToBytes(1, 2))
-        output.write(intToBytes(channels, 2))
-        output.write(intToBytes(sampleRate, 4))
-        output.write(intToBytes(byteRate, 4))
-        output.write(intToBytes(blockAlign, 2))
-        output.write(intToBytes(bitsPerSample, 2))
-        
-        // data chunk
-        output.write("data".toByteArray())
-        output.write(intToBytes(dataSize, 4))
-        output.write(pcmData)
-        
-        return output.toByteArray()
-    }
-    
-    private fun intToBytes(value: Int, numBytes: Int): ByteArray {
-        val bytes = ByteArray(numBytes)
-        for (i in 0 until numBytes) {
-            bytes[i] = (value shr (8 * i) and 0xFF).toByte()
-        }
-        return bytes
-    }
-    
-    /**
-     * Add to conversation history
-     */
-    private fun addToHistory(userMessage: String, assistantMessage: String) {
-        conversationHistory.add("user" to userMessage)
-        conversationHistory.add("assistant" to assistantMessage)
-        
-        // Limit history length
-        while (conversationHistory.size > 10) {
-            conversationHistory.removeAt(0)
-        }
-    }
-    
-    /**
-     * Clear conversation history
-     */
-    override fun clearHistory() {
-        conversationHistory.clear()
     }
 }

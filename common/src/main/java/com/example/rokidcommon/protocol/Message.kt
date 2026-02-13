@@ -106,6 +106,9 @@ data class Message(
             type = MessageType.AI_RESPONSE_TEXT,
             payload = text
         )
+
+        // Alias for compatibility with older/newer call sites
+        fun aiResponse(text: String) = aiResponseText(text)
         
         fun aiResponseTts(audioData: ByteArray) = Message(
             type = MessageType.AI_RESPONSE_TTS,
@@ -123,6 +126,11 @@ data class Message(
         )
         
         fun displayClear() = Message(type = MessageType.DISPLAY_CLEAR)
+
+        fun photoData(photoChunk: ByteArray) = Message(
+            type = MessageType.PHOTO_DATA,
+            binaryData = photoChunk
+        )
     }
     
     /**

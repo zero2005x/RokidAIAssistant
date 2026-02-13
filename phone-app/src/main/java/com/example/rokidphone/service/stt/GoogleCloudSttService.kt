@@ -30,12 +30,13 @@ class GoogleCloudSttService(
     private val projectId: String,
     private val apiKey: String = "",
     private val serviceAccountJson: String = "",
-    private val useServiceAccount: Boolean = false
+    private val useServiceAccount: Boolean = false,
+    internal val baseUrl: String = DEFAULT_BASE_URL
 ) : BaseSttService() {
     
     companion object {
         private const val TAG = "GoogleCloudSTT"
-        private const val BASE_URL = "https://speech.googleapis.com/v1"
+        internal const val DEFAULT_BASE_URL = "https://speech.googleapis.com/v1"
     }
     
     override val provider = SttProvider.GOOGLE_CLOUD_STT
@@ -70,9 +71,9 @@ class GoogleCloudSttService(
                 
                 // Build request URL
                 val url = if (useServiceAccount) {
-                    "$BASE_URL/speech:recognize"
+                    "$baseUrl/speech:recognize"
                 } else {
-                    "$BASE_URL/speech:recognize?key=$apiKey"
+                    "$baseUrl/speech:recognize?key=$apiKey"
                 }
                 
                 val request = Request.Builder()

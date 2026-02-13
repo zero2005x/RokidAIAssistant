@@ -42,6 +42,24 @@
     <string name="enter_system_prompt">Enter AI system prompt…</string>
     <string name="default_system_prompt">You are a friendly AI assistant. Please answer all questions in English concisely and clearly.</string>
     
+    <!-- LLM Parameters -->
+    <string name="llm_parameters">LLM Parameters</string>
+    <string name="llm_parameters_subtitle">Temperature, Max Tokens, Top P…</string>
+    <string name="llm_parameters_description">Adjust AI model generation parameters. These values affect all AI providers and control how the model generates responses.</string>
+    <string name="llm_parameters_note">Note: Not all parameters are supported by every provider. Unsupported parameters will be silently ignored. Frequency Penalty and Presence Penalty only apply to OpenAI-compatible providers.</string>
+    <string name="param_temperature">Temperature</string>
+    <string name="param_temperature_desc">Controls randomness. Lower values make responses more focused and deterministic, higher values make them more creative and diverse.</string>
+    <string name="param_max_tokens">Max Tokens</string>
+    <string name="param_max_tokens_desc">Maximum number of tokens in the AI response. Higher values allow longer responses but may increase latency and cost.</string>
+    <string name="param_top_p">Top P (Nucleus Sampling)</string>
+    <string name="param_top_p_desc">Controls diversity via nucleus sampling. 0.1 means only tokens in the top 10% probability mass are considered.</string>
+    <string name="param_frequency_penalty">Frequency Penalty</string>
+    <string name="param_frequency_penalty_desc">Penalizes tokens based on how often they appear in the text so far, reducing repetition of frequent words.</string>
+    <string name="param_presence_penalty">Presence Penalty</string>
+    <string name="param_presence_penalty_desc">Penalizes tokens that have already appeared in the text, encouraging the model to talk about new topics.</string>
+    <string name="param_presets">Presets</string>
+    <string name="reset_defaults">Reset Defaults</string>
+
     <!-- Recording Settings -->
     <string name="recording_settings">Recording Settings</string>
     <string name="auto_analyze_recordings">Auto-Analyze Recordings</string>

@@ -26,18 +26,22 @@ import org.json.JSONObject
 class GeminiService(
     apiKey: String,
     modelId: String = "gemini-2.5-flash",
-    systemPrompt: String = ""
-) : BaseAiService(apiKey, modelId, systemPrompt), AiServiceProvider {
+    systemPrompt: String = "",
+    temperature: Float = 0.7f,
+    maxTokens: Int = 2048,
+    topP: Float = 1.0f,
+    internal val baseUrl: String = DEFAULT_BASE_URL
+) : BaseAiService(apiKey, modelId, systemPrompt, temperature, maxTokens, topP), AiServiceProvider {
     
     companion object {
         private const val TAG = "GeminiService"
-        private const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
+        internal const val DEFAULT_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
     }
     
     override val provider = AiProvider.GEMINI
     
     private val apiUrl: String
-        get() = "$BASE_URL/$modelId:generateContent"
+        get() = "$baseUrl/$modelId:generateContent"
     
     /**
      * Speech Recognition - Gemini native audio support
@@ -282,8 +286,9 @@ Rules:
             val requestJson = JSONObject().apply {
                 put("contents", contents)
                 put("generationConfig", JSONObject().apply {
-                    put("temperature", 0.7)
-                    put("maxOutputTokens", 500)
+                    put("temperature", temperature.toDouble())
+                    put("maxOutputTokens", maxTokens)
+                    put("topP", topP.toDouble())
                 })
             }
             
@@ -355,8 +360,8 @@ Rules:
                     })
                 })
                 put("generationConfig", JSONObject().apply {
-                    put("temperature", 0.4)
-                    put("maxOutputTokens", 500)
+                    put("temperature", temperature.toDouble())
+                    put("maxOutputTokens", maxTokens.coerceAtMost(4096))
                 })
             }
             

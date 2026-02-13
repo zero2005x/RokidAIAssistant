@@ -19,7 +19,12 @@ import java.util.concurrent.TimeUnit
 abstract class BaseAiService(
     protected val apiKey: String,
     protected val modelId: String,
-    protected val systemPrompt: String
+    protected val systemPrompt: String,
+    protected val temperature: Float = 0.7f,
+    protected val maxTokens: Int = 2048,
+    protected val topP: Float = 1.0f,
+    protected val frequencyPenalty: Float = 0.0f,
+    protected val presencePenalty: Float = 0.0f
 ) {
     companion object {
         private const val TAG = "BaseAiService"

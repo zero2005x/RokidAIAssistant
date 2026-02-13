@@ -124,8 +124,6 @@ data class SttCredentials(
             SttProvider.TENCENT_ASR -> tencentSecretId.isNotBlank() && tencentSecretKey.isNotBlank()
             SttProvider.BAIDU_ASR -> baiduAsrApiKey.isNotBlank() && baiduAsrSecretKey.isNotBlank()
             SttProvider.OTTER_AI -> otteraiApiKey.isNotBlank()
-            SttProvider.BAIDU_ASR -> false  // TODO: Implement Baidu ASR credentials
-            SttProvider.OTTER_AI -> false  // TODO: Implement Otter.ai credentials
         }
     }
     

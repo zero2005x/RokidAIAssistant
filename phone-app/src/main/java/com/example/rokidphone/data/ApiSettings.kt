@@ -278,7 +278,7 @@ object AvailableModels {
     
     val anthropicModels = listOf(
         ModelOption(
-            id = "claude-opus-4.6",
+            id = "claude-opus-4-6",
             displayName = "Claude Opus 4.6",
             provider = AiProvider.ANTHROPIC,
             supportsAudio = false,
@@ -286,7 +286,7 @@ object AvailableModels {
             description = "Anthropic's most capable model with thinking mode for deep reasoning"
         ),
         ModelOption(
-            id = "claude-sonnet-4.5",
+            id = "claude-sonnet-4-5",
             displayName = "Claude Sonnet 4.5",
             provider = AiProvider.ANTHROPIC,
             supportsAudio = false,
@@ -294,7 +294,7 @@ object AvailableModels {
             description = "The best balance of intelligence and speed for enterprise workloads"
         ),
         ModelOption(
-            id = "claude-haiku-4.5",
+            id = "claude-haiku-4-5",
             displayName = "Claude Haiku 4.5",
             provider = AiProvider.ANTHROPIC,
             supportsAudio = false,
@@ -302,12 +302,12 @@ object AvailableModels {
             description = "Blazing fast model for instant responses and simple tasks"
         ),
         ModelOption(
-            id = "claude-4",
-            displayName = "Claude 4",
+            id = "claude-sonnet-4-20250514",
+            displayName = "Claude Sonnet 4",
             provider = AiProvider.ANTHROPIC,
             supportsAudio = false,
             supportsVision = true,
-            description = "Balanced Claude model with strong overall performance"
+            description = "Previous generation Claude model with strong overall performance"
         )
     )
     
@@ -858,6 +858,13 @@ data class ApiSettings(
     
     // Otter.ai
     val otteraiApiKey: String = "",
+    
+    // LLM Generation Parameters
+    val temperature: Float = 0.7f,
+    val maxTokens: Int = 2048,
+    val topP: Float = 1.0f,
+    val frequencyPenalty: Float = 0.0f,
+    val presencePenalty: Float = 0.0f,
     
     // AI response settings
     val responseLanguage: String = "zh-TW",

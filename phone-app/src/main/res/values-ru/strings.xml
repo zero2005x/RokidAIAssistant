@@ -42,6 +42,24 @@
     <string name="enter_system_prompt">Введите системный промпт ИИ…</string>
     <string name="default_system_prompt">Вы дружелюбный ИИ-ассистент. Пожалуйста, отвечайте на все вопросы на русском языке кратко и ясно.</string>
     
+    <!-- LLM Parameters -->
+    <string name="llm_parameters">Параметры LLM</string>
+    <string name="llm_parameters_subtitle">Temperature, Max Tokens, Top P…</string>
+    <string name="llm_parameters_description">Настройте параметры генерации модели ИИ. Эти значения влияют на всех провайдеров ИИ и управляют способом генерации ответов моделью.</string>
+    <string name="llm_parameters_note">Примечание: не все параметры поддерживаются каждым провайдером. Неподдерживаемые параметры будут автоматически проигнорированы. Frequency Penalty и Presence Penalty применяются только к OpenAI-совместимым провайдерам.</string>
+    <string name="param_temperature">Температура (Temperature)</string>
+    <string name="param_temperature_desc">Контролирует случайность. Низкие значения делают ответы более сфокусированными и детерминированными, высокие — более креативными и разнообразными.</string>
+    <string name="param_max_tokens">Макс. токенов</string>
+    <string name="param_max_tokens_desc">Максимальное количество токенов в ответе ИИ. Более высокие значения допускают более длинные ответы, но могут увеличить задержку и стоимость.</string>
+    <string name="param_top_p">Top P (ядерная выборка)</string>
+    <string name="param_top_p_desc">Контролирует разнообразие через ядерную выборку. 0.1 означает, что рассматриваются только токены в верхних 10% вероятностной массы.</string>
+    <string name="param_frequency_penalty">Штраф за частоту</string>
+    <string name="param_frequency_penalty_desc">Штрафует токены на основе частоты их появления в тексте, уменьшая повторение частых слов.</string>
+    <string name="param_presence_penalty">Штраф за присутствие</string>
+    <string name="param_presence_penalty_desc">Штрафует токены, уже появившиеся в тексте, побуждая модель обсуждать новые темы.</string>
+    <string name="param_presets">Предустановки</string>
+    <string name="reset_defaults">Сбросить на значения по умолчанию</string>
+    
     <!-- Recording Settings -->
     <string name="recording_settings">Настройки записи</string>
     <string name="auto_analyze_recordings">Автоматический анализ записей</string>
@@ -190,7 +208,7 @@
     <string name="stt_uses_main_api_key">Использует ключ API основного провайдера ИИ, настроенный выше</string>
     <string name="stt_test_connection">Тест соединения</string>
     <string name="stt_test_success">Соединение успешно</string>
-    <string name="stt_test_failed">Тест соединения не пройден</string>
+    <string name="stt_test_failed">Ошибка соединения: %s</string>
     <string name="stt_api_key">API-ключ</string>
     <string name="stt_api_secret">API-секрет</string>
     <string name="stt_app_id">ID приложения</string>

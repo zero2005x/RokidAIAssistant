@@ -13,6 +13,7 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString.Companion.toByteString
 import org.json.JSONObject
+import android.util.Base64
 import java.net.URLEncoder
 import java.util.*
 import java.util.concurrent.CountDownLatch
@@ -260,7 +261,7 @@ class VolcengineSttService(
         mac.init(secretKeySpec)
         
         val signatureBytes = mac.doFinal(signString.toByteArray())
-        val signature = Base64.getEncoder().encodeToString(signatureBytes)
+        val signature = Base64.encodeToString(signatureBytes, Base64.NO_WRAP)
         
         // Build token
         return "$accessKeyId;$timestamp;$nonce;$signature"

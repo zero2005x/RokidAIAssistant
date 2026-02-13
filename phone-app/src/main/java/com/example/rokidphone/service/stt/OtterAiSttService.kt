@@ -35,14 +35,17 @@ import java.io.FileOutputStream
 class OtterAiSttService(
     private val apiKey: String,
     private val clientId: String? = null,
-    private val clientSecret: String? = null
+    private val clientSecret: String? = null,
+    internal val baseUrl: String = DEFAULT_BASE_URL,
+    internal val pollingIntervalMs: Long = DEFAULT_POLLING_INTERVAL_MS,
+    internal val maxPollingAttempts: Int = DEFAULT_MAX_POLLING_ATTEMPTS
 ) : BaseSttService() {
 
     companion object {
         private const val TAG = "OtterAiStt"
-        private const val BASE_URL = "https://otter.ai/forward/api/v1"
-        private const val MAX_POLLING_ATTEMPTS = 60
-        private const val POLLING_INTERVAL_MS = 2000L
+        internal const val DEFAULT_BASE_URL = "https://otter.ai/forward/api/v1"
+        internal const val DEFAULT_POLLING_INTERVAL_MS = 2000L
+        internal const val DEFAULT_MAX_POLLING_ATTEMPTS = 60
     }
 
     override val provider = SttProvider.OTTER_AI
@@ -143,7 +146,7 @@ class OtterAiSttService(
                 .build()
 
             val request = Request.Builder()
-                .url("$BASE_URL/speeches")
+                .url("$baseUrl/speeches")
                 .addHeader("Authorization", "Bearer $apiKey")
                 .post(requestBody)
                 .build()
@@ -171,10 +174,10 @@ class OtterAiSttService(
     private suspend fun pollForTranscript(speechId: String): String? {
         var attempts = 0
         
-        while (attempts < MAX_POLLING_ATTEMPTS) {
+        while (attempts < maxPollingAttempts) {
             try {
                 val request = Request.Builder()
-                    .url("$BASE_URL/speeches/$speechId")
+                    .url("$baseUrl/speeches/$speechId")
                     .addHeader("Authorization", "Bearer $apiKey")
                     .get()
                     .build()
@@ -208,7 +211,7 @@ class OtterAiSttService(
                 }
                 
                 // Wait before next poll
-                delay(POLLING_INTERVAL_MS)
+                delay(pollingIntervalMs)
                 attempts++
                 
             } catch (e: Exception) {
