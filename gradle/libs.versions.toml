@@ -2,7 +2,7 @@
 agp = "9.0.0"
 kotlin = "2.2.10"
 kotlinSerialization = "2.2.10"
-ksp = "2.2.10-1.0.29"
+ksp = "2.2.10-2.0.2"
 compose-compiler = "1.5.10"
 room = "2.8.4"
 kotlinxSerializationJson = "1.10.0"
