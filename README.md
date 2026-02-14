@@ -50,7 +50,7 @@ cp local.properties.template local.properties
 | 🎤 Voice Interaction    | Speak to AI through glasses or phone                                                                                                                                                                                                       |
 | 📷 Photo Analysis       | Capture images with glasses camera, get AI analysis                                                                                                                                                                                        |
 | 🎙️ Recording & Analysis | Record audio from phone or glasses with auto AI transcription and analysis                                                                                                                                                                 |
-| 🤖 Multi-AI Providers   | 11 providers: Gemini, OpenAI, Anthropic, Claude, DeepSeek, Groq, Baidu, Alibaba (Qwen), Zhipu (GLM), Perplexity, xAI                                                                                                                       |
+| 🤖 Multi-AI Providers   | 13 providers: Gemini, OpenAI, Anthropic, DeepSeek, Groq, xAI, Alibaba (Qwen), Zhipu (GLM), Baidu, Perplexity, Moonshot (Kimi), Gemini Live, Custom (OpenAI-compatible)                                                                     |
 | 🎧 Multi-STT Providers  | 18 providers: Gemini, OpenAI Whisper, Groq Whisper, Deepgram, AssemblyAI, Azure Speech, iFLYTEK, Google Cloud STT, AWS Transcribe, Alibaba ASR, Tencent ASR, Baidu ASR, IBM Watson, Huawei SIS, Volcengine, Rev.ai, Speechmatics, Otter.ai |
 | 📱 Phone-Glasses Comm   | Via Rokid CXR SDK and Bluetooth SPP                                                                                                                                                                                                        |
 | 💬 Conversation History | Room database persistence                                                                                                                                                                                                                  |
@@ -119,7 +119,7 @@ RokidAIAssistant/
 ### Prerequisites
 
 - **Android Studio**: Ladybug (2024.2) or later
-- **JDK**: 17
+- **JDK**: 21 (recommended for AGP 9 and CI)
 - **Android SDK**: API 36 installed
 
 ### Environment Setup
@@ -194,7 +194,22 @@ glasses-app/build/outputs/apk/release/glasses-app-release.apk
 
 ## Testing
 
-> ⚠️ **Note**: Unit tests are not yet implemented in this project.
+Unit and integration test suites are implemented for protocol, service, factory, and data-layer paths.
+
+### Run Tests
+
+```bash
+# Cross-module unit tests
+./gradlew :common:testDebugUnitTest :phone-app:testDebugUnitTest :glasses-app:testDebugUnitTest
+
+# Targeted suites
+./gradlew :common:testDebugUnitTest --tests "com.example.rokidcommon.protocol.*"
+./gradlew :phone-app:testDebugUnitTest --tests "com.example.rokidphone.service.ai.*"
+./gradlew :phone-app:testDebugUnitTest --tests "com.example.rokidphone.service.stt.*"
+
+# Phone instrumented tests (Room/data-layer)
+./gradlew :phone-app:connectedDebugAndroidTest
+```
 
 ### Manual Testing Checklist
 
@@ -214,7 +229,7 @@ glasses-app/build/outputs/apk/release/glasses-app-release.apk
    - [ ] Test voice command from glasses → AI response displayed
    - [ ] Test photo capture → AI analysis → result displayed
 
-### Running Instrumentation Tests (when available)
+### Running Instrumentation Tests
 
 ```bash
 ./gradlew :phone-app:connectedAndroidTest
@@ -270,7 +285,7 @@ A: Ensure Android Studio has SDK 36 installed.
 
 ```
 A: Project requires JDK 17.
-   File → Settings → Build → Gradle → Gradle JDK → Select JDK 17.
+   File → Settings → Build → Gradle → Gradle JDK → Select JDK 21.
 ```
 
 ### Runtime Issues

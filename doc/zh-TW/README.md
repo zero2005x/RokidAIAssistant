@@ -50,7 +50,7 @@ cp local.properties.template local.properties
 | 🎤 語音互動      | 透過眼鏡或手機與 AI 對話                                                                                                                                                                                                                  |
 | 📷 照片分析      | 使用眼鏡相機拍攝圖片，取得 AI 分析                                                                                                                                                                                                        |
 | 🎙️ 錄音與分析    | 透過手機或眼鏡錄音，自動進行 AI 語音辨識與分析                                                                                                                                                                                            |
-| 🤖 多 AI 服務商  | 11 個服務商：Gemini、OpenAI、Anthropic、Claude、DeepSeek、Groq、Baidu、Alibaba (Qwen)、Zhipu (GLM)、Perplexity、xAI                                                                                                                       |
+| 🤖 多 AI 服務商  | 13 個服務商：Gemini、OpenAI、Anthropic、DeepSeek、Groq、xAI、Alibaba (Qwen)、Zhipu (GLM)、Baidu、Perplexity、Moonshot (Kimi)、Gemini Live、Custom（OpenAI 相容端點）                                                                      |
 | 🎧 多 STT 服務商 | 18 個服務商：Gemini、OpenAI Whisper、Groq Whisper、Deepgram、AssemblyAI、Azure Speech、iFLYTEK、Google Cloud STT、AWS Transcribe、Alibaba ASR、Tencent ASR、Baidu ASR、IBM Watson、Huawei SIS、Volcengine、Rev.ai、Speechmatics、Otter.ai |
 | 📱 手機-眼鏡通訊 | 透過 Rokid CXR SDK 和藍牙 SPP                                                                                                                                                                                                             |
 | 💬 對話記錄      | Room 資料庫持久儲存                                                                                                                                                                                                                       |
@@ -119,7 +119,7 @@ RokidAIAssistant/
 ### 前置需求
 
 - **Android Studio**: Ladybug (2024.2) 或更新版本
-- **JDK**: 17
+- **JDK**: 21（建議，與 AGP 9 / CI 一致）
 - **Android SDK**: 已安裝 API 36
 
 ### 環境設定
@@ -189,7 +189,22 @@ glasses-app/build/outputs/apk/release/glasses-app-release.apk
 
 ## 測試
 
-> ⚠️ **注意**：本專案尚未實作單元測試。
+目前已實作單元測試與整合測試，涵蓋 protocol、service、factory、data layer。
+
+### 測試指令
+
+```bash
+# 跨模組單元測試
+./gradlew :common:testDebugUnitTest :phone-app:testDebugUnitTest :glasses-app:testDebugUnitTest
+
+# 目標測試群組
+./gradlew :common:testDebugUnitTest --tests "com.example.rokidcommon.protocol.*"
+./gradlew :phone-app:testDebugUnitTest --tests "com.example.rokidphone.service.ai.*"
+./gradlew :phone-app:testDebugUnitTest --tests "com.example.rokidphone.service.stt.*"
+
+# phone-app 儀器測試（Room / data layer）
+./gradlew :phone-app:connectedDebugAndroidTest
+```
 
 ### 手動測試檢查清單
 
@@ -257,8 +272,8 @@ A: 確認 Android Studio 已安裝 SDK 36。
 **Q: JDK 版本不符**
 
 ```
-A: 專案需要 JDK 17。
-   File → Settings → Build → Gradle → Gradle JDK → 選擇 JDK 17。
+A: 專案建議使用 JDK 21。
+   File → Settings → Build → Gradle → Gradle JDK → 選擇 JDK 21。
 ```
 
 ### 執行時問題

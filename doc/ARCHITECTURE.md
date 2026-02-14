@@ -102,9 +102,12 @@ RokidAIAssistant/
 │   └── src/main/java/.../rokidphone/
 │       ├── MainActivity.kt       # Entry point, permission handling
 │       ├── PhoneApplication.kt   # Application class
-│       ├── ai/                   # AI provider interfaces
+│       ├── service/ai/           # AI provider interfaces & implementations
 │       │   ├── AiServiceProvider.kt      # ⭐ Core interface
-│       │   └── AiServiceFactory.kt       # Provider factory
+│       │   ├── AiServiceFactory.kt       # Provider factory
+│       │   ├── OpenAiCompatibleService.kt
+│       │   ├── GeminiService.kt
+│       │   └── AnthropicService.kt
 │       ├── data/
 │       │   ├── ApiSettings.kt    # API configuration
 │       │   ├── db/               # Room database
@@ -326,18 +329,21 @@ interface AiServiceProvider {
 
 #### Supported AI Providers
 
-| Provider  | Implementation            | Features               |
-| --------- | ------------------------- | ---------------------- |
-| Gemini    | `GeminiService`           | Native SDK, multimodal |
-| OpenAI    | `OpenAiCompatibleService` | OpenAI-compatible API  |
-| Anthropic | `AnthropicService`        | Custom API format      |
-| DeepSeek  | `OpenAiCompatibleService` | OpenAI-compatible      |
-| Groq      | `OpenAiCompatibleService` | OpenAI-compatible      |
-| xAI       | `OpenAiCompatibleService` | OpenAI-compatible      |
-| Alibaba   | `OpenAiCompatibleService` | OpenAI-compatible      |
-| Zhipu     | `OpenAiCompatibleService` | OpenAI-compatible      |
-| Baidu     | `BaiduService`            | OAuth authentication   |
-| Custom    | `OpenAiCompatibleService` | User-defined endpoint  |
+| Provider       | Implementation             | Features                                 |
+| -------------- | -------------------------- | ---------------------------------------- |
+| Gemini         | `GeminiService`            | Native SDK, multimodal                   |
+| OpenAI         | `OpenAiCompatibleService`  | OpenAI-compatible API                    |
+| Anthropic      | `AnthropicService`         | Custom API format                        |
+| DeepSeek       | `OpenAiCompatibleService`  | OpenAI-compatible                        |
+| Groq           | `OpenAiCompatibleService`  | OpenAI-compatible                        |
+| xAI            | `OpenAiCompatibleService`  | OpenAI-compatible                        |
+| Alibaba (Qwen) | `OpenAiCompatibleService`  | OpenAI-compatible                        |
+| Zhipu (GLM)    | `OpenAiCompatibleService`  | OpenAI-compatible                        |
+| Perplexity     | `OpenAiCompatibleService`  | OpenAI-compatible                        |
+| Moonshot       | `OpenAiCompatibleService`  | OpenAI-compatible                        |
+| Baidu          | `BaiduService`             | OAuth authentication                     |
+| Gemini Live    | `GeminiService` (fallback) | Live session handled by `PhoneAIService` |
+| Custom         | `OpenAiCompatibleService`  | User-defined OpenAI-compatible endpoint  |
 
 #### STT Service Architecture
 
