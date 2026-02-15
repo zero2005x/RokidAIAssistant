@@ -89,3 +89,6 @@ credentials.json
 
 # Rokid SDK license files
 *.lc
+
+# Local SN auth binary (keep local, never commit)
+app/src/main/res/raw/sn_auth_file.lc

@@ -11,6 +11,19 @@ android {
     namespace = "com.example.rokidglasses"
     compileSdk = 36
 
+    val localPropsFile = rootProject.file("local.properties")
+    val localProps = Properties().apply {
+        if (localPropsFile.exists()) {
+            localPropsFile.inputStream().use { load(it) }
+        }
+    }
+    fun requiredLocalProperty(name: String): String {
+        return localProps.getProperty(name)?.takeIf { it.isNotBlank() }
+            ?: throw org.gradle.api.GradleException(
+                "Missing required property '$name' in local.properties for release signing"
+            )
+    }
+
     defaultConfig {
         applicationId = "com.example.rokidglasses"
         minSdk = 28
@@ -21,27 +34,20 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // API Keys - Read from local.properties, do not hardcode
-        val localProps = rootProject.file("local.properties")
-        val props = Properties().apply {
-            if (localProps.exists()) {
-                localProps.inputStream().use { load(it) }
-            }
-        }
-
         // Rokid SDK Configuration
-        buildConfigField("String", "ROKID_CLIENT_SECRET", "\"${props.getProperty("ROKID_CLIENT_SECRET", "")}\"")
+        buildConfigField("String", "ROKID_CLIENT_SECRET", "\"${localProps.getProperty("ROKID_CLIENT_SECRET", "")}\"")
 
         // API Keys
-        buildConfigField("String", "GEMINI_API_KEY", "\"${props.getProperty("GEMINI_API_KEY", "")}\"")
-        buildConfigField("String", "OPENAI_API_KEY", "\"${props.getProperty("OPENAI_API_KEY", "")}\"")
+        buildConfigField("String", "GEMINI_API_KEY", "\"${localProps.getProperty("GEMINI_API_KEY", "")}\"")
+        buildConfigField("String", "OPENAI_API_KEY", "\"${localProps.getProperty("OPENAI_API_KEY", "")}\"")
     }
 
     signingConfigs {
         create("release") {
-            storeFile = rootProject.file("release-keystore.jks")
-            storePassword = "rokidai2026"
-            keyAlias = "rokid-ai-assistant"
-            keyPassword = "rokidai2026"
+            storeFile = rootProject.file(requiredLocalProperty("RELEASE_STORE_FILE"))
+            storePassword = requiredLocalProperty("RELEASE_STORE_PASSWORD")
+            keyAlias = requiredLocalProperty("RELEASE_KEY_ALIAS")
+            keyPassword = requiredLocalProperty("RELEASE_KEY_PASSWORD")
         }
     }
 
