@@ -49,6 +49,22 @@ class CxrApi private constructor() {
     ) {
         Log.d(TAG, "[MOCK] initBluetooth called for device: ${getSafeDeviceName(context, device)}")
         bluetoothCallback = callback
+
+        val hasBluetoothConnectPermission =
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.BLUETOOTH_CONNECT
+                ) == PackageManager.PERMISSION_GRANTED
+
+        if (!hasBluetoothConnectPermission) {
+            callback.onFailed(
+                1,
+                "Missing BLUETOOTH_CONNECT permission"
+            )
+            return
+        }
+
         // Mock initialization success
         callback.onConnectionInfo(
             device.uuids?.firstOrNull()?.uuid?.toString(),
