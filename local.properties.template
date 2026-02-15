@@ -27,3 +27,9 @@ OPENAI_API_KEY=your_openai_api_key_here
 # Anthropic API Key (optional)
 
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
+
+# Release signing (required only when you need signed release builds)
+RELEASE_STORE_FILE=path/to/your/keystore.jks
+RELEASE_STORE_PASSWORD=your_keystore_password
+RELEASE_KEY_ALIAS=your_key_alias
+RELEASE_KEY_PASSWORD=your_key_password

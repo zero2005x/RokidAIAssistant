@@ -137,3 +137,28 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }
+
+val verifySingleSnAuthSource by tasks.registering {
+    group = "verification"
+    description = "Ensure only one sn_auth_file.* exists in app/src/main/res/raw"
+
+    doLast {
+        val rawDir = project.file("src/main/res/raw")
+        if (!rawDir.exists()) return@doLast
+
+        val snFiles = rawDir.listFiles { file ->
+            file.isFile && file.name.startsWith("sn_auth_file.")
+        }?.toList().orEmpty()
+
+        if (snFiles.size > 1) {
+            val names = snFiles.joinToString(", ") { it.name }
+            throw GradleException(
+                "Duplicate SN auth sources detected in res/raw: $names. Keep exactly one sn_auth_file.*"
+            )
+        }
+    }
+}
+
+tasks.named("preBuild") {
+    dependsOn(verifySingleSnAuthSource)
+}

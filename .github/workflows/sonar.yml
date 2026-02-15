@@ -41,6 +41,27 @@ jobs:
       - name: Grant execute permission for Gradle wrapper
         run: chmod +x ./gradlew
 
+      - name: Inject signing properties (optional)
+        run: |
+          {
+            echo "RELEASE_STORE_FILE=${{ secrets.RELEASE_STORE_FILE }}"
+            echo "RELEASE_KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}"
+            echo "RELEASE_STORE_PASSWORD=${{ secrets.RELEASE_STORE_PASSWORD }}"
+            echo "RELEASE_KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}"
+          } >> local.properties
+
+      - name: Prepare SN auth resource (single source)
+        shell: bash
+        run: |
+          mkdir -p app/src/main/res/raw
+          rm -f app/src/main/res/raw/sn_auth_file.*
+
+          if [ -n "${{ secrets.SN_AUTH_FILE_BASE64 }}" ]; then
+            echo "${{ secrets.SN_AUTH_FILE_BASE64 }}" | base64 --decode > app/src/main/res/raw/sn_auth_file.lc
+          else
+            echo "sn_auth_placeholder_for_ci" > app/src/main/res/raw/sn_auth_file.lc
+          fi
+
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

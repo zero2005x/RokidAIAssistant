@@ -206,12 +206,21 @@ class BluetoothInitViewModel : ViewModel() {
             
             // Step 2: Read SN authentication file
             val snBytes = try {
-                context.resources.openRawResource(Constants.getSNResource()).use { 
+                val snResourceId = Constants.getSNResource(context)
+                if (snResourceId == 0) {
+                    throw IllegalStateException(
+                        "SN authentication file not found. Place exactly one sn_auth_file.* in app/src/main/res/raw/"
+                    )
+                }
+
+                context.resources.openRawResource(snResourceId).use {
                     it.readBytes() 
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to read SN authentication file", e)
-                throw Exception("Failed to read SN authentication file. Please ensure the file is placed in res/raw/")
+                throw Exception(
+                    "Failed to read SN authentication file. Please ensure exactly one sn_auth_file.* is placed in res/raw/"
+                )
             }
             
             Log.d(TAG, "SN authentication file size: ${snBytes.size} bytes")

@@ -1,8 +1,8 @@
 package com.example.rokidaiassistant.data
 
+import android.content.Context
 import android.media.AudioFormat
 import com.example.rokidaiassistant.BuildConfig
-import com.example.rokidaiassistant.R
 import java.util.UUID
 
 /**
@@ -24,8 +24,15 @@ object Constants {
     val CLIENT_SECRET: String
         get() = BuildConfig.ROKID_CLIENT_SECRET.replace("-", "")
     
-    /** SN authentication file resource ID */
-    fun getSNResource(): Int = R.raw.sn_auth_file
+    /**
+     * SN authentication file resource ID
+     *
+     * Single-source strategy: only one file named sn_auth_file.* should exist in res/raw.
+     * We resolve by resource name to avoid compile-time dependency on a specific extension.
+     */
+    fun getSNResource(context: Context): Int {
+        return context.resources.getIdentifier("sn_auth_file", "raw", context.packageName)
+    }
     
     // ========================================
     // AI Configuration

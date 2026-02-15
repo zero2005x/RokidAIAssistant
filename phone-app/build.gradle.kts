@@ -19,12 +19,18 @@ android {
             localPropsFile.inputStream().use { load(it) }
         }
     }
-    fun requiredLocalProperty(name: String): String {
-        return localProps.getProperty(name)?.takeIf { it.isNotBlank() }
-            ?: throw org.gradle.api.GradleException(
-                "Missing required property '$name' in local.properties for release signing"
-            )
-    }
+    fun localProperty(name: String): String? = localProps.getProperty(name)?.takeIf { it.isNotBlank() }
+
+    val releaseStoreFile = localProperty("RELEASE_STORE_FILE")
+    val releaseStorePassword = localProperty("RELEASE_STORE_PASSWORD")
+    val releaseKeyAlias = localProperty("RELEASE_KEY_ALIAS")
+    val releaseKeyPassword = localProperty("RELEASE_KEY_PASSWORD")
+    val hasReleaseSigning = listOf(
+        releaseStoreFile,
+        releaseStorePassword,
+        releaseKeyAlias,
+        releaseKeyPassword
+    ).all { !it.isNullOrBlank() }
 
     defaultConfig {
         applicationId = "com.example.rokidphone"
@@ -43,11 +49,13 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            storeFile = rootProject.file(requiredLocalProperty("RELEASE_STORE_FILE"))
-            storePassword = requiredLocalProperty("RELEASE_STORE_PASSWORD")
-            keyAlias = requiredLocalProperty("RELEASE_KEY_ALIAS")
-            keyPassword = requiredLocalProperty("RELEASE_KEY_PASSWORD")
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = rootProject.file(releaseStoreFile!!)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
         }
     }
 
@@ -58,7 +66,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("release")
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            } else {
+                logger.lifecycle("Release signing is not configured. Building unsigned release artifacts.")
+            }
         }
     }
     

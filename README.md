@@ -129,6 +129,29 @@ RokidAIAssistant/
 cp local.properties.template local.properties
 ```
 
+### CI: Inject a Single `sn_auth_file.*` Resource
+
+The app enforces a single-source SN auth strategy in `app/src/main/res/raw/`.
+Keep exactly one file named `sn_auth_file.*` (for example: `sn_auth_file.lc`).
+
+```yaml
+- name: Prepare SN auth resource (single source)
+   shell: bash
+   run: |
+      mkdir -p app/src/main/res/raw
+      rm -f app/src/main/res/raw/sn_auth_file.*
+      echo "${{ secrets.SN_AUTH_FILE_BASE64 }}" | base64 --decode > app/src/main/res/raw/sn_auth_file.lc
+
+- name: Build app module
+   run: ./gradlew :app:assembleDebug --no-daemon
+```
+
+Notes:
+
+- Store the SN file as base64 in `SN_AUTH_FILE_BASE64` (GitHub Secret).
+- Do not commit `sn_auth_file.*` into version control.
+- Build will fail fast if multiple `sn_auth_file.*` files exist.
+
 **Required keys in `local.properties`:**
 
 ```properties

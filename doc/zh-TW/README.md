@@ -129,6 +129,29 @@ RokidAIAssistant/
 cp local.properties.template local.properties
 ```
 
+### CI：注入唯一的 `sn_auth_file.*` 資源檔
+
+`app/src/main/res/raw/` 採用 SN 檔單一來源策略。
+請確保只存在一個 `sn_auth_file.*`（例如：`sn_auth_file.lc`）。
+
+```yaml
+- name: 準備 SN 驗證資源（單一來源）
+   shell: bash
+   run: |
+      mkdir -p app/src/main/res/raw
+      rm -f app/src/main/res/raw/sn_auth_file.*
+      echo "${{ secrets.SN_AUTH_FILE_BASE64 }}" | base64 --decode > app/src/main/res/raw/sn_auth_file.lc
+
+- name: 建置 app 模組
+   run: ./gradlew :app:assembleDebug --no-daemon
+```
+
+說明：
+
+- 將 SN 檔內容先轉成 base64，存入 `SN_AUTH_FILE_BASE64`（GitHub Secret）。
+- 不要把 `sn_auth_file.*` 提交到版本控制。
+- 若同時存在多個 `sn_auth_file.*`，建置會快速失敗。
+
 **`local.properties` 中的必要金鑰：**
 
 ```properties
