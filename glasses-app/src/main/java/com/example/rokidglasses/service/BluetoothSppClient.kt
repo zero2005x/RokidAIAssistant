@@ -73,6 +73,19 @@ class BluetoothSppClient(
     
     // Last device we were connected to (for auto-reconnect)
     private var lastConnectedDevice: BluetoothDevice? = null
+
+    /**
+     * Safely get the device name with BLUETOOTH_CONNECT permission check.
+     * Returns "unknown" if the permission is not granted.
+     */
+    private fun getSafeDeviceName(device: BluetoothDevice): String {
+        val hasPermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+            ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) == PackageManager.PERMISSION_GRANTED
+        return if (hasPermission) device.name ?: "unknown" else "unknown (missing permission)"
+    }
     
     // Connection state
     private val _connectionState = MutableStateFlow(BluetoothClientState.DISCONNECTED)
@@ -122,7 +135,7 @@ class BluetoothSppClient(
             for (attempt in 1..maxRetries) {
                 try {
                     _connectionState.value = BluetoothClientState.CONNECTING
-                    Log.d(TAG, "Connecting to ${device.name}... (attempt $attempt/$maxRetries)")
+                    Log.d(TAG, "Connecting to ${getSafeDeviceName(device)}... (attempt $attempt/$maxRetries)")
                     
                     // Cancel device discovery to speed up connection
                     bluetoothAdapter?.cancelDiscovery()
@@ -153,11 +166,11 @@ class BluetoothSppClient(
                     outputStream = socket?.outputStream
                     
                     _connectionState.value = BluetoothClientState.CONNECTED
-                    _connectedDeviceName.value = device.name
+                    _connectedDeviceName.value = getSafeDeviceName(device)
                     lastConnectedDevice = device
                     missedHeartbeatCount = 0
                     
-                    Log.d(TAG, "Connected to ${device.name}")
+                    Log.d(TAG, "Connected to ${getSafeDeviceName(device)}")
                     
                     // Start reading messages
                     startReading()
@@ -368,7 +381,7 @@ class BluetoothSppClient(
         
         // Try to reconnect if we have a device
         if (deviceToReconnect != null) {
-            Log.d(TAG, "Attempting to reconnect to ${deviceToReconnect.name}...")
+            Log.d(TAG, "Attempting to reconnect to ${getSafeDeviceName(deviceToReconnect)}...")
             delay(1000) // Wait a bit before reconnecting
             connect(deviceToReconnect)
         }
