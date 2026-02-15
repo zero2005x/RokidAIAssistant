@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.rokidphone.R
 import com.example.rokidphone.data.log.LogEntry
 import com.example.rokidphone.data.log.LogLevel
 import com.example.rokidphone.viewmodel.LogViewerViewModel
@@ -83,16 +85,16 @@ fun LogViewerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Log Viewer") },
+                title = { Text(stringResource(R.string.log_viewer)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.log_back))
                     }
                 },
                 actions = {
                     // Refresh button
                     IconButton(onClick = { viewModel.refreshLogs() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                        Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.log_refresh))
                     }
                     
                     // Filter button
@@ -104,14 +106,14 @@ fun LogViewerScreen(
                                 searchQuery.isNotBlank()) MaterialTheme.colorScheme.primary 
                             else Color.Transparent
                         ) {
-                            Icon(Icons.Default.FilterList, contentDescription = "Filter")
+                            Icon(Icons.Default.FilterList, contentDescription = stringResource(R.string.log_filter))
                         }
                     }
                     
                     // More menu
                     Box {
                         IconButton(onClick = { showMoreMenu = true }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "More")
+                            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.log_more))
                         }
                         
                         DropdownMenu(
@@ -119,7 +121,7 @@ fun LogViewerScreen(
                             onDismissRequest = { showMoreMenu = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Export Logs") },
+                                text = { Text(stringResource(R.string.log_export_logs)) },
                                 onClick = {
                                     showMoreMenu = false
                                     viewModel.exportLogs()
@@ -127,17 +129,17 @@ fun LogViewerScreen(
                                 leadingIcon = { Icon(Icons.Default.Download, null) }
                             )
                             DropdownMenuItem(
-                                text = { Text("Copy to Clipboard") },
+                                text = { Text(stringResource(R.string.log_copy_to_clipboard)) },
                                 onClick = {
                                     showMoreMenu = false
                                     val logsText = viewModel.getLogsForShare()
                                     clipboardManager.setText(AnnotatedString(logsText))
-                                    Toast.makeText(context, "Logs copied to clipboard", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.log_logs_copied_clipboard), Toast.LENGTH_SHORT).show()
                                 },
                                 leadingIcon = { Icon(Icons.Default.ContentCopy, null) }
                             )
                             DropdownMenuItem(
-                                text = { Text("Exported Files") },
+                                text = { Text(stringResource(R.string.log_exported_files)) },
                                 onClick = {
                                     showMoreMenu = false
                                     viewModel.refreshExportedFiles()
@@ -146,7 +148,7 @@ fun LogViewerScreen(
                                 leadingIcon = { Icon(Icons.Default.Folder, null) }
                             )
                             DropdownMenuItem(
-                                text = { Text("Statistics") },
+                                text = { Text(stringResource(R.string.log_statistics)) },
                                 onClick = {
                                     showMoreMenu = false
                                     viewModel.refreshStats()
@@ -156,7 +158,7 @@ fun LogViewerScreen(
                             )
                             HorizontalDivider()
                             DropdownMenuItem(
-                                text = { Text("Delete Logs...", color = MaterialTheme.colorScheme.error) },
+                                text = { Text(stringResource(R.string.log_delete_logs_menu), color = MaterialTheme.colorScheme.error) },
                                 onClick = {
                                     showMoreMenu = false
                                     showDeleteDialog = true
@@ -185,13 +187,15 @@ fun LogViewerScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${filteredLogs.size} entries" + 
-                            if (stats?.totalCount != filteredLogs.size) " (${stats?.totalCount} total)" else "",
+                        text = context.getString(R.string.log_entries_count, filteredLogs.size) +
+                            if (stats?.totalCount != filteredLogs.size) {
+                                context.getString(R.string.log_entries_total_suffix, stats?.totalCount ?: 0)
+                            } else "",
                         style = MaterialTheme.typography.bodySmall
                     )
                     
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Auto-scroll", style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.log_auto_scroll), style = MaterialTheme.typography.bodySmall)
                         Switch(
                             checked = autoScroll,
                             onCheckedChange = { viewModel.toggleAutoScroll() },
@@ -224,13 +228,13 @@ fun LogViewerScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        "No logs found",
+                        stringResource(R.string.log_no_logs_found),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(onClick = { viewModel.refreshLogs() }) {
-                        Text("Load Logs")
+                        Text(stringResource(R.string.log_load_logs))
                     }
                 }
             } else {
@@ -243,7 +247,7 @@ fun LogViewerScreen(
                             entry = entry,
                             onCopy = {
                                 clipboardManager.setText(AnnotatedString(entry.toExportString()))
-                                Toast.makeText(context, "Log copied", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.log_log_copied), Toast.LENGTH_SHORT).show()
                             }
                         )
                     }
@@ -296,7 +300,7 @@ fun LogViewerScreen(
                 scope.launch {
                     val content = viewModel.readExportedFile(file)
                     clipboardManager.setText(AnnotatedString(content))
-                    Toast.makeText(context, "File content copied to clipboard", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.log_file_content_copied), Toast.LENGTH_SHORT).show()
                 }
             },
             onDeleteFile = { viewModel.deleteExportedFile(it) },
@@ -434,21 +438,21 @@ private fun FilterDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Filter Logs") },
+        title = { Text(stringResource(R.string.log_filter_logs)) },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 // Search
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = onSearchChange,
-                    label = { Text("Search") },
+                    label = { Text(stringResource(R.string.log_search)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     leadingIcon = { Icon(Icons.Default.Search, null) },
                     trailingIcon = {
                         if (searchQuery.isNotBlank()) {
                             IconButton(onClick = { onSearchChange("") }) {
-                                Icon(Icons.Default.Clear, "Clear")
+                                Icon(Icons.Default.Clear, stringResource(R.string.log_clear))
                             }
                         }
                     }
@@ -457,7 +461,7 @@ private fun FilterDialog(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 // Log level
-                Text("Minimum Level", style = MaterialTheme.typography.labelMedium)
+                Text(stringResource(R.string.log_minimum_level), style = MaterialTheme.typography.labelMedium)
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 Row(
@@ -477,7 +481,7 @@ private fun FilterDialog(
                 
                 if (availableTags.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Tags", style = MaterialTheme.typography.labelMedium)
+                    Text(stringResource(R.string.log_tags), style = MaterialTheme.typography.labelMedium)
                     Spacer(modifier = Modifier.height(8.dp))
                     
                     // Show top 20 most common tags
@@ -515,12 +519,12 @@ private fun FilterDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Done")
+                Text(stringResource(R.string.log_done))
             }
         },
         dismissButton = {
             TextButton(onClick = onClearFilters) {
-                Text("Clear All")
+                Text(stringResource(R.string.log_clear_all))
             }
         }
     )
@@ -540,8 +544,8 @@ private fun DeleteLogsDialog(
     if (showConfirmClearAll) {
         AlertDialog(
             onDismissRequest = { showConfirmClearAll = false },
-            title = { Text("Clear All Logs?") },
-            text = { Text("This will delete all in-memory logs. This action cannot be undone.") },
+            title = { Text(stringResource(R.string.log_clear_all_title)) },
+            text = { Text(stringResource(R.string.log_clear_all_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -550,23 +554,23 @@ private fun DeleteLogsDialog(
                         onDismiss()
                     }
                 ) {
-                    Text("Clear All", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.log_clear_all), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showConfirmClearAll = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.log_cancel))
                 }
             }
         )
     } else {
         AlertDialog(
             onDismissRequest = onDismiss,
-            title = { Text("Delete Logs") },
+            title = { Text(stringResource(R.string.log_delete_logs)) },
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        "Choose what to delete:",
+                        stringResource(R.string.log_choose_delete),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     
@@ -574,8 +578,8 @@ private fun DeleteLogsDialog(
                     
                     // Delete options
                     ListItem(
-                        headlineContent = { Text("Clear All Logs") },
-                        supportingContent = { Text("Delete all in-memory logs") },
+                        headlineContent = { Text(stringResource(R.string.log_clear_all_logs)) },
+                        supportingContent = { Text(stringResource(R.string.log_delete_in_memory)) },
                         leadingContent = { Icon(Icons.Default.DeleteForever, null) },
                         modifier = Modifier.clickable { showConfirmClearAll = true }
                     )
@@ -583,8 +587,8 @@ private fun DeleteLogsDialog(
                     HorizontalDivider()
                     
                     ListItem(
-                        headlineContent = { Text("Delete Filtered") },
-                        supportingContent = { Text("Delete currently visible logs") },
+                        headlineContent = { Text(stringResource(R.string.log_delete_filtered)) },
+                        supportingContent = { Text(stringResource(R.string.log_delete_visible)) },
                         leadingContent = { Icon(Icons.Default.FilterAlt, null) },
                         modifier = Modifier.clickable {
                             onDeleteFiltered()
@@ -595,8 +599,8 @@ private fun DeleteLogsDialog(
                     HorizontalDivider()
                     
                     ListItem(
-                        headlineContent = { Text("Delete Old (1 hour)") },
-                        supportingContent = { Text("Delete logs older than 1 hour") },
+                        headlineContent = { Text(stringResource(R.string.log_delete_old_1h)) },
+                        supportingContent = { Text(stringResource(R.string.log_delete_older_1h)) },
                         leadingContent = { Icon(Icons.Default.Schedule, null) },
                         modifier = Modifier.clickable {
                             onDeleteOld(1)
@@ -607,8 +611,8 @@ private fun DeleteLogsDialog(
                     HorizontalDivider()
                     
                     ListItem(
-                        headlineContent = { Text("Delete DEBUG & Below") },
-                        supportingContent = { Text("Keep only INFO, WARN, ERROR") },
+                        headlineContent = { Text(stringResource(R.string.log_delete_debug_below)) },
+                        supportingContent = { Text(stringResource(R.string.log_keep_info_warn_error)) },
                         leadingContent = { Icon(Icons.Default.BugReport, null) },
                         modifier = Modifier.clickable {
                             onDeleteBelowLevel(LogLevel.INFO)
@@ -619,8 +623,8 @@ private fun DeleteLogsDialog(
                     HorizontalDivider()
                     
                     ListItem(
-                        headlineContent = { Text("Clear System Logcat") },
-                        supportingContent = { Text("Clear Android system logs") },
+                        headlineContent = { Text(stringResource(R.string.log_clear_system_logcat)) },
+                        supportingContent = { Text(stringResource(R.string.log_clear_android_logs)) },
                         leadingContent = { Icon(Icons.Default.CleaningServices, null) },
                         modifier = Modifier.clickable {
                             onClearSystemLogcat()
@@ -631,7 +635,7 @@ private fun DeleteLogsDialog(
             },
             confirmButton = {
                 TextButton(onClick = onDismiss) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.log_cancel))
                 }
             }
         )
@@ -648,27 +652,27 @@ private fun ExportedFilesDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Exported Log Files") },
+        title = { Text(stringResource(R.string.log_exported_files_title)) },
         text = {
             if (files.isEmpty()) {
-                Text("No exported files found")
+                Text(stringResource(R.string.log_no_exported_files))
             } else {
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
                     items(files) { file ->
                         ListItem(
                             headlineContent = { Text(file.name) },
                             supportingContent = { 
-                                Text("${file.length() / 1024} KB") 
+                                Text(stringResource(R.string.log_file_size_kb, file.length() / 1024))
                             },
                             trailingContent = {
                                 Row {
                                     IconButton(onClick = { onViewFile(file) }) {
-                                        Icon(Icons.Default.ContentCopy, "Copy content")
+                                        Icon(Icons.Default.ContentCopy, stringResource(R.string.log_copy_content))
                                     }
                                     IconButton(onClick = { onDeleteFile(file) }) {
                                         Icon(
                                             Icons.Default.Delete, 
-                                            "Delete",
+                                            stringResource(R.string.log_delete),
                                             tint = MaterialTheme.colorScheme.error
                                         )
                                     }
@@ -682,7 +686,7 @@ private fun ExportedFilesDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(stringResource(R.string.log_close))
             }
         },
         dismissButton = {
@@ -691,7 +695,7 @@ private fun ExportedFilesDialog(
                     onDeleteAll()
                     onDismiss()
                 }) {
-                    Text("Delete All", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.log_delete_all), color = MaterialTheme.colorScheme.error)
                 }
             }
         }
@@ -705,36 +709,36 @@ private fun StatsDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Log Statistics") },
+        title = { Text(stringResource(R.string.log_statistics_title)) },
         text = {
             if (stats == null) {
-                Text("No statistics available")
+                Text(stringResource(R.string.log_no_statistics))
             } else {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text("Total Entries: ${stats.totalCount}")
-                    Text("Time Range: ${stats.getTimeRangeString()}")
-                    Text("Exported Files: ${stats.exportedFilesCount}")
+                    Text(stringResource(R.string.log_total_entries, stats.totalCount))
+                    Text(stringResource(R.string.log_time_range, stats.getTimeRangeString()))
+                    Text(stringResource(R.string.log_exported_files_count, stats.exportedFilesCount))
                     
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("By Level:", style = MaterialTheme.typography.labelMedium)
+                    Text(stringResource(R.string.log_by_level), style = MaterialTheme.typography.labelMedium)
                     stats.countByLevel.forEach { (level, count) ->
-                        Text("  ${level.name}: $count")
+                        Text(stringResource(R.string.log_level_count, level.name, count))
                     }
                     
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Top Tags:", style = MaterialTheme.typography.labelMedium)
+                    Text(stringResource(R.string.log_top_tags), style = MaterialTheme.typography.labelMedium)
                     stats.countByTag.entries
                         .sortedByDescending { it.value }
                         .take(10)
                         .forEach { (tag, count) ->
-                            Text("  $tag: $count")
+                            Text(stringResource(R.string.log_tag_count, tag, count))
                         }
                 }
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(stringResource(R.string.log_close))
             }
         }
     )

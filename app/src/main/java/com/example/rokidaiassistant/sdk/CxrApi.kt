@@ -1,8 +1,12 @@
 package com.example.rokidaiassistant.sdk
 
+import android.Manifest
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
+import androidx.core.content.ContextCompat
 
 /**
  * Rokid CXR SDK Mock Interface
@@ -43,7 +47,7 @@ class CxrApi private constructor() {
         device: BluetoothDevice,
         callback: BluetoothStatusCallback
     ) {
-        Log.d(TAG, "[MOCK] initBluetooth called for device: ${device.name}")
+        Log.d(TAG, "[MOCK] initBluetooth called for device: ${getSafeDeviceName(context, device)}")
         bluetoothCallback = callback
         // Mock initialization success
         callback.onConnectionInfo(
@@ -51,6 +55,21 @@ class CxrApi private constructor() {
             device.address,
             0
         )
+    }
+
+    private fun getSafeDeviceName(context: Context, device: BluetoothDevice): String {
+        val hasBluetoothConnectPermission =
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.BLUETOOTH_CONNECT
+                ) == PackageManager.PERMISSION_GRANTED
+
+        if (!hasBluetoothConnectPermission) {
+            return "unknown (no BLUETOOTH_CONNECT permission)"
+        }
+
+        return device.name ?: "unknown"
     }
     
     /**

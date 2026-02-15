@@ -73,4 +73,10 @@
     <!-- AI System Prompt -->
     <string name="glasses_system_prompt">You are a friendly AI assistant installed on Rokid smart glasses. Answer in the user\'s language, with each response not exceeding 100 words.</string>
     <string name="glasses_system_prompt_ack">Understood, I am your Rokid AI assistant. I will assist you concisely. How can I help you?</string>
+
+    <!-- Wake Word Service -->
+    <string name="wake_word_channel_name">Voice Wake Service</string>
+    <string name="wake_word_channel_description">Continuously listens for voice wake command</string>
+    <string name="wake_word_notification_title">Rokid AI Assistant</string>
+    <string name="wake_word_notification_text">Say \"Hi Rokid\" to start conversation</string>
 </resources>

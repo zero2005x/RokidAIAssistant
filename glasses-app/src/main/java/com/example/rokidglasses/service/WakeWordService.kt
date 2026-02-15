@@ -75,10 +75,10 @@ class WakeWordService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Voice Wake Service",
+                getString(R.string.wake_word_channel_name),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Continuously listens for voice wake command"
+                description = getString(R.string.wake_word_channel_description)
                 setShowBadge(false)
             }
             
@@ -96,8 +96,8 @@ class WakeWordService : Service() {
         )
         
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Rokid AI Assistant")
-            .setContentText("Say \"Hi Rokid\" to start conversation")
+            .setContentTitle(getString(R.string.wake_word_notification_title))
+            .setContentText(getString(R.string.wake_word_notification_text))
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
             .setOngoing(true)

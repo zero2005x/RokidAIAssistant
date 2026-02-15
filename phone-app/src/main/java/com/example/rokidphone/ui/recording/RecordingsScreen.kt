@@ -52,7 +52,7 @@ fun RecordingsScreen(
             TopAppBar(
                 title = { 
                     if (uiState.isSelectionMode) {
-                        Text("${uiState.selectedIds.size} selected")
+                        Text(stringResource(R.string.recordings_selected_count, uiState.selectedIds.size))
                     } else {
                         Text(stringResource(R.string.recordings))
                     }
@@ -74,7 +74,7 @@ fun RecordingsScreen(
                 actions = {
                     if (uiState.isSelectionMode) {
                         IconButton(onClick = { viewModel.selectAll() }) {
-                            Icon(Icons.Default.SelectAll, contentDescription = "Select All")
+                            Icon(Icons.Default.SelectAll, contentDescription = stringResource(R.string.recordings_select_all))
                         }
                         IconButton(onClick = { viewModel.showDeleteDialog() }) {
                             Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
@@ -83,7 +83,7 @@ fun RecordingsScreen(
                         // Filter button
                         Box {
                             IconButton(onClick = { showFilterMenu = true }) {
-                                Icon(Icons.Default.FilterList, contentDescription = "Filter")
+                                Icon(Icons.Default.FilterList, contentDescription = stringResource(R.string.recordings_filter))
                             }
                             FilterMenu(
                                 expanded = showFilterMenu,
@@ -99,7 +99,7 @@ fun RecordingsScreen(
                         // Sort button
                         Box {
                             IconButton(onClick = { showSortMenu = true }) {
-                                Icon(Icons.Default.Sort, contentDescription = "Sort")
+                                Icon(Icons.Default.Sort, contentDescription = stringResource(R.string.recordings_sort))
                             }
                             SortMenu(
                                 expanded = showSortMenu,
@@ -113,7 +113,7 @@ fun RecordingsScreen(
                         }
                         
                         IconButton(onClick = { viewModel.toggleSelectionMode() }) {
-                            Icon(Icons.Default.Checklist, contentDescription = "Select")
+                            Icon(Icons.Default.Checklist, contentDescription = stringResource(R.string.recordings_select))
                         }
                     }
                 }
@@ -304,7 +304,7 @@ private fun SearchBar(
         trailingIcon = {
             if (query.isNotBlank()) {
                 IconButton(onClick = { onQueryChange("") }) {
-                    Icon(Icons.Default.Clear, contentDescription = "Clear")
+                    Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.recordings_clear_search))
                 }
             }
         },
@@ -498,7 +498,7 @@ private fun RecordingItem(
                     if (recording.transcript != null) {
                         AssistChip(
                             onClick = { },
-                            label = { Text("Transcribed") },
+                            label = { Text(stringResource(R.string.recordings_transcribed_chip)) },
                             leadingIcon = {
                                 Icon(
                                     Icons.Default.TextFields,
@@ -513,7 +513,7 @@ private fun RecordingItem(
                     if (recording.aiResponse != null) {
                         AssistChip(
                             onClick = { },
-                            label = { Text("AI") },
+                            label = { Text(stringResource(R.string.recordings_ai_chip)) },
                             leadingIcon = {
                                 Icon(
                                     Icons.Default.AutoAwesome,
@@ -549,7 +549,7 @@ private fun RecordingItem(
                 } else {
                     Box {
                         IconButton(onClick = { showMenu = true }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "More")
+                            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.recordings_more))
                         }
                         
                         DropdownMenu(
@@ -557,7 +557,15 @@ private fun RecordingItem(
                             onDismissRequest = { showMenu = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text(if (recording.isFavorite) "Remove Favorite" else "Add Favorite") },
+                                text = {
+                                    Text(
+                                        if (recording.isFavorite) {
+                                            stringResource(R.string.recordings_remove_favorite)
+                                        } else {
+                                            stringResource(R.string.recordings_add_favorite)
+                                        }
+                                    )
+                                },
                                 onClick = {
                                     onFavoriteClick()
                                     showMenu = false
@@ -633,31 +641,31 @@ private fun StatusChip(status: RecordingStatus) {
     when (status) {
         RecordingStatus.RECORDING -> {
             color = MaterialTheme.colorScheme.error
-            text = "Recording"
+            text = stringResource(R.string.recordings_status_recording)
         }
         RecordingStatus.COMPLETED -> {
             color = ExtendedTheme.colors.success
-            text = "Completed"
+            text = stringResource(R.string.recordings_status_completed)
         }
         RecordingStatus.TRANSCRIBING -> {
             color = MaterialTheme.colorScheme.tertiary
-            text = "Transcribing"
+            text = stringResource(R.string.recordings_status_transcribing)
         }
         RecordingStatus.TRANSCRIBED -> {
             color = MaterialTheme.colorScheme.primary
-            text = "Transcribed"
+            text = stringResource(R.string.recordings_status_transcribed)
         }
         RecordingStatus.ANALYZING -> {
             color = MaterialTheme.colorScheme.tertiary
-            text = "Analyzing"
+            text = stringResource(R.string.recordings_status_analyzing)
         }
         RecordingStatus.ANALYZED -> {
             color = MaterialTheme.colorScheme.primary
-            text = "Analyzed"
+            text = stringResource(R.string.recordings_status_analyzed)
         }
         RecordingStatus.ERROR -> {
             color = MaterialTheme.colorScheme.error
-            text = "Error"
+            text = stringResource(R.string.recordings_status_error)
         }
     }
     

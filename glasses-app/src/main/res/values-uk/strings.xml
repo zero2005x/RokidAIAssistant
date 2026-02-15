@@ -73,4 +73,9 @@
     <!-- AI System Prompt -->
     <string name="glasses_system_prompt">Ви дружній ШІ-асистент, встановлений на розумних окулярах Rokid. Будь ласка, відповідайте на запитання мовою користувача, кожна відповідь не повинна перевищувати 100 слів.</string>
     <string name="glasses_system_prompt_ack">Зрозуміло, я ваш ШІ-асистент Rokid. Я допомагатиму вам стисло. Чим можу допомогти?</string>
+    <!-- Wake Word Service -->
+    <string name="wake_word_channel_name">Voice Wake Service</string>
+    <string name="wake_word_channel_description">Continuously listens for voice wake command</string>
+    <string name="wake_word_notification_title">Rokid AI Assistant</string>
+    <string name="wake_word_notification_text">Say \"Hi Rokid\" to start conversation</string>
 </resources>

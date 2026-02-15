@@ -390,4 +390,32 @@
     <string name="pause_recording">Tạm dừng</string>
     <string name="stop_and_send">Dừng và Phân tích</string>
     <string name="stopping">Đang dừng…</string>
+    <!-- Log Viewer (Additional) -->
+    <string name="log_filter">Filter</string>
+    <string name="log_more">More</string>
+    <string name="log_export_logs">Export Logs</string>
+    <string name="log_copy_to_clipboard">Copy to Clipboard</string>
+    <string name="log_exported_files">Exported Files</string>
+    <string name="log_statistics">Statistics</string>
+    <string name="log_delete_logs_menu">Delete Logs…</string>
+
+    <!-- Recordings (Additional) -->
+    <string name="recordings_selected_count">%d selected</string>
+    <string name="recordings_select_all">Select All</string>
+    <string name="recordings_filter">Filter</string>
+    <string name="recordings_sort">Sort</string>
+    <string name="recordings_select">Select</string>
+    <string name="recordings_clear_search">Clear</string>
+    <string name="recordings_transcribed_chip">Transcribed</string>
+    <string name="recordings_ai_chip">AI</string>
+    <string name="recordings_more">More</string>
+    <string name="recordings_remove_favorite">Remove Favorite</string>
+    <string name="recordings_add_favorite">Add Favorite</string>
+    <string name="recordings_status_recording">Recording</string>
+    <string name="recordings_status_completed">Completed</string>
+    <string name="recordings_status_transcribing">Transcribing</string>
+    <string name="recordings_status_transcribed">Transcribed</string>
+    <string name="recordings_status_analyzing">Analyzing</string>
+    <string name="recordings_status_analyzed">Analyzed</string>
+    <string name="recordings_status_error">Error</string>
 </resources>
