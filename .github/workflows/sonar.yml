@@ -22,6 +22,7 @@ jobs:
           fetch-depth: 0 # Full history required for accurate blame & new-code detection
 
       - name: Set up JDK 21
+        id: setup-java
         uses: actions/setup-java@v4
         with:
           java-version: "21"
@@ -64,6 +65,8 @@ jobs:
 
       - name: Build
         run: ./gradlew --no-daemon clean build --stacktrace
+        env:
+          JAVA_HOME: ${{ steps.setup-java.outputs.path }}
 
       - name: SonarCloud analysis
         if: env.SONAR_TOKEN != ''
