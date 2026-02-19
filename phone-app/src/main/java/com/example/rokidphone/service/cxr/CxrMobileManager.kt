@@ -1,5 +1,6 @@
 package com.example.rokidphone.service.cxr
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.Log
@@ -233,6 +234,7 @@ class CxrMobileManager(private val context: Context) {
     /**
      * Internal suspend function that performs the actual init with proper sequencing.
      */
+    @SuppressLint("MissingPermission")
     private suspend fun initBluetoothInternal(device: BluetoothDevice) {
         bluetoothMutex.withLock {
             try {

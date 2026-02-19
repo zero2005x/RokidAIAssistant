@@ -61,6 +61,10 @@ android {
             useLegacyPackaging = false
         }
     }
+
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
 }
 
 kotlin {
