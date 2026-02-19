@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 private const val TAG = "RecordingViewModel"
+private const val AI_ANALYSIS_FAILED = "AI analysis failed"
 
 /**
  * Filter options for recordings list
@@ -401,14 +402,14 @@ class RecordingViewModel(application: Application) : AndroidViewModel(applicatio
                     )
                     Log.d(TAG, "AI analysis completed for recording: $id")
                 }.onFailure { e ->
-                    Log.e(TAG, "AI analysis failed", e)
-                    repository.markError(id, e.message ?: "AI analysis failed")
+                    Log.e(TAG, AI_ANALYSIS_FAILED, e)
+                    repository.markError(id, e.message ?: AI_ANALYSIS_FAILED)
                     _uiState.update { it.copy(error = e.message) }
                 }
                 
             } catch (e: Exception) {
-                Log.e(TAG, "AI analysis failed", e)
-                repository.markError(id, e.message ?: "AI analysis failed")
+                Log.e(TAG, AI_ANALYSIS_FAILED, e)
+                repository.markError(id, e.message ?: AI_ANALYSIS_FAILED)
                 _uiState.update { it.copy(error = e.message) }
             } finally {
                 _uiState.update { it.copy(processingRecordingId = null) }

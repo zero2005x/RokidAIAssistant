@@ -4,6 +4,7 @@ import android.util.Base64
 import android.util.Log
 import com.example.rokidphone.data.AiProvider
 import com.example.rokidphone.service.SpeechResult
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -30,12 +31,14 @@ class GeminiService(
     temperature: Float = 0.7f,
     maxTokens: Int = 2048,
     topP: Float = 1.0f,
-    internal val baseUrl: String = DEFAULT_BASE_URL
+    internal val baseUrl: String = DEFAULT_BASE_URL,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : BaseAiService(apiKey, modelId, systemPrompt, temperature, maxTokens, topP), AiServiceProvider {
     
     companion object {
         private const val TAG = "GeminiService"
         internal const val DEFAULT_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
+        private const val ERROR_API_KEY_NOT_CONFIGURED = "API key not configured. Please set up an API key in Settings."
     }
     
     override val provider = AiProvider.GEMINI
@@ -47,12 +50,12 @@ class GeminiService(
      * Speech Recognition - Gemini native audio support
      */
     override suspend fun transcribe(pcmAudioData: ByteArray, languageCode: String): SpeechResult {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             Log.d(TAG, "Starting transcription, audio size: ${pcmAudioData.size} bytes, language: $languageCode")
             
             if (apiKey.isBlank()) {
                 Log.e(TAG, "API key is not configured")
-                return@withContext SpeechResult.Error("API key not configured. Please set up an API key in Settings.")
+                return@withContext SpeechResult.Error(ERROR_API_KEY_NOT_CONFIGURED)
             }
             
             if (pcmAudioData.size < 1000) {
@@ -101,33 +104,7 @@ Rules:
                     .build()
                 
                 client.newCall(request).execute().use { response ->
-                    val responseBody = response.body?.string()
-                    
-                    if (response.isSuccessful && responseBody != null) {
-                        val json = JSONObject(responseBody)
-                        val text = extractTextFromResponse(json)
-                        
-                        if (text.isNullOrEmpty() || 
-                            text.contains("Unable to recognize") || 
-                            isGeminiErrorResponse(text) ||
-                            isInvalidTranscription(text)) {
-                            if (!text.isNullOrEmpty()) {
-                                Log.d(TAG, "Filtered invalid transcription: $text")
-                            }
-                            null
-                        } else {
-                            Log.d(TAG, "Transcription: $text")
-                            text
-                        }
-                    } else {
-                        Log.e(TAG, "API error: ${response.code}, body: $responseBody")
-                        // Handle 503 (overloaded) with longer delay
-                        if (response.code == 503 || response.code == 429) {
-                            Log.w(TAG, "Server overloaded (${response.code}), will retry with longer delay...")
-                            kotlinx.coroutines.delay(2000L * attempt) // Exponential backoff
-                        }
-                        null
-                    }
+                    parseTranscriptionResponse(response, attempt)
                 }
             }
             
@@ -145,12 +122,12 @@ Rules:
      * bypassing the PCM-to-WAV conversion used by transcribe().
      */
     override suspend fun transcribeAudioFile(audioData: ByteArray, mimeType: String, languageCode: String): SpeechResult {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             Log.d(TAG, "Starting audio file transcription, size: ${audioData.size} bytes, mimeType: $mimeType, language: $languageCode")
             
             if (apiKey.isBlank()) {
                 Log.e(TAG, "API key is not configured")
-                return@withContext SpeechResult.Error("API key not configured. Please set up an API key in Settings.")
+                return@withContext SpeechResult.Error(ERROR_API_KEY_NOT_CONFIGURED)
             }
             
             if (audioData.size < 1000) {
@@ -199,32 +176,7 @@ Rules:
                     .build()
                 
                 client.newCall(request).execute().use { response ->
-                    val responseBody = response.body?.string()
-                    
-                    if (response.isSuccessful && responseBody != null) {
-                        val json = JSONObject(responseBody)
-                        val text = extractTextFromResponse(json)
-                        
-                        if (text.isNullOrEmpty() || 
-                            text.contains("Unable to recognize") || 
-                            isGeminiErrorResponse(text) ||
-                            isInvalidTranscription(text)) {
-                            if (!text.isNullOrEmpty()) {
-                                Log.d(TAG, "Filtered invalid transcription: $text")
-                            }
-                            null
-                        } else {
-                            Log.d(TAG, "Audio file transcription: $text")
-                            text
-                        }
-                    } else {
-                        Log.e(TAG, "API error: ${response.code}, body: $responseBody")
-                        if (response.code == 503 || response.code == 429) {
-                            Log.w(TAG, "Server overloaded (${response.code}), will retry with longer delay...")
-                            kotlinx.coroutines.delay(2000L * attempt)
-                        }
-                        null
-                    }
+                    parseTranscriptionResponse(response, attempt)
                 }
             }
             
@@ -240,12 +192,12 @@ Rules:
      * Text Chat
      */
     override suspend fun chat(userMessage: String): String {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             Log.d(TAG, "Chat request: $userMessage")
             
             if (apiKey.isBlank()) {
                 Log.e(TAG, "API key is not configured")
-                return@withContext "API key not configured. Please set up an API key in Settings."
+                return@withContext ERROR_API_KEY_NOT_CONFIGURED
             }
             
             val contents = JSONArray()
@@ -333,7 +285,7 @@ Rules:
      * Image Analysis
      */
     override suspend fun analyzeImage(imageData: ByteArray, prompt: String): String {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             Log.d(TAG, "Image analysis request, size: ${imageData.size} bytes")
             
             if (apiKey.isBlank()) {
@@ -416,6 +368,52 @@ Rules:
         }
     }
     
+    /**
+     * Shared helper: parse an HTTP response from a transcription request.
+     * Returns the transcribed text on success, or null if the response is invalid.
+     */
+    private suspend fun parseTranscriptionResponse(
+        response: okhttp3.Response,
+        attempt: Int
+    ): String? {
+        val responseBody = response.body.string()
+        if (!response.isSuccessful) {
+            Log.e(TAG, "API error: ${response.code}, body: $responseBody")
+            handleRetryableError(response.code, attempt)
+            return null
+        }
+        val json = JSONObject(responseBody)
+        val text = extractTextFromResponse(json)
+        if (isValidTranscription(text)) {
+            Log.d(TAG, "Transcription: $text")
+            return text
+        }
+        if (!text.isNullOrEmpty()) {
+            Log.d(TAG, "Filtered invalid transcription: $text")
+        }
+        return null
+    }
+
+    /**
+     * Check whether a transcription result is valid spoken text
+     */
+    private fun isValidTranscription(text: String?): Boolean {
+        return !text.isNullOrEmpty() &&
+                !text.contains("Unable to recognize") &&
+                !isGeminiErrorResponse(text) &&
+                !isInvalidTranscription(text)
+    }
+
+    /**
+     * Handle retryable HTTP error codes with exponential backoff
+     */
+    private suspend fun handleRetryableError(code: Int, attempt: Int) {
+        if (code == 503 || code == 429) {
+            Log.w(TAG, "Server overloaded ($code), will retry with longer delay...")
+            kotlinx.coroutines.delay(2000L * attempt)
+        }
+    }
+
     private fun extractTextFromResponse(json: JSONObject): String? {
         val candidates = json.optJSONArray("candidates")
         if (candidates != null && candidates.length() > 0) {

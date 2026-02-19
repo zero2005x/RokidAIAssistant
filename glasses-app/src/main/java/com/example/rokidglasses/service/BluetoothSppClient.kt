@@ -612,14 +612,9 @@ class BluetoothSppClient(
     }
     
     /**
-     * Get the underlying Bluetooth socket for photo transfer.
+     * The underlying Bluetooth socket for photo transfer.
      * Returns null if not connected.
      */
-    fun getSocket(): BluetoothSocket? {
-        return if (_connectionState.value == BluetoothClientState.CONNECTED) {
-            socket
-        } else {
-            null
-        }
-    }
+    val connectedSocket: BluetoothSocket?
+        get() = if (_connectionState.value == BluetoothClientState.CONNECTED) socket else null
 }

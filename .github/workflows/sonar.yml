@@ -62,8 +62,13 @@ jobs:
             echo "sn_auth_placeholder_for_ci" > app/src/main/res/raw/sn_auth_file.lc
           fi
 
-      - name: Build and analyze
+      - name: Build
+        run: ./gradlew --no-daemon clean build --stacktrace
+
+      - name: SonarCloud analysis
+        if: env.SONAR_TOKEN != ''
+        continue-on-error: true
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew --no-daemon clean build sonar --stacktrace --info
+        run: ./gradlew --no-daemon sonar --info

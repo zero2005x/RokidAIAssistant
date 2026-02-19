@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -99,7 +100,7 @@ fun RecordingsScreen(
                         // Sort button
                         Box {
                             IconButton(onClick = { showSortMenu = true }) {
-                                Icon(Icons.Default.Sort, contentDescription = stringResource(R.string.recordings_sort))
+                                Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = stringResource(R.string.recordings_sort))
                             }
                             SortMenu(
                                 expanded = showSortMenu,

@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.BluetoothSearching
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -37,7 +38,7 @@ fun StatusChip(
         ConnectionStatus.CONNECTING -> listOf(
             MaterialTheme.colorScheme.tertiaryContainer,
             MaterialTheme.colorScheme.onTertiaryContainer,
-            Icons.Default.BluetoothSearching,
+            Icons.AutoMirrored.Filled.BluetoothSearching,
             "Connecting..."
         )
         ConnectionStatus.DISCONNECTED -> listOf(

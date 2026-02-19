@@ -3,6 +3,7 @@ package com.example.rokidphone.service.stt
 import android.util.Log
 import com.example.rokidphone.service.SpeechErrorCode
 import com.example.rokidphone.service.SpeechResult
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -45,7 +46,8 @@ import kotlin.coroutines.resume
 class AwsTranscribeSttService(
     private val accessKeyId: String,
     private val secretAccessKey: String,
-    private val region: String = "us-east-1"
+    private val region: String = "us-east-1",
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : BaseSttService() {
 
     companion object {
@@ -54,11 +56,12 @@ class AwsTranscribeSttService(
         private const val ALGORITHM = "AWS4-HMAC-SHA256"
         private const val RECOGNITION_TIMEOUT_MS = 60_000L
         private const val AUDIO_CHUNK_SIZE = 8192 // 每次傳送的音訊塊大小
+        private const val UNKNOWN_ERROR = "Unknown error"
     }
 
     override val provider = SttProvider.AWS_TRANSCRIBE
 
-    // ========== AWS Signature V4 工具方法 ==========
+    // ========== AWS Signature V4 Tool Methodology ==========
 
     private fun getSignatureKey(key: String, dateStamp: String, regionName: String, serviceName: String): ByteArray {
         val kDate = hmacSHA256("AWS4$key".toByteArray(), dateStamp)
@@ -255,7 +258,7 @@ class AwsTranscribeSttService(
             val buffer = ByteBuffer.wrap(data).order(ByteOrder.BIG_ENDIAN)
             val totalLength = buffer.int
             val headersLength = buffer.int
-            val preludeCrc = buffer.int
+            buffer.int  // skip prelude CRC
 
             // 跳過標頭
             val headersBytes = ByteArray(headersLength)
@@ -293,113 +296,30 @@ class AwsTranscribeSttService(
 
     // ========== 語音辨識實作 ==========
 
+    /**
+     * Mutable state shared between WebSocket callbacks during transcription
+     */
+    private class TranscriptionState {
+        val transcript = StringBuilder()
+        var hasError = false
+        var errorMessage = ""
+    }
+
     override suspend fun transcribe(audioData: ByteArray, languageCode: String): SpeechResult {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
+            if (isAudioTooShort(audioData)) {
+                return@withContext SpeechResult.Error(
+                    message = "Audio too short",
+                    errorCode = SpeechErrorCode.AUDIO_TOO_SHORT
+                )
+            }
+
+            Log.d(TAG, "AWS Transcribe streaming: ${audioData.size} bytes, language: $languageCode")
+            val presignedUrl = buildPresignedWebSocketUrl(languageCode)
+            Log.d(TAG, "Connecting to AWS Transcribe WebSocket")
+
             try {
-                if (isAudioTooShort(audioData)) {
-                    return@withContext SpeechResult.Error(
-                        message = "Audio too short",
-                        errorCode = SpeechErrorCode.AUDIO_TOO_SHORT
-                    )
-                }
-
-                Log.d(TAG, "AWS Transcribe streaming: ${audioData.size} bytes, language: $languageCode")
-
-                val presignedUrl = buildPresignedWebSocketUrl(languageCode)
-                Log.d(TAG, "Connecting to AWS Transcribe WebSocket")
-
-                withTimeout(RECOGNITION_TIMEOUT_MS) {
-                    suspendCancellableCoroutine<SpeechResult> { continuation ->
-                        var finalTranscript = StringBuilder()
-                        var hasError = false
-                        var errorMessage = ""
-
-                        val request = Request.Builder().url(presignedUrl).build()
-
-                        val webSocket = client.newWebSocket(request, object : WebSocketListener() {
-                            override fun onOpen(webSocket: WebSocket, response: Response) {
-                                Log.d(TAG, "WebSocket connected to AWS Transcribe")
-
-                                // 分塊傳送音訊資料（Event Stream 編碼）
-                                var offset = 0
-                                while (offset < audioData.size) {
-                                    val chunkSize = minOf(AUDIO_CHUNK_SIZE, audioData.size - offset)
-                                    val chunk = audioData.copyOfRange(offset, offset + chunkSize)
-                                    val eventFrame = encodeAudioEvent(chunk)
-                                    webSocket.send(eventFrame.toByteString())
-                                    offset += chunkSize
-                                }
-
-                                // 傳送空的 AudioEvent 表示音訊結束
-                                val endFrame = encodeAudioEvent(ByteArray(0))
-                                webSocket.send(endFrame.toByteString())
-                                Log.d(TAG, "Audio data sent, waiting for transcription...")
-                            }
-
-                            override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-                                try {
-                                    val text = parseEventStreamResponse(bytes.toByteArray())
-                                    if (!text.isNullOrEmpty()) {
-                                        finalTranscript.append(text)
-                                        Log.d(TAG, "Transcript segment: $text")
-                                    }
-                                } catch (e: Exception) {
-                                    Log.w(TAG, "Error parsing response", e)
-                                }
-                            }
-
-                            override fun onMessage(webSocket: WebSocket, text: String) {
-                                Log.d(TAG, "Text message: $text")
-                                // AWS 通常使用二進位訊息，但錯誤可能以文字傳送
-                                try {
-                                    val json = JSONObject(text)
-                                    if (json.has("Message")) {
-                                        hasError = true
-                                        errorMessage = json.optString("Message", "Unknown error")
-                                        Log.e(TAG, "AWS error: $errorMessage")
-                                    }
-                                } catch (_: Exception) {}
-                            }
-
-                            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                                Log.d(TAG, "WebSocket closed: $code - $reason")
-                                if (continuation.isActive) {
-                                    val result = finalTranscript.toString().trim()
-                                    if (hasError) {
-                                        continuation.resume(SpeechResult.Error(
-                                            message = "AWS Transcribe error: $errorMessage",
-                                            errorCode = SpeechErrorCode.RECOGNITION_FAILED
-                                        ))
-                                    } else if (result.isNotEmpty()) {
-                                        continuation.resume(SpeechResult.Success(result))
-                                    } else {
-                                        continuation.resume(SpeechResult.Error(
-                                            message = "No speech detected",
-                                            errorCode = SpeechErrorCode.NO_SPEECH_DETECTED
-                                        ))
-                                    }
-                                }
-                            }
-
-                            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                                Log.e(TAG, "WebSocket failure", t)
-                                if (continuation.isActive) {
-                                    val msg = response?.body?.string()?.let {
-                                        try { JSONObject(it).optString("Message", t.message ?: "Unknown error") } catch (_: Exception) { t.message }
-                                    } ?: t.message ?: "Unknown error"
-                                    continuation.resume(SpeechResult.Error(
-                                        message = "Connection error: $msg",
-                                        errorCode = SpeechErrorCode.NETWORK_ERROR
-                                    ))
-                                }
-                            }
-                        })
-
-                        continuation.invokeOnCancellation {
-                            webSocket.close(1000, "Cancelled")
-                        }
-                    }
-                }
+                performWebSocketTranscription(presignedUrl, audioData)
             } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
                 Log.e(TAG, "AWS Transcribe timed out")
                 SpeechResult.Error(
@@ -416,8 +336,157 @@ class AwsTranscribeSttService(
         }
     }
 
+    /**
+     * Perform WebSocket-based streaming transcription with timeout
+     */
+    private suspend fun performWebSocketTranscription(
+        presignedUrl: String,
+        audioData: ByteArray
+    ): SpeechResult {
+        return withTimeout(RECOGNITION_TIMEOUT_MS) {
+            suspendCancellableCoroutine { continuation ->
+                val state = TranscriptionState()
+                val request = Request.Builder().url(presignedUrl).build()
+
+                val webSocket = client.newWebSocket(
+                    request,
+                    createTranscribeListener(audioData, state, continuation)
+                )
+
+                continuation.invokeOnCancellation {
+                    webSocket.close(1000, "Cancelled")
+                }
+            }
+        }
+    }
+
+    /**
+     * Create the WebSocket listener that handles audio streaming and result collection
+     */
+    private fun createTranscribeListener(
+        audioData: ByteArray,
+        state: TranscriptionState,
+        continuation: kotlinx.coroutines.CancellableContinuation<SpeechResult>
+    ): WebSocketListener {
+        return object : WebSocketListener() {
+            override fun onOpen(webSocket: WebSocket, response: Response) {
+                Log.d(TAG, "WebSocket connected to AWS Transcribe")
+                sendAudioChunks(webSocket, audioData)
+            }
+
+            override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+                try {
+                    val text = parseEventStreamResponse(bytes.toByteArray())
+                    if (!text.isNullOrEmpty()) {
+                        state.transcript.append(text)
+                        Log.d(TAG, "Transcript segment: $text")
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Error parsing response", e)
+                }
+            }
+
+            override fun onMessage(webSocket: WebSocket, text: String) {
+                Log.d(TAG, "Text message: $text")
+                parseAwsErrorMessage(text, state)
+            }
+
+            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                Log.d(TAG, "WebSocket closed: $code - $reason")
+                resolveTranscription(state, continuation)
+            }
+
+            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                Log.e(TAG, "WebSocket failure", t)
+                resolveFailure(t, response, continuation)
+            }
+        }
+    }
+
+    /**
+     * Send audio data in chunks via Event Stream encoding
+     */
+    private fun sendAudioChunks(webSocket: WebSocket, audioData: ByteArray) {
+        var offset = 0
+        while (offset < audioData.size) {
+            val chunkSize = minOf(AUDIO_CHUNK_SIZE, audioData.size - offset)
+            val chunk = audioData.copyOfRange(offset, offset + chunkSize)
+            webSocket.send(encodeAudioEvent(chunk).toByteString())
+            offset += chunkSize
+        }
+        // Send empty AudioEvent to signal end of audio
+        webSocket.send(encodeAudioEvent(ByteArray(0)).toByteString())
+        Log.d(TAG, "Audio data sent, waiting for transcription...")
+    }
+
+    /**
+     * Parse AWS error message from text-based WebSocket message
+     */
+    private fun parseAwsErrorMessage(text: String, state: TranscriptionState) {
+        try {
+            val json = JSONObject(text)
+            if (json.has("Message")) {
+                state.hasError = true
+                state.errorMessage = json.optString("Message", UNKNOWN_ERROR)
+                Log.e(TAG, "AWS error: ${state.errorMessage}")
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to parse text message: ${e.message}")
+        }
+    }
+
+    /**
+     * Resolve the final transcription result and resume the continuation
+     */
+    private fun resolveTranscription(
+        state: TranscriptionState,
+        continuation: kotlinx.coroutines.CancellableContinuation<SpeechResult>
+    ) {
+        if (!continuation.isActive) return
+        val result = state.transcript.toString().trim()
+        when {
+            state.hasError -> continuation.resume(SpeechResult.Error(
+                message = "AWS Transcribe error: ${state.errorMessage}",
+                errorCode = SpeechErrorCode.RECOGNITION_FAILED
+            ))
+            result.isNotEmpty() -> continuation.resume(SpeechResult.Success(result))
+            else -> continuation.resume(SpeechResult.Error(
+                message = "No speech detected",
+                errorCode = SpeechErrorCode.NO_SPEECH_DETECTED
+            ))
+        }
+    }
+
+    /**
+     * Handle WebSocket failure and resume with error
+     */
+    private fun resolveFailure(
+        t: Throwable,
+        response: Response?,
+        continuation: kotlinx.coroutines.CancellableContinuation<SpeechResult>
+    ) {
+        if (!continuation.isActive) return
+        val msg = extractFailureMessage(t, response)
+        continuation.resume(SpeechResult.Error(
+            message = "Connection error: $msg",
+            errorCode = SpeechErrorCode.NETWORK_ERROR
+        ))
+    }
+
+    /**
+     * Extract a meaningful error message from a WebSocket failure
+     */
+    private fun extractFailureMessage(t: Throwable, response: Response?): String {
+        val body = response?.body?.string() ?: return t.message ?: UNKNOWN_ERROR
+        return try {
+            JSONObject(body).optString("Message", t.message ?: UNKNOWN_ERROR)
+        } catch (_: Exception) {
+            t.message ?: UNKNOWN_ERROR
+        }
+    }
+
     override suspend fun validateCredentials(): SttValidationResult {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             try {
                 if (accessKeyId.isBlank() || secretAccessKey.isBlank()) {
                     return@withContext SttValidationResult.Invalid(SttValidationError.INVALID_CREDENTIALS)

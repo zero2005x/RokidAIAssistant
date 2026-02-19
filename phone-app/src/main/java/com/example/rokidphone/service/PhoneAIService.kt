@@ -1033,68 +1033,8 @@ class PhoneAIService : Service() {
             ))
             
             // 1. Speech recognition
-            // Detect audio format from file extension to use correct transcription method
-            val isEncodedAudio = filePath.endsWith(".m4a", ignoreCase = true) || 
-                                 filePath.endsWith(".mp4", ignoreCase = true) ||
-                                 filePath.endsWith(".aac", ignoreCase = true) ||
-                                 filePath.endsWith(".mp3", ignoreCase = true) ||
-                                 filePath.endsWith(".ogg", ignoreCase = true)
-            val audioMimeType = when {
-                filePath.endsWith(".m4a", ignoreCase = true) || filePath.endsWith(".mp4", ignoreCase = true) -> "audio/mp4"
-                filePath.endsWith(".aac", ignoreCase = true) -> "audio/aac"
-                filePath.endsWith(".mp3", ignoreCase = true) -> "audio/mpeg"
-                filePath.endsWith(".ogg", ignoreCase = true) -> "audio/ogg"
-                else -> "audio/wav"
-            }
-            
-            Log.d(TAG, "Starting speech recognition for phone recording... (encoded=$isEncodedAudio, mimeType=$audioMimeType)")
-            val transcriptResult = if (sttService != null) {
-                Log.d(TAG, "Using dedicated STT service: ${sttService?.provider?.name}")
-                if (isEncodedAudio) {
-                    sttService?.transcribeAudioFile(audioData, audioMimeType, settings.speechLanguage)
-                } else {
-                    sttService?.transcribe(audioData, settings.speechLanguage)
-                }
-            } else {
-                Log.d(TAG, "Using AI-based speech service, language: ${settings.speechLanguage}")
-                if (isEncodedAudio) {
-                    speechService?.transcribeAudioFile(audioData, audioMimeType, settings.speechLanguage)
-                } else {
-                    speechService?.transcribe(audioData, settings.speechLanguage)
-                }
-            }
-            
-            val transcript = when (transcriptResult) {
-                is SpeechResult.Success -> {
-                    Log.d(TAG, "Phone recording transcript: ${transcriptResult.text}")
-                    transcriptResult.text
-                }
-                is SpeechResult.Error -> {
-                    Log.e(TAG, "Phone recording transcription error: ${transcriptResult.message}")
-                    recordingRepository?.markError(recordingId, transcriptResult.message)
-                    if (settings.pushRecordingToGlasses) {
-                        bluetoothManager?.sendMessage(Message.aiError(transcriptResult.message))
-                    }
-                    ServiceBridge.emitConversation(Message(
-                        type = MessageType.AI_ERROR,
-                        payload = transcriptResult.message
-                    ))
-                    return
-                }
-                null -> {
-                    val errorMsg = getString(R.string.service_not_ready)
-                    recordingRepository?.markError(recordingId, errorMsg)
-                    if (settings.pushRecordingToGlasses) {
-                        bluetoothManager?.sendMessage(Message.aiError(errorMsg))
-                    }
-                    ServiceBridge.emitConversation(Message(
-                        type = MessageType.AI_ERROR,
-                        payload = errorMsg
-                    ))
-                    notifyApiKeyMissing()
-                    return
-                }
-            }
+            val transcriptResult = performSpeechRecognition(audioData, filePath, settings.speechLanguage)
+            val transcript = extractTranscript(transcriptResult, recordingId, settings) ?: return
             
             // 2. Update recording with transcript
             recordingRepository?.updateTranscript(recordingId, transcript)
@@ -1152,20 +1092,105 @@ class PhoneAIService : Service() {
             throw e
         } catch (e: Exception) {
             Log.e(TAG, "Error processing phone recording", e)
-            val errorMsg = e.message ?: "Unknown error"
-            recordingRepository?.markError(recordingId, errorMsg)
-            try {
-                val settings = SettingsRepository.getInstance(this).getSettings()
-                if (settings.pushRecordingToGlasses) {
-                    bluetoothManager?.sendMessage(Message.aiError(errorMsg))
-                }
-                ServiceBridge.emitConversation(Message(
-                    type = MessageType.AI_ERROR,
-                    payload = errorMsg
-                ))
-            } catch (_: Exception) { }
+            notifyProcessingError(recordingId, e.message ?: "Unknown error")
         } finally {
             processingRecordingIds.remove(recordingId)
+        }
+    }
+    
+    /**
+     * Determine audio MIME type from file extension
+     */
+    private fun getAudioMimeType(filePath: String): String = when {
+        filePath.endsWith(".m4a", ignoreCase = true) || filePath.endsWith(".mp4", ignoreCase = true) -> "audio/mp4"
+        filePath.endsWith(".aac", ignoreCase = true) -> "audio/aac"
+        filePath.endsWith(".mp3", ignoreCase = true) -> "audio/mpeg"
+        filePath.endsWith(".ogg", ignoreCase = true) -> "audio/ogg"
+        else -> "audio/wav"
+    }
+    
+    /**
+     * Perform speech recognition using the best available STT service
+     */
+    private suspend fun performSpeechRecognition(
+        audioData: ByteArray,
+        filePath: String,
+        languageCode: String
+    ): SpeechResult? {
+        val isEncodedAudio = filePath.endsWith(".m4a", ignoreCase = true) ||
+                filePath.endsWith(".mp4", ignoreCase = true) ||
+                filePath.endsWith(".aac", ignoreCase = true) ||
+                filePath.endsWith(".mp3", ignoreCase = true) ||
+                filePath.endsWith(".ogg", ignoreCase = true)
+        val audioMimeType = getAudioMimeType(filePath)
+        
+        Log.d(TAG, "Starting speech recognition for phone recording... (encoded=$isEncodedAudio, mimeType=$audioMimeType)")
+        
+        val stt = sttService
+        val speech = speechService
+        val serviceName = if (stt != null) "dedicated STT (${stt.provider.name})" else "AI-based speech"
+        Log.d(TAG, "Using $serviceName service, language: $languageCode")
+        
+        return when {
+            stt != null && isEncodedAudio -> stt.transcribeAudioFile(audioData, audioMimeType, languageCode)
+            stt != null -> stt.transcribe(audioData, languageCode)
+            speech != null && isEncodedAudio -> speech.transcribeAudioFile(audioData, audioMimeType, languageCode)
+            speech != null -> speech.transcribe(audioData, languageCode)
+            else -> null
+        }
+    }
+    
+    /**
+     * Extract transcript text from SpeechResult, notifying errors as needed.
+     * Returns null if transcription failed (caller should return early).
+     */
+    private suspend fun extractTranscript(
+        result: SpeechResult?,
+        recordingId: String,
+        settings: ApiSettings
+    ): String? {
+        return when (result) {
+            is SpeechResult.Success -> {
+                Log.d(TAG, "Phone recording transcript: ${result.text}")
+                result.text
+            }
+            is SpeechResult.Error -> {
+                Log.e(TAG, "Phone recording transcription error: ${result.message}")
+                notifyRecordingError(recordingId, result.message, settings)
+                null
+            }
+            null -> {
+                notifyRecordingError(recordingId, getString(R.string.service_not_ready), settings)
+                notifyApiKeyMissing()
+                null
+            }
+        }
+    }
+    
+    /**
+     * Notify recording error to database, glasses, and phone UI
+     */
+    private suspend fun notifyRecordingError(recordingId: String, message: String, settings: ApiSettings) {
+        recordingRepository?.markError(recordingId, message)
+        if (settings.pushRecordingToGlasses) {
+            bluetoothManager?.sendMessage(Message.aiError(message))
+        }
+        ServiceBridge.emitConversation(Message(type = MessageType.AI_ERROR, payload = message))
+    }
+    
+    /**
+     * Notify processing error with best-effort error propagation
+     */
+    private suspend fun notifyProcessingError(recordingId: String, errorMsg: String) {
+        recordingRepository?.markError(recordingId, errorMsg)
+        try {
+            val settings = SettingsRepository.getInstance(this).getSettings()
+            if (settings.pushRecordingToGlasses) {
+                bluetoothManager?.sendMessage(Message.aiError(errorMsg))
+            }
+            ServiceBridge.emitConversation(Message(type = MessageType.AI_ERROR, payload = errorMsg))
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to notify error state", e)
         }
     }
     

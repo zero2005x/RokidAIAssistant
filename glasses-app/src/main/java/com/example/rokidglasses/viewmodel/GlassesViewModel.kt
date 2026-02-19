@@ -499,28 +499,7 @@ class GlassesViewModel(
             }
             
             MessageType.AI_RESPONSE_TEXT -> {
-                // AI response text - handle pagination for long responses
-                val responseText = message.payload ?: ""
-                fullAiResponse = responseText
-                responsePages = paginateText(responseText)
-                
-                val isPaginated = responsePages.size > 1
-                val displayText = if (responsePages.isNotEmpty()) responsePages[0] else responseText
-                val hintText = if (isPaginated) {
-                    context.getString(R.string.swipe_for_more)
-                } else {
-                    context.getString(R.string.tap_continue)
-                }
-                
-                _uiState.update { it.copy(
-                    isProcessing = false,
-                    aiResponse = responseText,
-                    displayText = displayText,
-                    hintText = hintText,
-                    currentPage = 0,
-                    totalPages = responsePages.size,
-                    isPaginated = isPaginated
-                ) }
+                handleAiResponseText(message)
             }
             
             MessageType.AI_RESPONSE_TTS -> {
@@ -662,6 +641,33 @@ class GlassesViewModel(
                 Log.d(TAG, "Unhandled message type: ${message.type}")
             }
         }
+    }
+    
+    /**
+     * Handle AI response text message with pagination support
+     */
+    private fun handleAiResponseText(message: Message) {
+        val responseText = message.payload ?: ""
+        fullAiResponse = responseText
+        responsePages = paginateText(responseText)
+        
+        val isPaginated = responsePages.size > 1
+        val displayText = if (responsePages.isNotEmpty()) responsePages[0] else responseText
+        val hintText = if (isPaginated) {
+            context.getString(R.string.swipe_for_more)
+        } else {
+            context.getString(R.string.tap_continue)
+        }
+        
+        _uiState.update { it.copy(
+            isProcessing = false,
+            aiResponse = responseText,
+            displayText = displayText,
+            hintText = hintText,
+            currentPage = 0,
+            totalPages = responsePages.size,
+            isPaginated = isPaginated
+        ) }
     }
     
     private fun playAudio(audioData: ByteArray) {
@@ -945,7 +951,7 @@ class GlassesViewModel(
                     photoTransferProgress = 0f
                 ) }
                 
-                val socket = bluetoothClient.getSocket()
+                val socket = bluetoothClient.connectedSocket
                 if (socket == null || !socket.isConnected) {
                     throw IllegalStateException("Bluetooth socket not connected")
                 }

@@ -116,11 +116,9 @@ class CxrServiceManager {
     fun subscribe(channelName: String, callback: (name: String, args: Caps?, data: ByteArray?) -> Unit): Int {
         onMessageReceived = callback
         
-        val msgCallback = object : CXRServiceBridge.MsgCallback {
-            override fun onReceive(name: String, args: Caps?, value: ByteArray?) {
-                Log.d(TAG, "Received message: $name, args size: ${args?.size() ?: 0}")
-                callback(name, args, value)
-            }
+        val msgCallback = CXRServiceBridge.MsgCallback { name, args, value ->
+            Log.d(TAG, "Received message: $name, args size: ${args?.size() ?: 0}")
+            callback(name, args, value)
         }
         
         val result = cxrBridge.subscribe(channelName, msgCallback)
@@ -137,11 +135,9 @@ class CxrServiceManager {
     ): Int {
         onMessageWithReply = callback
         
-        val replyCallback = object : CXRServiceBridge.MsgReplyCallback {
-            override fun onReceive(name: String, args: Caps?, value: ByteArray?, reply: CXRServiceBridge.Reply?) {
-                Log.d(TAG, "Received message with reply: $name")
-                callback(name, args, value, reply)
-            }
+        val replyCallback = CXRServiceBridge.MsgReplyCallback { name, args, value, reply ->
+            Log.d(TAG, "Received message with reply: $name")
+            callback(name, args, value, reply)
         }
         
         val result = cxrBridge.subscribe(channelName, replyCallback)

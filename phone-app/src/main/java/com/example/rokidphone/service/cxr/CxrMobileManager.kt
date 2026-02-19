@@ -192,11 +192,9 @@ class CxrMobileManager(private val context: Context) {
     }
     
     // Photo result callback
-    private val photoCallback = object : PhotoResultCallback {
-        override fun onPhotoResult(status: ValueUtil.CxrStatus?, photo: ByteArray?) {
-            Log.d(TAG, "Photo result: status=$status, size=${photo?.size ?: 0}")
-            onPhotoResult?.invoke(status, photo)
-        }
+    private val photoCallback = PhotoResultCallback { status, photo ->
+        Log.d(TAG, "Photo result: status=$status, size=${photo?.size ?: 0}")
+        onPhotoResult?.invoke(status, photo)
     }
     
     /**
@@ -474,10 +472,8 @@ class CxrMobileManager(private val context: Context) {
      */
     fun getGlassInfo(callback: (status: ValueUtil.CxrStatus?, info: GlassInfo?) -> Unit) {
         try {
-            cxrApi.getGlassInfo(object : GlassInfoResultCallback {
-                override fun onGlassInfoResult(status: ValueUtil.CxrStatus?, glassInfo: GlassInfo?) {
-                    callback(status, glassInfo)
-                }
+            cxrApi.getGlassInfo(GlassInfoResultCallback { status, glassInfo ->
+                callback(status, glassInfo)
             })
         } catch (e: Exception) {
             Log.e(TAG, "Failed to get glass info", e)

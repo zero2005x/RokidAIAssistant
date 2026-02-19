@@ -136,10 +136,10 @@ fun RecordingDetailScreen(
                 )
                 
                 // Notes section
-                if (rec.notes != null) {
+                rec.notes?.let { notes ->
                     Spacer(modifier = Modifier.height(16.dp))
                     NotesSection(
-                        notes = rec.notes!!,
+                        notes = notes,
                         onUpdateNotes = { viewModel.updateNotes(rec.id, it) },
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )

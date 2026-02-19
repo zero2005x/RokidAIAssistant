@@ -67,7 +67,7 @@ object ServiceBridge {
             .replace(Regex("```[\\s\\S]*?```"), "")
             .replace(Regex("`(.+?)`"), "$1")
             // Remove links but keep text
-            .replace(Regex("\\[(.+?)]\\(.+?\\)"), "$1")
+            .replace(Regex("\\[(.+?)]\\([^)]+\\)"), "$1")
             // Remove bullet points
             .replace(Regex("^[\\-*+]\\s+", RegexOption.MULTILINE), "• ")
             // Remove numbered lists formatting

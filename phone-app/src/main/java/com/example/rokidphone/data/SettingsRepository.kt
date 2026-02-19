@@ -68,7 +68,7 @@ class SettingsRepository(private val context: Context) {
         }
     }
     
-    private val masterKey = MasterKey.Builder(context)
+    private val masterKey = MasterKey.Builder(context, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
         .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
         .build()
     
