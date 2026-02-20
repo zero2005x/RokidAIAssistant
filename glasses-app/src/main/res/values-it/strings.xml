@@ -74,8 +74,8 @@
     <string name="glasses_system_prompt">Sei un assistente IA amichevole installato sugli occhiali intelligenti Rokid. Rispondi alle domande nella lingua dell\'utente, con ogni risposta non superiore a 100 parole.</string>
     <string name="glasses_system_prompt_ack">Capito, sono il tuo assistente IA Rokid. Ti aiuterò in modo conciso. Come posso aiutarti?</string>
     <!-- Wake Word Service -->
-    <string name="wake_word_channel_name">Voice Wake Service</string>
-    <string name="wake_word_channel_description">Continuously listens for voice wake command</string>
+    <string name="wake_word_channel_name">Servizio di attivazione vocale</string>
+    <string name="wake_word_channel_description">Ascolta continuamente il comando di attivazione vocale</string>
     <string name="wake_word_notification_title">Rokid AI Assistant</string>
-    <string name="wake_word_notification_text">Say \"Hi Rokid\" to start conversation</string>
+    <string name="wake_word_notification_text">Di\' \"Hi Rokid\" per avviare una conversazione</string>
 </resources>

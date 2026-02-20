@@ -202,20 +202,6 @@ Rules:
             
             val contents = JSONArray()
             
-            // System prompt
-            contents.put(JSONObject().apply {
-                put("role", "user")
-                put("parts", JSONArray().apply {
-                    put(JSONObject().put("text", getFullSystemPrompt()))
-                })
-            })
-            contents.put(JSONObject().apply {
-                put("role", "model")
-                put("parts", JSONArray().apply {
-                    put(JSONObject().put("text", "Understood, I will assist you accordingly!"))
-                })
-            })
-            
             // Conversation history
             for ((role, content) in conversationHistory.takeLast(6)) {
                 val geminiRole = if (role == "user") "user" else "model"
@@ -236,6 +222,9 @@ Rules:
             })
             
             val requestJson = JSONObject().apply {
+                put("systemInstruction", JSONObject().apply {
+                    put("parts", JSONArray().put(JSONObject().put("text", getFullSystemPrompt())))
+                })
                 put("contents", contents)
                 put("generationConfig", JSONObject().apply {
                     put("temperature", temperature.toDouble())

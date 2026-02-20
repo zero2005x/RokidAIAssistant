@@ -34,11 +34,13 @@ class TextToSpeechService(private val context: Context) {
     companion object {
         private const val TAG = "TextToSpeechService"
         
-        // Edge TTS voice options (Chinese)
+        // Edge TTS voice options
         const val EDGE_VOICE_XIAOXIAO = "zh-CN-XiaoxiaoNeural"      // Female voice, friendly
         const val EDGE_VOICE_YUNXI = "zh-CN-YunxiNeural"            // Male voice, young
         const val EDGE_VOICE_XIAOYI = "zh-TW-HsiaoChenNeural"       // Taiwan female voice
         const val EDGE_VOICE_YUNYANG = "zh-CN-YunyangNeural"        // Male voice, news anchor style
+        const val EDGE_VOICE_SUNHI = "ko-KR-SunHiNeural"            // Korean female voice
+        const val EDGE_VOICE_EN = "en-US-JennyNeural"               // English female voice
         
         // Default voice
         const val DEFAULT_VOICE = EDGE_VOICE_XIAOXIAO
@@ -66,7 +68,8 @@ class TextToSpeechService(private val context: Context) {
     fun initSystemTts() {
         systemTts = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                val result = systemTts?.setLanguage(Locale.TRADITIONAL_CHINESE)
+                val defaultLocale = Locale.getDefault()
+                val result = systemTts?.setLanguage(defaultLocale)
                 isSystemTtsReady = result != TextToSpeech.LANG_MISSING_DATA 
                     && result != TextToSpeech.LANG_NOT_SUPPORTED
                 Log.d(TAG, "System TTS initialization: ${if (isSystemTtsReady) "success" else "failed"}")
@@ -90,7 +93,7 @@ class TextToSpeechService(private val context: Context) {
      */
     suspend fun speakWithEdgeTts(
         text: String,
-        voice: String = DEFAULT_VOICE,
+        voice: String = selectEdgeVoiceForText(text),
         onComplete: (() -> Unit)? = null
     ): Result<Unit> = withContext(Dispatchers.IO) {
         try {
@@ -148,8 +151,9 @@ class TextToSpeechService(private val context: Context) {
     private suspend fun fetchGoogleTranslateTts(text: String): ByteArray? {
         return try {
             val encodedText = URLEncoder.encode(text, "UTF-8")
+            val languageCode = localeToGoogleLanguageCode(detectLocaleForText(text))
             val url = "https://translate.google.com/translate_tts?" +
-                "ie=UTF-8&client=tw-ob&tl=zh-TW&q=$encodedText"
+                "ie=UTF-8&client=tw-ob&tl=$languageCode&q=$encodedText"
             
             val request = Request.Builder()
                 .url(url)
@@ -183,6 +187,12 @@ class TextToSpeechService(private val context: Context) {
             }
             
             Log.d(TAG, "System TTS playing: $text")
+
+            val locale = detectLocaleForText(text)
+            val languageResult = systemTts?.setLanguage(locale)
+            if (languageResult == TextToSpeech.LANG_MISSING_DATA || languageResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                systemTts?.setLanguage(Locale.getDefault())
+            }
             
             val utteranceId = "tts_${System.currentTimeMillis()}"
             
@@ -235,7 +245,7 @@ class TextToSpeechService(private val context: Context) {
         }
         
         // Try Edge TTS first
-        val result = speakWithEdgeTts(text, DEFAULT_VOICE, onComplete)
+        val result = speakWithEdgeTts(text, selectEdgeVoiceForText(text), onComplete)
         if (result.isSuccess) {
             return result
         }
@@ -314,6 +324,36 @@ class TextToSpeechService(private val context: Context) {
             currentAudioTrack = null
         } catch (e: Exception) {
             Log.e(TAG, "Failed to release resources", e)
+        }
+    }
+
+    private fun detectLocaleForText(text: String): Locale {
+        val trimmed = text.trim()
+        if (trimmed.isEmpty()) return Locale.getDefault()
+
+        return when {
+            trimmed.any { it in '\uAC00'..'\uD7AF' } -> Locale.KOREAN
+            trimmed.any { it in '\u4E00'..'\u9FFF' } -> Locale.TRADITIONAL_CHINESE
+            trimmed.any { it in '\u3040'..'\u30FF' } -> Locale.JAPANESE
+            else -> Locale.getDefault()
+        }
+    }
+
+    private fun selectEdgeVoiceForText(text: String): String {
+        return when {
+            text.any { it in '\uAC00'..'\uD7AF' } -> EDGE_VOICE_SUNHI
+            text.any { it in '\u4E00'..'\u9FFF' } -> EDGE_VOICE_XIAOXIAO
+            text.any { it in 'A'..'Z' || it in 'a'..'z' } -> EDGE_VOICE_EN
+            else -> DEFAULT_VOICE
+        }
+    }
+
+    private fun localeToGoogleLanguageCode(locale: Locale): String {
+        return when (locale.language) {
+            Locale.KOREAN.language -> "ko-KR"
+            Locale.JAPANESE.language -> "ja-JP"
+            Locale.CHINESE.language -> "zh-TW"
+            else -> "en-US"
         }
     }
 }

@@ -76,13 +76,13 @@ class OpenAiCompatibleService(
                 }
                 else -> {
                     // OpenAI, Groq support Whisper
-                    transcribeWithWhisper(pcmAudioData)
+                    transcribeWithWhisper(pcmAudioData, languageCode)
                 }
             }
         }
     }
     
-    private suspend fun transcribeWithWhisper(pcmAudioData: ByteArray): SpeechResult {
+    private suspend fun transcribeWithWhisper(pcmAudioData: ByteArray, languageCode: String): SpeechResult {
         return withContext(Dispatchers.IO) {
             Log.d(TAG, "Starting Whisper transcription, audio size: ${pcmAudioData.size} bytes")
             
@@ -92,7 +92,7 @@ class OpenAiCompatibleService(
             
             val wavData = pcmToWav(pcmAudioData)
             val boundary = "----WebKitFormBoundary${System.currentTimeMillis()}"
-            val requestBody = buildMultipartBody(boundary, wavData)
+            val requestBody = buildMultipartBody(boundary, wavData, languageCode)
             
             val url = buildUrl("audio/transcriptions")
             val authHeader = buildAuthHeader()
@@ -133,9 +133,10 @@ class OpenAiCompatibleService(
         }
     }
     
-    private fun buildMultipartBody(boundary: String, wavData: ByteArray): ByteArray {
+    private fun buildMultipartBody(boundary: String, wavData: ByteArray, languageCode: String): ByteArray {
         val output = java.io.ByteArrayOutputStream()
         val writer = output.bufferedWriter()
+        val normalizedLanguageCode = languageCode.substringBefore('-').ifBlank { "auto" }.lowercase()
         
         // file field
         writer.write("--$boundary\r\n")
@@ -157,7 +158,7 @@ class OpenAiCompatibleService(
         // language field
         writer.write("--$boundary\r\n")
         writer.write("Content-Disposition: form-data; name=\"language\"\r\n\r\n")
-        writer.write("zh\r\n")
+        writer.write("$normalizedLanguageCode\r\n")
         
         writer.write("--$boundary--\r\n")
         writer.flush()

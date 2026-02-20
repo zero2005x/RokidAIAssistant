@@ -153,6 +153,16 @@ class GeminiLiveSession(
         try {
             // Initialize ToolCallRouter
             toolCallRouter = ToolCallRouter(scope).also { router ->
+                val systemToolsHandler = SystemToolsHandler(context)
+
+                router.registerHandler("check_schedule") { call ->
+                    systemToolsHandler.handleCheckSchedule(call)
+                }
+
+                router.registerHandler("make_call") { call ->
+                    systemToolsHandler.handleMakeCall(call)
+                }
+
                 // Collect tool execution results and return to WebSocket
                 scope.launch {
                     router.toolResults.collect { result ->

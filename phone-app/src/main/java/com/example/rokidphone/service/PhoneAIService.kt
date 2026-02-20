@@ -1534,18 +1534,32 @@ class TextToSpeechService(private val context: android.content.Context) {
     init {
         tts = android.speech.tts.TextToSpeech(context) { status ->
             if (status == android.speech.tts.TextToSpeech.SUCCESS) {
-                tts?.language = java.util.Locale.TRADITIONAL_CHINESE
+                tts?.language = java.util.Locale.getDefault()
             }
         }
     }
     
     fun speak(text: String, onAudioChunk: (ByteArray) -> Unit) {
         // Simplified version: using system TTS
+        val locale = detectLocaleForText(text)
+        tts?.language = locale
         tts?.speak(text, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null, null)
     }
     
     fun shutdown() {
         tts?.shutdown()
+    }
+
+    private fun detectLocaleForText(text: String): java.util.Locale {
+        val trimmed = text.trim()
+        if (trimmed.isEmpty()) return java.util.Locale.getDefault()
+
+        return when {
+            trimmed.any { it in '\uAC00'..'\uD7AF' } -> java.util.Locale.KOREAN
+            trimmed.any { it in '\u4E00'..'\u9FFF' } -> java.util.Locale.TRADITIONAL_CHINESE
+            trimmed.any { it in '\u3040'..'\u30FF' } -> java.util.Locale.JAPANESE
+            else -> java.util.Locale.getDefault()
+        }
     }
 }
 

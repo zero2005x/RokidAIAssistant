@@ -74,8 +74,8 @@
     <string name="glasses_system_prompt">Bạn là trợ lý AI thân thiện được cài đặt trên kính thông minh Rokid. Vui lòng trả lời câu hỏi bằng ngôn ngữ của người dùng, mỗi câu trả lời không quá 100 từ.</string>
     <string name="glasses_system_prompt_ack">Đã hiểu, tôi là trợ lý AI Rokid của bạn. Tôi sẽ hỗ trợ bạn một cách ngắn gọn. Tôi có thể giúp gì cho bạn?</string>
     <!-- Wake Word Service -->
-    <string name="wake_word_channel_name">Voice Wake Service</string>
-    <string name="wake_word_channel_description">Continuously listens for voice wake command</string>
+    <string name="wake_word_channel_name">Dịch vụ đánh thức bằng giọng nói</string>
+    <string name="wake_word_channel_description">Liên tục lắng nghe lệnh đánh thức bằng giọng nói</string>
     <string name="wake_word_notification_title">Rokid AI Assistant</string>
-    <string name="wake_word_notification_text">Say \"Hi Rokid\" to start conversation</string>
+    <string name="wake_word_notification_text">Nói \"Hi Rokid\" để bắt đầu cuộc trò chuyện</string>
 </resources>

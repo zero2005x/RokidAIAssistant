@@ -74,8 +74,8 @@
     <string name="glasses_system_prompt">你是安裝在 Rokid 智慧眼鏡上的友善 AI 助理。請用使用者的語言回答問題，每次回覆不超過 100 字。</string>
     <string name="glasses_system_prompt_ack">了解，我是您的 Rokid AI 助理。我會簡潔地協助您。有什麼可以幫您的嗎？</string>
     <!-- Wake Word Service -->
-    <string name="wake_word_channel_name">Voice Wake Service</string>
-    <string name="wake_word_channel_description">Continuously listens for voice wake command</string>
+    <string name="wake_word_channel_name">語音喚醒服務</string>
+    <string name="wake_word_channel_description">持續監聽語音喚醒指令</string>
     <string name="wake_word_notification_title">Rokid AI Assistant</string>
-    <string name="wake_word_notification_text">Say \"Hi Rokid\" to start conversation</string>
+    <string name="wake_word_notification_text">說「Hi Rokid」開始對話</string>
 </resources>

@@ -82,8 +82,8 @@ enum class AiProvider(
     ZHIPU(
         displayNameResId = R.string.provider_zhipu,
         description = "GLM series, strong Chinese capabilities",
-        website = "https://open.bigmodel.cn",
-        defaultBaseUrl = "https://open.bigmodel.cn/api/paas/v4/",
+        website = "https://z.ai/model-api",
+        defaultBaseUrl = "https://api.z.ai/api/paas/v4/",
         isOpenAiCompatible = true,
         supportsSpeech = false,
         supportsVision = false
@@ -110,7 +110,7 @@ enum class AiProvider(
         displayNameResId = R.string.provider_moonshot,
         description = "Kimi series, multimodal with video support",
         website = "https://moonshot.cn",
-        defaultBaseUrl = "https://api.moonshot.cn/v1/",
+        defaultBaseUrl = "https://api.moonshot.ai/v1/",
         isOpenAiCompatible = true,
         supportsSpeech = false,
         supportsVision = true
@@ -176,7 +176,7 @@ data class ModelOption(
 object AvailableModels {
     val geminiModels = listOf(
         ModelOption(
-            id = "gemini-3-pro",
+            id = "gemini-3-pro-preview",
             displayName = "Gemini 3 Pro",
             provider = AiProvider.GEMINI,
             supportsAudio = true,
@@ -184,7 +184,7 @@ object AvailableModels {
             description = "Google's next-gen flagship with enhanced reasoning and multimodal capabilities"
         ),
         ModelOption(
-            id = "gemini-3-flash",
+            id = "gemini-3-flash-preview",
             displayName = "Gemini 3 Flash",
             provider = AiProvider.GEMINI,
             supportsAudio = true,
@@ -313,42 +313,26 @@ object AvailableModels {
     
     val deepseekModels = listOf(
         ModelOption(
-            id = "deepseek-v3.2",
-            displayName = "DeepSeek V3.2",
+            id = "deepseek-chat",
+            displayName = "DeepSeek Chat",
             provider = AiProvider.DEEPSEEK,
             supportsAudio = false,
             supportsVision = false,
-            description = "Latest V3.2 generation. Highly capable general-purpose model"
+            description = "DeepSeek's general chat model (OpenAI-compatible endpoint)"
         ),
         ModelOption(
-            id = "deepseek-v3",
-            displayName = "DeepSeek V3",
+            id = "deepseek-reasoner",
+            displayName = "DeepSeek Reasoner",
             provider = AiProvider.DEEPSEEK,
             supportsAudio = false,
             supportsVision = false,
-            description = "Previous V3 generation, stable and cost-effective"
-        ),
-        ModelOption(
-            id = "deepseek-r1",
-            displayName = "DeepSeek R1",
-            provider = AiProvider.DEEPSEEK,
-            supportsAudio = false,
-            supportsVision = false,
-            description = "Specialized reasoning model (Chain of Thought) for complex logic"
-        ),
-        ModelOption(
-            id = "deepseek-r2",
-            displayName = "DeepSeek R2",
-            provider = AiProvider.DEEPSEEK,
-            supportsAudio = false,
-            supportsVision = false,
-            description = "Next-gen reasoning model with improved Chain of Thought capabilities"
+            description = "DeepSeek's reasoning model for complex inference tasks"
         )
     )
     
     val groqModels = listOf(
         ModelOption(
-            id = "llama-4-scout",
+            id = "meta-llama/llama-4-scout-17b-16e-instruct",
             displayName = "Llama 4 Scout",
             provider = AiProvider.GROQ,
             supportsAudio = false,
@@ -356,7 +340,7 @@ object AvailableModels {
             description = "Meta's latest MoE model (109B total), fast and vision-capable on Groq"
         ),
         ModelOption(
-            id = "llama-4-maverick",
+            id = "meta-llama/llama-4-maverick-17b-128e-instruct",
             displayName = "Llama 4 Maverick",
             provider = AiProvider.GROQ,
             supportsAudio = false,
@@ -364,20 +348,12 @@ object AvailableModels {
             description = "Meta's most powerful MoE model (400B total), top-tier open model"
         ),
         ModelOption(
-            id = "llama-4-70b-versatile",
-            displayName = "Llama 4 70B",
-            provider = AiProvider.GROQ,
-            supportsAudio = false,
-            supportsVision = false,
-            description = "Llama 4 dense 70B model, reliable for general tasks"
-        ),
-        ModelOption(
             id = "llama-3.3-70b-versatile",
             displayName = "Llama 3.3 70B",
             provider = AiProvider.GROQ,
             supportsAudio = false,
             supportsVision = false,
-            description = "Reliable and powerful open model, optimized for tool use"
+            description = "Reliable and powerful model, optimized for tool use"
         ),
         ModelOption(
             id = "llama-3.1-70b-versatile",
@@ -442,28 +418,44 @@ object AvailableModels {
     
     val xaiModels = listOf(
         ModelOption(
-            id = "grok-4.1",
+            id = "grok-4-1-latest",
+            displayName = "Grok 4.1 Latest",
+            provider = AiProvider.XAI,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Alias that tracks the latest Grok 4.1 release"
+        ),
+        ModelOption(
+            id = "grok-4-1",
             displayName = "Grok 4.1",
             provider = AiProvider.XAI,
             supportsAudio = false,
             supportsVision = false,
-            description = "xAI's latest and most capable flagship model"
+            description = "Stable Grok 4.1 alias"
         ),
         ModelOption(
-            id = "grok-4.1-thinking",
-            displayName = "Grok 4.1 Thinking",
+            id = "grok-4-1-fast-reasoning",
+            displayName = "Grok 4.1 Fast Reasoning",
             provider = AiProvider.XAI,
             supportsAudio = false,
             supportsVision = false,
-            description = "Extended thinking variant of Grok 4.1 for deep reasoning"
+            description = "Fast reasoning variant for lower-latency responses"
         ),
         ModelOption(
-            id = "grok-4.1-fast",
-            displayName = "Grok 4.1 Fast",
+            id = "grok-4-0709",
+            displayName = "Grok 4 (2025-07-09)",
             provider = AiProvider.XAI,
             supportsAudio = false,
             supportsVision = false,
-            description = "Low-latency version of Grok 4.1 for quick interactions"
+            description = "Pinned dated release for reproducible behavior"
+        ),
+        ModelOption(
+            id = "grok-4-latest",
+            displayName = "Grok 4 Latest",
+            provider = AiProvider.XAI,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Alias that tracks the latest Grok 4 release"
         ),
         ModelOption(
             id = "grok-4",
@@ -471,47 +463,23 @@ object AvailableModels {
             provider = AiProvider.XAI,
             supportsAudio = false,
             supportsVision = false,
-            description = "Powerful reasoning model with strong capabilities"
+            description = "Stable Grok 4 alias"
         ),
         ModelOption(
-            id = "grok-4-fast",
-            displayName = "Grok 4 Fast",
+            id = "grok-3-latest",
+            displayName = "Grok 3 Latest",
             provider = AiProvider.XAI,
             supportsAudio = false,
             supportsVision = false,
-            description = "Speed-optimized Grok 4 for rapid responses"
+            description = "Alias that tracks the latest Grok 3 release"
         ),
         ModelOption(
-            id = "grok-4-heavy",
-            displayName = "Grok 4 Heavy",
+            id = "grok-3-mini-latest",
+            displayName = "Grok 3 Mini Latest",
             provider = AiProvider.XAI,
             supportsAudio = false,
             supportsVision = false,
-            description = "Maximum capability variant for complex analysis tasks"
-        ),
-        ModelOption(
-            id = "grok-3",
-            displayName = "Grok 3",
-            provider = AiProvider.XAI,
-            supportsAudio = false,
-            supportsVision = false,
-            description = "Previous generation model, stable and reliable"
-        ),
-        ModelOption(
-            id = "grok-3-mini",
-            displayName = "Grok 3 Mini",
-            provider = AiProvider.XAI,
-            supportsAudio = false,
-            supportsVision = false,
-            description = "Lightweight Grok 3 for cost-effective simple tasks"
-        ),
-        ModelOption(
-            id = "grok-beta",
-            displayName = "Grok Beta",
-            provider = AiProvider.XAI,
-            supportsAudio = false,
-            supportsVision = false,
-            description = "Experimental model for testing new capabilities"
+            description = "Alias that tracks the latest Grok 3 Mini release"
         )
     )
     

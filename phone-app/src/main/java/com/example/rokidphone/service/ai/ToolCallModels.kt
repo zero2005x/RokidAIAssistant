@@ -55,7 +55,8 @@ data class GeminiFunctionCall(
      * @return task description string, or null if not present
      */
     fun getTaskDescription(): String? {
-        return args.optString("task", null)
+        if (!args.has("task")) return null
+        return args.optString("task").takeIf { it.isNotBlank() }
     }
 
     /**
@@ -195,7 +196,9 @@ object ToolDeclarations {
     fun allDeclarations(): List<JSONObject> {
         return listOf(
             executeToolDeclaration(),
-            searchToolDeclaration()
+            searchToolDeclaration(),
+            checkScheduleToolDeclaration(),
+            makeCallToolDeclaration()
         )
     }
 
@@ -274,6 +277,55 @@ object ToolDeclarations {
                         })
                         put("required", JSONArray().apply {
                             put("query")
+                        })
+                    })
+                })
+            })
+        }
+    }
+
+    /**
+     * check_schedule — Query today's calendar events
+     */
+    private fun checkScheduleToolDeclaration(): JSONObject {
+        return JSONObject().apply {
+            put("function_declarations", JSONArray().apply {
+                put(JSONObject().apply {
+                    put("name", "check_schedule")
+                    put("description",
+                        "Check the user's schedule for today and return today's calendar events."
+                    )
+                    put("parameters", JSONObject().apply {
+                        put("type", "object")
+                        put("properties", JSONObject())
+                    })
+                })
+            })
+        }
+    }
+
+    /**
+     * make_call — Start a phone call via dialer
+     */
+    private fun makeCallToolDeclaration(): JSONObject {
+        return JSONObject().apply {
+            put("function_declarations", JSONArray().apply {
+                put(JSONObject().apply {
+                    put("name", "make_call")
+                    put("description",
+                        "Initiate a phone call by using a phone number or contact name."
+                    )
+                    put("parameters", JSONObject().apply {
+                        put("type", "object")
+                        put("properties", JSONObject().apply {
+                            put("phone_number", JSONObject().apply {
+                                put("type", "string")
+                                put("description", "Target phone number in local or international format")
+                            })
+                            put("contact_name", JSONObject().apply {
+                                put("type", "string")
+                                put("description", "Target contact name to dial")
+                            })
                         })
                     })
                 })
