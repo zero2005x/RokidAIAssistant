@@ -9,6 +9,7 @@ import com.example.rokidphone.service.stt.SttProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.util.Locale
 
 /**
  * Settings Repository
@@ -137,8 +138,17 @@ class SettingsRepository(private val context: Context) {
             sttProvider = SttProvider.fromName(
                 prefs.getString(KEY_STT_PROVIDER, SttProvider.GEMINI.name) ?: SttProvider.GEMINI.name
             ),
-            speechLanguage = prefs.getString(KEY_SPEECH_LANGUAGE, "zh-TW") ?: "zh-TW",
-            responseLanguage = prefs.getString(KEY_RESPONSE_LANGUAGE, "zh-TW") ?: "zh-TW",
+            // Use device locale (e.g. "ko-KR") as the first-run default so new users get
+            // the correct TTS and response language automatically.
+            // Existing users who already have a saved value keep their preference unchanged.
+            speechLanguage = prefs.getString(
+                KEY_SPEECH_LANGUAGE,
+                Locale.getDefault().toLanguageTag()
+            ) ?: Locale.getDefault().toLanguageTag(),
+            responseLanguage = prefs.getString(
+                KEY_RESPONSE_LANGUAGE,
+                Locale.getDefault().toLanguageTag()
+            ) ?: Locale.getDefault().toLanguageTag(),
             systemPrompt = systemPrompt,
             autoAnalyzeRecordings = prefs.getBoolean(KEY_AUTO_ANALYZE_RECORDINGS, true),
             pushChatToGlasses = prefs.getBoolean(KEY_PUSH_CHAT_TO_GLASSES, true),

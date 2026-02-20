@@ -758,7 +758,9 @@ data class ApiSettings(
     
     // Speech recognition settings
     val sttProvider: SttProvider = SttProvider.GEMINI,
-    val speechLanguage: String = "zh-TW",
+    // Empty string = SettingsRepository will resolve to device locale on first run.
+    // TODO: UI should display the resolved locale tag so users know what is active.
+    val speechLanguage: String = "",
     
     // === STT Provider Credentials ===
     
@@ -835,7 +837,9 @@ data class ApiSettings(
     val presencePenalty: Float = 0.0f,
     
     // AI response settings
-    val responseLanguage: String = "zh-TW",
+    // Empty string = SettingsRepository will resolve to device locale on first run.
+    // TODO: UI should display the resolved locale tag so users know what is active.
+    val responseLanguage: String = "",
     // Note: The default value is set to empty string here. 
     // The actual default (localized) is provided by SettingsRepository.getDefaultSystemPrompt()
     val systemPrompt: String = "",

@@ -29,7 +29,14 @@ import kotlin.coroutines.resumeWithException
  * 2. Android System TTS (offline available) - Fallback
  * 3. Google Translate TTS (free, average quality) - Fallback
  */
-class TextToSpeechService(private val context: Context) {
+class TextToSpeechService(
+    private val context: Context,
+    /** Preferred locale used as voice fallback when script detection is inconclusive.
+     *  Pass the user's configured speechLanguage / responseLanguage locale here.
+     *  Defaults to null which resolves to EDGE_VOICE_EN as the neutral fallback.
+     */
+    private val preferredLocale: Locale? = null
+) {
     
     companion object {
         private const val TAG = "TextToSpeechService"
@@ -41,9 +48,12 @@ class TextToSpeechService(private val context: Context) {
         const val EDGE_VOICE_YUNYANG = "zh-CN-YunyangNeural"        // Male voice, news anchor style
         const val EDGE_VOICE_SUNHI = "ko-KR-SunHiNeural"            // Korean female voice
         const val EDGE_VOICE_EN = "en-US-JennyNeural"               // English female voice
+        const val EDGE_VOICE_NANAMI = "ja-JP-NanamiNeural"          // Japanese female voice
         
-        // Default voice
-        const val DEFAULT_VOICE = EDGE_VOICE_XIAOXIAO
+        // Default voice — English is a neutral fallback (not Chinese) so mixed-script or
+        // undetected text doesn't get read by the wrong voice.
+        // TODO: If a device-locale-aware default is preferred, derive this from Locale.getDefault().
+        const val DEFAULT_VOICE = EDGE_VOICE_EN
     }
     
     private var systemTts: TextToSpeech? = null
@@ -339,12 +349,36 @@ class TextToSpeechService(private val context: Context) {
         }
     }
 
-    private fun selectEdgeVoiceForText(text: String): String {
+    /**
+     * Select the best Edge TTS voice for [text] based on detected script.
+     *
+     * Detection order:
+     *  1. Korean Hangul  → Korean voice
+     *  2. CJK Unified    → Chinese voice
+     *  3. Hiragana/Katakana → Japanese voice
+     *  4. Latin alphabet → English voice
+     *  5. Undetected     → derived from [preferredLocale], then English as neutral fallback
+     *
+     * @param preferredLocale  Caller-supplied locale (e.g. from ApiSettings.speechLanguage).
+     *                         Defaults to the locale stored in this instance.
+     */
+    private fun selectEdgeVoiceForText(
+        text: String,
+        preferredLocale: Locale? = this.preferredLocale
+    ): String {
         return when {
             text.any { it in '\uAC00'..'\uD7AF' } -> EDGE_VOICE_SUNHI
             text.any { it in '\u4E00'..'\u9FFF' } -> EDGE_VOICE_XIAOXIAO
+            text.any { it in '\u3040'..'\u30FF' } -> EDGE_VOICE_NANAMI
             text.any { it in 'A'..'Z' || it in 'a'..'z' } -> EDGE_VOICE_EN
-            else -> DEFAULT_VOICE
+            // Nothing detected — honour the caller's preferred language, then fall back to English.
+            // English is a safer neutral fallback than Chinese for mixed/unknown content.
+            else -> when (preferredLocale?.language) {
+                "ko" -> EDGE_VOICE_SUNHI
+                "ja" -> EDGE_VOICE_NANAMI
+                "zh" -> EDGE_VOICE_XIAOXIAO
+                else -> EDGE_VOICE_EN
+            }
         }
     }
 

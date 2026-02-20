@@ -873,7 +873,7 @@ class PhoneAIService : Service() {
             context = this,
             apiKey = apiKey,
             modelId = settings.aiModelId.ifBlank { "gemini-2.5-flash-preview-native-audio-dialog" },
-            systemPrompt = settings.systemPrompt
+            systemPrompt = buildSystemPromptWithLanguage(settings.systemPrompt, settings.responseLanguage)
         )
         
         // Collect Live session events
@@ -1326,6 +1326,39 @@ class PhoneAIService : Service() {
     }
     
     /**
+     * Prepend an explicit language-enforcement instruction to [basePrompt].
+     *
+     * Older / smaller models (e.g. Gemini 2.0 Flash) may ignore a general
+     * "respond in the user's language" instruction unless it is prominently placed at
+     * the very beginning of the system prompt.  This approach keeps the original
+     * user-written base prompt intact while ensuring model compliance.
+     *
+     * If [responseLanguage] is blank the base prompt is returned unchanged — the model
+     * will rely on the conversation language as usual.
+     *
+     * TODO: Verify via manual testing that the prepended instruction does not conflict
+     *       with any user-customised system prompt.
+     */
+    private fun buildSystemPromptWithLanguage(basePrompt: String, responseLanguage: String): String {
+        val langInstruction = when {
+            responseLanguage.startsWith("ko") ->
+                "CRITICAL INSTRUCTION: You MUST respond ONLY in Korean (\ud55c\uad6d\uc5b4). " +
+                "Never mix in Chinese, Japanese, or any other language. " +
+                "All responses must be in pure Korean.\n\n"
+            responseLanguage.startsWith("ja") ->
+                "CRITICAL INSTRUCTION: You MUST respond ONLY in Japanese (\u65e5\u672c\u8a9e). " +
+                "Never mix in other languages.\n\n"
+            responseLanguage.startsWith("zh-TW") ->
+                "CRITICAL INSTRUCTION: You MUST respond ONLY in Traditional Chinese (\u7e41\u9ad4\u4e2d\u6587).\n\n"
+            responseLanguage.startsWith("zh") ->
+                "CRITICAL INSTRUCTION: You MUST respond ONLY in Simplified Chinese (\u7b80\u4f53\u4e2d\u6587).\n\n"
+            responseLanguage.isBlank() -> ""  // Blank = let model follow conversation language
+            else -> ""
+        }
+        return langInstruction + basePrompt
+    }
+
+    /**
      * Create AI service
      */
     private fun createAiService(settings: ApiSettings): AiServiceProvider {
@@ -1348,7 +1381,13 @@ class PhoneAIService : Service() {
             settings
         }
         
-        return AiServiceFactory.createService(effectiveSettings)
+        val promptEnhancedSettings = effectiveSettings.copy(
+            systemPrompt = buildSystemPromptWithLanguage(
+                effectiveSettings.systemPrompt,
+                effectiveSettings.responseLanguage
+            )
+        )
+        return AiServiceFactory.createService(promptEnhancedSettings)
     }
     
     /**
@@ -1534,15 +1573,40 @@ class TextToSpeechService(private val context: android.content.Context) {
     init {
         tts = android.speech.tts.TextToSpeech(context) { status ->
             if (status == android.speech.tts.TextToSpeech.SUCCESS) {
-                tts?.language = java.util.Locale.getDefault()
+                val defaultLocale = java.util.Locale.getDefault()
+                val langResult = tts?.setLanguage(defaultLocale)
+                if (langResult == android.speech.tts.TextToSpeech.LANG_MISSING_DATA ||
+                    langResult == android.speech.tts.TextToSpeech.LANG_NOT_SUPPORTED) {
+                    android.util.Log.w(
+                        "TextToSpeechService",
+                        "System TTS does not support device locale '$defaultLocale'. " +
+                        "Consider installing the '${defaultLocale.displayLanguage}' TTS pack."
+                    )
+                }
+            } else {
+                android.util.Log.e("TextToSpeechService", "System TTS initialization failed (status=$status)")
             }
         }
     }
     
     fun speak(text: String, onAudioChunk: (ByteArray) -> Unit) {
         // Simplified version: using system TTS
+        // TODO: For consistent multi-language voice quality (especially Korean), consider
+        //       routing through EdgeTtsClient (Microsoft Edge TTS) instead of system TTS.
         val locale = detectLocaleForText(text)
-        tts?.language = locale
+        val langResult = tts?.setLanguage(locale)
+        if (langResult == android.speech.tts.TextToSpeech.LANG_MISSING_DATA ||
+            langResult == android.speech.tts.TextToSpeech.LANG_NOT_SUPPORTED) {
+            android.util.Log.w(
+                "TextToSpeechService",
+                "System TTS language pack not available for locale '$locale'. " +
+                "The voice may sound incorrect (e.g. Korean text read by a Chinese voice). " +
+                "Install the '${locale.displayLanguage}' TTS pack in device Settings > " +
+                "Accessibility > Text-to-speech. Falling back to device default locale."
+            )
+            // Fall back to device default rather than leaving an unsupported locale set
+            tts?.setLanguage(java.util.Locale.getDefault())
+        }
         tts?.speak(text, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null, null)
     }
     
