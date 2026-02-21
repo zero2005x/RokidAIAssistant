@@ -99,18 +99,18 @@ RokidAIAssistant/
 
 ## 技術棧
 
-| 類別      | 技術                         | 版本           |
-| --------- | ---------------------------- | -------------- |
-| 程式語言  | Kotlin                       | 2.2.10         |
-| 最低 SDK  | Android                      | 28 (9.0 Pie)   |
-| 目標 SDK  | Android                      | 34 (14)        |
-| 編譯 SDK  | Android                      | 36             |
-| 建置工具  | Gradle + Kotlin DSL          | 9.0            |
-| UI        | Jetpack Compose + Material 3 | BOM 2026.01.00 |
-| 非同步    | Kotlin Coroutines            | 1.10.2         |
-| 資料庫    | Room                         | 2.8.4          |
-| 網路      | Retrofit + OkHttp            | 3.0 / 5.3      |
-| Rokid SDK | CXR client-m                 | 1.0.4          |
+| 類別      | 技術                         | 版本                 |
+| --------- | ---------------------------- | -------------------- |
+| 程式語言  | Kotlin                       | 2.2.10               |
+| 最低 SDK  | Android                      | 28 (9.0 Pie)         |
+| 目標 SDK  | Android                      | 34 (14)              |
+| 編譯 SDK  | Android                      | 36                   |
+| 建置工具  | Gradle + Kotlin DSL          | AGP 9.0 / Gradle 9.3 |
+| UI        | Jetpack Compose + Material 3 | BOM 2026.01.00       |
+| 非同步    | Kotlin Coroutines            | 1.10.2               |
+| 資料庫    | Room                         | 2.8.4                |
+| 網路      | Retrofit + OkHttp            | 3.0 / 5.3            |
+| Rokid SDK | CXR client-m                 | 1.0.4                |
 
 ---
 

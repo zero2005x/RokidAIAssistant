@@ -79,19 +79,21 @@ echo "GEMINI_API_KEY=your_key_here" >> local.properties
 
 ### 支援的服務商
 
-| 服務商         | 模型                            | 視覺   | 基礎 URL                                             |
-| -------------- | ------------------------------- | ------ | ---------------------------------------------------- |
-| **Gemini**     | Gemini 2.5 Pro/Flash/Flash-Lite | ✅     | `https://generativelanguage.googleapis.com/v1beta/`  |
-| **OpenAI**     | GPT-5, GPT-5.2, o3, o4-mini     | ✅     | `https://api.openai.com/v1/`                         |
-| **Anthropic**  | Claude 4, Claude 4 Sonnet       | ✅     | `https://api.anthropic.com/v1/`                      |
-| **DeepSeek**   | DeepSeek V3, R2                 | ❌     | `https://api.deepseek.com/`                          |
-| **Groq**       | Llama 4 Scout/Maverick          | ✅     | `https://api.groq.com/openai/v1/`                    |
-| **xAI**        | Grok 3, Grok 3 Mini             | ✅     | `https://api.x.ai/v1/`                               |
-| **阿里雲**     | Qwen-Max, Qwen-Plus             | ✅     | `https://dashscope.aliyuncs.com/compatible-mode/v1/` |
-| **智譜**       | GLM-4 Plus                      | ✅     | `https://open.bigmodel.cn/api/paas/v4/`              |
-| **百度**       | ERNIE 4.5 Pro                   | ❌     | `https://aip.baidubce.com/rpc/2.0/...`               |
-| **Perplexity** | Sonar Pro, Sonar Reasoning Pro  | ❌     | `https://api.perplexity.ai/`                         |
-| **自訂**       | 使用者定義                      | 視情況 | 使用者定義（如 Ollama, LM Studio）                   |
+| 服務商          | 模型                                         | 視覺   | 基礎 URL                                             |
+| --------------- | -------------------------------------------- | ------ | ---------------------------------------------------- |
+| **Gemini**      | Gemini 3 Pro/Flash, 2.5 Pro/Flash/Flash-Lite | ✅     | `https://generativelanguage.googleapis.com/v1beta/`  |
+| **OpenAI**      | GPT-5.2, GPT-5, o3, o4-mini                  | ✅     | `https://api.openai.com/v1/`                         |
+| **Anthropic**   | Claude Opus 4.6, Sonnet 4.5, Haiku 4.5       | ✅     | `https://api.anthropic.com/v1/`                      |
+| **DeepSeek**    | DeepSeek Chat, DeepSeek Reasoner             | ❌     | `https://api.deepseek.com/`                          |
+| **Groq**        | Llama 4 Scout/Maverick                       | ✅     | `https://api.groq.com/openai/v1/`                    |
+| **xAI**         | Grok 4, Grok 4.1, Grok 3                     | ❌     | `https://api.x.ai/v1/`                               |
+| **阿里雲**      | Qwen 3 Max, Qwen 2.5 VL 72B/32B/7B           | ✅     | `https://dashscope.aliyuncs.com/compatible-mode/v1/` |
+| **智譜**        | GLM-5, GLM-4.7, GLM-4 Plus                   | ✅     | `https://api.z.ai/api/paas/v4/`                      |
+| **百度**        | ERNIE 4.0 8K, ERNIE 3.5 8K                   | ❌     | `https://aip.baidubce.com/rpc/2.0/...`               |
+| **Perplexity**  | Sonar, Sonar Pro, Sonar Reasoning Pro        | ❌     | `https://api.perplexity.ai/`                         |
+| **Moonshot**    | Kimi K2.5, Moonshot V1 128K/32K/8K           | ✅     | `https://api.moonshot.ai/v1/`                        |
+| **Gemini Live** | Gemini Live（對話模式）                      | ✅     | `wss://generativelanguage.googleapis.com/ws/...`     |
+| **自訂**        | 使用者定義                                   | 視情況 | 使用者定義（如 Ollama, LM Studio）                   |
 
 ### 取得 API 金鑰
 

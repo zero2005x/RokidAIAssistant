@@ -99,18 +99,18 @@ RokidAIAssistant/
 
 ## Technology Stack
 
-| Category    | Technology                   | Version        |
-| ----------- | ---------------------------- | -------------- |
-| Language    | Kotlin                       | 2.2.10         |
-| Min SDK     | Android                      | 28 (9.0 Pie)   |
-| Target SDK  | Android                      | 34 (14)        |
-| Compile SDK | Android                      | 36             |
-| Build       | Gradle + Kotlin DSL          | 9.0            |
-| UI          | Jetpack Compose + Material 3 | BOM 2026.01.00 |
-| Async       | Kotlin Coroutines            | 1.10.2         |
-| Database    | Room                         | 2.8.4          |
-| Networking  | Retrofit + OkHttp            | 3.0 / 5.3      |
-| Rokid SDK   | CXR client-m                 | 1.0.4          |
+| Category    | Technology                   | Version              |
+| ----------- | ---------------------------- | -------------------- |
+| Language    | Kotlin                       | 2.2.10               |
+| Min SDK     | Android                      | 28 (9.0 Pie)         |
+| Target SDK  | Android                      | 34 (14)              |
+| Compile SDK | Android                      | 36                   |
+| Build       | Gradle + Kotlin DSL          | AGP 9.0 / Gradle 9.3 |
+| UI          | Jetpack Compose + Material 3 | BOM 2026.01.00       |
+| Async       | Kotlin Coroutines            | 1.10.2               |
+| Database    | Room                         | 2.8.4                |
+| Networking  | Retrofit + OkHttp            | 3.0 / 5.3            |
+| Rokid SDK   | CXR client-m                 | 1.0.4                |
 
 ---
 
@@ -307,7 +307,7 @@ A: Ensure Android Studio has SDK 36 installed.
 **Q: JDK version mismatch**
 
 ```
-A: Project requires JDK 17.
+A: Project requires JDK 21 (matches AGP 9 and CI).
    File → Settings → Build → Gradle → Gradle JDK → Select JDK 21.
 ```
 

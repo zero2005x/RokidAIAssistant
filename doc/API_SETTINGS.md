@@ -81,21 +81,21 @@ echo "GEMINI_API_KEY=your_key_here" >> local.properties
 
 ### Supported Providers
 
-| Provider        | Models                          | Vision | Base URL                                             |
-| --------------- | ------------------------------- | ------ | ---------------------------------------------------- |
-| **Gemini**      | Gemini 2.5 Pro/Flash/Flash-Lite | ✅     | `https://generativelanguage.googleapis.com/v1beta/`  |
-| **OpenAI**      | GPT-5, GPT-5.2, o3, o4-mini     | ✅     | `https://api.openai.com/v1/`                         |
-| **Anthropic**   | Claude 4, Claude 4 Sonnet       | ✅     | `https://api.anthropic.com/v1/`                      |
-| **DeepSeek**    | DeepSeek V3, R2                 | ❌     | `https://api.deepseek.com/`                          |
-| **Groq**        | Llama 4 Scout/Maverick          | ✅     | `https://api.groq.com/openai/v1/`                    |
-| **xAI**         | Grok 3, Grok 3 Mini             | ✅     | `https://api.x.ai/v1/`                               |
-| **Alibaba**     | Qwen-Max, Qwen-Plus             | ✅     | `https://dashscope.aliyuncs.com/compatible-mode/v1/` |
-| **Zhipu**       | GLM-4 Plus                      | ✅     | `https://open.bigmodel.cn/api/paas/v4/`              |
-| **Baidu**       | ERNIE 4.5 Pro                   | ❌     | `https://aip.baidubce.com/rpc/2.0/...`               |
-| **Perplexity**  | Sonar Pro, Sonar Reasoning Pro  | ❌     | `https://api.perplexity.ai/`                         |
-| **Moonshot**    | Kimi K2 / Kimi 1.5              | ✅     | `https://api.moonshot.cn/v1/`                        |
-| **Gemini Live** | Gemini Live (session mode)      | ✅     | `wss://generativelanguage.googleapis.com/ws/...`     |
-| **Custom**      | User-defined                    | Varies | User-defined (e.g., Ollama, LM Studio)               |
+| Provider        | Models                                       | Vision | Base URL                                             |
+| --------------- | -------------------------------------------- | ------ | ---------------------------------------------------- |
+| **Gemini**      | Gemini 3 Pro/Flash, 2.5 Pro/Flash/Flash-Lite | ✅     | `https://generativelanguage.googleapis.com/v1beta/`  |
+| **OpenAI**      | GPT-5.2, GPT-5, o3, o4-mini                  | ✅     | `https://api.openai.com/v1/`                         |
+| **Anthropic**   | Claude Opus 4.6, Sonnet 4.5, Haiku 4.5       | ✅     | `https://api.anthropic.com/v1/`                      |
+| **DeepSeek**    | DeepSeek Chat, DeepSeek Reasoner             | ❌     | `https://api.deepseek.com/`                          |
+| **Groq**        | Llama 4 Scout/Maverick                       | ✅     | `https://api.groq.com/openai/v1/`                    |
+| **xAI**         | Grok 4, Grok 4.1, Grok 3                     | ❌     | `https://api.x.ai/v1/`                               |
+| **Alibaba**     | Qwen 3 Max, Qwen 2.5 VL 72B/32B/7B           | ✅     | `https://dashscope.aliyuncs.com/compatible-mode/v1/` |
+| **Zhipu**       | GLM-5, GLM-4.7, GLM-4 Plus                   | ✅     | `https://api.z.ai/api/paas/v4/`                      |
+| **Baidu**       | ERNIE 4.0 8K, ERNIE 3.5 8K                   | ❌     | `https://aip.baidubce.com/rpc/2.0/...`               |
+| **Perplexity**  | Sonar, Sonar Pro, Sonar Reasoning Pro        | ❌     | `https://api.perplexity.ai/`                         |
+| **Moonshot**    | Kimi K2.5, Moonshot V1 128K/32K/8K           | ✅     | `https://api.moonshot.ai/v1/`                        |
+| **Gemini Live** | Gemini Live (session mode)                   | ✅     | `wss://generativelanguage.googleapis.com/ws/...`     |
+| **Custom**      | User-defined                                 | Varies | User-defined (e.g., Ollama, LM Studio)               |
 
 ### Getting API Keys
 
