@@ -364,4 +364,60 @@ class OpenAiCompatibleServiceTest {
         // system + user = 2 (no history)
         assertThat(messages.length()).isEqualTo(2)
     }
+
+    // ==================== TestConnection - fallback chat failure ====================
+
+    @Test
+    fun `testConnection - 404 fallback chat also fails returns failure`() = runTest {
+        val service = createService()
+        // First: /models returns 404
+        mockServer.server.enqueue(mockwebserver3.MockResponse(code = 404))
+        // Fallback: /chat/completions also fails
+        mockServer.server.enqueue(
+            jsonResponse(TestFixtures.MockResponses.openAiError("server_error", "Service down"), 500)
+        )
+
+        val result = service.testConnection()
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `testConnection - other non-handled status code returns failure`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(mockwebserver3.MockResponse(code = 503))
+
+        val result = service.testConnection()
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).contains("503")
+    }
+
+    @Test
+    fun `chat - empty response text returns fallback message`() = runTest {
+        val service = createService()
+        // choices[0].message.content is empty string
+        val emptyTextResponse = """
+            {
+              "choices": [{"message": {"content": ""}, "index": 0}]
+            }
+        """.trimIndent()
+        mockServer.server.enqueue(jsonResponse(emptyTextResponse))
+
+        val result = service.chat("Hello")
+
+        assertThat(result).contains("couldn't generate")
+    }
+
+    @Test
+    fun `analyzeImage - server error returns fallback image analysis message`() = runTest {
+        val service = createService(providerType = AiProvider.OPENAI)
+        mockServer.server.enqueue(
+            jsonResponse(TestFixtures.MockResponses.openAiError("server_error", "Error"), 500)
+        )
+
+        val result = service.analyzeImage(TestFixtures.createTestJpeg(), "Describe")
+
+        assertThat(result).contains("analysis failed")
+    }
 }

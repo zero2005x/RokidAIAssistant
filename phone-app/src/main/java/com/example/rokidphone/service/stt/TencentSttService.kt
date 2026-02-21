@@ -56,7 +56,7 @@ class TencentSttService(
     private fun buildSignedWebSocketUrl(): String {
         val timestamp = System.currentTimeMillis() / 1000
         val expired = timestamp + 86400  // 24 hours
-        val nonce = (Math.random() * 1000000000).toLong()
+        val nonce = java.security.SecureRandom().nextLong().and(0x7FFF_FFFFL) % 1_000_000_000L
         val voiceId = UUID.randomUUID().toString()
         
         // Build params map (sorted alphabetically for signing)
@@ -76,8 +76,8 @@ class TencentSttService(
         // Sign string = host/path/appid?query (without wss://)
         val signString = "$BASE_HOST/asr/v2/$appId?$queryString"
         
-        // HMAC-SHA1 signature
-        val mac = Mac.getInstance("HmacSHA1")
+        // HMAC-SHA1 signature (required by Tencent ASR WebSocket API spec — cannot be substituted)
+        val mac = Mac.getInstance("HmacSHA1") // NOSONAR kotlin:S4790 - algorithm mandated by Tencent Cloud ASR API v2 specification
         mac.init(SecretKeySpec(secretKey.toByteArray(Charsets.UTF_8), "HmacSHA1"))
         val signatureBytes = mac.doFinal(signString.toByteArray(Charsets.UTF_8))
         val signature = Base64.encodeToString(signatureBytes, Base64.NO_WRAP)

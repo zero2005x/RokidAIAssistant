@@ -252,7 +252,7 @@ object PacketUtils {
      * @return 16-byte MD5 hash
      */
     fun calculateMD5(data: ByteArray): ByteArray {
-        val digest = MessageDigest.getInstance("MD5")
+        val digest = MessageDigest.getInstance("MD5") // NOSONAR kotlin:S4790 - MD5 used solely for Bluetooth photo packet integrity verification, not for security/authentication
         return digest.digest(data)
     }
     

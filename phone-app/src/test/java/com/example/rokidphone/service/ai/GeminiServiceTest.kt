@@ -804,4 +804,128 @@ class GeminiServiceTest {
             .getJSONObject("generationConfig").getInt("maxOutputTokens")
         assertThat(maxOutputTokens).isEqualTo(1024)
     }
+
+    // ==================== getLanguageDisplayName - remaining branches ====================
+
+    @Test
+    fun `transcribe - es sends Spanish in transcription prompt`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("Hola")))
+        service.transcribe(TestFixtures.createTestPcmAudio(), "es-ES")
+        val promptText = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONArray("contents").getJSONObject(0)
+            .getJSONArray("parts").getJSONObject(1).getString("text")
+        assertThat(promptText).contains("Spanish")
+    }
+
+    @Test
+    fun `transcribe - it sends Italian in transcription prompt`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("Ciao")))
+        service.transcribe(TestFixtures.createTestPcmAudio(), "it-IT")
+        val promptText = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONArray("contents").getJSONObject(0)
+            .getJSONArray("parts").getJSONObject(1).getString("text")
+        assertThat(promptText).contains("Italian")
+    }
+
+    @Test
+    fun `transcribe - ru sends Russian in transcription prompt`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("Привет")))
+        service.transcribe(TestFixtures.createTestPcmAudio(), "ru-RU")
+        val promptText = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONArray("contents").getJSONObject(0)
+            .getJSONArray("parts").getJSONObject(1).getString("text")
+        assertThat(promptText).contains("Russian")
+    }
+
+    @Test
+    fun `transcribe - uk sends Ukrainian in transcription prompt`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("Привіт")))
+        service.transcribe(TestFixtures.createTestPcmAudio(), "uk-UA")
+        val promptText = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONArray("contents").getJSONObject(0)
+            .getJSONArray("parts").getJSONObject(1).getString("text")
+        assertThat(promptText).contains("Ukrainian")
+    }
+
+    @Test
+    fun `transcribe - th sends Thai in transcription prompt`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("สวัสดี")))
+        service.transcribe(TestFixtures.createTestPcmAudio(), "th-TH")
+        val promptText = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONArray("contents").getJSONObject(0)
+            .getJSONArray("parts").getJSONObject(1).getString("text")
+        assertThat(promptText).contains("Thai")
+    }
+
+    @Test
+    fun `transcribe - vi sends Vietnamese in transcription prompt`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("Xin chào")))
+        service.transcribe(TestFixtures.createTestPcmAudio(), "vi-VN")
+        val promptText = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONArray("contents").getJSONObject(0)
+            .getJSONArray("parts").getJSONObject(1).getString("text")
+        assertThat(promptText).contains("Vietnamese")
+    }
+
+    @Test
+    fun `transcribe - ar sends Arabic in transcription prompt`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("مرحبا")))
+        service.transcribe(TestFixtures.createTestPcmAudio(), "ar-SA")
+        val promptText = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONArray("contents").getJSONObject(0)
+            .getJSONArray("parts").getJSONObject(1).getString("text")
+        assertThat(promptText).contains("Arabic")
+    }
+
+    @Test
+    fun `transcribe - zh-Hant sends Traditional Chinese in transcription prompt`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("你好")))
+        service.transcribe(TestFixtures.createTestPcmAudio(), "zh-Hant-TW")
+        val promptText = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONArray("contents").getJSONObject(0)
+            .getJSONArray("parts").getJSONObject(1).getString("text")
+        assertThat(promptText).contains("Traditional Chinese")
+    }
+
+    @Test
+    fun `transcribe - zh-Hans sends Simplified Chinese in transcription prompt`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("你好")))
+        service.transcribe(TestFixtures.createTestPcmAudio(), "zh-Hans")
+        val promptText = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONArray("contents").getJSONObject(0)
+            .getJSONArray("parts").getJSONObject(1).getString("text")
+        assertThat(promptText).contains("Simplified Chinese")
+    }
+
+    @Test
+    fun `transcribe - en-GB sends English in transcription prompt`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("Hello")))
+        service.transcribe(TestFixtures.createTestPcmAudio(), "en-GB")
+        val promptText = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONArray("contents").getJSONObject(0)
+            .getJSONArray("parts").getJSONObject(1).getString("text")
+        assertThat(promptText).contains("English")
+    }
+
+    @Test
+    fun `transcribe - de sends German using fallback label`() = runTest {
+        // "de" is not an explicit branch → falls through to the else branch
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("Hallo")))
+        service.transcribe(TestFixtures.createTestPcmAudio(), "de-DE")
+        val promptText = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONArray("contents").getJSONObject(0)
+            .getJSONArray("parts").getJSONObject(1).getString("text")
+        assertThat(promptText).contains("de-DE")
+    }
 }

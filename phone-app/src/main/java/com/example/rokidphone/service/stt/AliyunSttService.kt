@@ -94,8 +94,8 @@ class AliyunSttService(
                 // Build string to sign: GET&/&<encoded query string>
                 val stringToSign = "GET&${percentEncode("/")}&${percentEncode(queryString)}"
                 
-                // Calculate HMAC-SHA1 signature
-                val mac = Mac.getInstance("HmacSHA1")
+                // Calculate HMAC-SHA1 signature (required by Alibaba Cloud OpenAPI v1 spec — cannot be substituted)
+                val mac = Mac.getInstance("HmacSHA1") // NOSONAR kotlin:S4790 - algorithm mandated by Alibaba Cloud OpenAPI v1 signature specification
                 mac.init(SecretKeySpec("$accessKeySecret&".toByteArray(Charsets.UTF_8), "HmacSHA1"))
                 val signatureBytes = mac.doFinal(stringToSign.toByteArray(Charsets.UTF_8))
                 val signature = Base64.encodeToString(signatureBytes, Base64.NO_WRAP)
