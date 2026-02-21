@@ -298,8 +298,10 @@ class GeminiServiceTest {
         val secondRequest = mockServer.server.takeRequest()
         val body = JSONObject(secondRequest.body.readUtf8())
         val contents = body.getJSONArray("contents")
-        // Should have: system prompt (user), system ack (model), history (user+model), current message
-        assertThat(contents.length()).isGreaterThan(3)
+        // The system prompt is sent via the top-level "systemInstruction" field (not in contents).
+        // contents should have: history (user + model from turn 1) + current message = 3 entries.
+        // i.e. contents.length() > 2 proves that prior history is being included.
+        assertThat(contents.length()).isGreaterThan(2)
     }
 
     @Test
@@ -322,8 +324,10 @@ class GeminiServiceTest {
         val request = mockServer.server.takeRequest()
         val body = JSONObject(request.body.readUtf8())
         val contents = body.getJSONArray("contents")
-        // Should only have system prompt (user+model) + current message = 3
-        assertThat(contents.length()).isEqualTo(3)
+        // The system prompt lives in the top-level "systemInstruction" field, not in contents.
+        // After clearHistory() the conversation history is empty, so contents should contain
+        // only the single current user message.
+        assertThat(contents.length()).isEqualTo(1)
     }
 
     // ==================== AnalyzeImage Tests ====================
@@ -411,5 +415,393 @@ class GeminiServiceTest {
 
         val request = mockServer.server.takeRequest()
         assertThat(request.requestUrl.toString()).startsWith(mockServer.baseUrl)
+    }
+
+    // ==================== Transcribe - isGeminiErrorResponse patterns ====================
+
+    @Test
+    fun `transcribe - i am sorry pattern is filtered as error`() = runBlocking {
+        val service = createService()
+        repeat(3) {
+            mockServer.server.enqueue(
+                jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("I am sorry, I cannot provide a transcription"))
+            )
+        }
+        val result = service.transcribe(TestFixtures.createTestPcmAudio(), "zh-TW")
+        assertThat(result).isInstanceOf(SpeechResult.Error::class.java)
+    }
+
+    @Test
+    fun `transcribe - silence keyword is filtered as error`() = runBlocking {
+        val service = createService()
+        repeat(3) {
+            mockServer.server.enqueue(
+                jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("This audio contains only silence"))
+            )
+        }
+        val result = service.transcribe(TestFixtures.createTestPcmAudio(), "zh-TW")
+        assertThat(result).isInstanceOf(SpeechResult.Error::class.java)
+    }
+
+    @Test
+    fun `transcribe - no speech keyword is filtered as error`() = runBlocking {
+        val service = createService()
+        repeat(3) {
+            mockServer.server.enqueue(
+                jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("There is no speech in this recording"))
+            )
+        }
+        val result = service.transcribe(TestFixtures.createTestPcmAudio(), "zh-TW")
+        assertThat(result).isInstanceOf(SpeechResult.Error::class.java)
+    }
+
+    // ==================== Transcribe - isInvalidTranscription branches ====================
+
+    @Test
+    fun `transcribe - single character response is filtered as invalid`() = runBlocking {
+        val service = createService()
+        repeat(3) {
+            mockServer.server.enqueue(
+                jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("A"))
+            )
+        }
+        val result = service.transcribe(TestFixtures.createTestPcmAudio(), "zh-TW")
+        assertThat(result).isInstanceOf(SpeechResult.Error::class.java)
+    }
+
+    @Test
+    fun `transcribe - high ratio of zeros and colons is filtered as invalid`() = runBlocking {
+        // 22 chars, 20 are '0'/':'/' ' → ratio > 0.7 and length > 10
+        val service = createService()
+        repeat(3) {
+            mockServer.server.enqueue(
+                jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("00:00:00:00:00:00:00:0"))
+            )
+        }
+        val result = service.transcribe(TestFixtures.createTestPcmAudio(), "zh-TW")
+        assertThat(result).isInstanceOf(SpeechResult.Error::class.java)
+    }
+
+    @Test
+    fun `transcribe - highly repetitive pattern is filtered as invalid`() = runBlocking {
+        // "abcde" repeated 5x = 25 chars; first-5 "abcde" occurs 5 times > 25/8 = 3.125
+        val service = createService()
+        repeat(3) {
+            mockServer.server.enqueue(
+                jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("abcdeabcdeabcdeabcdeabcde"))
+            )
+        }
+        val result = service.transcribe(TestFixtures.createTestPcmAudio(), "zh-TW")
+        assertThat(result).isInstanceOf(SpeechResult.Error::class.java)
+    }
+
+    // ==================== Transcribe - getLanguageDisplayName branches ====================
+
+    @Test
+    fun `transcribe - ko-KR sends Korean in transcription prompt`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("안녕하세요")))
+        val result = service.transcribe(TestFixtures.createTestPcmAudio(), "ko-KR")
+        // Also verify a valid Korean result passes through
+        assertThat(result).isInstanceOf(SpeechResult.Success::class.java)
+        assertThat((result as SpeechResult.Success).text).isEqualTo("안녕하세요")
+
+        val request = mockServer.server.takeRequest()
+        val promptText = JSONObject(request.body.readUtf8())
+            .getJSONArray("contents").getJSONObject(0)
+            .getJSONArray("parts").getJSONObject(1).getString("text")
+        assertThat(promptText).contains("Korean")
+    }
+
+    @Test
+    fun `transcribe - ja-JP sends Japanese in transcription prompt`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("テスト")))
+        service.transcribe(TestFixtures.createTestPcmAudio(), "ja-JP")
+        val request = mockServer.server.takeRequest()
+        val promptText = JSONObject(request.body.readUtf8())
+            .getJSONArray("contents").getJSONObject(0)
+            .getJSONArray("parts").getJSONObject(1).getString("text")
+        assertThat(promptText).contains("Japanese")
+    }
+
+    @Test
+    fun `transcribe - fr sends French in transcription prompt`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("Bonjour")))
+        service.transcribe(TestFixtures.createTestPcmAudio(), "fr")
+        val request = mockServer.server.takeRequest()
+        val promptText = JSONObject(request.body.readUtf8())
+            .getJSONArray("contents").getJSONObject(0)
+            .getJSONArray("parts").getJSONObject(1).getString("text")
+        assertThat(promptText).contains("French")
+    }
+
+    @Test
+    fun `transcribe - zh-CN sends Simplified Chinese in transcription prompt`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("你好")))
+        service.transcribe(TestFixtures.createTestPcmAudio(), "zh-CN")
+        val request = mockServer.server.takeRequest()
+        val promptText = JSONObject(request.body.readUtf8())
+            .getJSONArray("contents").getJSONObject(0)
+            .getJSONArray("parts").getJSONObject(1).getString("text")
+        assertThat(promptText).contains("Simplified Chinese")
+    }
+
+    @Test
+    fun `transcribe - unknown language code sends fallback label in prompt`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("hello")))
+        service.transcribe(TestFixtures.createTestPcmAudio(), "xx-XX")
+        val request = mockServer.server.takeRequest()
+        val promptText = JSONObject(request.body.readUtf8())
+            .getJSONArray("contents").getJSONObject(0)
+            .getJSONArray("parts").getJSONObject(1).getString("text")
+        assertThat(promptText).contains("xx-XX")
+    }
+
+    @Test
+    fun `transcribe - 429 then success retries and returns text`() = runBlocking {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiError(429, "rate limited"), 429))
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("Retry success")))
+        val result = service.transcribe(TestFixtures.createTestPcmAudio(), "en-US")
+        assertThat(result).isInstanceOf(SpeechResult.Success::class.java)
+        assertThat((result as SpeechResult.Success).text).isEqualTo("Retry success")
+    }
+
+    // ==================== TranscribeAudioFile - edge cases ====================
+
+    @Test
+    fun `transcribeAudioFile - blank API key returns error`() = runTest {
+        val service = createService(apiKey = "")
+        val result = service.transcribeAudioFile(TestFixtures.createTestPcmAudio(), "audio/m4a", "zh-TW")
+        assertThat(result).isInstanceOf(SpeechResult.Error::class.java)
+        assertThat((result as SpeechResult.Error).message).contains("API key")
+    }
+
+    @Test
+    fun `transcribeAudioFile - audio too short returns error`() = runTest {
+        val service = createService()
+        val result = service.transcribeAudioFile(TestFixtures.createTooShortAudio(), "audio/mp3", "zh-TW")
+        assertThat(result).isInstanceOf(SpeechResult.Error::class.java)
+        assertThat((result as SpeechResult.Error).message).contains("too short")
+    }
+
+    @Test
+    fun `transcribeAudioFile - server error returns error`() = runBlocking {
+        val service = createService()
+        repeat(3) {
+            mockServer.server.enqueue(
+                jsonResponse(TestFixtures.MockResponses.geminiError(500, "Server Error"), 500)
+            )
+        }
+        val result = service.transcribeAudioFile(TestFixtures.createTestPcmAudio(), "audio/mp3", "zh-TW")
+        assertThat(result).isInstanceOf(SpeechResult.Error::class.java)
+    }
+
+    @Test
+    fun `transcribeAudioFile - unable to recognize returns error`() = runBlocking {
+        val service = createService()
+        repeat(3) {
+            mockServer.server.enqueue(
+                jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("Unable to recognize"))
+            )
+        }
+        val result = service.transcribeAudioFile(TestFixtures.createTestPcmAudio(), "audio/m4a", "zh-TW")
+        assertThat(result).isInstanceOf(SpeechResult.Error::class.java)
+    }
+
+    @Test
+    fun `transcribeAudioFile - mp3 mime type is passed through in request`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("Hello")))
+        service.transcribeAudioFile(TestFixtures.createTestPcmAudio(), "audio/mp3", "en-US")
+        val request = mockServer.server.takeRequest()
+        val mimeType = JSONObject(request.body.readUtf8())
+            .getJSONArray("contents").getJSONObject(0)
+            .getJSONArray("parts").getJSONObject(0)
+            .getJSONObject("inline_data").getString("mime_type")
+        assertThat(mimeType).isEqualTo("audio/mp3")
+    }
+
+    @Test
+    fun `transcribeAudioFile - 429 then success retries and returns text`() = runBlocking {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiError(429, "rate limited"), 429))
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiTranscribeSuccess("File result")))
+        val result = service.transcribeAudioFile(TestFixtures.createTestPcmAudio(), "audio/m4a", "en-US")
+        assertThat(result).isInstanceOf(SpeechResult.Success::class.java)
+        assertThat((result as SpeechResult.Success).text).isEqualTo("File result")
+    }
+
+    // ==================== Chat - additional coverage ====================
+
+    @Test
+    fun `chat - systemInstruction field is present and contains system prompt text`() = runTest {
+        val service = GeminiService(
+            apiKey = "key",
+            modelId = "gemini-2.5-flash",
+            systemPrompt = "Be helpful",
+            baseUrl = mockServer.baseUrlNoSlash
+        )
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiChatSuccess("hi")))
+        service.chat("Hello")
+        val body = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+        assertThat(body.has("systemInstruction")).isTrue()
+        val sysText = body.getJSONObject("systemInstruction")
+            .getJSONArray("parts").getJSONObject(0).getString("text")
+        assertThat(sysText).contains("Be helpful")
+    }
+
+    @Test
+    fun `chat - generationConfig includes topP with correct value`() = runTest {
+        val service = GeminiService(
+            apiKey = "key",
+            modelId = "gemini-2.5-flash",
+            topP = 0.9f,
+            baseUrl = mockServer.baseUrlNoSlash
+        )
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiChatSuccess("ok")))
+        service.chat("Hello")
+        val config = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONObject("generationConfig")
+        assertThat(config.has("topP")).isTrue()
+        assertThat(config.getDouble("topP")).isWithin(0.001).of(0.9)
+    }
+
+    @Test
+    fun `chat - history entries use role model not role assistant`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiChatSuccess("R1")))
+        service.chat("M1")
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiChatSuccess("R2")))
+        service.chat("M2")
+        mockServer.server.takeRequest() // discard turn 1
+        val contents = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONArray("contents")
+        // First two items are the turn-1 history pair
+        assertThat(contents.getJSONObject(0).getString("role")).isEqualTo("user")
+        assertThat(contents.getJSONObject(1).getString("role")).isEqualTo("model")
+    }
+
+    @Test
+    fun `chat - conversation history is capped at last 6 entries per request`() = runBlocking {
+        val service = createService()
+        // 4 turns → 8 history entries; takeLast(6) caps at 6
+        repeat(4) { i ->
+            mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiChatSuccess("R${i + 1}")))
+            service.chat("M${i + 1}")
+        }
+        // 5th request: 6 history entries + 1 current = 7
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiChatSuccess("R5")))
+        service.chat("M5")
+        repeat(4) { mockServer.server.takeRequest() }
+        val contents = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONArray("contents")
+        assertThat(contents.length()).isEqualTo(7)
+    }
+
+    @Test
+    fun `chat - 503 service overloaded exhausts retries and returns fallback`() = runBlocking {
+        val service = createService()
+        repeat(3) {
+            mockServer.server.enqueue(
+                jsonResponse(TestFixtures.MockResponses.geminiError(503, "Service Unavailable"), 503)
+            )
+        }
+        val result = service.chat("Hello")
+        assertThat(result).contains("unavailable")
+    }
+
+    @Test
+    fun `chat - empty candidates array returns fallback message`() = runBlocking {
+        val service = createService()
+        repeat(3) {
+            mockServer.server.enqueue(jsonResponse("""{"candidates": []}"""))
+        }
+        val result = service.chat("Hello")
+        assertThat(result).contains("unavailable")
+    }
+
+    @Test
+    fun `chat - request URL contains API key`() = runTest {
+        val service = createService(apiKey = "my-secret-key")
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiChatSuccess("ok")))
+        service.chat("Test")
+        assertThat(mockServer.server.takeRequest().path).contains("key=my-secret-key")
+    }
+
+    @Test
+    fun `chat - request URL contains model ID`() = runTest {
+        val service = createService(modelId = "gemini-2.5-pro")
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiChatSuccess("ok")))
+        service.chat("Test")
+        assertThat(mockServer.server.takeRequest().path).contains("gemini-2.5-pro")
+    }
+
+    // ==================== AnalyzeImage - additional coverage ====================
+
+    @Test
+    fun `analyzeImage - 429 then success retries and returns text`() = runBlocking {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiError(429, "rate limited"), 429))
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiChatSuccess("Image analysis ok")))
+        val result = service.analyzeImage(TestFixtures.createTestJpeg(), "Describe")
+        assertThat(result).isEqualTo("Image analysis ok")
+    }
+
+    @Test
+    fun `analyzeImage - 503 exhausts retries and returns fallback`() = runBlocking {
+        val service = createService()
+        repeat(3) {
+            mockServer.server.enqueue(
+                jsonResponse(TestFixtures.MockResponses.geminiError(503, "Unavailable"), 503)
+            )
+        }
+        val result = service.analyzeImage(TestFixtures.createTestJpeg(), "Describe")
+        assertThat(result).contains("unable to analyze")
+    }
+
+    @Test
+    fun `analyzeImage - empty candidates returns fallback message`() = runBlocking {
+        val service = createService()
+        repeat(3) {
+            mockServer.server.enqueue(jsonResponse("""{"candidates": []}"""))
+        }
+        val result = service.analyzeImage(TestFixtures.createTestJpeg(), "Describe")
+        assertThat(result).contains("unable to analyze")
+    }
+
+    @Test
+    fun `analyzeImage - maxOutputTokens is capped at 4096 when service maxTokens exceeds it`() = runTest {
+        // GeminiService.analyzeImage uses maxTokens.coerceAtMost(4096)
+        val service = GeminiService(
+            apiKey = "key",
+            modelId = "gemini-2.5-flash",
+            maxTokens = 8192,
+            baseUrl = mockServer.baseUrlNoSlash
+        )
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiChatSuccess("ok")))
+        service.analyzeImage(TestFixtures.createTestJpeg(), "Describe")
+        val maxOutputTokens = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONObject("generationConfig").getInt("maxOutputTokens")
+        assertThat(maxOutputTokens).isEqualTo(4096)
+    }
+
+    @Test
+    fun `analyzeImage - maxOutputTokens uses configured value when below 4096`() = runTest {
+        val service = GeminiService(
+            apiKey = "key",
+            modelId = "gemini-2.5-flash",
+            maxTokens = 1024,
+            baseUrl = mockServer.baseUrlNoSlash
+        )
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiChatSuccess("ok")))
+        service.analyzeImage(TestFixtures.createTestJpeg(), "Describe")
+        val maxOutputTokens = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONObject("generationConfig").getInt("maxOutputTokens")
+        assertThat(maxOutputTokens).isEqualTo(1024)
     }
 }
