@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -343,7 +344,7 @@ private fun ConversationActionsSheet(
             },
             leadingContent = {
                 Icon(
-                    if (conversation.isPinned) Icons.Default.PushPin else Icons.Default.PushPin,
+                    if (conversation.isPinned) Icons.Default.PushPin else Icons.Outlined.PushPin,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary
                 )

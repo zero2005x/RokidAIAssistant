@@ -479,7 +479,9 @@ class RecordingRepository private constructor(
         if (recording != null) {
             // Delete file
             if (recording.filePath.isNotBlank()) {
-                File(recording.filePath).delete()
+                if (!File(recording.filePath).delete()) {
+                    Log.w(TAG, "Failed to delete recording file: ${recording.filePath}")
+                }
             }
             // Delete from database
             recordingDao.deleteById(id)
@@ -494,7 +496,9 @@ class RecordingRepository private constructor(
         ids.forEach { id ->
             val recording = recordingDao.getRecordingById(id)
             if (recording != null && recording.filePath.isNotBlank()) {
-                File(recording.filePath).delete()
+                if (!File(recording.filePath).delete()) {
+                    Log.w(TAG, "Failed to delete recording file: ${recording.filePath}")
+                }
             }
         }
         recordingDao.deleteByIds(ids)

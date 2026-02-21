@@ -284,13 +284,17 @@ class TextToSpeechService(
                 setOnCompletionListener {
                     Log.d(TAG, "Audio playback completed")
                     it.release()
-                    tempFile.delete()
+                    if (!tempFile.delete()) {
+                        Log.w(TAG, "Failed to delete temp audio file: ${tempFile.absolutePath}")
+                    }
                     onComplete?.invoke()
                 }
                 setOnErrorListener { _, what, extra ->
                     Log.e(TAG, "Audio playback error: what=$what, extra=$extra")
                     release()
-                    tempFile.delete()
+                    if (!tempFile.delete()) {
+                        Log.w(TAG, "Failed to delete temp audio file: ${tempFile.absolutePath}")
+                    }
                     onComplete?.invoke()
                     true
                 }

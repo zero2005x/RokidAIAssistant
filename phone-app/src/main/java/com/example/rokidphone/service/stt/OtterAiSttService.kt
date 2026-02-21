@@ -97,7 +97,9 @@ class OtterAiSttService(
                     }
                 } finally {
                     // Clean up temporary file
-                    tempFile.delete()
+                    if (!tempFile.delete()) {
+                        Log.w(TAG, "Failed to delete temporary file: ${tempFile.absolutePath}")
+                    }
                 }
                 
             } catch (e: Exception) {

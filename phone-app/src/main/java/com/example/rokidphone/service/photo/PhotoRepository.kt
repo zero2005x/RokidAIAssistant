@@ -208,8 +208,10 @@ class PhotoRepository(
     suspend fun deletePhoto(photoData: PhotoData) {
         withContext(Dispatchers.IO) {
             try {
-                File(photoData.filePath).delete()
-                
+                if (!File(photoData.filePath).delete()) {
+                    Log.w(TAG, "Failed to delete photo file: ${photoData.filePath}")
+                }
+
                 val currentList = _photoHistory.value.toMutableList()
                 currentList.removeAll { it.id == photoData.id }
                 _photoHistory.value = currentList
@@ -231,7 +233,11 @@ class PhotoRepository(
     suspend fun clearAll() {
         withContext(Dispatchers.IO) {
             try {
-                photoDir.listFiles()?.forEach { it.delete() }
+                photoDir.listFiles()?.forEach {
+                    if (!it.delete()) {
+                        Log.w(TAG, "Failed to delete photo file: ${it.absolutePath}")
+                    }
+                }
                 _photoHistory.value = emptyList()
                 _currentPhoto.value = null
                 Log.d(TAG, "Cleared all photos")
@@ -298,7 +304,9 @@ class PhotoRepository(
             val toRemove = currentList.drop(MAX_STORED_PHOTOS)
             toRemove.forEach { photo ->
                 try {
-                    File(photo.filePath).delete()
+                    if (!File(photo.filePath).delete()) {
+                        Log.w(TAG, "Failed to delete old photo file: ${photo.filePath}")
+                    }
                     Log.d(TAG, "Cleaned up old photo: ${photo.id}")
                 } catch (e: Exception) {
                     Log.w(TAG, "Failed to cleanup photo: ${photo.id}")
