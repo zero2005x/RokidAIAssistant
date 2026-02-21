@@ -1340,21 +1340,31 @@ class PhoneAIService : Service() {
      *       with any user-customised system prompt.
      */
     private fun buildSystemPromptWithLanguage(basePrompt: String, responseLanguage: String): String {
-        val langInstruction = when {
-            responseLanguage.startsWith("ko") ->
-                "CRITICAL INSTRUCTION: You MUST respond ONLY in Korean (\ud55c\uad6d\uc5b4). " +
-                "Never mix in Chinese, Japanese, or any other language. " +
-                "All responses must be in pure Korean.\n\n"
-            responseLanguage.startsWith("ja") ->
-                "CRITICAL INSTRUCTION: You MUST respond ONLY in Japanese (\u65e5\u672c\u8a9e). " +
-                "Never mix in other languages.\n\n"
-            responseLanguage.startsWith("zh-TW") ->
-                "CRITICAL INSTRUCTION: You MUST respond ONLY in Traditional Chinese (\u7e41\u9ad4\u4e2d\u6587).\n\n"
-            responseLanguage.startsWith("zh") ->
-                "CRITICAL INSTRUCTION: You MUST respond ONLY in Simplified Chinese (\u7b80\u4f53\u4e2d\u6587).\n\n"
-            responseLanguage.isBlank() -> ""  // Blank = let model follow conversation language
-            else -> ""
-        }
+        if (responseLanguage.isBlank()) return basePrompt
+
+        val locale = java.util.Locale.forLanguageTag(responseLanguage)
+
+        // Short English language name used in the closing phrase, e.g. "Korean", "French".
+        // Falls back to the raw tag if the JVM returns an empty string for an unknown code.
+        val englishLanguageName = locale.getDisplayLanguage(java.util.Locale.ENGLISH)
+            .takeIf { it.isNotBlank() } ?: responseLanguage
+
+        // Full English label including region qualifier for disambiguation when needed,
+        // e.g. "Chinese (Taiwan)" vs "Chinese (China)", "French (France)".
+        val fullEnglishLabel = locale.getDisplayName(java.util.Locale.ENGLISH)
+            .takeIf { it.isNotBlank() } ?: englishLanguageName
+
+        // Native self-name, e.g. "한국어", "日本語", "français".
+        // Omitted when it is identical to the English name (e.g. for "English").
+        val nativeName = locale.getDisplayLanguage(locale)
+            .takeIf { it.isNotBlank() && !it.equals(englishLanguageName, ignoreCase = true) }
+
+        val languageLabel = if (nativeName != null) "$fullEnglishLabel ($nativeName)" else fullEnglishLabel
+
+        val langInstruction =
+            "CRITICAL INSTRUCTION: You MUST respond ONLY in $languageLabel. " +
+            "Never mix in other languages. All responses must be in pure $englishLanguageName.\n\n"
+
         return langInstruction + basePrompt
     }
 
