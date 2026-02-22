@@ -36,8 +36,8 @@ android {
         applicationId = "com.example.rokidphone"
         minSdk = 28
         targetSdk = 34
-        versionCode = 2
-        versionName = "0.10.0"
+        versionCode = 3
+        versionName = "0.11.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
