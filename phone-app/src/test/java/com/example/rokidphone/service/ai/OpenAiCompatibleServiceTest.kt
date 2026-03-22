@@ -81,7 +81,8 @@ class OpenAiCompatibleServiceTest {
         val body = JSONObject(request.body.readUtf8())
         assertThat(body.getString("model")).isEqualTo("gpt-5.1")
         assertThat(body.getDouble("temperature")).isWithin(0.01).of(0.3)
-        assertThat(body.getInt("max_tokens")).isEqualTo(512)
+        // gpt-5.x models use max_completion_tokens instead of max_tokens
+        assertThat(body.getInt("max_completion_tokens")).isEqualTo(512)
         assertThat(body.getDouble("top_p")).isWithin(0.01).of(0.95)
         assertThat(body.getDouble("frequency_penalty")).isWithin(0.01).of(0.5)
         assertThat(body.getDouble("presence_penalty")).isWithin(0.01).of(0.2)
