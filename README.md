@@ -4,6 +4,9 @@
 
 **AI-powered voice and vision assistant for Rokid AR glasses.**
 
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/liangtinglin)
+
 ---
 
 ## 🚀 Quick Start (5 minutes)
