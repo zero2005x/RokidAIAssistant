@@ -1,6 +1,8 @@
 package com.example.rokidphone.ui
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.rokidphone.R
 import com.example.rokidphone.data.*
@@ -362,6 +365,13 @@ fun SettingsScreen(
                     )
                 }
             }
+
+            // Support section
+            item {
+                SettingsSection(title = "Support") {
+                    KofiButton(modifier = Modifier.fillMaxWidth())
+                }
+            }
         }
     }
     
@@ -490,6 +500,32 @@ fun SettingsSection(
             Spacer(modifier = Modifier.height(12.dp))
             content()
         }
+    }
+}
+
+@Composable
+fun KofiButton(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    Button(
+        onClick = {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://ko-fi.com/liangtinglin"))
+            context.startActivity(intent)
+        },
+        modifier = modifier,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFFFF5E5B)
+        )
+    ) {
+        Icon(
+            imageVector = Icons.Default.LocalCafe,
+            contentDescription = null,
+            tint = Color.White
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = "Support me on Ko-fi",
+            color = Color.White
+        )
     }
 }
 
