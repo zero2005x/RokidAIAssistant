@@ -243,6 +243,25 @@ sealed class ProviderSetting {
     }
     
     /**
+     * VPS Provider Settings
+     * Personal VPS running Claude Code for photo analysis + voice
+     */
+    @Serializable
+    data class Vps(
+        override val id: String = "vps",
+        override val displayName: String = "Personal VPS",
+        override val enabled: Boolean = true,
+        val baseUrl: String = "http://100.108.124.60:8081",
+        val authToken: String = ""
+    ) : ProviderSetting() {
+        @Transient
+        override val providerApiKey: String? = authToken.ifBlank { null }
+        @Transient
+        override val providerBaseUrl: String = baseUrl
+        override fun isValid(): Boolean = baseUrl.isNotBlank()
+    }
+
+    /**
      * Custom OpenAI-compatible Provider Settings
      * Supports Ollama, LM Studio, vLLM, and other local deployments
      */
@@ -279,6 +298,7 @@ sealed class ProviderSetting {
             Baidu(),
             Perplexity(),
             Moonshot(),
+            Vps(),
             Custom()
         )
         
@@ -297,6 +317,7 @@ sealed class ProviderSetting {
             "baidu" -> Baidu()
             "perplexity" -> Perplexity()
             "moonshot" -> Moonshot()
+            "vps" -> Vps()
             "custom" -> Custom()
             else -> null
         }

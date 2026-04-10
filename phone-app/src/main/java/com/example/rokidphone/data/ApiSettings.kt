@@ -124,6 +124,15 @@ enum class AiProvider(
         supportsSpeech = true,
         supportsVision = true
     ),
+    VPS(
+        displayNameResId = R.string.provider_vps,
+        description = "Personal VPS running Claude Code — photo analysis + voice",
+        website = "",
+        defaultBaseUrl = "http://100.108.124.60:8081",
+        isOpenAiCompatible = false,
+        supportsSpeech = false,
+        supportsVision = true
+    ),
     CUSTOM(
         displayNameResId = R.string.provider_custom,
         description = "OpenAI-compatible API (Ollama, LM Studio, etc.)",
@@ -724,6 +733,10 @@ data class ApiSettings(
     val moonshotApiKey: String = "",
     val customApiKey: String = "",
     
+    // VPS settings
+    val vpsBaseUrl: String = "http://100.108.124.60:8081",
+    val vpsAuthToken: String = "",
+
     // Custom base URLs (for providers that support it)
     val customBaseUrl: String = "http://localhost:11434/v1/",
     val customModelName: String = "llama4",
@@ -850,7 +863,8 @@ data class ApiSettings(
             AiProvider.BAIDU -> baiduApiKey
             AiProvider.PERPLEXITY -> perplexityApiKey
             AiProvider.MOONSHOT -> moonshotApiKey
-            AiProvider.GEMINI_LIVE -> geminiApiKey  // Shares Gemini API key
+            AiProvider.GEMINI_LIVE -> geminiApiKey
+            AiProvider.VPS -> vpsAuthToken
             AiProvider.CUSTOM -> customApiKey
         }
     }
@@ -871,11 +885,12 @@ data class ApiSettings(
             AiProvider.BAIDU -> baiduApiKey
             AiProvider.PERPLEXITY -> perplexityApiKey
             AiProvider.MOONSHOT -> moonshotApiKey
-            AiProvider.GEMINI_LIVE -> geminiApiKey  // Shares Gemini API key
+            AiProvider.GEMINI_LIVE -> geminiApiKey
+            AiProvider.VPS -> vpsAuthToken
             AiProvider.CUSTOM -> customApiKey
         }
     }
-    
+
     /**
      * Get base URL for current provider
      */
@@ -903,6 +918,7 @@ data class ApiSettings(
         return when (aiProvider) {
             AiProvider.CUSTOM -> customBaseUrl.isNotBlank() && isValidUrl(customBaseUrl)
             AiProvider.BAIDU -> baiduApiKey.isNotBlank() && baiduSecretKey.isNotBlank()
+            AiProvider.VPS -> vpsBaseUrl.isNotBlank() && isValidUrl(vpsBaseUrl)
             else -> getCurrentApiKey().isNotBlank()
         }
     }

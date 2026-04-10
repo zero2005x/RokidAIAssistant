@@ -143,6 +143,7 @@ class ProviderManager private constructor(
             AiProvider.PERPLEXITY -> settingsRepository.updatePerplexityApiKey(apiKey)
             AiProvider.MOONSHOT -> settingsRepository.updateMoonshotApiKey(apiKey)
             AiProvider.GEMINI_LIVE -> settingsRepository.updateGeminiApiKey(apiKey)  // Shares Gemini API key
+            AiProvider.VPS -> { /* VPS uses auth token, configured via settings */ }
             AiProvider.CUSTOM -> settingsRepository.updateCustomApiKey(apiKey)
         }
         cachedService = null
@@ -222,6 +223,10 @@ class ProviderManager private constructor(
                 apiKey = settings.moonshotApiKey,
                 modelId = settings.aiModelId
             )
+            AiProvider.VPS -> ProviderSetting.Vps(
+                baseUrl = settings.vpsBaseUrl,
+                authToken = settings.vpsAuthToken
+            )
             AiProvider.CUSTOM -> ProviderSetting.Custom(
                 apiKey = settings.customApiKey,
                 modelId = settings.customModelName,
@@ -274,6 +279,12 @@ class ProviderManager private constructor(
             }
             if (settings.moonshotApiKey.isNotBlank()) {
                 add(ProviderSetting.Moonshot(apiKey = settings.moonshotApiKey))
+            }
+            if (settings.vpsBaseUrl.isNotBlank()) {
+                add(ProviderSetting.Vps(
+                    baseUrl = settings.vpsBaseUrl,
+                    authToken = settings.vpsAuthToken
+                ))
             }
             if (settings.customBaseUrl.isNotBlank()) {
                 add(ProviderSetting.Custom(
