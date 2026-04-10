@@ -243,15 +243,16 @@ sealed class ProviderSetting {
     }
     
     /**
-     * VPS Provider Settings
-     * Personal VPS running Claude Code for photo analysis + voice
+     * Private Server Provider Settings
+     * Self-hosted server with photo analysis + voice endpoints.
+     * Base URL must be configured in settings (no default).
      */
     @Serializable
-    data class Vps(
-        override val id: String = "vps",
-        override val displayName: String = "Personal VPS",
+    data class PrivateServer(
+        override val id: String = "private_server",
+        override val displayName: String = "Private Server",
         override val enabled: Boolean = true,
-        val baseUrl: String = "http://100.108.124.60:8081",
+        val baseUrl: String = "",
         val authToken: String = ""
     ) : ProviderSetting() {
         @Transient
@@ -298,7 +299,7 @@ sealed class ProviderSetting {
             Baidu(),
             Perplexity(),
             Moonshot(),
-            Vps(),
+            PrivateServer(),
             Custom()
         )
         
@@ -317,7 +318,7 @@ sealed class ProviderSetting {
             "baidu" -> Baidu()
             "perplexity" -> Perplexity()
             "moonshot" -> Moonshot()
-            "vps" -> Vps()
+            "vps" -> PrivateServer()
             "custom" -> Custom()
             else -> null
         }

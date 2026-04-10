@@ -14,28 +14,31 @@ import java.net.URLDecoder
 import java.util.concurrent.TimeUnit
 
 /**
- * VPS AI Service
+ * Private Server AI Service
  *
- * Sends photos and text to a personal VPS running Claude Code,
- * which analyses images with Claude Vision and returns TTS audio + text.
+ * Sends photos and text to a self-hosted server for AI analysis.
+ * The server must implement two endpoints:
  *
- * Endpoint: POST {baseUrl}/voice/photo  (multipart: image + prompt + session_id)
- * Response: audio/mpeg body, X-Transcript header with text response
+ * POST {baseUrl}/voice/photo  (multipart: image + prompt + session_id)
+ *   → Response: audio body + X-Transcript header with text
  *
- * Endpoint: POST {baseUrl}/voice        (JSON: text + session_id)
- * Response: audio/ogg body, X-Transcript header with text response
+ * POST {baseUrl}/voice        (JSON: text + session_id)
+ *   → Response: audio body + X-Transcript header with text
+ *
+ * Compatible with any server implementing this protocol.
+ * Base URL and auth token are configured in app settings.
  */
-class VpsService(
+class PrivateServerService(
     private val baseUrl: String,
     private val authToken: String = "",
     private val sessionId: String = "glasses-main"
 ) : AiServiceProvider {
 
     companion object {
-        private const val TAG = "VpsService"
+        private const val TAG = "PrivateServerService"
     }
 
-    override val provider: AiProvider = AiProvider.VPS
+    override val provider: AiProvider = AiProvider.PRIVATE_SERVER
 
     private val client: OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -51,10 +54,7 @@ class VpsService(
         pcmAudioData: ByteArray,
         languageCode: String
     ): SpeechResult {
-        // VPS doesn't do standalone STT — audio goes through /voice/audio
-        // which transcribes + processes + returns TTS all at once.
-        // For now, return an error suggesting to use a different STT provider.
-        return SpeechResult.Error("VPS does not support standalone speech-to-text")
+        return SpeechResult.Error("Private server does not support standalone speech-to-text")
     }
 
     override suspend fun chat(userMessage: String): String = withContext(Dispatchers.IO) {
@@ -81,19 +81,17 @@ class VpsService(
                 return@withContext "Error: ${response.code} - $errorBody"
             }
 
-            // Extract transcript from header
             val transcript = response.header("X-Transcript")?.let {
                 URLDecoder.decode(it, "UTF-8")
             } ?: ""
 
-            // Store audio for playback
             lastAudioResponse = response.body?.bytes()
 
             Log.d(TAG, "Chat response: ${transcript.take(100)}")
             transcript.ifBlank { "Response received but no transcript available." }
         } catch (e: Exception) {
             Log.e(TAG, "Chat error", e)
-            "Error communicating with VPS: ${e.message}"
+            "Error communicating with server: ${e.message}"
         }
     }
 
@@ -130,12 +128,10 @@ class VpsService(
                 return@withContext "Error analysing photo: ${response.code}"
             }
 
-            // Extract transcript from header
             val transcript = response.header("X-Transcript")?.let {
                 URLDecoder.decode(it, "UTF-8")
             } ?: ""
 
-            // Store audio for playback
             lastAudioResponse = response.body?.bytes()
 
             val elapsed = response.header("X-Duration-Ms") ?: "?"
