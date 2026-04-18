@@ -67,6 +67,20 @@ class OpenAiCompatibleService(
             "" to ""
         }
     }
+
+    /**
+     * GPT-5 and o-series models reject the legacy `max_tokens` key and require
+     * `max_completion_tokens` instead. All other models still use `max_tokens`.
+     */
+    private fun putTokenLimit(json: JSONObject, tokens: Int) {
+        val requiresCompletionTokens =
+            modelId.startsWith("o") || modelId.startsWith("gpt-5")
+        if (requiresCompletionTokens) {
+            json.put("max_completion_tokens", tokens)
+        } else {
+            json.put("max_tokens", tokens)
+        }
+    }
     
     /**
      * Speech Recognition - Using Whisper API (if supported)
@@ -208,14 +222,9 @@ class OpenAiCompatibleService(
                 put("model", modelId)
                 put("messages", messages)
                 put("temperature", temperature.toDouble())
-                
-                val requiresCompletionTokens = modelId.startsWith("o") || modelId.startsWith("gpt-5")
-                if (requiresCompletionTokens) {
-                    put("max_completion_tokens", maxTokens)
-                } else {
-                    put("max_tokens", maxTokens)
-                }
-                
+
+                putTokenLimit(this, maxTokens)
+
                 put("top_p", topP.toDouble())
                 // Grok 4 (pure reasoning) rejects penalty & stop params
                 if (!isReasoningOnly) {
@@ -305,7 +314,7 @@ class OpenAiCompatibleService(
             val requestJson = JSONObject().apply {
                 put("model", modelId)
                 put("messages", messages)
-                put("max_tokens", maxTokens.coerceAtMost(4096))
+                putTokenLimit(this, maxTokens.coerceAtMost(4096))
                 put("temperature", temperature.toDouble())
             }
             
@@ -400,7 +409,7 @@ class OpenAiCompatibleService(
                 val requestJson = JSONObject().apply {
                     put("model", modelId)
                     put("messages", messages)
-                    put("max_tokens", 10)
+                    putTokenLimit(this, 10)
                 }
                 
                 val url = buildUrl("chat/completions")
