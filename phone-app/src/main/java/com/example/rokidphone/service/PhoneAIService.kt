@@ -1617,6 +1617,7 @@ class TextToSpeechService(private val context: android.content.Context) {
     // ── Edge TTS ─────────────────────────────────────────
 
     private fun speakWithEdge(text: String, settings: com.example.rokidphone.data.ApiSettings, onAudioChunk: (ByteArray) -> Unit) {
+        android.util.Log.d(TAG, "TTS engine: Edge")
         ttsScope.launch {
             try {
                 // Resolve voice
@@ -1635,7 +1636,15 @@ class TextToSpeechService(private val context: android.content.Context) {
 
                 android.util.Log.d(TAG, "Edge TTS: voice=$voice, rate=$rate, pitch=$pitch")
 
-                val result = edgeTtsClient.synthesize(text, voice, rate, pitch)
+                // For Korean voices, strip embedded Han characters that would otherwise
+                // be read with a Chinese accent.
+                val cleanedText = if (voice.startsWith("ko-KR")) {
+                    sanitizeForTts(text, java.util.Locale.KOREAN)
+                } else {
+                    text
+                }
+
+                val result = edgeTtsClient.synthesize(cleanedText, voice, rate, pitch)
 
                 result.onSuccess { audioData ->
                     if (audioData.isNotEmpty()) {
@@ -1663,6 +1672,7 @@ class TextToSpeechService(private val context: android.content.Context) {
     // ── System TTS ───────────────────────────────────────
 
     private fun speakWithSystemTts(text: String, settings: com.example.rokidphone.data.ApiSettings?) {
+        android.util.Log.d(TAG, "TTS engine: System")
         if (!systemTtsReady || tts == null) {
             android.util.Log.e(TAG, "System TTS not ready")
             return
@@ -1675,18 +1685,27 @@ class TextToSpeechService(private val context: android.content.Context) {
             android.util.Log.w(TAG, "System TTS: locale '$locale' not supported, using device default")
             tts?.setLanguage(java.util.Locale.getDefault())
         } else {
-            // Explicitly set a native voice to avoid non-native accent
-            val nativeVoice = tts?.voices?.firstOrNull { 
-                it.locale.language == locale.language && !it.isNetworkConnectionRequired 
-            }
+            // Prefer an offline native voice, but fall back to network voices instead
+            // of discarding them (Samsung's Korean voice is often network-only, and
+            // dropping it forces the engine to fall back to its Chinese default).
+            val nativeVoice = tts?.voices
+                ?.asSequence()
+                ?.filter { it.locale.language == locale.language }
+                ?.sortedBy { if (it.isNetworkConnectionRequired) 1 else 0 }
+                ?.firstOrNull()
             if (nativeVoice != null) {
                 tts?.voice = nativeVoice
+                android.util.Log.d(
+                    TAG,
+                    "System TTS: voice=${nativeVoice.name}, network=${nativeVoice.isNetworkConnectionRequired}"
+                )
             }
         }
 
         tts?.setSpeechRate(settings?.systemTtsSpeechRate ?: 1.0f)
         tts?.setPitch(settings?.systemTtsPitch ?: 1.0f)
-        tts?.speak(text, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null, null)
+        val cleaned = sanitizeForTts(text, locale)
+        tts?.speak(cleaned, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null, null)
     }
 
     // ── Audio playback ───────────────────────────────────
@@ -1733,6 +1752,18 @@ class TextToSpeechService(private val context: android.content.Context) {
             else -> java.util.Locale.getDefault()
         }
     }
+
+    /**
+     * Strip characters that the resolved TTS locale cannot pronounce natively.
+     * Currently used to remove embedded Han characters from Korean output, which
+     * would otherwise be read by Samsung TTS using its Chinese voice mid-sentence.
+     */
+    internal fun sanitizeForTts(text: String, locale: java.util.Locale): String =
+        when (locale.language) {
+            "ko" -> text.filter { it !in '\u4E00'..'\u9FFF' }
+                        .replace(Regex("\\s{2,}"), " ").trim()
+            else -> text
+        }
 }
 
 /**
