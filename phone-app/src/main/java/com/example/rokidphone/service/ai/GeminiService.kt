@@ -32,7 +32,13 @@ class GeminiService(
     maxTokens: Int = 2048,
     topP: Float = 1.0f,
     internal val baseUrl: String = DEFAULT_BASE_URL,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    /**
+     * Gemini 3.1 thinking intensity: "low" | "medium" | "high".
+     * Forced to "high" for *deep-think* variants and "low" for *flash-lite*.
+     * Null skips the param (e.g. 2.5/3.0 use thinkingBudget=0 instead).
+     */
+    val thinkingLevel: String? = null
 ) : BaseAiService(apiKey, modelId, systemPrompt, temperature, maxTokens, topP), AiServiceProvider {
     
     companion object {
@@ -45,6 +51,37 @@ class GeminiService(
     
     private val apiUrl: String
         get() = "$baseUrl/$modelId:generateContent"
+
+    /**
+     * Build the optional `thinkingConfig` block for the current model.
+     *
+     * - Gemini 3.1 family (incl. deep-think): emits `thinkingLevel` (high|low|medium).
+     * - Gemini 2.5 Pro/Flash and Gemini 3.0: emits `thinkingBudget=0` to skip visible CoT,
+     *   keeping AR voice replies snappy.
+     * - Anything else: returns null (no field added).
+     */
+    private fun buildThinkingConfig(): JSONObject? {
+        val is31Family = modelId.startsWith("gemini-3.1") || modelId.contains("deep-think")
+        if (is31Family) {
+            val level = when {
+                modelId.contains("deep-think") -> "high"
+                modelId.contains("flash-lite") -> "low"
+                else -> thinkingLevel ?: "medium"
+            }
+            return JSONObject().apply {
+                put("thinkingLevel", level)
+                put("includeThoughts", false)
+            }
+        }
+        val is25or30 = modelId.contains("2.5") || modelId.startsWith("gemini-3")
+        if (is25or30) {
+            return JSONObject().apply {
+                put("thinkingBudget", 0)
+                put("includeThoughts", false)
+            }
+        }
+        return null
+    }
     
     /**
      * Speech Recognition - Gemini native audio support
@@ -230,6 +267,7 @@ Rules:
                     put("temperature", temperature.toDouble())
                     put("maxOutputTokens", maxTokens)
                     put("topP", topP.toDouble())
+                    buildThinkingConfig()?.let { put("thinkingConfig", it) }
                 })
             }
             
@@ -303,6 +341,7 @@ Rules:
                 put("generationConfig", JSONObject().apply {
                     put("temperature", temperature.toDouble())
                     put("maxOutputTokens", maxTokens.coerceAtMost(4096))
+                    buildThinkingConfig()?.let { put("thinkingConfig", it) }
                 })
             }
             
