@@ -31,7 +31,11 @@ class OpenAiCompatibleService(
     maxTokens: Int = 2048,
     topP: Float = 1.0f,
     frequencyPenalty: Float = 0.0f,
-    presencePenalty: Float = 0.0f
+    presencePenalty: Float = 0.0f,
+    /** "none" | "minimal" | "low" | "medium" | "high" | "xhigh" — GPT-5.x / o-series only. */
+    val reasoningEffort: String? = null,
+    /** "low" | "medium" | "high" — GPT-5.2+ only. */
+    val verbosity: String? = null
 ) : BaseAiService(apiKey, modelId, systemPrompt, temperature, maxTokens, topP, frequencyPenalty, presencePenalty), AiServiceProvider {
     
     companion object {
@@ -66,6 +70,40 @@ class OpenAiCompatibleService(
             // For local models (Ollama, LM Studio) that may not need auth
             "" to ""
         }
+    }
+
+    /**
+     * Emit the correct token-limit key for the current model.
+     * GPT-5 / o-series use `max_completion_tokens`; everything else uses `max_tokens`.
+     */
+    private fun putTokenLimit(json: JSONObject, tokens: Int) {
+        if (modelId.startsWith("o") || modelId.startsWith("gpt-5")) {
+            json.put("max_completion_tokens", tokens)
+        } else {
+            json.put("max_tokens", tokens)
+        }
+    }
+
+    /**
+     * Whether the GPT-5.x / o-series `reasoning_effort` parameter applies to this model.
+     */
+    private fun requiresReasoningEffort(): Boolean =
+        modelId.startsWith("o") || modelId.startsWith("gpt-5")
+
+    /**
+     * Whether the GPT-5.x `verbosity` parameter applies to this model (5.2 / 5.4 and later).
+     */
+    private fun requiresVerbosity(): Boolean =
+        modelId.startsWith("gpt-5.2") || modelId.startsWith("gpt-5.4")
+
+    /**
+     * Whether sampling params (temperature, top_p, penalties, stop) should be omitted.
+     * True for o-series, and for any GPT-5 model whose effective reasoning_effort is not "none".
+     */
+    private fun isSamplingLocked(effectiveEffort: String?): Boolean {
+        if (modelId.startsWith("o")) return true
+        if (modelId.startsWith("gpt-5") && effectiveEffort != null && effectiveEffort != "none") return true
+        return false
     }
     
     /**
@@ -203,25 +241,36 @@ class OpenAiCompatibleService(
             }
             
             val isReasoningOnly = isReasoningOnlyModel(modelId)
+            val effectiveEffort: String? = if (requiresReasoningEffort()) {
+                // Default to "minimal" for short AR voice replies; user can override.
+                reasoningEffort ?: "minimal"
+            } else {
+                null
+            }
+            val samplingLocked = isSamplingLocked(effectiveEffort)
 
             val requestJson = JSONObject().apply {
                 put("model", modelId)
                 put("messages", messages)
-                put("temperature", temperature.toDouble())
-                
-                val requiresCompletionTokens = modelId.startsWith("o") || modelId.startsWith("gpt-5")
-                if (requiresCompletionTokens) {
-                    put("max_completion_tokens", maxTokens)
-                } else {
-                    put("max_tokens", maxTokens)
-                }
-                
-                put("top_p", topP.toDouble())
-                // Grok 4 (pure reasoning) rejects penalty & stop params
-                if (!isReasoningOnly) {
+
+                // Sampling params are rejected by o-series and by GPT-5 when effort != "none",
+                // and by pure reasoning models (Grok 4).
+                if (!isReasoningOnly && !samplingLocked) {
+                    put("temperature", temperature.toDouble())
+                    put("top_p", topP.toDouble())
                     if (frequencyPenalty != 0.0f) put("frequency_penalty", frequencyPenalty.toDouble())
                     if (presencePenalty != 0.0f) put("presence_penalty", presencePenalty.toDouble())
                 }
+
+                putTokenLimit(this, maxTokens)
+
+                if (effectiveEffort != null) {
+                    put("reasoning_effort", effectiveEffort)
+                }
+                if (requiresVerbosity()) {
+                    put("verbosity", verbosity ?: "medium")
+                }
+
                 put("stream", false)
             }
             
@@ -302,11 +351,26 @@ class OpenAiCompatibleService(
                 })
             }
             
+            val effectiveEffort: String? = if (requiresReasoningEffort()) {
+                reasoningEffort ?: "minimal"
+            } else {
+                null
+            }
+            val samplingLocked = isSamplingLocked(effectiveEffort)
+
             val requestJson = JSONObject().apply {
                 put("model", modelId)
                 put("messages", messages)
-                put("max_tokens", maxTokens.coerceAtMost(4096))
-                put("temperature", temperature.toDouble())
+                putTokenLimit(this, maxTokens.coerceAtMost(4096))
+                if (!samplingLocked) {
+                    put("temperature", temperature.toDouble())
+                }
+                if (effectiveEffort != null) {
+                    put("reasoning_effort", effectiveEffort)
+                }
+                if (requiresVerbosity()) {
+                    put("verbosity", verbosity ?: "medium")
+                }
             }
             
             val url = buildUrl("chat/completions")
@@ -400,7 +464,7 @@ class OpenAiCompatibleService(
                 val requestJson = JSONObject().apply {
                     put("model", modelId)
                     put("messages", messages)
-                    put("max_tokens", 10)
+                    putTokenLimit(this, 10)
                 }
                 
                 val url = buildUrl("chat/completions")
