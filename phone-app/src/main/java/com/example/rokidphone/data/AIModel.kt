@@ -4,7 +4,7 @@ package com.example.rokidphone.data
  * AI Provider type for model categorization
  */
 enum class Provider {
-    GEMINI, CLAUDE, OPENAI, GROK
+    GEMINI, CLAUDE, OPENAI, GROK, DEEPSEEK, QWEN, ZHIPU, MOONSHOT, PERPLEXITY, GROQ
 }
 
 /**
@@ -36,10 +36,29 @@ sealed class AIModel(
         isDeprecated: Boolean = false
     ) : AIModel(modelId, displayName, contextWindow, Provider.GEMINI, isPreview, isDeprecated) {
 
+        data object Gemini31Flash : Gemini(
+            modelId = "gemini-3.1-flash",
+            displayName = "Gemini 3.1 Flash",
+            contextWindow = 1_000_000L
+        )
+
+        data object Gemini31FlashLite : Gemini(
+            modelId = "gemini-3.1-flash-lite",
+            displayName = "Gemini 3.1 Flash-Lite",
+            contextWindow = 1_000_000L
+        )
+
+        data object Gemini31DeepThink : Gemini(
+            modelId = "gemini-3.1-pro-deep-think",
+            displayName = "Gemini 3.1 Pro Deep Think",
+            contextWindow = 1_048_576L,
+            isPreview = true
+        )
+
         data object Gemini31ProPreview : Gemini(
             modelId = "gemini-3.1-pro-preview",
             displayName = "Gemini 3.1 Pro (Preview)",
-            contextWindow = -1L, // TBD
+            contextWindow = 1_048_576L,
             isPreview = true
         )
 
@@ -76,6 +95,9 @@ sealed class AIModel(
 
         companion object {
             fun all(): List<Gemini> = listOf(
+                Gemini31Flash,
+                Gemini31FlashLite,
+                Gemini31DeepThink,
                 Gemini31ProPreview,
                 Gemini3FlashPreview,
                 Gemini25Pro,
@@ -96,6 +118,12 @@ sealed class AIModel(
         isDeprecated: Boolean = false
     ) : AIModel(modelId, displayName, contextWindow, Provider.CLAUDE, isPreview, isDeprecated) {
 
+        data object Opus47 : Claude(
+            modelId = "claude-opus-4-7",
+            displayName = "Claude Opus 4.7",
+            contextWindow = 200_000L // 1M via beta header
+        )
+
         data object Opus46 : Claude(
             modelId = "claude-opus-4-6",
             displayName = "Claude Opus 4.6",
@@ -115,13 +143,15 @@ sealed class AIModel(
         )
 
         companion object {
-            fun all(): List<Claude> = listOf(Opus46, Sonnet46, Haiku45)
+            fun all(): List<Claude> = listOf(Opus47, Opus46, Sonnet46, Haiku45)
 
             /**
              * Whether this model supports 1M context via beta header.
              */
             fun supports1MContext(modelId: String): Boolean =
-                modelId == Opus46.modelId || modelId == Sonnet46.modelId
+                modelId == Opus47.modelId ||
+                modelId == Opus46.modelId ||
+                modelId == Sonnet46.modelId
         }
     }
 
@@ -134,6 +164,30 @@ sealed class AIModel(
         isPreview: Boolean = false,
         isDeprecated: Boolean = false
     ) : AIModel(modelId, displayName, contextWindow, Provider.OPENAI, isPreview, isDeprecated) {
+
+        data object Gpt54 : OpenAI(
+            modelId = "gpt-5.4",
+            displayName = "GPT-5.4",
+            contextWindow = 1_000_000L
+        )
+
+        data object Gpt54Pro : OpenAI(
+            modelId = "gpt-5.4-pro",
+            displayName = "GPT-5.4 Pro (Reasoning)",
+            contextWindow = 1_000_000L
+        )
+
+        data object Gpt54Mini : OpenAI(
+            modelId = "gpt-5.4-mini",
+            displayName = "GPT-5.4 mini",
+            contextWindow = 400_000L
+        )
+
+        data object Gpt54Nano : OpenAI(
+            modelId = "gpt-5.4-nano",
+            displayName = "GPT-5.4 nano",
+            contextWindow = 400_000L
+        )
 
         data object Gpt52 : OpenAI(
             modelId = "gpt-5.2",
@@ -172,7 +226,10 @@ sealed class AIModel(
         )
 
         companion object {
-            fun all(): List<OpenAI> = listOf(Gpt52, Gpt52Codex, Gpt51, Gpt5Mini, Gpt5Nano, O3)
+            fun all(): List<OpenAI> = listOf(
+                Gpt54, Gpt54Pro, Gpt54Mini, Gpt54Nano,
+                Gpt52, Gpt52Codex, Gpt51, Gpt5Mini, Gpt5Nano, O3
+            )
         }
     }
 
@@ -186,6 +243,14 @@ sealed class AIModel(
         isDeprecated: Boolean = false,
         val isReasoningOnly: Boolean = false
     ) : AIModel(modelId, displayName, contextWindow, Provider.GROK, isPreview, isDeprecated) {
+
+        data object Grok420BetaReasoning : Grok(
+            modelId = "grok-4.20-beta-latest-reasoning",
+            displayName = "Grok 4.20 Beta (Reasoning)",
+            contextWindow = 2_000_000L,
+            isPreview = true,
+            isReasoningOnly = true
+        )
 
         data object Grok420 : Grok(
             modelId = "grok-4.20",
@@ -226,7 +291,9 @@ sealed class AIModel(
         )
 
         companion object {
-            fun all(): List<Grok> = listOf(Grok420, Grok4, Grok41Fast, Grok3, Grok3Mini, GrokImage)
+            fun all(): List<Grok> = listOf(
+                Grok420BetaReasoning, Grok420, Grok4, Grok41Fast, Grok3, Grok3Mini, GrokImage
+            )
 
             /**
              * Whether this model is a pure reasoning model that
@@ -237,11 +304,254 @@ sealed class AIModel(
         }
     }
 
+    // ==================== DeepSeek ====================
+
+    sealed class DeepSeek(
+        modelId: String,
+        displayName: String,
+        contextWindow: Long,
+        isPreview: Boolean = false,
+        isDeprecated: Boolean = false,
+        val isReasoner: Boolean = false
+    ) : AIModel(modelId, displayName, contextWindow, Provider.DEEPSEEK, isPreview, isDeprecated) {
+
+        data object Chat : DeepSeek(
+            modelId = "deepseek-chat",
+            displayName = "DeepSeek V3.2 (Chat)",
+            contextWindow = 128_000L
+        )
+
+        data object Reasoner : DeepSeek(
+            modelId = "deepseek-reasoner",
+            displayName = "DeepSeek V3.2 (Reasoner)",
+            contextWindow = 128_000L,
+            isReasoner = true
+        )
+
+        data object Speciale : DeepSeek(
+            modelId = "deepseek-v3.2-speciale",
+            displayName = "DeepSeek V3.2 Speciale",
+            contextWindow = 128_000L,
+            isPreview = true,
+            isReasoner = true
+        )
+
+        companion object {
+            fun all(): List<DeepSeek> = listOf(Chat, Reasoner, Speciale)
+
+            fun isReasoner(modelId: String): Boolean =
+                all().find { it.modelId == modelId }?.isReasoner == true
+        }
+    }
+
+    // ==================== Alibaba Qwen ====================
+
+    sealed class Qwen(
+        modelId: String,
+        displayName: String,
+        contextWindow: Long,
+        isPreview: Boolean = false,
+        isDeprecated: Boolean = false,
+        val supportsThinkingMode: Boolean = false
+    ) : AIModel(modelId, displayName, contextWindow, Provider.QWEN, isPreview, isDeprecated) {
+
+        data object Qwen3Max : Qwen(
+            modelId = "qwen3-max-2026-01-23",
+            displayName = "Qwen3 Max (2026-01-23)",
+            contextWindow = 262_144L,
+            supportsThinkingMode = true
+        )
+
+        data object Qwen35Plus : Qwen(
+            modelId = "qwen3.5-plus",
+            displayName = "Qwen3.5 Plus",
+            contextWindow = 131_072L
+        )
+
+        data object Qwen35Flash : Qwen(
+            modelId = "qwen3.5-flash",
+            displayName = "Qwen3.5 Flash",
+            contextWindow = 131_072L
+        )
+
+        companion object {
+            fun all(): List<Qwen> = listOf(Qwen3Max, Qwen35Plus, Qwen35Flash)
+
+            fun supportsThinkingMode(modelId: String): Boolean =
+                all().find { it.modelId == modelId }?.supportsThinkingMode == true
+        }
+    }
+
+    // ==================== Zhipu GLM ====================
+
+    sealed class Zhipu(
+        modelId: String,
+        displayName: String,
+        contextWindow: Long,
+        isPreview: Boolean = false,
+        isDeprecated: Boolean = false
+    ) : AIModel(modelId, displayName, contextWindow, Provider.ZHIPU, isPreview, isDeprecated) {
+
+        data object Glm5 : Zhipu(
+            modelId = "glm-5",
+            displayName = "GLM-5",
+            contextWindow = 128_000L
+        )
+
+        data object Glm51 : Zhipu(
+            modelId = "glm-5.1",
+            displayName = "GLM-5.1",
+            contextWindow = 128_000L
+        )
+
+        data object Glm46V : Zhipu(
+            modelId = "glm-4.6v",
+            displayName = "GLM-4.6V (Vision)",
+            contextWindow = 128_000L
+        )
+
+        data object Glm4Plus : Zhipu(
+            modelId = "glm-4-plus",
+            displayName = "GLM-4 Plus",
+            contextWindow = 128_000L
+        )
+
+        companion object {
+            fun all(): List<Zhipu> = listOf(Glm5, Glm51, Glm46V, Glm4Plus)
+        }
+    }
+
+    // ==================== Moonshot Kimi ====================
+
+    sealed class Moonshot(
+        modelId: String,
+        displayName: String,
+        contextWindow: Long,
+        isPreview: Boolean = false,
+        isDeprecated: Boolean = false
+    ) : AIModel(modelId, displayName, contextWindow, Provider.MOONSHOT, isPreview, isDeprecated) {
+
+        data object KimiK25 : Moonshot(
+            modelId = "kimi-k2.5",
+            displayName = "Kimi K2.5 (Instant)",
+            contextWindow = 256_000L
+        )
+
+        data object KimiK25Thinking : Moonshot(
+            modelId = "kimi-k2.5-thinking",
+            displayName = "Kimi K2.5 (Thinking)",
+            contextWindow = 256_000L
+        )
+
+        companion object {
+            fun all(): List<Moonshot> = listOf(KimiK25, KimiK25Thinking)
+
+            fun isThinkingMode(modelId: String): Boolean =
+                modelId == KimiK25Thinking.modelId
+        }
+    }
+
+    // ==================== Perplexity ====================
+
+    sealed class Perplexity(
+        modelId: String,
+        displayName: String,
+        contextWindow: Long,
+        isPreview: Boolean = false,
+        isDeprecated: Boolean = false
+    ) : AIModel(modelId, displayName, contextWindow, Provider.PERPLEXITY, isPreview, isDeprecated) {
+
+        data object Sonar : Perplexity(
+            modelId = "sonar",
+            displayName = "Sonar",
+            contextWindow = 128_000L
+        )
+
+        data object SonarPro : Perplexity(
+            modelId = "sonar-pro",
+            displayName = "Sonar Pro",
+            contextWindow = 200_000L
+        )
+
+        data object SonarReasoningPro : Perplexity(
+            modelId = "sonar-reasoning-pro",
+            displayName = "Sonar Reasoning Pro",
+            contextWindow = 128_000L
+        )
+
+        data object SonarDeepResearch : Perplexity(
+            modelId = "sonar-deep-research",
+            displayName = "Sonar Deep Research",
+            contextWindow = 128_000L
+        )
+
+        companion object {
+            fun all(): List<Perplexity> = listOf(Sonar, SonarPro, SonarReasoningPro, SonarDeepResearch)
+        }
+    }
+
+    // ==================== Groq ====================
+
+    sealed class Groq(
+        modelId: String,
+        displayName: String,
+        contextWindow: Long,
+        isPreview: Boolean = false,
+        isDeprecated: Boolean = false
+    ) : AIModel(modelId, displayName, contextWindow, Provider.GROQ, isPreview, isDeprecated) {
+
+        data object KimiK2Instruct : Groq(
+            modelId = "moonshotai/kimi-k2-instruct",
+            displayName = "Kimi K2 Instruct (Groq)",
+            contextWindow = 128_000L
+        )
+
+        data object GptOss120B : Groq(
+            modelId = "openai/gpt-oss-120b",
+            displayName = "GPT-OSS 120B (Groq)",
+            contextWindow = 128_000L
+        )
+
+        data object GptOss20B : Groq(
+            modelId = "openai/gpt-oss-20b",
+            displayName = "GPT-OSS 20B (Groq)",
+            contextWindow = 128_000L
+        )
+
+        data object Llama4Maverick : Groq(
+            modelId = "meta-llama/llama-4-maverick-17b-128e-instruct",
+            displayName = "Llama 4 Maverick 17B 128E (Groq)",
+            contextWindow = 131_072L
+        )
+
+        data object Llama4Scout : Groq(
+            modelId = "meta-llama/llama-4-scout-17b-16e-instruct",
+            displayName = "Llama 4 Scout 17B 16E (Groq)",
+            contextWindow = 131_072L
+        )
+
+        data object Qwen332B : Groq(
+            modelId = "qwen/qwen3-32b",
+            displayName = "Qwen3 32B (Groq)",
+            contextWindow = 131_072L
+        )
+
+        companion object {
+            fun all(): List<Groq> = listOf(
+                KimiK2Instruct, GptOss120B, GptOss20B,
+                Llama4Maverick, Llama4Scout, Qwen332B
+            )
+        }
+    }
+
     companion object {
         /**
          * Returns all registered models across all providers.
          */
-        fun allModels(): List<AIModel> = Gemini.all() + Claude.all() + OpenAI.all() + Grok.all()
+        fun allModels(): List<AIModel> =
+            Gemini.all() + Claude.all() + OpenAI.all() + Grok.all() +
+            DeepSeek.all() + Qwen.all() + Zhipu.all() +
+            Moonshot.all() + Perplexity.all() + Groq.all()
     }
 }
 
