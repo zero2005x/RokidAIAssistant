@@ -49,12 +49,11 @@ object AiServiceFactory {
                 topP = settings.topP
             )
             
-            AiProvider.DEEPSEEK -> OpenAiCompatibleService(
+            AiProvider.DEEPSEEK -> DeepSeekService(
                 apiKey = apiKey,
                 baseUrl = settings.aiProvider.defaultBaseUrl,
                 modelId = modelId,
                 systemPrompt = systemPrompt,
-                providerType = AiProvider.DEEPSEEK,
                 temperature = settings.temperature,
                 maxTokens = settings.maxTokens,
                 topP = settings.topP,
@@ -185,8 +184,15 @@ object AiServiceFactory {
     fun createTestService(settings: ApiSettings): OpenAiCompatibleService? {
         return when (settings.aiProvider) {
             AiProvider.GEMINI, AiProvider.ANTHROPIC, AiProvider.BAIDU, AiProvider.GEMINI_LIVE -> null // Not OpenAI-compatible
-            
-            AiProvider.OPENAI, AiProvider.DEEPSEEK, AiProvider.GROQ, 
+
+            AiProvider.DEEPSEEK -> DeepSeekService(
+                apiKey = settings.getCurrentApiKey(),
+                baseUrl = settings.aiProvider.defaultBaseUrl,
+                modelId = settings.getCurrentModelId(),
+                systemPrompt = ""
+            )
+
+            AiProvider.OPENAI, AiProvider.GROQ,
             AiProvider.XAI, AiProvider.ALIBABA, AiProvider.ZHIPU, AiProvider.PERPLEXITY,
             AiProvider.MOONSHOT -> OpenAiCompatibleService(
                 apiKey = settings.getCurrentApiKey(),
