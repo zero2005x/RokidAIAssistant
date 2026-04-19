@@ -21,7 +21,7 @@ import org.json.JSONObject
  * 
  * This is a generic implementation that works with any OpenAI-compatible endpoint.
  */
-class OpenAiCompatibleService(
+open class OpenAiCompatibleService(
     apiKey: String,
     private val baseUrl: String,
     modelId: String,
@@ -105,6 +105,20 @@ class OpenAiCompatibleService(
         if (modelId.startsWith("gpt-5") && effectiveEffort != null && effectiveEffort != "none") return true
         return false
     }
+
+    /**
+     * Hook for subclasses to mutate the chat request JSON just before it is sent
+     * (e.g. DeepSeek reasoner strips `temperature`).
+     */
+    protected open fun postProcessRequestJson(json: JSONObject) {}
+
+    /**
+     * Hook for subclasses to capture side-channel fields on the assistant message
+     * (e.g. DeepSeek's `reasoning_content`). Return value is the text that will be
+     * stored in history and returned to the caller; returning null keeps the default
+     * behaviour of using `content`.
+     */
+    protected open fun onAssistantMessage(messageObj: JSONObject): String? = null
     
     /**
      * Speech Recognition - Using Whisper API (if supported)
@@ -273,6 +287,7 @@ class OpenAiCompatibleService(
 
                 put("stream", false)
             }
+            postProcessRequestJson(requestJson)
             
             val url = buildUrl("chat/completions")
             val authHeader = buildAuthHeader()
@@ -295,9 +310,9 @@ class OpenAiCompatibleService(
                     if (response.isSuccessful && responseBody != null) {
                         val json = JSONObject(responseBody)
                         val choices = json.optJSONArray("choices")
-                        val text = choices?.optJSONObject(0)
-                            ?.optJSONObject("message")
-                            ?.optString("content", "")?.trim()
+                        val messageObj = choices?.optJSONObject(0)?.optJSONObject("message")
+                        if (messageObj != null) onAssistantMessage(messageObj)
+                        val text = messageObj?.optString("content", "")?.trim()
                         
                         if (!text.isNullOrEmpty()) {
                             addToHistory(userMessage, text)
