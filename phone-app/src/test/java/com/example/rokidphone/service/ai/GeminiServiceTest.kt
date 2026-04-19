@@ -928,4 +928,67 @@ class GeminiServiceTest {
             .getJSONArray("parts").getJSONObject(1).getString("text")
         assertThat(promptText).contains("de-DE")
     }
+
+    // ==================== v0.12.0 thinkingConfig / thinkingLevel ====================
+
+    private suspend fun thinkingConfigForChat(
+        modelId: String,
+        thinkingLevel: String? = null
+    ): JSONObject? {
+        val service = GeminiService(
+            apiKey = "test-key",
+            modelId = modelId,
+            baseUrl = mockServer.baseUrlNoSlash,
+            thinkingLevel = thinkingLevel
+        )
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiChatSuccess("ok")))
+        service.chat("hi")
+        val config = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONObject("generationConfig")
+        return if (config.has("thinkingConfig")) config.getJSONObject("thinkingConfig") else null
+    }
+
+    @Test
+    fun `chat - gemini 3_1 pro deep-think forces thinkingLevel high`() = runTest {
+        val tc = thinkingConfigForChat("gemini-3.1-pro-deep-think", thinkingLevel = "low")
+        assertThat(tc).isNotNull()
+        assertThat(tc!!.getString("thinkingLevel")).isEqualTo("high")
+        assertThat(tc.getBoolean("includeThoughts")).isFalse()
+    }
+
+    @Test
+    fun `chat - gemini 3_1 flash-lite forces thinkingLevel low`() = runTest {
+        val tc = thinkingConfigForChat("gemini-3.1-flash-lite", thinkingLevel = "high")
+        assertThat(tc).isNotNull()
+        assertThat(tc!!.getString("thinkingLevel")).isEqualTo("low")
+    }
+
+    @Test
+    fun `chat - gemini 3_1 flash defaults to thinkingLevel medium`() = runTest {
+        val tc = thinkingConfigForChat("gemini-3.1-flash")
+        assertThat(tc).isNotNull()
+        assertThat(tc!!.getString("thinkingLevel")).isEqualTo("medium")
+    }
+
+    @Test
+    fun `chat - gemini 3_1 flash honours caller-supplied thinkingLevel`() = runTest {
+        val tc = thinkingConfigForChat("gemini-3.1-flash", thinkingLevel = "high")
+        assertThat(tc).isNotNull()
+        assertThat(tc!!.getString("thinkingLevel")).isEqualTo("high")
+    }
+
+    @Test
+    fun `chat - gemini 2_5 flash emits thinkingBudget zero`() = runTest {
+        val tc = thinkingConfigForChat("gemini-2.5-flash")
+        assertThat(tc).isNotNull()
+        assertThat(tc!!.has("thinkingLevel")).isFalse()
+        assertThat(tc.getInt("thinkingBudget")).isEqualTo(0)
+        assertThat(tc.getBoolean("includeThoughts")).isFalse()
+    }
+
+    @Test
+    fun `chat - gemini 2_0 flash omits thinkingConfig entirely`() = runTest {
+        val tc = thinkingConfigForChat("gemini-2.0-flash")
+        assertThat(tc).isNull()
+    }
 }

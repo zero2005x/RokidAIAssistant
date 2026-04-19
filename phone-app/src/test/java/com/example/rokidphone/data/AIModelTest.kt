@@ -144,10 +144,15 @@ class AIModelTest {
     // ==================== Cross-Provider Tests ====================
 
     @Test
-    fun `allModels returns models from all three providers`() {
+    fun `allModels returns models from all registered providers`() {
         val all = AIModel.allModels()
         val providers = all.map { it.provider }.toSet()
-        assertThat(providers).containsExactly(Provider.GEMINI, Provider.CLAUDE, Provider.OPENAI, Provider.GROK)
+        // v0.12.0 expanded the registry to 10 providers (April 2026 refresh).
+        assertThat(providers).containsExactly(
+            Provider.GEMINI, Provider.CLAUDE, Provider.OPENAI, Provider.GROK,
+            Provider.DEEPSEEK, Provider.QWEN, Provider.ZHIPU, Provider.MOONSHOT,
+            Provider.PERPLEXITY, Provider.GROQ
+        )
     }
 
     @Test
@@ -202,7 +207,8 @@ class AIModelTest {
         claudeModels.forEach { model ->
             assertThat(model.provider).isEqualTo(Provider.CLAUDE)
         }
-        assertThat(claudeModels).hasSize(3) // Opus 4.6, Sonnet 4.6, Haiku 4.5
+        // v0.12.0: Opus 4.7 + Opus 4.6 + Sonnet 4.6 + Haiku 4.5 = 4
+        assertThat(claudeModels).hasSize(4)
     }
 
     @Test
@@ -340,5 +346,154 @@ class AIModelTest {
     fun `Grok 3 models have 128K context window`() {
         assertThat(AIModel.Grok.Grok3.contextWindow).isEqualTo(128_000L)
         assertThat(AIModel.Grok.Grok3Mini.contextWindow).isEqualTo(128_000L)
+    }
+
+    // ==================== v0.12.0 April 2026 refresh ====================
+
+    // --- Gemini 3.1 family ---
+
+    @Test
+    fun `Gemini 3_1 Flash has correct model ID and 1M context`() {
+        assertThat(AIModel.Gemini.Gemini31Flash.modelId).isEqualTo("gemini-3.1-flash")
+        assertThat(AIModel.Gemini.Gemini31Flash.contextWindow).isEqualTo(1_000_000L)
+        assertThat(AIModel.Gemini.Gemini31Flash.isPreview).isFalse()
+    }
+
+    @Test
+    fun `Gemini 3_1 Flash-Lite has correct model ID`() {
+        assertThat(AIModel.Gemini.Gemini31FlashLite.modelId).isEqualTo("gemini-3.1-flash-lite")
+        assertThat(AIModel.Gemini.Gemini31FlashLite.contextWindow).isEqualTo(1_000_000L)
+    }
+
+    @Test
+    fun `Gemini 3_1 Deep Think has correct model ID and is preview`() {
+        assertThat(AIModel.Gemini.Gemini31DeepThink.modelId).isEqualTo("gemini-3.1-pro-deep-think")
+        assertThat(AIModel.Gemini.Gemini31DeepThink.isPreview).isTrue()
+    }
+
+    // --- Claude Opus 4.7 ---
+
+    @Test
+    fun `Claude Opus 4_7 is registered and supports 1M context`() {
+        assertThat(AIModel.Claude.Opus47.modelId).isEqualTo("claude-opus-4-7")
+        assertThat(AIModel.Claude.Opus47.contextWindow).isEqualTo(200_000L)
+        assertThat(AIModel.Claude.supports1MContext("claude-opus-4-7")).isTrue()
+    }
+
+    // --- OpenAI GPT-5.4 family ---
+
+    @Test
+    fun `GPT-5_4 flagship models have 1M context`() {
+        assertThat(AIModel.OpenAI.Gpt54.modelId).isEqualTo("gpt-5.4")
+        assertThat(AIModel.OpenAI.Gpt54.contextWindow).isEqualTo(1_000_000L)
+        assertThat(AIModel.OpenAI.Gpt54Pro.modelId).isEqualTo("gpt-5.4-pro")
+        assertThat(AIModel.OpenAI.Gpt54Pro.contextWindow).isEqualTo(1_000_000L)
+    }
+
+    @Test
+    fun `GPT-5_4 mini and nano have 400K context`() {
+        assertThat(AIModel.OpenAI.Gpt54Mini.contextWindow).isEqualTo(400_000L)
+        assertThat(AIModel.OpenAI.Gpt54Nano.contextWindow).isEqualTo(400_000L)
+    }
+
+    // --- Grok 4.20 Beta Reasoning ---
+
+    @Test
+    fun `Grok 4_20 Beta Reasoning is preview and reasoning-only with 2M context`() {
+        val m = AIModel.Grok.Grok420BetaReasoning
+        assertThat(m.modelId).isEqualTo("grok-4.20-beta-latest-reasoning")
+        assertThat(m.isPreview).isTrue()
+        assertThat(m.isReasoningOnly).isTrue()
+        assertThat(m.contextWindow).isEqualTo(2_000_000L)
+    }
+
+    // --- DeepSeek ---
+
+    @Test
+    fun `DeepSeek registry exposes Chat Reasoner and Speciale`() {
+        val ids = AIModel.DeepSeek.all().map { it.modelId }
+        assertThat(ids).containsExactly("deepseek-chat", "deepseek-reasoner", "deepseek-v3.2-speciale")
+    }
+
+    @Test
+    fun `DeepSeek isReasoner identifies reasoner and speciale only`() {
+        assertThat(AIModel.DeepSeek.isReasoner("deepseek-reasoner")).isTrue()
+        assertThat(AIModel.DeepSeek.isReasoner("deepseek-v3.2-speciale")).isTrue()
+        assertThat(AIModel.DeepSeek.isReasoner("deepseek-chat")).isFalse()
+        assertThat(AIModel.DeepSeek.isReasoner("unknown")).isFalse()
+    }
+
+    @Test
+    fun `DeepSeek Speciale is preview`() {
+        assertThat(AIModel.DeepSeek.Speciale.isPreview).isTrue()
+        assertThat(AIModel.DeepSeek.Chat.isPreview).isFalse()
+        assertThat(AIModel.DeepSeek.Reasoner.isPreview).isFalse()
+    }
+
+    // --- Qwen ---
+
+    @Test
+    fun `Qwen registry includes Qwen3 Max 2026-01-23 with thinking mode`() {
+        assertThat(AIModel.Qwen.Qwen3Max.modelId).isEqualTo("qwen3-max-2026-01-23")
+        assertThat(AIModel.Qwen.Qwen3Max.supportsThinkingMode).isTrue()
+        assertThat(AIModel.Qwen.supportsThinkingMode("qwen3-max-2026-01-23")).isTrue()
+        assertThat(AIModel.Qwen.supportsThinkingMode("qwen3.5-plus")).isFalse()
+    }
+
+    // --- Zhipu ---
+
+    @Test
+    fun `Zhipu registry includes GLM-5 5_1 4_6V 4-Plus`() {
+        val ids = AIModel.Zhipu.all().map { it.modelId }
+        assertThat(ids).containsExactly("glm-5", "glm-5.1", "glm-4.6v", "glm-4-plus")
+    }
+
+    // --- Moonshot ---
+
+    @Test
+    fun `Moonshot registry includes Kimi K2_5 and K2_5 Thinking`() {
+        val ids = AIModel.Moonshot.all().map { it.modelId }
+        assertThat(ids).containsExactly("kimi-k2.5", "kimi-k2.5-thinking")
+    }
+
+    @Test
+    fun `Moonshot isThinkingMode identifies thinking variant only`() {
+        assertThat(AIModel.Moonshot.isThinkingMode("kimi-k2.5-thinking")).isTrue()
+        assertThat(AIModel.Moonshot.isThinkingMode("kimi-k2.5")).isFalse()
+    }
+
+    // --- Perplexity ---
+
+    @Test
+    fun `Perplexity registry includes Sonar family`() {
+        val ids = AIModel.Perplexity.all().map { it.modelId }
+        assertThat(ids).containsExactly("sonar", "sonar-pro", "sonar-reasoning-pro", "sonar-deep-research")
+    }
+
+    // --- Groq ---
+
+    @Test
+    fun `Groq registry includes cross-provider hosted models`() {
+        val ids = AIModel.Groq.all().map { it.modelId }.toSet()
+        assertThat(ids).containsAtLeast(
+            "moonshotai/kimi-k2-instruct",
+            "openai/gpt-oss-120b",
+            "openai/gpt-oss-20b",
+            "meta-llama/llama-4-maverick-17b-128e-instruct",
+            "meta-llama/llama-4-scout-17b-16e-instruct",
+            "qwen/qwen3-32b"
+        )
+    }
+
+    // --- Cross-provider coverage ---
+
+    @Test
+    fun `getModelsByProvider contains all ten providers`() {
+        val grouped = ModelRepository.getModelsByProvider()
+        assertThat(grouped.keys).containsExactly(
+            Provider.GEMINI, Provider.CLAUDE, Provider.OPENAI, Provider.GROK,
+            Provider.DEEPSEEK, Provider.QWEN, Provider.ZHIPU, Provider.MOONSHOT,
+            Provider.PERPLEXITY, Provider.GROQ
+        )
     }
 }

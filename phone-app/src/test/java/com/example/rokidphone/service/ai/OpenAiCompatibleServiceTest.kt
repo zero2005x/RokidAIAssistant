@@ -58,6 +58,9 @@ class OpenAiCompatibleServiceTest {
 
     @Test
     fun `chat - request body format is correct`() = runTest {
+        // gpt-5.x defaults to reasoning_effort=minimal, which locks sampling params.
+        // Use an explicit "none" to keep temperature/top_p/penalties in the request
+        // so this test verifies the "classic" OpenAI chat completion shape.
         val service = OpenAiCompatibleService(
             apiKey = "sk-test",
             baseUrl = mockServer.baseUrl,
@@ -67,7 +70,8 @@ class OpenAiCompatibleServiceTest {
             maxTokens = 512,
             topP = 0.95f,
             frequencyPenalty = 0.5f,
-            presencePenalty = 0.2f
+            presencePenalty = 0.2f,
+            reasoningEffort = "none"
         )
         mockServer.server.enqueue(
             jsonResponse(TestFixtures.MockResponses.openAiChatSuccess("Ok"))
@@ -87,6 +91,8 @@ class OpenAiCompatibleServiceTest {
         assertThat(body.getDouble("frequency_penalty")).isWithin(0.01).of(0.5)
         assertThat(body.getDouble("presence_penalty")).isWithin(0.01).of(0.2)
         assertThat(body.getBoolean("stream")).isFalse()
+        // reasoning_effort still sent even when "none" — downstream API handles the opt-out.
+        assertThat(body.getString("reasoning_effort")).isEqualTo("none")
         // Messages should start with system prompt
         val messages = body.getJSONArray("messages")
         assertThat(messages.getJSONObject(0).getString("role")).isEqualTo("system")
@@ -480,5 +486,121 @@ class OpenAiCompatibleServiceTest {
         val result = service.analyzeImage(TestFixtures.createTestJpeg(), "Describe")
 
         assertThat(result).contains("analysis failed")
+    }
+
+    // ==================== v0.12.0 reasoning_effort / verbosity ====================
+
+    @Test
+    fun `chat - gpt-5_4 defaults to reasoning_effort minimal and verbosity medium`() = runTest {
+        val service = createService(modelId = "gpt-5.4")
+        mockServer.server.enqueue(
+            jsonResponse(TestFixtures.MockResponses.openAiChatSuccess("ok"))
+        )
+
+        service.chat("hi")
+
+        val body = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+        assertThat(body.getString("reasoning_effort")).isEqualTo("minimal")
+        assertThat(body.getString("verbosity")).isEqualTo("medium")
+        // Sampling params are stripped when effort is non-"none".
+        assertThat(body.has("temperature")).isFalse()
+        assertThat(body.has("top_p")).isFalse()
+        assertThat(body.has("frequency_penalty")).isFalse()
+        assertThat(body.has("presence_penalty")).isFalse()
+        // gpt-5.x must use max_completion_tokens, not max_tokens.
+        assertThat(body.has("max_completion_tokens")).isTrue()
+        assertThat(body.has("max_tokens")).isFalse()
+    }
+
+    @Test
+    fun `chat - gpt-5_1 does not emit verbosity because 5_1 predates verbosity support`() = runTest {
+        val service = createService(modelId = "gpt-5.1")
+        mockServer.server.enqueue(
+            jsonResponse(TestFixtures.MockResponses.openAiChatSuccess("ok"))
+        )
+
+        service.chat("hi")
+
+        val body = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+        assertThat(body.getString("reasoning_effort")).isEqualTo("minimal")
+        assertThat(body.has("verbosity")).isFalse()
+    }
+
+    @Test
+    fun `chat - explicit reasoning_effort none keeps sampling params on gpt-5`() = runTest {
+        val service = OpenAiCompatibleService(
+            apiKey = "sk-test",
+            baseUrl = mockServer.baseUrl,
+            modelId = "gpt-5.4",
+            temperature = 0.4f,
+            topP = 0.9f,
+            reasoningEffort = "none"
+        )
+        mockServer.server.enqueue(
+            jsonResponse(TestFixtures.MockResponses.openAiChatSuccess("ok"))
+        )
+
+        service.chat("hi")
+
+        val body = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+        assertThat(body.getString("reasoning_effort")).isEqualTo("none")
+        assertThat(body.getDouble("temperature")).isWithin(0.01).of(0.4)
+        assertThat(body.getDouble("top_p")).isWithin(0.01).of(0.9)
+    }
+
+    @Test
+    fun `chat - custom reasoning_effort and verbosity values flow through`() = runTest {
+        val service = OpenAiCompatibleService(
+            apiKey = "sk-test",
+            baseUrl = mockServer.baseUrl,
+            modelId = "gpt-5.4-pro",
+            reasoningEffort = "high",
+            verbosity = "low"
+        )
+        mockServer.server.enqueue(
+            jsonResponse(TestFixtures.MockResponses.openAiChatSuccess("ok"))
+        )
+
+        service.chat("hi")
+
+        val body = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+        assertThat(body.getString("reasoning_effort")).isEqualTo("high")
+        assertThat(body.getString("verbosity")).isEqualTo("low")
+    }
+
+    @Test
+    fun `chat - o3 emits reasoning_effort and strips sampling params`() = runTest {
+        val service = createService(modelId = "o3")
+        mockServer.server.enqueue(
+            jsonResponse(TestFixtures.MockResponses.openAiChatSuccess("ok"))
+        )
+
+        service.chat("hi")
+
+        val body = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+        assertThat(body.getString("reasoning_effort")).isEqualTo("minimal")
+        assertThat(body.has("verbosity")).isFalse()
+        assertThat(body.has("temperature")).isFalse()
+        assertThat(body.has("top_p")).isFalse()
+        assertThat(body.has("max_completion_tokens")).isTrue()
+    }
+
+    @Test
+    fun `chat - gpt-4o uses classic shape without reasoning_effort or verbosity`() = runTest {
+        val service = createService(modelId = "gpt-4o")
+        mockServer.server.enqueue(
+            jsonResponse(TestFixtures.MockResponses.openAiChatSuccess("ok"))
+        )
+
+        service.chat("hi")
+
+        val body = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+        assertThat(body.has("reasoning_effort")).isFalse()
+        assertThat(body.has("verbosity")).isFalse()
+        // gpt-4o keeps the legacy fields.
+        assertThat(body.has("max_tokens")).isTrue()
+        assertThat(body.has("max_completion_tokens")).isFalse()
+        assertThat(body.has("temperature")).isTrue()
+        assertThat(body.has("top_p")).isTrue()
     }
 }
