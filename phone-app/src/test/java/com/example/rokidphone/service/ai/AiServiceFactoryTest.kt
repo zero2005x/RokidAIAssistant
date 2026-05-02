@@ -23,6 +23,7 @@ class AiServiceFactoryTest {
             baiduSecretKey = "baidu-secret",
             perplexityApiKey = "perplexity-key",
             moonshotApiKey = "moonshot-key",
+            mistralApiKey = "mistral-key",
             customApiKey = "custom-key",
             customBaseUrl = "http://localhost:11434/v1/",
             customModelName = "custom-model",
@@ -66,6 +67,7 @@ class AiServiceFactoryTest {
             AiProvider.ZHIPU,
             AiProvider.PERPLEXITY,
             AiProvider.MOONSHOT,
+            AiProvider.MISTRAL,
             AiProvider.CUSTOM
         )
 
@@ -111,6 +113,7 @@ class AiServiceFactoryTest {
             AiProvider.ZHIPU,
             AiProvider.PERPLEXITY,
             AiProvider.MOONSHOT,
+            AiProvider.MISTRAL,
             AiProvider.CUSTOM
         )
 

@@ -241,6 +241,26 @@ sealed class ProviderSetting {
         override val providerBaseUrl: String = baseUrl
         override fun isValid(): Boolean = apiKey.isNotBlank()
     }
+
+    /**
+     * Mistral AI Provider Settings (OpenAI-compatible)
+     */
+    @Serializable
+    data class Mistral(
+        override val id: String = "mistral",
+        override val displayName: String = "Mistral AI",
+        override val enabled: Boolean = true,
+        val apiKey: String = "",
+        // TODO: Verify the default model ID against https://docs.mistral.ai/getting-started/models/
+        val modelId: String = "mistral-large-latest",
+        val baseUrl: String = "https://api.mistral.ai/v1/"
+    ) : ProviderSetting() {
+        @Transient
+        override val providerApiKey: String = apiKey
+        @Transient
+        override val providerBaseUrl: String = baseUrl
+        override fun isValid(): Boolean = apiKey.isNotBlank()
+    }
     
     /**
      * Custom OpenAI-compatible Provider Settings
@@ -279,6 +299,7 @@ sealed class ProviderSetting {
             Baidu(),
             Perplexity(),
             Moonshot(),
+            Mistral(),
             Custom()
         )
         
@@ -297,6 +318,7 @@ sealed class ProviderSetting {
             "baidu" -> Baidu()
             "perplexity" -> Perplexity()
             "moonshot" -> Moonshot()
+            "mistral" -> Mistral()
             "custom" -> Custom()
             else -> null
         }

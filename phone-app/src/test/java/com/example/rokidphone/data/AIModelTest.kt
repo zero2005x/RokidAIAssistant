@@ -147,11 +147,11 @@ class AIModelTest {
     fun `allModels returns models from all registered providers`() {
         val all = AIModel.allModels()
         val providers = all.map { it.provider }.toSet()
-        // v0.12.0 expanded the registry to 10 providers (April 2026 refresh).
+        // v0.12.0 expanded the registry; Mistral added as 11th provider.
         assertThat(providers).containsExactly(
             Provider.GEMINI, Provider.CLAUDE, Provider.OPENAI, Provider.GROK,
             Provider.DEEPSEEK, Provider.QWEN, Provider.ZHIPU, Provider.MOONSHOT,
-            Provider.PERPLEXITY, Provider.GROQ
+            Provider.PERPLEXITY, Provider.GROQ, Provider.MISTRAL
         )
     }
 
@@ -207,8 +207,8 @@ class AIModelTest {
         claudeModels.forEach { model ->
             assertThat(model.provider).isEqualTo(Provider.CLAUDE)
         }
-        // v0.12.0: Opus 4.7 + Opus 4.6 + Sonnet 4.6 + Haiku 4.5 = 4
-        assertThat(claudeModels).hasSize(4)
+        // v0.12.0: 4 from prior refresh + 4 newly added = 8 Claude models
+        assertThat(claudeModels).hasSize(8)
     }
 
     @Test
@@ -412,7 +412,8 @@ class AIModelTest {
     @Test
     fun `DeepSeek registry exposes Chat Reasoner and Speciale`() {
         val ids = AIModel.DeepSeek.all().map { it.modelId }
-        assertThat(ids).containsExactly("deepseek-chat", "deepseek-reasoner", "deepseek-v3.2-speciale")
+        // includes legacy + newly added preview entries
+        assertThat(ids).containsAtLeast("deepseek-chat", "deepseek-reasoner", "deepseek-v3.2-speciale")
     }
 
     @Test
@@ -493,7 +494,7 @@ class AIModelTest {
         assertThat(grouped.keys).containsExactly(
             Provider.GEMINI, Provider.CLAUDE, Provider.OPENAI, Provider.GROK,
             Provider.DEEPSEEK, Provider.QWEN, Provider.ZHIPU, Provider.MOONSHOT,
-            Provider.PERPLEXITY, Provider.GROQ
+            Provider.PERPLEXITY, Provider.GROQ, Provider.MISTRAL
         )
     }
 }

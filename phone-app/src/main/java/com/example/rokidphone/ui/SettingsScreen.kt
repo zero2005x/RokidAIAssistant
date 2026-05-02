@@ -227,6 +227,14 @@ fun SettingsScreen(
                                     isActive = true
                                 )
                             }
+                            AiProvider.MISTRAL -> {
+                                ApiKeyField(
+                                    label = stringResource(R.string.mistral_api_key),
+                                    value = settings.mistralApiKey,
+                                    onValueChange = { onSettingsChange(settings.copy(mistralApiKey = it)) },
+                                    isActive = true
+                                )
+                            }
                             AiProvider.GEMINI_LIVE -> {
                                 // Gemini Live shares the Gemini API key
                                 ApiKeyField(

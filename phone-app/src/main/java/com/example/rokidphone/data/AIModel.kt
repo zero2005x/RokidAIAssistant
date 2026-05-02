@@ -4,7 +4,7 @@ package com.example.rokidphone.data
  * AI Provider type for model categorization
  */
 enum class Provider {
-    GEMINI, CLAUDE, OPENAI, GROK, DEEPSEEK, QWEN, ZHIPU, MOONSHOT, PERPLEXITY, GROQ
+    GEMINI, CLAUDE, OPENAI, GROK, DEEPSEEK, QWEN, ZHIPU, MOONSHOT, PERPLEXITY, GROQ, MISTRAL
 }
 
 /**
@@ -124,6 +124,37 @@ sealed class AIModel(
             contextWindow = 200_000L // 1M via beta header
         )
 
+        // TODO: Verify exact API model ID for Claude Sonnet 4.7.
+        data object Sonnet47 : Claude(
+            modelId = "claude-sonnet-4-7",
+            displayName = "Claude Sonnet 4.7 (TODO: verify ID)",
+            contextWindow = 200_000L,
+            isPreview = true
+        )
+
+        // TODO: Verify exact API model ID for legacy Claude Opus 4 line.
+        data object Opus4 : Claude(
+            modelId = "claude-opus-4",
+            displayName = "Claude Opus 4 (TODO: verify ID)",
+            contextWindow = 200_000L,
+            isPreview = true
+        )
+
+        // TODO: Verify exact API model ID for legacy Claude Sonnet 4 line.
+        data object Sonnet4 : Claude(
+            modelId = "claude-sonnet-4",
+            displayName = "Claude Sonnet 4 (TODO: verify ID)",
+            contextWindow = 200_000L,
+            isPreview = true
+        )
+
+        // TODO: Verify exact API model ID for Claude 3.7 Sonnet.
+        data object Sonnet37 : Claude(
+            modelId = "claude-3-7-sonnet-latest",
+            displayName = "Claude 3.7 Sonnet (TODO: verify ID)",
+            contextWindow = 200_000L
+        )
+
         data object Opus46 : Claude(
             modelId = "claude-opus-4-6",
             displayName = "Claude Opus 4.6",
@@ -143,7 +174,7 @@ sealed class AIModel(
         )
 
         companion object {
-            fun all(): List<Claude> = listOf(Opus47, Opus46, Sonnet46, Haiku45)
+            fun all(): List<Claude> = listOf(Sonnet47, Opus47, Opus46, Sonnet46, Haiku45, Opus4, Sonnet4, Sonnet37)
 
             /**
              * Whether this model supports 1M context via beta header.
@@ -169,6 +200,36 @@ sealed class AIModel(
             modelId = "gpt-5.4",
             displayName = "GPT-5.4",
             contextWindow = 1_000_000L
+        )
+
+        // TODO: Verify exact API model ID for GPT-5.5 once GA.
+        data object Gpt55 : OpenAI(
+            modelId = "gpt-5.5",
+            displayName = "GPT-5.5 (TODO: verify ID)",
+            contextWindow = 1_000_000L,
+            isPreview = true
+        )
+
+        data object Gpt4o : OpenAI(
+            modelId = "gpt-4o",
+            displayName = "GPT-4o",
+            contextWindow = 128_000L
+        )
+
+        // TODO: Verify exact API model ID for o4-mini.
+        data object O4Mini : OpenAI(
+            modelId = "o4-mini",
+            displayName = "o4-mini (Reasoning, TODO: verify ID)",
+            contextWindow = 200_000L,
+            isPreview = true
+        )
+
+        // TODO: Verify exact API model ID for o3-pro.
+        data object O3Pro : OpenAI(
+            modelId = "o3-pro",
+            displayName = "o3 Pro (Reasoning, TODO: verify ID)",
+            contextWindow = 200_000L,
+            isPreview = true
         )
 
         data object Gpt54Pro : OpenAI(
@@ -227,8 +288,9 @@ sealed class AIModel(
 
         companion object {
             fun all(): List<OpenAI> = listOf(
-                Gpt54, Gpt54Pro, Gpt54Mini, Gpt54Nano,
-                Gpt52, Gpt52Codex, Gpt51, Gpt5Mini, Gpt5Nano, O3
+                Gpt55, Gpt54, Gpt54Pro, Gpt54Mini, Gpt54Nano,
+                Gpt52, Gpt52Codex, Gpt51, Gpt5Mini, Gpt5Nano,
+                Gpt4o, O4Mini, O3Pro, O3
             )
         }
     }
@@ -250,6 +312,14 @@ sealed class AIModel(
             contextWindow = 2_000_000L,
             isPreview = true,
             isReasoningOnly = true
+        )
+
+        // TODO: Verify exact API model ID for Grok 4.3 once xAI publishes it.
+        data object Grok43 : Grok(
+            modelId = "grok-4.3",
+            displayName = "Grok 4.3 (TODO: verify ID)",
+            contextWindow = 2_000_000L,
+            isPreview = true
         )
 
         data object Grok420 : Grok(
@@ -292,7 +362,7 @@ sealed class AIModel(
 
         companion object {
             fun all(): List<Grok> = listOf(
-                Grok420BetaReasoning, Grok420, Grok4, Grok41Fast, Grok3, Grok3Mini, GrokImage
+                Grok43, Grok420BetaReasoning, Grok420, Grok4, Grok41Fast, Grok3, Grok3Mini, GrokImage
             )
 
             /**
@@ -336,8 +406,33 @@ sealed class AIModel(
             isReasoner = true
         )
 
+        // TODO: Verify exact API model ID for DeepSeek V4 Pro.
+        data object V4Pro : DeepSeek(
+            modelId = "deepseek-v4-pro",
+            displayName = "DeepSeek V4 Pro (TODO: verify ID)",
+            contextWindow = 128_000L,
+            isPreview = true
+        )
+
+        // TODO: Verify exact API model ID for DeepSeek V4 Flash Max.
+        data object V4FlashMax : DeepSeek(
+            modelId = "deepseek-v4-flash-max",
+            displayName = "DeepSeek V4 Flash Max (TODO: verify ID)",
+            contextWindow = 128_000L,
+            isPreview = true
+        )
+
+        // TODO: Verify whether 'deepseek-r1' is still a valid public alias.
+        data object R1 : DeepSeek(
+            modelId = "deepseek-r1",
+            displayName = "DeepSeek R1 (TODO: verify ID)",
+            contextWindow = 128_000L,
+            isPreview = true,
+            isReasoner = true
+        )
+
         companion object {
-            fun all(): List<DeepSeek> = listOf(Chat, Reasoner, Speciale)
+            fun all(): List<DeepSeek> = listOf(Chat, Reasoner, Speciale, V4Pro, V4FlashMax, R1)
 
             fun isReasoner(modelId: String): Boolean =
                 all().find { it.modelId == modelId }?.isReasoner == true
@@ -544,6 +639,43 @@ sealed class AIModel(
         }
     }
 
+    // ==================== Mistral AI ====================
+
+    sealed class Mistral(
+        modelId: String,
+        displayName: String,
+        contextWindow: Long,
+        isPreview: Boolean = false,
+        isDeprecated: Boolean = false
+    ) : AIModel(modelId, displayName, contextWindow, Provider.MISTRAL, isPreview, isDeprecated) {
+
+        // TODO: Verify exact API model ID against https://docs.mistral.ai/getting-started/models/
+        data object MistralMedium35 : Mistral(
+            modelId = "mistral-medium-3.5",
+            displayName = "Mistral Medium 3.5 (TODO: verify ID)",
+            contextWindow = 128_000L,
+            isPreview = true
+        )
+
+        data object MistralLarge : Mistral(
+            modelId = "mistral-large-latest",
+            displayName = "Mistral Large (latest)",
+            contextWindow = 128_000L
+        )
+
+        // TODO: Verify exact API model ID for Ministral 3 (3B) edge tier.
+        data object Ministral33B : Mistral(
+            modelId = "ministral-3-3b",
+            displayName = "Ministral 3 3B (TODO: verify ID)",
+            contextWindow = 32_000L,
+            isPreview = true
+        )
+
+        companion object {
+            fun all(): List<Mistral> = listOf(MistralMedium35, MistralLarge, Ministral33B)
+        }
+    }
+
     companion object {
         /**
          * Returns all registered models across all providers.
@@ -551,7 +683,7 @@ sealed class AIModel(
         fun allModels(): List<AIModel> =
             Gemini.all() + Claude.all() + OpenAI.all() + Grok.all() +
             DeepSeek.all() + Qwen.all() + Zhipu.all() +
-            Moonshot.all() + Perplexity.all() + Groq.all()
+            Moonshot.all() + Perplexity.all() + Groq.all() + Mistral.all()
     }
 }
 

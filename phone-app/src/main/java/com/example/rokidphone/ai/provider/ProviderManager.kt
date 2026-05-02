@@ -142,6 +142,7 @@ class ProviderManager private constructor(
             AiProvider.BAIDU -> settingsRepository.updateBaiduApiKey(apiKey)
             AiProvider.PERPLEXITY -> settingsRepository.updatePerplexityApiKey(apiKey)
             AiProvider.MOONSHOT -> settingsRepository.updateMoonshotApiKey(apiKey)
+            AiProvider.MISTRAL -> settingsRepository.updateMistralApiKey(apiKey)
             AiProvider.GEMINI_LIVE -> settingsRepository.updateGeminiApiKey(apiKey)  // Shares Gemini API key
             AiProvider.CUSTOM -> settingsRepository.updateCustomApiKey(apiKey)
         }
@@ -222,6 +223,10 @@ class ProviderManager private constructor(
                 apiKey = settings.moonshotApiKey,
                 modelId = settings.aiModelId
             )
+            AiProvider.MISTRAL -> ProviderSetting.Mistral(
+                apiKey = settings.mistralApiKey,
+                modelId = settings.aiModelId
+            )
             AiProvider.CUSTOM -> ProviderSetting.Custom(
                 apiKey = settings.customApiKey,
                 modelId = settings.customModelName,
@@ -274,6 +279,9 @@ class ProviderManager private constructor(
             }
             if (settings.moonshotApiKey.isNotBlank()) {
                 add(ProviderSetting.Moonshot(apiKey = settings.moonshotApiKey))
+            }
+            if (settings.mistralApiKey.isNotBlank()) {
+                add(ProviderSetting.Mistral(apiKey = settings.mistralApiKey))
             }
             if (settings.customBaseUrl.isNotBlank()) {
                 add(ProviderSetting.Custom(

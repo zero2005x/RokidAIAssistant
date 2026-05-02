@@ -311,6 +311,10 @@ class SettingsRepository(private val context: Context) {
         saveSettings(getSettings().copy(moonshotApiKey = apiKey))
     }
     
+    fun updateMistralApiKey(apiKey: String) {
+        saveSettings(getSettings().copy(mistralApiKey = apiKey))
+    }
+    
     fun updateCustomApiKey(apiKey: String) {
         saveSettings(getSettings().copy(customApiKey = apiKey))
     }
