@@ -77,6 +77,20 @@ class AiServiceFactoryTest {
     }
 
     @Test
+    fun `createService returns DeepSeekService for DEEPSEEK provider`() {
+        // v0.12.1: DEEPSEEK routes through the dedicated DeepSeekService subclass.
+        val service = AiServiceFactory.createService(fullyConfiguredSettings(AiProvider.DEEPSEEK))
+        assertThat(service).isInstanceOf(DeepSeekService::class.java)
+        assertThat(service.provider).isEqualTo(AiProvider.DEEPSEEK)
+    }
+
+    @Test
+    fun `createTestService returns DeepSeekService for DEEPSEEK provider`() {
+        val service = AiServiceFactory.createTestService(fullyConfiguredSettings(AiProvider.DEEPSEEK))
+        assertThat(service).isInstanceOf(DeepSeekService::class.java)
+    }
+
+    @Test
     fun `every AiProvider enum value has a factory case`() {
         // 測試：所有 AiProvider 都能建立對應服務
         for (provider in AiProvider.entries) {

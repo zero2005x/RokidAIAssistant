@@ -177,6 +177,31 @@ data class ModelOption(
 object AvailableModels {
     val geminiModels = listOf(
         ModelOption(
+            id = "gemini-3.1-flash",
+            displayName = "Gemini 3.1 Flash",
+            provider = AiProvider.GEMINI,
+            supportsAudio = true,
+            supportsVision = true,
+            description = "2026 Flash flagship, 1M context, best value"
+        ),
+        ModelOption(
+            id = "gemini-3.1-flash-lite",
+            displayName = "Gemini 3.1 Flash-Lite",
+            provider = AiProvider.GEMINI,
+            supportsAudio = true,
+            supportsVision = true,
+            description = "Fastest & cheapest in 3.1 series, 1M context"
+        ),
+        ModelOption(
+            id = "gemini-3.1-pro-deep-think",
+            displayName = "Gemini 3.1 Pro Deep Think",
+            provider = AiProvider.GEMINI,
+            supportsAudio = true,
+            supportsVision = true,
+            isPreview = true,
+            description = "Extended reasoning mode for complex tasks, ~1M context (Preview)"
+        ),
+        ModelOption(
             id = "gemini-3.1-pro-preview",
             displayName = "Gemini 3.1 Pro (Preview)",
             provider = AiProvider.GEMINI,
@@ -221,6 +246,38 @@ object AvailableModels {
     )
     
     val openaiModels = listOf(
+        ModelOption(
+            id = "gpt-5.4",
+            displayName = "GPT-5.4",
+            provider = AiProvider.OPENAI,
+            supportsAudio = false,
+            supportsVision = true,
+            description = "2026 flagship general-purpose model, ~1M context"
+        ),
+        ModelOption(
+            id = "gpt-5.4-pro",
+            displayName = "GPT-5.4 Pro (Reasoning)",
+            provider = AiProvider.OPENAI,
+            supportsAudio = false,
+            supportsVision = true,
+            description = "Top-tier reasoning flagship, ~1M context"
+        ),
+        ModelOption(
+            id = "gpt-5.4-mini",
+            displayName = "GPT-5.4 mini",
+            provider = AiProvider.OPENAI,
+            supportsAudio = false,
+            supportsVision = true,
+            description = "Cost-effective 5.4-class model, ~400K context"
+        ),
+        ModelOption(
+            id = "gpt-5.4-nano",
+            displayName = "GPT-5.4 nano",
+            provider = AiProvider.OPENAI,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Ultra-light classification & high-volume tasks, ~400K context"
+        ),
         ModelOption(
             id = "gpt-5.2",
             displayName = "GPT-5.2",
@@ -273,6 +330,14 @@ object AvailableModels {
     
     val anthropicModels = listOf(
         ModelOption(
+            id = "claude-opus-4-7",
+            displayName = "Claude Opus 4.7",
+            provider = AiProvider.ANTHROPIC,
+            supportsAudio = false,
+            supportsVision = true,
+            description = "2026 flagship, best for agents & coding. 200K/1M (beta) context"
+        ),
+        ModelOption(
             id = "claude-opus-4-6",
             displayName = "Claude Opus 4.6",
             provider = AiProvider.ANTHROPIC,
@@ -301,23 +366,64 @@ object AvailableModels {
     val deepseekModels = listOf(
         ModelOption(
             id = "deepseek-chat",
-            displayName = "DeepSeek Chat",
+            displayName = "DeepSeek V3.2 (Chat)",
             provider = AiProvider.DEEPSEEK,
             supportsAudio = false,
             supportsVision = false,
-            description = "DeepSeek's general chat model (OpenAI-compatible endpoint)"
+            description = "DeepSeek V3.2 general chat model (OpenAI-compatible endpoint)"
         ),
         ModelOption(
             id = "deepseek-reasoner",
-            displayName = "DeepSeek Reasoner",
+            displayName = "DeepSeek V3.2 (Reasoner)",
             provider = AiProvider.DEEPSEEK,
             supportsAudio = false,
             supportsVision = false,
-            description = "DeepSeek's reasoning model for complex inference tasks"
+            description = "Reasoning model. Strips temperature/top_p/penalties; returns reasoning_content"
+        ),
+        ModelOption(
+            id = "deepseek-v3.2-speciale",
+            displayName = "DeepSeek V3.2 Speciale",
+            provider = AiProvider.DEEPSEEK,
+            supportsAudio = false,
+            supportsVision = false,
+            isPreview = true,
+            description = "Preview reasoning variant. Strips temperature/top_p/penalties"
         )
     )
     
     val groqModels = listOf(
+        ModelOption(
+            id = "moonshotai/kimi-k2-instruct",
+            displayName = "Kimi K2 Instruct (Groq)",
+            provider = AiProvider.GROQ,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Moonshot Kimi K2 hosted on Groq for ultra-low latency"
+        ),
+        ModelOption(
+            id = "openai/gpt-oss-120b",
+            displayName = "GPT-OSS 120B (Groq)",
+            provider = AiProvider.GROQ,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "OpenAI's open-weight 120B model hosted on Groq"
+        ),
+        ModelOption(
+            id = "openai/gpt-oss-20b",
+            displayName = "GPT-OSS 20B (Groq)",
+            provider = AiProvider.GROQ,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "OpenAI's open-weight 20B model hosted on Groq"
+        ),
+        ModelOption(
+            id = "qwen/qwen3-32b",
+            displayName = "Qwen3 32B (Groq)",
+            provider = AiProvider.GROQ,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Alibaba Qwen3 32B hosted on Groq, 131K context"
+        ),
         ModelOption(
             id = "meta-llama/llama-4-scout-17b-16e-instruct",
             displayName = "Llama 4 Scout",
@@ -405,6 +511,15 @@ object AvailableModels {
     
     val xaiModels = listOf(
         ModelOption(
+            id = "grok-4.20-beta-latest-reasoning",
+            displayName = "Grok 4.20 Beta (Reasoning)",
+            provider = AiProvider.XAI,
+            supportsAudio = false,
+            supportsVision = false,
+            isPreview = true,
+            description = "Pure reasoning beta flagship, 2M context. No penalty/stop/reasoning_effort params"
+        ),
+        ModelOption(
             id = "grok-4.20",
             displayName = "Grok 4.20 (Early Access)",
             provider = AiProvider.XAI,
@@ -456,6 +571,30 @@ object AvailableModels {
     )
     
     val alibabaModels = listOf(
+        ModelOption(
+            id = "qwen3-max-2026-01-23",
+            displayName = "Qwen3 Max (2026-01-23)",
+            provider = AiProvider.ALIBABA,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Latest Qwen3 Max snapshot with thinking mode, 262K context"
+        ),
+        ModelOption(
+            id = "qwen3.5-plus",
+            displayName = "Qwen3.5 Plus",
+            provider = AiProvider.ALIBABA,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Qwen3.5 flagship balanced tier, 131K context"
+        ),
+        ModelOption(
+            id = "qwen3.5-flash",
+            displayName = "Qwen3.5 Flash",
+            provider = AiProvider.ALIBABA,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Qwen3.5 fast & cost-effective variant, 131K context"
+        ),
         ModelOption(
             id = "qwen3-max-thinking",
             displayName = "Qwen 3 Max (Thinking)",
@@ -522,6 +661,22 @@ object AvailableModels {
             supportsAudio = false,
             supportsVision = false,
             description = "Zhipu's 744B MoE flagship. Ultimate Chinese/English bilingual model"
+        ),
+        ModelOption(
+            id = "glm-5.1",
+            displayName = "GLM-5.1",
+            provider = AiProvider.ZHIPU,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Refined GLM-5 successor with improved reasoning, 128K context"
+        ),
+        ModelOption(
+            id = "glm-4.6v",
+            displayName = "GLM-4.6V (Vision)",
+            provider = AiProvider.ZHIPU,
+            supportsAudio = false,
+            supportsVision = true,
+            description = "Vision-enabled GLM-4.6 variant, 128K context"
         ),
         ModelOption(
             id = "glm-4.7",
@@ -622,11 +777,19 @@ object AvailableModels {
     val moonshotModels = listOf(
         ModelOption(
             id = "kimi-k2.5",
-            displayName = "Kimi K2.5",
+            displayName = "Kimi K2.5 (Instant)",
             provider = AiProvider.MOONSHOT,
             supportsAudio = false,
             supportsVision = true,
-            description = "Latest Kimi model with multimodal and video understanding"
+            description = "Latest Kimi model with multimodal and video understanding, 256K context"
+        ),
+        ModelOption(
+            id = "kimi-k2.5-thinking",
+            displayName = "Kimi K2.5 (Thinking)",
+            provider = AiProvider.MOONSHOT,
+            supportsAudio = false,
+            supportsVision = true,
+            description = "Kimi K2.5 with extended chain-of-thought reasoning, 256K context"
         ),
         ModelOption(
             id = "moonshot-v1-128k",

@@ -675,10 +675,12 @@ fun ProviderSelectionDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.select_ai_provider)) },
         text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 480.dp)
             ) {
-                AiProvider.entries.forEach { provider ->
+                items(AiProvider.entries.toList(), key = { it.name }) { provider ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -715,10 +717,12 @@ fun ModelSelectionDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.select_model)) },
         text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 480.dp)
             ) {
-                models.forEach { model ->
+                items(models, key = { it.id }) { model ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
