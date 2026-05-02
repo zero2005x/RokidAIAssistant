@@ -49,16 +49,6 @@ class GeminiService(
     
     override val provider = AiProvider.GEMINI
 
-    /**
-     * Gemini 2.5 Pro and Gemini 3 series consume the output budget for internal
-     * "thinking" tokens, which can starve the visible response. For these models
-     * we explicitly disable thinking via `thinkingConfig.thinkingBudget = 0`.
-     */
-    private fun isThinkingCapable(modelId: String): Boolean =
-        modelId.contains("2.5") ||
-        modelId.startsWith("gemini-3") ||
-        modelId.startsWith("gemini-2.5-pro")
-
     private val apiUrl: String
         get() = "$baseUrl/$modelId:generateContent"
 

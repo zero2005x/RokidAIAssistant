@@ -110,7 +110,9 @@ open class OpenAiCompatibleService(
      * Hook for subclasses to mutate the chat request JSON just before it is sent
      * (e.g. DeepSeek reasoner strips `temperature`).
      */
-    protected open fun postProcessRequestJson(json: JSONObject) {}
+    protected open fun postProcessRequestJson(json: JSONObject) {
+        // Default: no-op. Subclasses override to inject provider-specific fields.
+    }
 
     /**
      * Hook for subclasses to capture side-channel fields on the assistant message
@@ -341,86 +343,97 @@ open class OpenAiCompatibleService(
             if (!providerType.supportsVision) {
                 return@withContext "This provider does not support image analysis."
             }
-            
-            Log.d(TAG, "Analyzing image with $providerType")
-            
-            val base64Image = android.util.Base64.encodeToString(imageData, android.util.Base64.NO_WRAP)
-            
-            val imageContent = JSONArray().apply {
-                put(JSONObject().apply {
-                    put("type", "text")
-                    put("text", prompt)
-                })
-                put(JSONObject().apply {
-                    put("type", "image_url")
-                    put("image_url", JSONObject().apply {
-                        put("url", "data:image/jpeg;base64,$base64Image")
-                    })
-                })
-            }
-            
-            val messages = JSONArray().apply {
-                put(JSONObject().apply {
-                    put("role", "user")
-                    put("content", imageContent)
-                })
-            }
-            
-            val effectiveEffort: String? = if (requiresReasoningEffort()) {
-                reasoningEffort ?: "minimal"
-            } else {
-                null
-            }
-            val samplingLocked = isSamplingLocked(effectiveEffort)
 
-            val requestJson = JSONObject().apply {
-                put("model", modelId)
-                put("messages", messages)
-                putTokenLimit(this, maxTokens.coerceAtMost(4096))
-                if (!samplingLocked) {
-                    put("temperature", temperature.toDouble())
-                }
-                if (effectiveEffort != null) {
-                    put("reasoning_effort", effectiveEffort)
-                }
-                if (requiresVerbosity()) {
-                    put("verbosity", verbosity ?: "medium")
-                }
-            }
-            
-            val url = buildUrl("chat/completions")
-            val authHeader = buildAuthHeader()
-            
+            Log.d(TAG, "Analyzing image with $providerType")
+
+            val messages = buildVisionMessages(imageData, prompt)
+            val requestJson = buildVisionRequest(messages)
+
             try {
-                val requestBuilder = Request.Builder()
-                    .url(url)
-                    .addHeader("Content-Type", "application/json")
-                    .post(requestJson.toString().toRequestBody("application/json".toMediaType()))
-                
-                if (authHeader.first.isNotBlank()) {
-                    requestBuilder.addHeader(authHeader.first, authHeader.second)
-                }
-                
-                client.newCall(requestBuilder.build()).execute().use { response ->
-                    val responseBody = response.body?.string()
-                    
-                    if (response.isSuccessful && responseBody != null) {
-                        val json = JSONObject(responseBody)
-                        val choices = json.optJSONArray("choices")
-                        choices?.optJSONObject(0)
-                            ?.optJSONObject("message")
-                            ?.optString("content", "")?.trim()
-                            ?: "Unable to analyze image."
-                    } else {
-                        Log.e(TAG, "Vision API error: ${response.code}")
-                        "Image analysis failed."
-                    }
+                val request = buildVisionHttpRequest(requestJson)
+                client.newCall(request).execute().use { response ->
+                    extractVisionResponse(response)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Vision error", e)
                 "Image analysis error: ${e.message}"
             }
         }
+    }
+
+    private fun buildVisionMessages(imageData: ByteArray, prompt: String): JSONArray {
+        val base64Image = android.util.Base64.encodeToString(imageData, android.util.Base64.NO_WRAP)
+        val imageContent = JSONArray().apply {
+            put(JSONObject().apply {
+                put("type", "text")
+                put("text", prompt)
+            })
+            put(JSONObject().apply {
+                put("type", "image_url")
+                put("image_url", JSONObject().apply {
+                    put("url", "data:image/jpeg;base64,$base64Image")
+                })
+            })
+        }
+        return JSONArray().apply {
+            put(JSONObject().apply {
+                put("role", "user")
+                put("content", imageContent)
+            })
+        }
+    }
+
+    private fun buildVisionRequest(messages: JSONArray): JSONObject {
+        val effectiveEffort: String? = if (requiresReasoningEffort()) {
+            reasoningEffort ?: "minimal"
+        } else {
+            null
+        }
+        val samplingLocked = isSamplingLocked(effectiveEffort)
+
+        return JSONObject().apply {
+            put("model", modelId)
+            put("messages", messages)
+            putTokenLimit(this, maxTokens.coerceAtMost(4096))
+            if (!samplingLocked) {
+                put("temperature", temperature.toDouble())
+            }
+            if (effectiveEffort != null) {
+                put("reasoning_effort", effectiveEffort)
+            }
+            if (requiresVerbosity()) {
+                put("verbosity", verbosity ?: "medium")
+            }
+        }
+    }
+
+    private fun buildVisionHttpRequest(requestJson: JSONObject): Request {
+        val url = buildUrl("chat/completions")
+        val authHeader = buildAuthHeader()
+
+        val requestBuilder = Request.Builder()
+            .url(url)
+            .addHeader("Content-Type", "application/json")
+            .post(requestJson.toString().toRequestBody("application/json".toMediaType()))
+
+        if (authHeader.first.isNotBlank()) {
+            requestBuilder.addHeader(authHeader.first, authHeader.second)
+        }
+        return requestBuilder.build()
+    }
+
+    private fun extractVisionResponse(response: okhttp3.Response): String {
+        val responseBody = response.body?.string()
+        if (!response.isSuccessful || responseBody == null) {
+            Log.e(TAG, "Vision API error: ${response.code}")
+            return "Image analysis failed."
+        }
+        val json = JSONObject(responseBody)
+        val choices = json.optJSONArray("choices")
+        return choices?.optJSONObject(0)
+            ?.optJSONObject("message")
+            ?.optString("content", "")?.trim()
+            ?: "Unable to analyze image."
     }
     
     /**

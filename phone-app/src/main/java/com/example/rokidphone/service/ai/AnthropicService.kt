@@ -70,72 +70,81 @@ class AnthropicService(
     override suspend fun chat(userMessage: String): String {
         return withContext(Dispatchers.IO) {
             Log.d(TAG, "Chat request: $userMessage")
-            
-            val messages = JSONArray().apply {
-                // Conversation history
-                for ((role, content) in conversationHistory.takeLast(6)) {
-                    put(JSONObject().apply {
-                        put("role", role)
-                        put("content", content)
-                    })
-                }
-                
-                // Current user message
-                put(JSONObject().apply {
-                    put("role", "user")
-                    put("content", userMessage)
-                })
-            }
-            
-            val requestJson = JSONObject().apply {
-                put("model", modelId)
-                put("max_tokens", maxTokens)
-                // Claude 4.x: Do NOT set both temperature and top_p simultaneously
-                put("temperature", temperature.toDouble())
-                put("system", getFullSystemPrompt())
-                put("messages", messages)
-            }
-            
+
+            val messages = buildChatMessages(userMessage)
+            val requestJson = buildChatRequest(messages)
+
             val result = executeWithRetry(TAG) { attempt ->
                 Log.d(TAG, "Sending chat request to Anthropic (attempt $attempt)")
-                
-                val requestBuilder = Request.Builder()
-                    .url("$baseUrl/messages")
-                    .addHeader("x-api-key", apiKey)
-                    .addHeader("anthropic-version", API_VERSION)
-                    .addHeader("Content-Type", "application/json")
-                
-                // Inject 1M context beta header when needed
-                if (needs1MContext) {
-                    requestBuilder.addHeader("anthropic-beta", BETA_CONTEXT_1M)
-                }
-                
-                val request = requestBuilder
-                    .post(requestJson.toString().toRequestBody("application/json".toMediaType()))
-                    .build()
-                
+                val request = buildAnthropicRequest("$baseUrl/messages", requestJson)
+
                 client.newCall(request).execute().use { response ->
-                    val responseBody = response.body?.string()
-                    
-                    if (response.isSuccessful && responseBody != null) {
-                        val json = JSONObject(responseBody)
-                        val content = json.optJSONArray("content")
-                        val text = content?.optJSONObject(0)?.optString("text", "")?.trim()
-                        
-                        if (!text.isNullOrEmpty()) {
-                            addToHistory(userMessage, text)
-                            Log.d(TAG, "Claude response: $text")
-                            text
-                        } else null
-                    } else {
-                        Log.e(TAG, "API error: ${response.code}, body: $responseBody")
-                        null
-                    }
+                    parseChatResponse(response, userMessage)
                 }
             }
-            
+
             result ?: "Sorry, Claude service is temporarily unavailable. Please try again later."
         }
+    }
+
+    private fun buildChatMessages(userMessage: String): JSONArray {
+        return JSONArray().apply {
+            // Conversation history
+            for ((role, content) in conversationHistory.takeLast(6)) {
+                put(JSONObject().apply {
+                    put("role", role)
+                    put("content", content)
+                })
+            }
+            // Current user message
+            put(JSONObject().apply {
+                put("role", "user")
+                put("content", userMessage)
+            })
+        }
+    }
+
+    private fun buildChatRequest(messages: JSONArray): JSONObject {
+        return JSONObject().apply {
+            put("model", modelId)
+            put("max_tokens", maxTokens)
+            // Claude 4.x: Do NOT set both temperature and top_p simultaneously
+            put("temperature", temperature.toDouble())
+            put("system", getFullSystemPrompt())
+            put("messages", messages)
+        }
+    }
+
+    private fun buildAnthropicRequest(url: String, body: JSONObject): Request {
+        val requestBuilder = Request.Builder()
+            .url(url)
+            .addHeader("x-api-key", apiKey)
+            .addHeader("anthropic-version", API_VERSION)
+            .addHeader("Content-Type", "application/json")
+
+        if (needs1MContext) {
+            requestBuilder.addHeader("anthropic-beta", BETA_CONTEXT_1M)
+        }
+
+        return requestBuilder
+            .post(body.toString().toRequestBody("application/json".toMediaType()))
+            .build()
+    }
+
+    private fun parseChatResponse(response: okhttp3.Response, userMessage: String): String? {
+        val responseBody = response.body?.string()
+        if (!response.isSuccessful || responseBody == null) {
+            Log.e(TAG, "API error: ${response.code}, body: $responseBody")
+            return null
+        }
+        val json = JSONObject(responseBody)
+        val content = json.optJSONArray("content")
+        val text = content?.optJSONObject(0)?.optString("text", "")?.trim()
+        if (text.isNullOrEmpty()) return null
+
+        addToHistory(userMessage, text)
+        Log.d(TAG, "Claude response: $text")
+        return text
     }
     
     /**

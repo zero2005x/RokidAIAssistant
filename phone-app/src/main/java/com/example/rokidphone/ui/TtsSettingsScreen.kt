@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.example.rokidphone.R
 import com.example.rokidphone.data.ApiSettings
 import com.example.rokidphone.data.TtsProvider
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -30,21 +31,28 @@ import kotlinx.coroutines.withContext
  */
 private data class EdgeVoiceOption(val voiceName: String, val displayLabel: String)
 
+// Default Edge TTS voice names per language, referenced both in the UI options and
+// in the script-based fallback selector below.
+private const val VOICE_KO_SUNHI = "ko-KR-SunHiNeural"
+private const val VOICE_EN_JENNY = "en-US-JennyNeural"
+private const val VOICE_ZH_XIAOXIAO = "zh-CN-XiaoxiaoNeural"
+private const val VOICE_JA_NANAMI = "ja-JP-NanamiNeural"
+
 private val EDGE_VOICE_OPTIONS = listOf(
     EdgeVoiceOption("", "Auto-detect"),
     // Korean
-    EdgeVoiceOption("ko-KR-SunHiNeural", "Korean — SunHi (Female)"),
+    EdgeVoiceOption(VOICE_KO_SUNHI, "Korean — SunHi (Female)"),
     EdgeVoiceOption("ko-KR-InJoonNeural", "Korean — InJoon (Male)"),
     // English
-    EdgeVoiceOption("en-US-JennyNeural", "English — Jenny (Female)"),
+    EdgeVoiceOption(VOICE_EN_JENNY, "English — Jenny (Female)"),
     EdgeVoiceOption("en-US-GuyNeural", "English — Guy (Male)"),
     EdgeVoiceOption("en-GB-SoniaNeural", "English — Sonia (Female, UK)"),
     // Chinese
-    EdgeVoiceOption("zh-CN-XiaoxiaoNeural", "Chinese — Xiaoxiao (Female)"),
+    EdgeVoiceOption(VOICE_ZH_XIAOXIAO, "Chinese — Xiaoxiao (Female)"),
     EdgeVoiceOption("zh-CN-YunxiNeural", "Chinese — Yunxi (Male)"),
     EdgeVoiceOption("zh-TW-HsiaoChenNeural", "Chinese — HsiaoChen (Female, TW)"),
     // Japanese
-    EdgeVoiceOption("ja-JP-NanamiNeural", "Japanese — Nanami (Female)"),
+    EdgeVoiceOption(VOICE_JA_NANAMI, "Japanese — Nanami (Female)"),
     EdgeVoiceOption("ja-JP-KeitaNeural", "Japanese — Keita (Male)")
 )
 
@@ -222,9 +230,8 @@ fun TtsSettingsScreen(
                         try {
                             testTtsVoice(context, settings)
                         } catch (e: Exception) {
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(context, e.message ?: "TTS test failed", Toast.LENGTH_SHORT).show()
-                            }
+                            // rememberCoroutineScope already dispatches on the main thread.
+                            Toast.makeText(context, e.message ?: "TTS test failed", Toast.LENGTH_SHORT).show()
                         } finally {
                             isTesting = false
                         }
@@ -376,7 +383,11 @@ private fun ParameterSliderCard(
 // Test helper – plays a localised sample sentence
 // ────────────────────────────────────────────────
 
-private suspend fun testTtsVoice(context: android.content.Context, settings: ApiSettings) {
+private suspend fun testTtsVoice(
+    context: android.content.Context,
+    settings: ApiSettings,
+    mainDispatcher: CoroutineDispatcher = Dispatchers.Main
+) {
     val sampleText = context.getString(R.string.tts_test_sample)
 
     when (settings.ttsProvider) {
@@ -393,14 +404,14 @@ private suspend fun testTtsVoice(context: android.content.Context, settings: Api
 
             val result = client.synthesize(sampleText, voice, rateStr, pitchStr)
             result.onSuccess { audioData ->
-                withContext(Dispatchers.Main) {
+                withContext(mainDispatcher) {
                     playTestAudio(context, audioData)
                 }
             }
             result.onFailure { throw it }
         }
         TtsProvider.SYSTEM_TTS -> {
-            withContext(Dispatchers.Main) {
+            withContext(mainDispatcher) {
                 val tts = android.speech.tts.TextToSpeech(context, null)
                 tts.setSpeechRate(settings.systemTtsSpeechRate)
                 tts.setPitch(settings.systemTtsPitch)
@@ -409,7 +420,7 @@ private suspend fun testTtsVoice(context: android.content.Context, settings: Api
         }
         TtsProvider.GOOGLE_TRANSLATE_TTS -> {
             // Use system TTS as a simple test for Google Translate provider
-            withContext(Dispatchers.Main) {
+            withContext(mainDispatcher) {
                 val tts = android.speech.tts.TextToSpeech(context, null)
                 tts.speak(sampleText, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null, "test")
             }
@@ -454,15 +465,15 @@ internal fun formatEdgePitch(offset: Float): String {
 /** Simple script-based voice selection (mirrors TextToSpeechService logic). */
 internal fun detectEdgeVoice(text: String, preferredLocale: java.util.Locale?): String {
     return when {
-        text.any { it in '\uAC00'..'\uD7AF' } -> "ko-KR-SunHiNeural"
-        text.any { it in '\u4E00'..'\u9FFF' } -> "zh-CN-XiaoxiaoNeural"
-        text.any { it in '\u3040'..'\u30FF' } -> "ja-JP-NanamiNeural"
-        text.any { it in 'A'..'Z' || it in 'a'..'z' } -> "en-US-JennyNeural"
+        text.any { it in '\uAC00'..'\uD7AF' } -> VOICE_KO_SUNHI
+        text.any { it in '\u4E00'..'\u9FFF' } -> VOICE_ZH_XIAOXIAO
+        text.any { it in '\u3040'..'\u30FF' } -> VOICE_JA_NANAMI
+        text.any { it in 'A'..'Z' || it in 'a'..'z' } -> VOICE_EN_JENNY
         else -> when (preferredLocale?.language) {
-            "ko" -> "ko-KR-SunHiNeural"
-            "ja" -> "ja-JP-NanamiNeural"
-            "zh" -> "zh-CN-XiaoxiaoNeural"
-            else -> "en-US-JennyNeural"
+            "ko" -> VOICE_KO_SUNHI
+            "ja" -> VOICE_JA_NANAMI
+            "zh" -> VOICE_ZH_XIAOXIAO
+            else -> VOICE_EN_JENNY
         }
     }
 }

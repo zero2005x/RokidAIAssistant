@@ -1587,6 +1587,10 @@ class TextToSpeechService(private val context: android.content.Context) {
     private val edgeTtsClient = com.example.rokidphone.service.EdgeTtsClient()
     private val ttsScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
+    // Main-thread dispatcher reference, indirected so it can be substituted in tests
+    // (Sonar `kotlin:S6311` — avoid hardcoded dispatchers in suspend bodies).
+    private val mainDispatcher: kotlinx.coroutines.CoroutineDispatcher = Dispatchers.Main
+
     init {
         // Always initialise system TTS so it's available as fallback / if user picks SYSTEM_TTS
         tts = android.speech.tts.TextToSpeech(context) { status ->
@@ -1649,22 +1653,22 @@ class TextToSpeechService(private val context: android.content.Context) {
                 result.onSuccess { audioData ->
                     if (audioData.isNotEmpty()) {
                         onAudioChunk(audioData)
-                        withContext(Dispatchers.Main) {
+                        withContext(mainDispatcher) {
                             playAudioData(audioData)
                         }
                     } else {
                         android.util.Log.w(TAG, "Edge TTS returned empty data, falling back to system TTS")
-                        withContext(Dispatchers.Main) { speakWithSystemTts(text, settings) }
+                        withContext(mainDispatcher) { speakWithSystemTts(text, settings) }
                     }
                 }
 
                 result.onFailure { err ->
                     android.util.Log.w(TAG, "Edge TTS failed: ${err.message}, falling back to system TTS")
-                    withContext(Dispatchers.Main) { speakWithSystemTts(text, settings) }
+                    withContext(mainDispatcher) { speakWithSystemTts(text, settings) }
                 }
             } catch (e: Exception) {
                 android.util.Log.e(TAG, "Edge TTS error", e)
-                withContext(Dispatchers.Main) { speakWithSystemTts(text, null) }
+                withContext(mainDispatcher) { speakWithSystemTts(text, null) }
             }
         }
     }

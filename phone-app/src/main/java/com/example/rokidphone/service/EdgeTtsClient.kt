@@ -1,6 +1,7 @@
 package com.example.rokidphone.service
 
 import android.util.Log
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.*
@@ -18,7 +19,9 @@ import java.util.concurrent.TimeUnit
  * synthesis.  This is a self-contained copy so that `phone-app` does not need
  * a module dependency on `app`.
  */
-class EdgeTtsClient {
+class EdgeTtsClient(
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+) {
 
     companion object {
         private const val TAG = "EdgeTtsClient"
@@ -61,13 +64,13 @@ class EdgeTtsClient {
         rate: String = "+0%",
         pitch: String = "+0Hz",
         volume: String = "+0%"
-    ): Result<ByteArray> = withContext(Dispatchers.IO) {
+    ): Result<ByteArray> = withContext(ioDispatcher) {
         try {
             Log.d(TAG, "Starting speech synthesis: voice=$voice, text=${text.take(50)}...")
 
             val audioData = ByteArrayOutputStream()
             val latch = CountDownLatch(1)
-            var error: Exception? = null
+            val errorRef = arrayOfNulls<Exception>(1)
 
             val requestId = generateRequestId()
             val wsUrl = "$WSS_URL?TrustedClientToken=${getTrustedToken()}&ConnectionId=$requestId"
@@ -78,47 +81,17 @@ class EdgeTtsClient {
                 .header("Origin", "chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold")
                 .build()
 
-            val webSocket = httpClient.newWebSocket(request, object : WebSocketListener() {
-                override fun onOpen(webSocket: WebSocket, response: Response) {
-                    Log.d(TAG, "WebSocket connection successful")
-                    webSocket.send(buildConfigMessage(requestId))
-                    webSocket.send(buildSsmlMessage(requestId, text, voice, rate, pitch, volume))
-                }
-
-                override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-                    val data = bytes.toByteArray()
-                    val headerEnd = findHeaderEnd(data)
-                    if (headerEnd > 0 && headerEnd < data.size) {
-                        audioData.write(data, headerEnd, data.size - headerEnd)
-                    }
-                }
-
-                override fun onMessage(webSocket: WebSocket, text: String) {
-                    if (text.contains("Path:turn.end")) {
-                        Log.d(TAG, "Received end signal")
-                        webSocket.close(1000, "Completed")
-                        latch.countDown()
-                    }
-                }
-
-                override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                    Log.e(TAG, "WebSocket error", t)
-                    error = Exception("WebSocket error: ${t.message}")
-                    latch.countDown()
-                }
-
-                override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                    Log.d(TAG, "WebSocket closed: code=$code, reason=$reason")
-                    if (latch.count > 0) latch.countDown()
-                }
-            })
+            val webSocket = httpClient.newWebSocket(
+                request,
+                createWebSocketListener(requestId, text, voice, rate, pitch, volume, audioData, latch, errorRef)
+            )
 
             if (!latch.await(TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
                 webSocket.cancel()
                 return@withContext Result.failure(Exception("Speech synthesis timeout"))
             }
 
-            error?.let {
+            errorRef[0]?.let {
                 return@withContext Result.failure(it)
             }
 
@@ -136,13 +109,59 @@ class EdgeTtsClient {
         }
     }
 
+    @Suppress("LongParameterList")
+    private fun createWebSocketListener(
+        requestId: String,
+        text: String,
+        voice: String,
+        rate: String,
+        pitch: String,
+        volume: String,
+        audioData: ByteArrayOutputStream,
+        latch: CountDownLatch,
+        errorRef: Array<Exception?>
+    ): WebSocketListener = object : WebSocketListener() {
+        override fun onOpen(webSocket: WebSocket, response: Response) {
+            Log.d(TAG, "WebSocket connection successful")
+            webSocket.send(buildConfigMessage())
+            webSocket.send(buildSsmlMessage(requestId, text, voice, rate, pitch, volume))
+        }
+
+        override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+            val data = bytes.toByteArray()
+            val headerEnd = findHeaderEnd(data)
+            if (headerEnd > 0 && headerEnd < data.size) {
+                audioData.write(data, headerEnd, data.size - headerEnd)
+            }
+        }
+
+        override fun onMessage(webSocket: WebSocket, text: String) {
+            if (text.contains("Path:turn.end")) {
+                Log.d(TAG, "Received end signal")
+                webSocket.close(1000, "Completed")
+                latch.countDown()
+            }
+        }
+
+        override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+            Log.e(TAG, "WebSocket error", t)
+            errorRef[0] = Exception("WebSocket error: ${t.message}")
+            latch.countDown()
+        }
+
+        override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+            Log.d(TAG, "WebSocket closed: code=$code, reason=$reason")
+            if (latch.count > 0) latch.countDown()
+        }
+    }
+
     private fun generateRequestId(): String =
         UUID.randomUUID().toString().replace("-", "")
 
     private fun getTrustedToken(): String =
         "6A5AA1D4EAFF4E9FB37E23D68491D6F4"
 
-    private fun buildConfigMessage(requestId: String): String {
+    private fun buildConfigMessage(): String {
         val timestamp = getTimestamp()
         return """
             X-Timestamp:$timestamp
@@ -198,22 +217,26 @@ class EdgeTtsClient {
         val pathAudio = "Path:audio".toByteArray()
 
         for (i in 0 until data.size - pathAudio.size) {
-            var found = true
-            for (j in pathAudio.indices) {
-                if (data[i + j] != pathAudio[j]) {
-                    found = false
-                    break
-                }
-            }
-            if (found) {
-                for (k in (i + pathAudio.size) until data.size - 1) {
-                    if (data[k] == 0x00.toByte() && data[k + 1] == 0x82.toByte()) {
-                        return k + 2
-                    }
-                }
-                return i + pathAudio.size + 2
-            }
+            if (!matchesAt(data, i, pathAudio)) continue
+            val bodyStart = findBodyStart(data, i + pathAudio.size)
+            return bodyStart ?: (i + pathAudio.size + 2)
         }
         return -1
+    }
+
+    private fun matchesAt(data: ByteArray, offset: Int, pattern: ByteArray): Boolean {
+        for (j in pattern.indices) {
+            if (data[offset + j] != pattern[j]) return false
+        }
+        return true
+    }
+
+    private fun findBodyStart(data: ByteArray, from: Int): Int? {
+        for (k in from until data.size - 1) {
+            if (data[k] == 0x00.toByte() && data[k + 1] == 0x82.toByte()) {
+                return k + 2
+            }
+        }
+        return null
     }
 }

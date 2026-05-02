@@ -478,10 +478,8 @@ class RecordingRepository private constructor(
         val recording = recordingDao.getRecordingById(id)
         if (recording != null) {
             // Delete file
-            if (recording.filePath.isNotBlank()) {
-                if (!File(recording.filePath).delete()) {
-                    Log.w(TAG, "Failed to delete recording file: ${recording.filePath}")
-                }
+            if (recording.filePath.isNotBlank() && !File(recording.filePath).delete()) {
+                Log.w(TAG, "Failed to delete recording file: ${recording.filePath}")
             }
             // Delete from database
             recordingDao.deleteById(id)
@@ -495,10 +493,8 @@ class RecordingRepository private constructor(
     suspend fun deleteRecordings(ids: List<String>) = withContext(Dispatchers.IO) {
         ids.forEach { id ->
             val recording = recordingDao.getRecordingById(id)
-            if (recording != null && recording.filePath.isNotBlank()) {
-                if (!File(recording.filePath).delete()) {
-                    Log.w(TAG, "Failed to delete recording file: ${recording.filePath}")
-                }
+            if (recording != null && recording.filePath.isNotBlank() && !File(recording.filePath).delete()) {
+                Log.w(TAG, "Failed to delete recording file: ${recording.filePath}")
             }
         }
         recordingDao.deleteByIds(ids)

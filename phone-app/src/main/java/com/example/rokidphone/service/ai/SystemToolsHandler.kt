@@ -9,6 +9,7 @@ import android.provider.CalendarContract
 import android.provider.ContactsContract
 import android.util.Log
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -22,13 +23,17 @@ import java.util.Calendar
  * - Add READ_CALENDAR in AndroidManifest.xml for check_schedule.
  * - Add CALL_PHONE in AndroidManifest.xml if you change make_call from ACTION_DIAL to ACTION_CALL.
  */
-class SystemToolsHandler(private val context: Context) {
+class SystemToolsHandler(
+    private val context: Context,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main
+) {
 
     companion object {
         private const val TAG = "SystemToolsHandler"
     }
 
-    suspend fun handleCheckSchedule(call: GeminiFunctionCall): ToolResult = withContext(Dispatchers.IO) {
+    suspend fun handleCheckSchedule(call: GeminiFunctionCall): ToolResult = withContext(ioDispatcher) {
         if (!hasPermission(Manifest.permission.READ_CALENDAR)) {
             return@withContext ToolResult.failure(
                 call.id,
@@ -53,7 +58,7 @@ class SystemToolsHandler(private val context: Context) {
         }
     }
 
-    suspend fun handleMakeCall(call: GeminiFunctionCall): ToolResult = withContext(Dispatchers.Main) {
+    suspend fun handleMakeCall(call: GeminiFunctionCall): ToolResult = withContext(mainDispatcher) {
         val args = call.args
         val phoneNumber = args.optString("phone_number").ifBlank {
             args.optString("phoneNumber").ifBlank { "" }

@@ -147,9 +147,9 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.truth)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation("androidx.test:core:1.6.1")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    testImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.ext.junit.legacy)
+    androidTestImplementation(libs.androidx.test.espresso.core)
 }
 
 val verifySingleSnAuthSource by tasks.registering {
