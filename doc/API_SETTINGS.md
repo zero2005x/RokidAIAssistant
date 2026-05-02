@@ -84,8 +84,8 @@ echo "GEMINI_API_KEY=your_key_here" >> local.properties
 | Provider        | Models                                      | Vision | Base URL                                             |
 | --------------- | ------------------------------------------- | ------ | ---------------------------------------------------- |
 | **Gemini**      | Gemini 3.1 Pro, 3 Flash, 2.5 Pro/Flash/Lite | ✅     | `https://generativelanguage.googleapis.com/v1beta/`  |
-| **OpenAI**      | GPT-5.2, 5.2 Codex, 5.1, 5 Mini/Nano, o3    | ✅     | `https://api.openai.com/v1/`                         |
-| **Anthropic**   | Claude Opus 4.6, Sonnet 4.6, Haiku 4.5      | ✅     | `https://api.anthropic.com/v1/`                      |
+| **OpenAI**      | GPT-5.5/5.4/5.2/5.1, 5.2 Codex, 5 Mini/Nano, o3, o3 Pro | ✅ | `https://api.openai.com/v1/`                         |
+| **Anthropic**   | Claude Opus 4.7, Opus 4.6, Sonnet 4.6, Haiku 4.5 | ✅ | `https://api.anthropic.com/v1/`                      |
 | **DeepSeek**    | DeepSeek Chat, DeepSeek Reasoner            | ❌     | `https://api.deepseek.com/`                          |
 | **Groq**        | Llama 4 Scout/Maverick                      | ✅     | `https://api.groq.com/openai/v1/`                    |
 | **xAI**         | Grok 4.20, 4, 4.1 Fast, 3, 3 Mini           | ❌     | `https://api.x.ai/v1/`                               |
@@ -94,6 +94,7 @@ echo "GEMINI_API_KEY=your_key_here" >> local.properties
 | **Baidu**       | ERNIE 4.0 8K, ERNIE 3.5 8K                  | ❌     | `https://aip.baidubce.com/rpc/2.0/...`               |
 | **Perplexity**  | Sonar, Sonar Pro, Sonar Reasoning Pro       | ❌     | `https://api.perplexity.ai/`                         |
 | **Moonshot**    | Kimi K2.5, Moonshot V1 128K/32K/8K          | ✅     | `https://api.moonshot.ai/v1/`                        |
+| **Mistral**     | Mistral Large, Medium 3.5, Ministral 3B      | ✅     | `https://api.mistral.ai/v1/`                         |
 | **Gemini Live** | Gemini Live (session mode)                  | ✅     | `wss://generativelanguage.googleapis.com/ws/...`     |
 | **Custom**      | User-defined                                | Varies | User-defined (e.g., Ollama, LM Studio)               |
 
