@@ -10,6 +10,7 @@ import android.hardware.camera2.*
 import android.media.ExifInterface
 import android.media.Image
 import android.media.ImageReader
+import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
@@ -476,7 +477,12 @@ class GlassesCameraManager(private val context: Context) {
             // For JPEG format, set quality and orientation
             if (imageReader.imageFormat == ImageFormat.JPEG) {
                 captureBuilder.set(CaptureRequest.JPEG_QUALITY, JPEG_QUALITY.toByte())
-                captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, sensorOrientation)
+                // On Rokid Glasses the sensor is mounted in the display's landscape
+                // orientation, so writing the raw sensorOrientation (90/270) into the
+                // EXIF tag produces upside-down/sideways photos. Force 0 there and rely
+                // on normalizeOrientation() to apply pixel rotation if EXIF says so.
+                val jpegOrientation = if (isRokidGlassesDevice()) 0 else sensorOrientation
+                captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, jpegOrientation)
             }
             
             // Execute capture
@@ -508,7 +514,7 @@ class GlassesCameraManager(private val context: Context) {
             
             if (received && capturedBytes != null) {
                 Log.d(TAG, "Capture successful: ${capturedBytes!!.size} bytes")
-                capturedBytes
+                normalizeOrientation(capturedBytes!!)
             } else {
                 Log.e(TAG, "Capture timed out or failed to receive image")
                 null
@@ -518,7 +524,41 @@ class GlassesCameraManager(private val context: Context) {
             null
         }
     }
-    
+
+    /**
+     * Detect Rokid Glasses devices, whose camera sensor is already mounted in
+     * the display's landscape orientation. Used to decide whether to suppress
+     * the JPEG_ORIENTATION EXIF tag during capture.
+     */
+    internal fun isRokidGlassesDevice(): Boolean =
+        Build.MODEL.contains("Rokid", ignoreCase = true)
+
+    /**
+     * Reads the EXIF orientation tag from the captured JPEG and, if non-zero,
+     * applies the corresponding pixel rotation via [ImageCompressor.rotateImage].
+     * This guarantees correct orientation regardless of downstream consumers
+     * that ignore EXIF metadata.
+     */
+    internal suspend fun normalizeOrientation(jpegBytes: ByteArray): ByteArray {
+        return try {
+            val exif = ExifInterface(java.io.ByteArrayInputStream(jpegBytes))
+            val degrees = when (exif.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> 90
+                ExifInterface.ORIENTATION_ROTATE_180 -> 180
+                ExifInterface.ORIENTATION_ROTATE_270 -> 270
+                else -> 0
+            }
+            if (degrees == 0) jpegBytes
+            else ImageCompressor.rotateImage(jpegBytes, degrees)
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to normalize orientation, returning original bytes", e)
+            jpegBytes
+        }
+    }
+
     /**
      * Convert YUV_420_888 image to JPEG byte array.
      */

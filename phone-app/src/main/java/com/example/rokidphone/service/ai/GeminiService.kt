@@ -42,7 +42,17 @@ class GeminiService(
     }
     
     override val provider = AiProvider.GEMINI
-    
+
+    /**
+     * Gemini 2.5 Pro and Gemini 3 series consume the output budget for internal
+     * "thinking" tokens, which can starve the visible response. For these models
+     * we explicitly disable thinking via `thinkingConfig.thinkingBudget = 0`.
+     */
+    private fun isThinkingCapable(modelId: String): Boolean =
+        modelId.contains("2.5") ||
+        modelId.startsWith("gemini-3") ||
+        modelId.startsWith("gemini-2.5-pro")
+
     private val apiUrl: String
         get() = "$baseUrl/$modelId:generateContent"
     
@@ -228,8 +238,14 @@ Rules:
                 put("contents", contents)
                 put("generationConfig", JSONObject().apply {
                     put("temperature", temperature.toDouble())
-                    put("maxOutputTokens", maxTokens)
+                    put("maxOutputTokens", maxTokens.coerceAtLeast(1024))
                     put("topP", topP.toDouble())
+                    if (isThinkingCapable(modelId)) {
+                        put("thinkingConfig", JSONObject().apply {
+                            put("thinkingBudget", 0)      // disable thinking by default
+                            put("includeThoughts", false)
+                        })
+                    }
                 })
             }
             
@@ -303,6 +319,12 @@ Rules:
                 put("generationConfig", JSONObject().apply {
                     put("temperature", temperature.toDouble())
                     put("maxOutputTokens", maxTokens.coerceAtMost(4096))
+                    if (isThinkingCapable(modelId)) {
+                        put("thinkingConfig", JSONObject().apply {
+                            put("thinkingBudget", 0)      // disable thinking by default
+                            put("includeThoughts", false)
+                        })
+                    }
                 })
             }
             
@@ -406,7 +428,12 @@ Rules:
     private fun extractTextFromResponse(json: JSONObject): String? {
         val candidates = json.optJSONArray("candidates")
         if (candidates != null && candidates.length() > 0) {
-            val content = candidates.getJSONObject(0).optJSONObject("content")
+            val firstCandidate = candidates.getJSONObject(0)
+            val finishReason = firstCandidate.optString("finishReason")
+            if (finishReason.isNotEmpty()) {
+                Log.d(TAG, "Gemini finishReason=$finishReason")
+            }
+            val content = firstCandidate.optJSONObject("content")
             val parts = content?.optJSONArray("parts")
             if (parts != null && parts.length() > 0) {
                 return parts.getJSONObject(0).optString("text", "").trim()

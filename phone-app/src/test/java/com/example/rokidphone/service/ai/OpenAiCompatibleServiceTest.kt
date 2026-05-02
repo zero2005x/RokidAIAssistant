@@ -481,4 +481,51 @@ class OpenAiCompatibleServiceTest {
 
         assertThat(result).contains("analysis failed")
     }
+
+    // ==================== GPT-5 / o-series token param Tests ====================
+
+    @Test
+    fun `chat - gpt-5 variant uses max_completion_tokens not max_tokens`() = runTest {
+        val service = createService(modelId = "gpt-5.2")
+        mockServer.server.enqueue(
+            jsonResponse(TestFixtures.MockResponses.openAiChatSuccess("ok"))
+        )
+
+        service.chat("Hi")
+
+        val body = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+        assertThat(body.has("max_completion_tokens")).isTrue()
+        assertThat(body.has("max_tokens")).isFalse()
+    }
+
+    @Test
+    fun `analyzeImage - gpt-5 variant uses max_completion_tokens not max_tokens`() = runTest {
+        val service = createService(modelId = "gpt-5.2", providerType = AiProvider.OPENAI)
+        mockServer.server.enqueue(
+            jsonResponse(TestFixtures.MockResponses.openAiChatSuccess("img"))
+        )
+
+        service.analyzeImage(TestFixtures.createTestJpeg(), "Describe")
+
+        val body = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+        assertThat(body.has("max_completion_tokens")).isTrue()
+        assertThat(body.has("max_tokens")).isFalse()
+    }
+
+    @Test
+    fun `testConnection - gpt-5 variant fallback chat uses max_completion_tokens`() = runTest {
+        val service = createService(modelId = "gpt-5.2")
+        // /models returns 404 -> triggers testWithSimpleChat fallback
+        mockServer.server.enqueue(mockwebserver3.MockResponse(code = 404))
+        mockServer.server.enqueue(
+            jsonResponse(TestFixtures.MockResponses.openAiChatSuccess("Hi"))
+        )
+
+        service.testConnection()
+
+        mockServer.server.takeRequest() // /models
+        val body = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+        assertThat(body.has("max_completion_tokens")).isTrue()
+        assertThat(body.has("max_tokens")).isFalse()
+    }
 }

@@ -928,4 +928,57 @@ class GeminiServiceTest {
             .getJSONArray("parts").getJSONObject(1).getString("text")
         assertThat(promptText).contains("de-DE")
     }
+
+    // ==================== Thinking config / finishReason logging ====================
+
+    @Test
+    fun `chat - gemini-3 model includes thinkingConfig with thinkingBudget 0`() = runTest {
+        val service = createService(modelId = "gemini-3.0-flash")
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiChatSuccess("ok")))
+
+        service.chat("Hi")
+
+        val config = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONObject("generationConfig")
+        assertThat(config.has("thinkingConfig")).isTrue()
+        val thinking = config.getJSONObject("thinkingConfig")
+        assertThat(thinking.getInt("thinkingBudget")).isEqualTo(0)
+        assertThat(thinking.getBoolean("includeThoughts")).isFalse()
+    }
+
+    @Test
+    fun `chat - gemini-2_0-flash request omits thinkingConfig for backward compatibility`() = runTest {
+        val service = createService(modelId = "gemini-2.0-flash")
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.geminiChatSuccess("ok")))
+
+        service.chat("Hi")
+
+        val config = JSONObject(mockServer.server.takeRequest().body.readUtf8())
+            .getJSONObject("generationConfig")
+        assertThat(config.has("thinkingConfig")).isFalse()
+    }
+
+    @Test
+    fun `chat - MAX_TOKENS finishReason is logged`() = runTest {
+        org.robolectric.shadows.ShadowLog.clear()
+        val service = createService(modelId = "gemini-2.0-flash")
+        // Response with empty parts but a MAX_TOKENS finishReason. extractTextFromResponse
+        // should log the finishReason, then return null (triggering fallback message).
+        val truncated = """
+            {
+              "candidates": [{
+                "content": { "parts": [], "role": "model" },
+                "finishReason": "MAX_TOKENS"
+              }]
+            }
+        """.trimIndent()
+        repeat(3) { mockServer.server.enqueue(jsonResponse(truncated)) }
+
+        service.chat("Hi")
+
+        val logged = org.robolectric.shadows.ShadowLog.getLogs().any {
+            it.tag == "GeminiService" && it.msg.contains("finishReason=MAX_TOKENS")
+        }
+        assertThat(logged).isTrue()
+    }
 }
