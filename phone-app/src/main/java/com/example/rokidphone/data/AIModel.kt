@@ -210,20 +210,6 @@ sealed class AIModel(
             isPreview = true
         )
 
-        data object Gpt4o : OpenAI(
-            modelId = "gpt-4o",
-            displayName = "GPT-4o",
-            contextWindow = 128_000L
-        )
-
-        // TODO: Verify exact API model ID for o4-mini.
-        data object O4Mini : OpenAI(
-            modelId = "o4-mini",
-            displayName = "o4-mini (Reasoning, TODO: verify ID)",
-            contextWindow = 200_000L,
-            isPreview = true
-        )
-
         // TODO: Verify exact API model ID for o3-pro.
         data object O3Pro : OpenAI(
             modelId = "o3-pro",
@@ -290,7 +276,7 @@ sealed class AIModel(
             fun all(): List<OpenAI> = listOf(
                 Gpt55, Gpt54, Gpt54Pro, Gpt54Mini, Gpt54Nano,
                 Gpt52, Gpt52Codex, Gpt51, Gpt5Mini, Gpt5Nano,
-                Gpt4o, O4Mini, O3Pro, O3
+                O3Pro, O3
             )
         }
     }
