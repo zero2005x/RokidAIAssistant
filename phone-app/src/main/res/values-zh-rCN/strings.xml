@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Info -->
     <string name="app_name">Rokid AI 助手</string>
@@ -174,7 +174,6 @@
     <string name="baidu_secret_key">百度 Secret 密钥</string>
     <string name="perplexity_api_key">Perplexity API 密钥</string>
     <string name="moonshot_api_key">Moonshot API 密钥</string>
-    <string name="mistral_api_key">Mistral API 密钥</string>
     <string name="custom_api_key">自定义 API 密钥（可选）</string>
     <string name="custom_provider_settings">自定义提供商设置</string>
     <string name="base_url">基础网址</string>
@@ -201,7 +200,6 @@
     <string name="provider_baidu">百度文心一言</string>
     <string name="provider_perplexity">Perplexity</string>
     <string name="provider_moonshot">Moonshot（Kimi）</string>
-    <string name="provider_mistral">Mistral AI</string>
     <string name="provider_custom">自定义 / 自托管</string>
     <string name="provider_gemini_live">Gemini Live</string>
     
