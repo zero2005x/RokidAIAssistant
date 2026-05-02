@@ -148,6 +148,19 @@ object AiServiceFactory {
                 presencePenalty = settings.presencePenalty
             )
             
+            AiProvider.MISTRAL -> OpenAiCompatibleService(
+                apiKey = apiKey,
+                baseUrl = settings.aiProvider.defaultBaseUrl,
+                modelId = modelId,
+                systemPrompt = systemPrompt,
+                providerType = AiProvider.MISTRAL,
+                temperature = settings.temperature,
+                maxTokens = settings.maxTokens,
+                topP = settings.topP,
+                frequencyPenalty = settings.frequencyPenalty,
+                presencePenalty = settings.presencePenalty
+            )
+            
             AiProvider.CUSTOM -> OpenAiCompatibleService(
                 apiKey = settings.customApiKey,
                 baseUrl = settings.getCurrentBaseUrl(),
@@ -194,7 +207,7 @@ object AiServiceFactory {
 
             AiProvider.OPENAI, AiProvider.GROQ,
             AiProvider.XAI, AiProvider.ALIBABA, AiProvider.ZHIPU, AiProvider.PERPLEXITY,
-            AiProvider.MOONSHOT -> OpenAiCompatibleService(
+            AiProvider.MOONSHOT, AiProvider.MISTRAL -> OpenAiCompatibleService(
                 apiKey = settings.getCurrentApiKey(),
                 baseUrl = settings.aiProvider.defaultBaseUrl,
                 modelId = settings.getCurrentModelId(),

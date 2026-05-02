@@ -233,9 +233,9 @@ class ProviderSettingTest {
 
     @Test
     fun `getDefaultProviders returns exactly 12 providers`() {
-        // 預設供應商清單應包含 12 個供應商
+        // 預設供應商清單應包含 13 個供應商（新增 Mistral）
         val providers = ProviderSetting.getDefaultProviders()
-        assertThat(providers).hasSize(12)
+        assertThat(providers).hasSize(13)
     }
 
     @Test
@@ -262,6 +262,7 @@ class ProviderSettingTest {
             ProviderSetting.Baidu::class,
             ProviderSetting.Perplexity::class,
             ProviderSetting.Moonshot::class,
+            ProviderSetting.Mistral::class,
             ProviderSetting.Custom::class
         ).inOrder()
     }

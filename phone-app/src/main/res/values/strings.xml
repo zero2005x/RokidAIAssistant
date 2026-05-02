@@ -165,6 +165,7 @@
     <string name="baidu_secret_key">Baidu Secret Key</string>
     <string name="perplexity_api_key">Perplexity API Key</string>
     <string name="moonshot_api_key">Moonshot API Key</string>
+    <string name="mistral_api_key">Mistral API Key</string>
     <string name="custom_api_key">Custom API Key (Optional)</string>
     
     <!-- Custom Provider Settings -->
@@ -200,6 +201,7 @@
     <string name="provider_baidu">Baidu Ernie</string>
     <string name="provider_perplexity">Perplexity</string>
     <string name="provider_moonshot">Moonshot (Kimi)</string>
+    <string name="provider_mistral">Mistral AI</string>
     <string name="provider_custom">Custom / Self-Hosted</string>
     <string name="provider_gemini_live">Gemini Live</string>
     

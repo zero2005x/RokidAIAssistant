@@ -115,6 +115,15 @@ enum class AiProvider(
         supportsSpeech = false,
         supportsVision = true
     ),
+    MISTRAL(
+        displayNameResId = R.string.provider_mistral,
+        description = "European frontier models from Mistral AI (OpenAI-compatible)",
+        website = "https://mistral.ai",
+        defaultBaseUrl = "https://api.mistral.ai/v1/",
+        isOpenAiCompatible = true,
+        supportsSpeech = false,
+        supportsVision = true
+    ),
     GEMINI_LIVE(
         displayNameResId = R.string.provider_gemini_live,
         description = "Gemini Live API - real-time bidirectional voice conversation",
@@ -246,6 +255,16 @@ object AvailableModels {
     )
     
     val openaiModels = listOf(
+        // TODO: Verify exact API model ID once GPT-5.5 is publicly listed.
+        ModelOption(
+            id = "gpt-5.5",
+            displayName = "GPT-5.5 (TODO: verify ID)",
+            provider = AiProvider.OPENAI,
+            supportsAudio = false,
+            supportsVision = true,
+            isPreview = true,
+            description = "Reported next-gen flagship; verify the official API ID before production use"
+        ),
         ModelOption(
             id = "gpt-5.4",
             displayName = "GPT-5.4",
@@ -325,10 +344,48 @@ object AvailableModels {
             supportsAudio = false,
             supportsVision = false,
             description = "Deep reasoning model for complex science, coding, and math, 200K context"
+        ),
+        // TODO: Verify exact API model ID for o3-pro once GA.
+        ModelOption(
+            id = "o3-pro",
+            displayName = "o3 Pro (Reasoning, TODO: verify ID)",
+            provider = AiProvider.OPENAI,
+            supportsAudio = false,
+            supportsVision = false,
+            isPreview = true,
+            description = "Top-tier o3 reasoning tier; confirm official API ID before production use"
+        ),
+        // TODO: Verify exact API model ID for o4-mini.
+        ModelOption(
+            id = "o4-mini",
+            displayName = "o4-mini (Reasoning, TODO: verify ID)",
+            provider = AiProvider.OPENAI,
+            supportsAudio = false,
+            supportsVision = false,
+            isPreview = true,
+            description = "Compact o4 reasoning tier; verify the official API ID before production use"
+        ),
+        ModelOption(
+            id = "gpt-4o",
+            displayName = "GPT-4o",
+            provider = AiProvider.OPENAI,
+            supportsAudio = true,
+            supportsVision = true,
+            description = "Legacy multimodal flagship retained for backward compatibility, 128K context"
         )
     )
     
     val anthropicModels = listOf(
+        // TODO: Verify exact API model ID for Claude Sonnet 4.7.
+        ModelOption(
+            id = "claude-sonnet-4-7",
+            displayName = "Claude Sonnet 4.7 (TODO: verify ID)",
+            provider = AiProvider.ANTHROPIC,
+            supportsAudio = false,
+            supportsVision = true,
+            isPreview = true,
+            description = "Reported Sonnet 4.7 tier; verify the official API ID before production use"
+        ),
         ModelOption(
             id = "claude-opus-4-7",
             displayName = "Claude Opus 4.7",
@@ -360,10 +417,68 @@ object AvailableModels {
             supportsAudio = false,
             supportsVision = true,
             description = "Fastest frontier model, vision-capable. 200K context"
+        ),
+        // TODO: Verify exact API model ID for Claude Opus 4 (legacy 4.0 line).
+        ModelOption(
+            id = "claude-opus-4",
+            displayName = "Claude Opus 4 (TODO: verify ID)",
+            provider = AiProvider.ANTHROPIC,
+            supportsAudio = false,
+            supportsVision = true,
+            isPreview = true,
+            description = "Earlier Opus 4 generation; verify the official API ID before production use"
+        ),
+        // TODO: Verify exact API model ID for Claude Sonnet 4 (legacy 4.0 line).
+        ModelOption(
+            id = "claude-sonnet-4",
+            displayName = "Claude Sonnet 4 (TODO: verify ID)",
+            provider = AiProvider.ANTHROPIC,
+            supportsAudio = false,
+            supportsVision = true,
+            isPreview = true,
+            description = "Earlier Sonnet 4 generation; verify the official API ID before production use"
+        ),
+        // TODO: Verify exact API model ID for Claude 3.7 Sonnet.
+        ModelOption(
+            id = "claude-3-7-sonnet-latest",
+            displayName = "Claude 3.7 Sonnet (TODO: verify ID)",
+            provider = AiProvider.ANTHROPIC,
+            supportsAudio = false,
+            supportsVision = true,
+            description = "Claude 3.7 Sonnet legacy tier; confirm the official API ID before production use"
         )
     )
     
     val deepseekModels = listOf(
+        // TODO: Verify exact API model IDs for the V4 line once published.
+        ModelOption(
+            id = "deepseek-v4-pro",
+            displayName = "DeepSeek V4 Pro (TODO: verify ID)",
+            provider = AiProvider.DEEPSEEK,
+            supportsAudio = false,
+            supportsVision = false,
+            isPreview = true,
+            description = "Reported V4 Pro flagship; verify the official API ID before production use"
+        ),
+        ModelOption(
+            id = "deepseek-v4-flash-max",
+            displayName = "DeepSeek V4 Flash Max (TODO: verify ID)",
+            provider = AiProvider.DEEPSEEK,
+            supportsAudio = false,
+            supportsVision = false,
+            isPreview = true,
+            description = "Reported V4 Flash Max tier; verify the official API ID before production use"
+        ),
+        // TODO: Verify whether 'deepseek-r1' is still a valid public alias.
+        ModelOption(
+            id = "deepseek-r1",
+            displayName = "DeepSeek R1 (TODO: verify ID)",
+            provider = AiProvider.DEEPSEEK,
+            supportsAudio = false,
+            supportsVision = false,
+            isPreview = true,
+            description = "Standalone R1 reasoning alias; verify the official API ID before production use"
+        ),
         ModelOption(
             id = "deepseek-chat",
             displayName = "DeepSeek V3.2 (Chat)",
@@ -510,6 +625,16 @@ object AvailableModels {
     )
     
     val xaiModels = listOf(
+        // TODO: Verify exact API model ID for Grok 4.3 once xAI publishes it.
+        ModelOption(
+            id = "grok-4.3",
+            displayName = "Grok 4.3 (TODO: verify ID)",
+            provider = AiProvider.XAI,
+            supportsAudio = false,
+            supportsVision = false,
+            isPreview = true,
+            description = "Reported Grok 4.3 tier; verify the official API ID before production use"
+        ),
         ModelOption(
             id = "grok-4.20-beta-latest-reasoning",
             displayName = "Grok 4.20 Beta (Reasoning)",
@@ -828,6 +953,37 @@ object AvailableModels {
         )
     )
 
+    val mistralModels = listOf(
+        // TODO: Verify exact API model IDs against https://docs.mistral.ai/getting-started/models/ before production use.
+        ModelOption(
+            id = "mistral-medium-3.5",
+            displayName = "Mistral Medium 3.5 (TODO: verify ID)",
+            provider = AiProvider.MISTRAL,
+            supportsAudio = false,
+            supportsVision = true,
+            isPreview = true,
+            description = "Reported mid-tier balanced model; verify the official API ID before production use"
+        ),
+        ModelOption(
+            id = "mistral-large-latest",
+            displayName = "Mistral Large (latest)",
+            provider = AiProvider.MISTRAL,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Mistral's flagship 'large' tier alias maintained by Mistral."
+        ),
+        // TODO: Verify exact API model ID for Ministral 3 (3B).
+        ModelOption(
+            id = "ministral-3-3b",
+            displayName = "Ministral 3 3B (TODO: verify ID)",
+            provider = AiProvider.MISTRAL,
+            supportsAudio = false,
+            supportsVision = false,
+            isPreview = true,
+            description = "Compact Ministral edge tier; verify the official API ID before production use"
+        )
+    )
+
     fun getModelsForProvider(provider: AiProvider): List<ModelOption> {
         return when (provider) {
             AiProvider.GEMINI -> geminiModels
@@ -841,6 +997,7 @@ object AvailableModels {
             AiProvider.BAIDU -> baiduModels
             AiProvider.PERPLEXITY -> perplexityModels
             AiProvider.MOONSHOT -> moonshotModels
+            AiProvider.MISTRAL -> mistralModels
             AiProvider.GEMINI_LIVE -> geminiLiveModels
             AiProvider.CUSTOM -> customModels
         }
@@ -852,7 +1009,7 @@ object AvailableModels {
     
     val allModels: List<ModelOption>
         get() = geminiModels + openaiModels + anthropicModels + deepseekModels + groqModels + 
-                xaiModels + alibabaModels + zhipuModels + baiduModels + perplexityModels + moonshotModels + geminiLiveModels + customModels
+                xaiModels + alibabaModels + zhipuModels + baiduModels + perplexityModels + moonshotModels + mistralModels + geminiLiveModels + customModels
 }
 
 /**
@@ -885,6 +1042,7 @@ data class ApiSettings(
     val baiduSecretKey: String = "",  // Baidu requires both API Key and Secret Key
     val perplexityApiKey: String = "",
     val moonshotApiKey: String = "",
+    val mistralApiKey: String = "",
     val customApiKey: String = "",
     
     // Custom base URLs (for providers that support it)
@@ -1013,6 +1171,7 @@ data class ApiSettings(
             AiProvider.BAIDU -> baiduApiKey
             AiProvider.PERPLEXITY -> perplexityApiKey
             AiProvider.MOONSHOT -> moonshotApiKey
+            AiProvider.MISTRAL -> mistralApiKey
             AiProvider.GEMINI_LIVE -> geminiApiKey  // Shares Gemini API key
             AiProvider.CUSTOM -> customApiKey
         }
@@ -1034,6 +1193,7 @@ data class ApiSettings(
             AiProvider.BAIDU -> baiduApiKey
             AiProvider.PERPLEXITY -> perplexityApiKey
             AiProvider.MOONSHOT -> moonshotApiKey
+            AiProvider.MISTRAL -> mistralApiKey
             AiProvider.GEMINI_LIVE -> geminiApiKey  // Shares Gemini API key
             AiProvider.CUSTOM -> customApiKey
         }
@@ -1125,6 +1285,7 @@ data class ApiSettings(
                (baiduApiKey.isNotBlank() && baiduSecretKey.isNotBlank()) ||
                perplexityApiKey.isNotBlank() ||
                moonshotApiKey.isNotBlank() ||
+               mistralApiKey.isNotBlank() ||
                (customApiKey.isNotBlank() || customBaseUrl.isNotBlank())
     }
     
