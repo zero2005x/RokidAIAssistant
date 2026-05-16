@@ -143,6 +143,7 @@ class ProviderManager private constructor(
             AiProvider.PERPLEXITY -> settingsRepository.updatePerplexityApiKey(apiKey)
             AiProvider.MOONSHOT -> settingsRepository.updateMoonshotApiKey(apiKey)
             AiProvider.MISTRAL -> settingsRepository.updateMistralApiKey(apiKey)
+            AiProvider.ANYTHINGLLM -> settingsRepository.updateAnythingLlmApiKey(apiKey)
             AiProvider.GEMINI_LIVE -> settingsRepository.updateGeminiApiKey(apiKey)  // Shares Gemini API key
             AiProvider.CUSTOM -> settingsRepository.updateCustomApiKey(apiKey)
         }
@@ -226,6 +227,11 @@ class ProviderManager private constructor(
             AiProvider.MISTRAL -> ProviderSetting.Mistral(
                 apiKey = settings.mistralApiKey,
                 modelId = settings.aiModelId
+            )
+            AiProvider.ANYTHINGLLM -> ProviderSetting.AnythingLLM(
+                serverUrl = settings.anythingllmServerUrl,
+                apiKey = settings.anythingllmApiKey,
+                workspaceSlug = settings.anythingllmWorkspaceSlug
             )
             AiProvider.CUSTOM -> ProviderSetting.Custom(
                 apiKey = settings.customApiKey,

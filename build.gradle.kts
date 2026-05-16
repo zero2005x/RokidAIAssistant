@@ -38,7 +38,13 @@ sonar {
             "**/R\$*.java",
             "**/BuildConfig.java",
             "**/*Binding.java",
-            "**/*Binding.kt"
+            "**/*Binding.kt",
+            "**/ui/**"
         ).joinToString(","))
+
+        property(
+            "sonar.coverage.jacoco.xmlReportPaths",
+            "phone-app/build/reports/coverage/test/debug/report.xml"
+        )
     }
 }

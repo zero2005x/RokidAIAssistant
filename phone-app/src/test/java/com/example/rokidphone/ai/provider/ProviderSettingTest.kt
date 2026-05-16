@@ -115,6 +115,54 @@ class ProviderSettingTest {
         assertThat(setting.isValid()).isFalse()
     }
 
+    // ==================== AnythingLLM Validation AnythingLLM 驗證 ====================
+
+    @Test
+    fun `AnythingLLM isValid returns true when all three fields are not blank`() {
+        val setting = ProviderSetting.AnythingLLM(
+            serverUrl = "http://localhost:3001",
+            apiKey = "my-key",
+            workspaceSlug = "workspace"
+        )
+        assertThat(setting.isValid()).isTrue()
+    }
+
+    @Test
+    fun `AnythingLLM isValid returns false when serverUrl is blank`() {
+        val setting = ProviderSetting.AnythingLLM(serverUrl = "", apiKey = "key", workspaceSlug = "slug")
+        assertThat(setting.isValid()).isFalse()
+    }
+
+    @Test
+    fun `AnythingLLM isValid returns false when apiKey is blank`() {
+        val setting = ProviderSetting.AnythingLLM(serverUrl = "http://host", apiKey = "", workspaceSlug = "slug")
+        assertThat(setting.isValid()).isFalse()
+    }
+
+    @Test
+    fun `AnythingLLM isValid returns false when workspaceSlug is blank`() {
+        val setting = ProviderSetting.AnythingLLM(serverUrl = "http://host", apiKey = "key", workspaceSlug = "")
+        assertThat(setting.isValid()).isFalse()
+    }
+
+    @Test
+    fun `AnythingLLM has correct default values`() {
+        val setting = ProviderSetting.AnythingLLM()
+        assertThat(setting.id).isEqualTo("anythingllm")
+        assertThat(setting.displayName).isEqualTo("AnythingLLM")
+        assertThat(setting.enabled).isTrue()
+        assertThat(setting.serverUrl).isEmpty()
+        assertThat(setting.apiKey).isEmpty()
+        assertThat(setting.workspaceSlug).isEmpty()
+        assertThat(setting.providerBaseUrl).isEmpty()
+    }
+
+    @Test
+    fun `AnythingLLM providerApiKey reflects apiKey`() {
+        val setting = ProviderSetting.AnythingLLM(apiKey = "ak-secret")
+        assertThat(setting.providerApiKey).isEqualTo("ak-secret")
+    }
+
     // ==================== Custom Provider Validation 自訂供應商驗證 ====================
 
     @Test
@@ -218,6 +266,7 @@ class ProviderSettingTest {
         assertThat(ProviderSetting.fromId("baidu")).isInstanceOf(ProviderSetting.Baidu::class.java)
         assertThat(ProviderSetting.fromId("perplexity")).isInstanceOf(ProviderSetting.Perplexity::class.java)
         assertThat(ProviderSetting.fromId("moonshot")).isInstanceOf(ProviderSetting.Moonshot::class.java)
+        assertThat(ProviderSetting.fromId("anythingllm")).isInstanceOf(ProviderSetting.AnythingLLM::class.java)
         assertThat(ProviderSetting.fromId("custom")).isInstanceOf(ProviderSetting.Custom::class.java)
     }
 
@@ -232,10 +281,10 @@ class ProviderSettingTest {
     // ==================== getDefaultProviders() Tests ====================
 
     @Test
-    fun `getDefaultProviders returns exactly 12 providers`() {
-        // 預設供應商清單應包含 13 個供應商（新增 Mistral）
+    fun `getDefaultProviders returns exactly 14 providers`() {
+        // 預設供應商清單應包含 14 個供應商（新增 AnythingLLM）
         val providers = ProviderSetting.getDefaultProviders()
-        assertThat(providers).hasSize(13)
+        assertThat(providers).hasSize(14)
     }
 
     @Test
@@ -263,6 +312,7 @@ class ProviderSettingTest {
             ProviderSetting.Perplexity::class,
             ProviderSetting.Moonshot::class,
             ProviderSetting.Mistral::class,
+            ProviderSetting.AnythingLLM::class,
             ProviderSetting.Custom::class
         ).inOrder()
     }
@@ -284,8 +334,10 @@ class ProviderSettingTest {
 
     @Test
     fun `all default providers have non-blank baseUrl`() {
-        ProviderSetting.getDefaultProviders().forEach { provider ->
-            assertThat(provider.providerBaseUrl).isNotEmpty()
-        }
+        ProviderSetting.getDefaultProviders()
+            .filterNot { it is ProviderSetting.AnythingLLM }
+            .forEach { provider ->
+                assertThat(provider.providerBaseUrl).isNotEmpty()
+            }
     }
 }

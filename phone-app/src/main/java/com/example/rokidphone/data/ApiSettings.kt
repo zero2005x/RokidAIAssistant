@@ -133,6 +133,15 @@ enum class AiProvider(
         supportsSpeech = true,
         supportsVision = true
     ),
+    ANYTHINGLLM(
+        displayNameResId = R.string.provider_anythingllm,
+        description = "Document-grounded retrieval via AnythingLLM workspace",
+        website = "https://anythingllm.com",
+        defaultBaseUrl = "http://localhost:3001",
+        isOpenAiCompatible = false,
+        supportsSpeech = false,
+        supportsVision = false
+    ),
     CUSTOM(
         displayNameResId = R.string.provider_custom,
         description = "OpenAI-compatible API (Ollama, LM Studio, etc.)",
@@ -581,6 +590,17 @@ object AvailableModels {
         )
     )
     
+    val anythingllmModels = listOf(
+        ModelOption(
+            id = "workspace",
+            displayName = "Workspace Model",
+            provider = AiProvider.ANYTHINGLLM,
+            supportsAudio = false,
+            supportsVision = false,
+            description = "Model determined by the AnythingLLM workspace configuration"
+        )
+    )
+
     val customModels = listOf(
         ModelOption(
             id = "custom",
@@ -999,17 +1019,18 @@ object AvailableModels {
             AiProvider.MOONSHOT -> moonshotModels
             AiProvider.MISTRAL -> mistralModels
             AiProvider.GEMINI_LIVE -> geminiLiveModels
+            AiProvider.ANYTHINGLLM -> anythingllmModels
             AiProvider.CUSTOM -> customModels
         }
     }
-    
+
     fun findModel(modelId: String): ModelOption? {
         return allModels.find { it.id == modelId }
     }
-    
+
     val allModels: List<ModelOption>
-        get() = geminiModels + openaiModels + anthropicModels + deepseekModels + groqModels + 
-                xaiModels + alibabaModels + zhipuModels + baiduModels + perplexityModels + moonshotModels + mistralModels + geminiLiveModels + customModels
+        get() = geminiModels + openaiModels + anthropicModels + deepseekModels + groqModels +
+                xaiModels + alibabaModels + zhipuModels + baiduModels + perplexityModels + moonshotModels + mistralModels + geminiLiveModels + anythingllmModels + customModels
 }
 
 /**
@@ -1044,7 +1065,12 @@ data class ApiSettings(
     val moonshotApiKey: String = "",
     val mistralApiKey: String = "",
     val customApiKey: String = "",
-    
+
+    // AnythingLLM settings
+    val anythingllmServerUrl: String = "",
+    val anythingllmApiKey: String = "",
+    val anythingllmWorkspaceSlug: String = "",
+
     // Custom base URLs (for providers that support it)
     val customBaseUrl: String = "http://localhost:11434/v1/",
     val customModelName: String = "llama4",
@@ -1173,10 +1199,11 @@ data class ApiSettings(
             AiProvider.MOONSHOT -> moonshotApiKey
             AiProvider.MISTRAL -> mistralApiKey
             AiProvider.GEMINI_LIVE -> geminiApiKey  // Shares Gemini API key
+            AiProvider.ANYTHINGLLM -> anythingllmApiKey
             AiProvider.CUSTOM -> customApiKey
         }
     }
-    
+
     /**
      * Get API Key for specified provider
      */
@@ -1195,6 +1222,7 @@ data class ApiSettings(
             AiProvider.MOONSHOT -> moonshotApiKey
             AiProvider.MISTRAL -> mistralApiKey
             AiProvider.GEMINI_LIVE -> geminiApiKey  // Shares Gemini API key
+            AiProvider.ANYTHINGLLM -> anythingllmApiKey
             AiProvider.CUSTOM -> customApiKey
         }
     }
@@ -1205,6 +1233,7 @@ data class ApiSettings(
     fun getCurrentBaseUrl(): String {
         return when (aiProvider) {
             AiProvider.CUSTOM -> customBaseUrl.ifBlank { AiProvider.CUSTOM.defaultBaseUrl }
+            AiProvider.ANYTHINGLLM -> anythingllmServerUrl.ifBlank { AiProvider.ANYTHINGLLM.defaultBaseUrl }
             else -> aiProvider.defaultBaseUrl
         }
     }
@@ -1226,6 +1255,8 @@ data class ApiSettings(
         return when (aiProvider) {
             AiProvider.CUSTOM -> customBaseUrl.isNotBlank() && isValidUrl(customBaseUrl)
             AiProvider.BAIDU -> baiduApiKey.isNotBlank() && baiduSecretKey.isNotBlank()
+            AiProvider.ANYTHINGLLM ->
+                anythingllmServerUrl.isNotBlank() && anythingllmApiKey.isNotBlank() && anythingllmWorkspaceSlug.isNotBlank()
             else -> getCurrentApiKey().isNotBlank()
         }
     }
@@ -1238,6 +1269,8 @@ data class ApiSettings(
             AiProvider.CUSTOM -> customBaseUrl.isNotBlank() && isValidUrl(customBaseUrl)
             AiProvider.BAIDU -> baiduApiKey.isNotBlank() && baiduSecretKey.isNotBlank()
             AiProvider.GEMINI_LIVE -> geminiApiKey.isNotBlank()  // Shares Gemini API key
+            AiProvider.ANYTHINGLLM ->
+                anythingllmServerUrl.isNotBlank() && anythingllmApiKey.isNotBlank() && anythingllmWorkspaceSlug.isNotBlank()
             else -> getApiKeyForProvider(provider).isNotBlank()
         }
     }
@@ -1286,6 +1319,7 @@ data class ApiSettings(
                perplexityApiKey.isNotBlank() ||
                moonshotApiKey.isNotBlank() ||
                mistralApiKey.isNotBlank() ||
+               (anythingllmApiKey.isNotBlank() && anythingllmServerUrl.isNotBlank()) ||
                (customApiKey.isNotBlank() || customBaseUrl.isNotBlank())
     }
     
@@ -1324,10 +1358,14 @@ sealed class SettingsValidationResult {
  */
 fun ApiSettings.validateForChat(): SettingsValidationResult {
     return when {
-        aiProvider == AiProvider.CUSTOM && !isValidUrl(customBaseUrl) -> 
+        aiProvider == AiProvider.CUSTOM && !isValidUrl(customBaseUrl) ->
             SettingsValidationResult.InvalidConfiguration("Invalid custom provider URL")
         aiProvider == AiProvider.BAIDU && (baiduApiKey.isBlank() || baiduSecretKey.isBlank()) ->
             SettingsValidationResult.MissingApiKey(AiProvider.BAIDU)
+        aiProvider == AiProvider.ANYTHINGLLM && !isValid() ->
+            SettingsValidationResult.InvalidConfiguration(
+                "Please configure server URL, API key, and workspace slug for AnythingLLM"
+            )
         getCurrentApiKey().isBlank() ->
             SettingsValidationResult.MissingApiKey(aiProvider)
         else -> SettingsValidationResult.Valid

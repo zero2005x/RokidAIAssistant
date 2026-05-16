@@ -26,11 +26,20 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.rokidphone.R
+import com.example.rokidphone.ai.provider.AnythingLLMProvider
+import com.example.rokidphone.ai.provider.ProviderSetting
+import com.example.rokidphone.ai.provider.ValidationResult
 import com.example.rokidphone.data.*
 import com.example.rokidphone.service.ai.AiServiceFactory
 import com.example.rokidphone.service.stt.SttProvider
 import com.example.rokidphone.service.stt.SttServiceFactory
 import kotlinx.coroutines.launch
+
+private const val URL_SCHEME_HTTP = "http://"
+private const val URL_SCHEME_HTTPS = "https://"
+
+private fun isHttpUrl(url: String): Boolean =
+    url.startsWith(URL_SCHEME_HTTP) || url.startsWith(URL_SCHEME_HTTPS)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -125,9 +134,23 @@ fun SettingsScreen(
                     )
                 }
             }
-            
-            // API Key settings section (for non-custom providers)
-            if (settings.aiProvider != AiProvider.CUSTOM) {
+
+            // AnythingLLM Settings (only shown for ANYTHINGLLM provider)
+            if (settings.aiProvider == AiProvider.ANYTHINGLLM) {
+                item {
+                    AnythingLLMProviderSection(
+                        serverUrl = settings.anythingllmServerUrl,
+                        onServerUrlChange = { onSettingsChange(settings.copy(anythingllmServerUrl = it)) },
+                        apiKey = settings.anythingllmApiKey,
+                        onApiKeyChange = { onSettingsChange(settings.copy(anythingllmApiKey = it)) },
+                        workspaceSlug = settings.anythingllmWorkspaceSlug,
+                        onWorkspaceSlugChange = { onSettingsChange(settings.copy(anythingllmWorkspaceSlug = it)) }
+                    )
+                }
+            }
+
+            // API Key settings section (for non-custom, non-AnythingLLM providers)
+            if (settings.aiProvider != AiProvider.CUSTOM && settings.aiProvider != AiProvider.ANYTHINGLLM) {
                 item {
                                 SettingsSection(title = stringResource(R.string.api_keys)) {
                         when (settings.aiProvider) {
@@ -1297,7 +1320,7 @@ fun CustomProviderSection(
     onTestConnection: () -> Unit
 ) {
     var isValidUrl by remember(baseUrl) { 
-        mutableStateOf(baseUrl.startsWith("http://") || baseUrl.startsWith("https://"))
+        mutableStateOf(isHttpUrl(baseUrl))
     }
     var isTesting by remember { mutableStateOf(false) }
     var testResult by remember { mutableStateOf<String?>(null) }
@@ -1322,7 +1345,7 @@ fun CustomProviderSection(
                 value = baseUrl,
                 onValueChange = { 
                     onBaseUrlChange(it)
-                    isValidUrl = it.startsWith("http://") || it.startsWith("https://")
+                    isValidUrl = isHttpUrl(it)
                 },
                 label = { Text(stringResource(R.string.base_url)) },
                 placeholder = { Text(stringResource(R.string.base_url_hint)) },
@@ -1462,6 +1485,221 @@ fun CustomProviderSection(
                 }
             }
         }
+    }
+}
+
+/**
+ * AnythingLLM Provider Settings Section
+ */
+private data class AnythingLlmConnectionState(
+    val success: Boolean,
+    val message: String? = null
+)
+
+@Composable
+fun AnythingLLMProviderSection(
+    serverUrl: String,
+    onServerUrlChange: (String) -> Unit,
+    apiKey: String,
+    onApiKeyChange: (String) -> Unit,
+    workspaceSlug: String,
+    onWorkspaceSlugChange: (String) -> Unit
+) {
+    var isValidUrl by remember(serverUrl) {
+        mutableStateOf(isHttpUrl(serverUrl))
+    }
+    var isTesting by remember { mutableStateOf(false) }
+    var testResult by remember { mutableStateOf<String?>(null) }
+    var testSuccess by remember { mutableStateOf<Boolean?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+    val invalidUrlText = stringResource(R.string.invalid_url)
+
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(R.string.anythingllm_provider_settings),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            AnythingLlmServerUrlField(
+                serverUrl = serverUrl,
+                isValidUrl = isValidUrl,
+                onServerUrlChange = {
+                    onServerUrlChange(it)
+                    isValidUrl = isHttpUrl(it)
+                }
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            ApiKeyInputField(
+                label = stringResource(R.string.anythingllm_api_key),
+                value = apiKey,
+                onValueChange = onApiKeyChange
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            AnythingLlmWorkspaceField(
+                value = workspaceSlug,
+                onValueChange = onWorkspaceSlugChange,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            AnythingLlmConnectionButton(
+                isTesting = isTesting,
+                onClick = {
+                    isTesting = true
+                    testResult = null
+                    testSuccess = null
+                    coroutineScope.launch {
+                        val result = testAnythingLlmConnection(
+                            serverUrl = serverUrl,
+                            apiKey = apiKey,
+                            workspaceSlug = workspaceSlug,
+                            isValidUrl = isValidUrl,
+                            invalidUrlText = invalidUrlText
+                        )
+                        testSuccess = result.success
+                        testResult = result.message
+                        isTesting = false
+                    }
+                }
+            )
+
+            if (testSuccess != null || testResult != null) {
+                AnythingLlmConnectionResult(
+                    success = testSuccess == true,
+                    message = testResult
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AnythingLlmServerUrlField(
+    serverUrl: String,
+    isValidUrl: Boolean,
+    onServerUrlChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = serverUrl,
+        onValueChange = onServerUrlChange,
+        label = { Text(stringResource(R.string.anythingllm_server_url)) },
+        placeholder = { Text(stringResource(R.string.anythingllm_server_url_hint)) },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true,
+        isError = serverUrl.isNotBlank() && !isValidUrl,
+        supportingText = {
+            if (serverUrl.isNotBlank() && !isValidUrl) {
+                Text(stringResource(R.string.invalid_url), color = MaterialTheme.colorScheme.error)
+            }
+        },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri)
+    )
+}
+
+@Composable
+private fun AnythingLlmWorkspaceField(
+    value: String,
+    onValueChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(stringResource(R.string.anythingllm_workspace_slug)) },
+        placeholder = { Text(stringResource(R.string.anythingllm_workspace_slug_hint)) },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+    )
+}
+
+@Composable
+private fun AnythingLlmConnectionButton(
+    isTesting: Boolean,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        enabled = !isTesting,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        if (isTesting) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                strokeWidth = 2.dp,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(stringResource(R.string.testing_connection))
+        } else {
+            Icon(Icons.Default.NetworkCheck, contentDescription = null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(stringResource(R.string.test_connection))
+        }
+    }
+}
+
+@Composable
+private fun AnythingLlmConnectionResult(
+    success: Boolean,
+    message: String?
+) {
+    Spacer(modifier = Modifier.height(12.dp))
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.small,
+        color = if (success) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            MaterialTheme.colorScheme.errorContainer
+        }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = if (success) Icons.Default.CheckCircle else Icons.Default.Error,
+                contentDescription = null,
+                tint = if (success) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = if (success) stringResource(R.string.connection_success) else message.orEmpty(),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+private suspend fun testAnythingLlmConnection(
+    serverUrl: String,
+    apiKey: String,
+    workspaceSlug: String,
+    isValidUrl: Boolean,
+    invalidUrlText: String
+): AnythingLlmConnectionState {
+    if (serverUrl.isNotBlank() && !isValidUrl) {
+        return AnythingLlmConnectionState(success = false, message = invalidUrlText)
+    }
+
+    val providerSetting = ProviderSetting.AnythingLLM(
+        serverUrl = serverUrl,
+        apiKey = apiKey,
+        workspaceSlug = workspaceSlug
+    )
+
+    return when (val result = AnythingLLMProvider().validateSetting(providerSetting)) {
+        is ValidationResult.Valid -> AnythingLlmConnectionState(success = true)
+        is ValidationResult.Invalid -> AnythingLlmConnectionState(success = false, message = result.reason)
     }
 }
 
