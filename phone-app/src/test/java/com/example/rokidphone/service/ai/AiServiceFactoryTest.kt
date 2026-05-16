@@ -1,11 +1,23 @@
 package com.example.rokidphone.service.ai
 
+import com.example.rokidphone.service.SpeechResult
+import com.example.rokidphone.testutil.MockWebServerRule
 import com.example.rokidphone.data.AiProvider
 import com.example.rokidphone.data.ApiSettings
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.runTest
+import mockwebserver3.MockResponse
+import okhttp3.Headers.Companion.headersOf
+import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class AiServiceFactoryTest {
+
+    @get:Rule
+    val mockServer = MockWebServerRule()
 
     private fun fullyConfiguredSettings(provider: AiProvider): ApiSettings {
         return ApiSettings(
@@ -24,6 +36,9 @@ class AiServiceFactoryTest {
             perplexityApiKey = "perplexity-key",
             moonshotApiKey = "moonshot-key",
             mistralApiKey = "mistral-key",
+            anythingllmServerUrl = mockServer.baseUrlNoSlash,
+            anythingllmApiKey = "anythingllm-key",
+            anythingllmWorkspaceSlug = "docs",
             customApiKey = "custom-key",
             customBaseUrl = "http://localhost:11434/v1/",
             customModelName = "custom-model",
@@ -87,9 +102,46 @@ class AiServiceFactoryTest {
     }
 
     @Test
+    fun `createService returns AnythingLLM adapter for ANYTHINGLLM provider`() = runTest {
+        mockServer.server.enqueue(
+            MockResponse(
+                code = 200,
+                body = """{"textResponse":"Docs answer","sources":[]}""",
+                headers = headersOf("Content-Type", "application/json")
+            )
+        )
+
+        val service = AiServiceFactory.createService(fullyConfiguredSettings(AiProvider.ANYTHINGLLM))
+
+        assertThat(service.provider).isEqualTo(AiProvider.ANYTHINGLLM)
+        assertThat(service.transcribe(byteArrayOf(), "en")).isInstanceOf(SpeechResult.Error::class.java)
+        assertThat(service.analyzeImage(byteArrayOf(), "describe")).contains("does not support image analysis")
+        assertThat(service.chat("What changed?")).isEqualTo("Docs answer")
+
+        val request = mockServer.server.takeRequest()
+        assertThat(request.path).isEqualTo("/api/v1/workspace/docs/chat")
+        service.clearHistory()
+    }
+
+    @Test
     fun `createTestService returns DeepSeekService for DEEPSEEK provider`() {
         val service = AiServiceFactory.createTestService(fullyConfiguredSettings(AiProvider.DEEPSEEK))
         assertThat(service).isInstanceOf(DeepSeekService::class.java)
+    }
+
+    @Test
+    fun `createTestService returns null for non OpenAI-compatible providers`() {
+        val providers = listOf(
+            AiProvider.GEMINI,
+            AiProvider.ANTHROPIC,
+            AiProvider.BAIDU,
+            AiProvider.GEMINI_LIVE,
+            AiProvider.ANYTHINGLLM
+        )
+
+        for (provider in providers) {
+            assertThat(AiServiceFactory.createTestService(fullyConfiguredSettings(provider))).isNull()
+        }
     }
 
     @Test

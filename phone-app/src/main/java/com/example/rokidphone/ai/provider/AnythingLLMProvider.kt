@@ -1,6 +1,7 @@
 package com.example.rokidphone.ai.provider
 
 import com.example.rokidphone.service.ai.NetworkClientFactory
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -16,7 +17,9 @@ import java.util.Locale
  * Relays text queries to a configured AnythingLLM workspace and surfaces
  * source previews from the workspace's document index when present.
  */
-class AnythingLLMProvider : Provider<ProviderSetting.AnythingLLM> {
+class AnythingLLMProvider(
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+) : Provider<ProviderSetting.AnythingLLM> {
 
     override val providerId: String = "anythingllm"
     override val displayName: String = "AnythingLLM"
@@ -38,7 +41,7 @@ class AnythingLLMProvider : Provider<ProviderSetting.AnythingLLM> {
             )
         }
 
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             try {
                 val request = Request.Builder()
                     .url("${setting.serverUrl.trimEnd('/')}/api/v1/auth")
@@ -74,7 +77,7 @@ class AnythingLLMProvider : Provider<ProviderSetting.AnythingLLM> {
             )
         }
 
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             try {
                 val userMessage = messages.lastOrNull { it.role == MessageRole.USER }?.content.orEmpty()
                 val requestBody = JSONObject()
@@ -90,8 +93,8 @@ class AnythingLLMProvider : Provider<ProviderSetting.AnythingLLM> {
                     .build()
 
                 client.newCall(request).execute().use { response ->
-                    val responseBody = response.body?.string()
-                    if (response.isSuccessful && responseBody != null) {
+                    val responseBody = response.body.string()
+                    if (response.isSuccessful) {
                         val json = JSONObject(responseBody)
                         val text = json.optNullableString("textResponse")
                             .ifBlank { json.optNullableString("response") }

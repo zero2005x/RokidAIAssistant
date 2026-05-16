@@ -30,6 +30,29 @@ class ApiSettingsTest {
     }
 
     @Test
+    fun `AnythingLLM uses its API key and server URL fields`() {
+        val settings = ApiSettings(
+            aiProvider = AiProvider.ANYTHINGLLM,
+            anythingllmServerUrl = "https://anything.example",
+            anythingllmApiKey = "anything-key",
+            anythingllmWorkspaceSlug = "docs"
+        )
+
+        assertThat(settings.getCurrentApiKey()).isEqualTo("anything-key")
+        assertThat(settings.getApiKeyForProvider(AiProvider.ANYTHINGLLM)).isEqualTo("anything-key")
+        assertThat(settings.getCurrentBaseUrl()).isEqualTo("https://anything.example")
+        assertThat(settings.isValid()).isTrue()
+        assertThat(settings.isProviderConfigured(AiProvider.ANYTHINGLLM)).isTrue()
+    }
+
+    @Test
+    fun `AnythingLLM falls back to provider default base URL when server URL is blank`() {
+        val settings = ApiSettings(aiProvider = AiProvider.ANYTHINGLLM)
+
+        assertThat(settings.getCurrentBaseUrl()).isEqualTo(AiProvider.ANYTHINGLLM.defaultBaseUrl)
+    }
+
+    @Test
     fun `custom provider base url and model use custom fields when set`() {
         // 測試：CUSTOM provider 應使用自訂 baseUrl 與 modelName
         val settings = ApiSettings(
@@ -64,11 +87,17 @@ class ApiSettingsTest {
         val baiduValid = ApiSettings(aiProvider = AiProvider.BAIDU, baiduApiKey = "k", baiduSecretKey = "s")
         val customInvalid = ApiSettings(aiProvider = AiProvider.CUSTOM, customBaseUrl = "ws://invalid")
         val customValid = ApiSettings(aiProvider = AiProvider.CUSTOM, customBaseUrl = "https://example.com/v1")
+        val anythingLlmInvalid = ApiSettings(
+            aiProvider = AiProvider.ANYTHINGLLM,
+            anythingllmServerUrl = "https://anything.example",
+            anythingllmApiKey = "key"
+        )
 
         assertThat(baiduInvalid.isValid()).isFalse()
         assertThat(baiduValid.isValid()).isTrue()
         assertThat(customInvalid.isValid()).isFalse()
         assertThat(customValid.isValid()).isTrue()
+        assertThat(anythingLlmInvalid.isValid()).isFalse()
     }
 
     @Test
@@ -88,11 +117,21 @@ class ApiSettingsTest {
         // 測試：聊天設定驗證應回傳正確結果型別
         val customInvalid = ApiSettings(aiProvider = AiProvider.CUSTOM, customBaseUrl = "invalid-url")
         val baiduMissing = ApiSettings(aiProvider = AiProvider.BAIDU, baiduApiKey = "", baiduSecretKey = "")
+        val anythingLlmInvalid = ApiSettings(aiProvider = AiProvider.ANYTHINGLLM, anythingllmApiKey = "key")
         val validOpenai = ApiSettings(aiProvider = AiProvider.OPENAI, openaiApiKey = "ok")
+        val validAnythingLlm = ApiSettings(
+            aiProvider = AiProvider.ANYTHINGLLM,
+            anythingllmServerUrl = "https://anything.example",
+            anythingllmApiKey = "key",
+            anythingllmWorkspaceSlug = "docs"
+        )
 
         assertThat(customInvalid.validateForChat()).isInstanceOf(SettingsValidationResult.InvalidConfiguration::class.java)
         assertThat(baiduMissing.validateForChat()).isInstanceOf(SettingsValidationResult.MissingApiKey::class.java)
+        assertThat(anythingLlmInvalid.validateForChat())
+            .isInstanceOf(SettingsValidationResult.InvalidConfiguration::class.java)
         assertThat(validOpenai.validateForChat()).isEqualTo(SettingsValidationResult.Valid)
+        assertThat(validAnythingLlm.validateForChat()).isEqualTo(SettingsValidationResult.Valid)
     }
 
     @Test
