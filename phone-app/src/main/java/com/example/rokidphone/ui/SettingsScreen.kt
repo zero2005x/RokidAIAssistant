@@ -1501,7 +1501,7 @@ fun AnythingLLMProviderSection(
     var testResult by remember { mutableStateOf<String?>(null) }
     var testSuccess by remember { mutableStateOf<Boolean?>(null) }
     val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
+    val invalidUrlText = stringResource(R.string.invalid_url)
 
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -1578,7 +1578,7 @@ fun AnythingLLMProviderSection(
                     coroutineScope.launch {
                         if (serverUrl.isNotBlank() && !isValidUrl) {
                             testSuccess = false
-                            testResult = context.getString(R.string.invalid_url)
+                            testResult = invalidUrlText
                         } else {
                             val providerSetting = ProviderSetting.AnythingLLM(
                                 serverUrl = serverUrl,
