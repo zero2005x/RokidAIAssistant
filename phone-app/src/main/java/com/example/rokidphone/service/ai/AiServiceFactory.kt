@@ -1,7 +1,13 @@
 package com.example.rokidphone.service.ai
 
+import com.example.rokidphone.ai.provider.AnythingLLMProvider
+import com.example.rokidphone.ai.provider.ChatMessage
+import com.example.rokidphone.ai.provider.GenerationResult
+import com.example.rokidphone.ai.provider.MessageRole
+import com.example.rokidphone.ai.provider.ProviderSetting
 import com.example.rokidphone.data.AiProvider
 import com.example.rokidphone.data.ApiSettings
+import com.example.rokidphone.service.SpeechResult
 
 /**
  * AI Service Factory
@@ -174,6 +180,34 @@ object AiServiceFactory {
                 presencePenalty = settings.presencePenalty
             )
 
+            AiProvider.ANYTHINGLLM -> {
+                val providerSetting = ProviderSetting.AnythingLLM(
+                    serverUrl = settings.anythingllmServerUrl,
+                    apiKey = settings.anythingllmApiKey,
+                    workspaceSlug = settings.anythingllmWorkspaceSlug
+                )
+                val anythingLlmProvider = AnythingLLMProvider()
+                val history = mutableListOf<ChatMessage>()
+                object : AiServiceProvider {
+                    override val provider: AiProvider = AiProvider.ANYTHINGLLM
+                    override suspend fun transcribe(pcmAudioData: ByteArray, languageCode: String): SpeechResult =
+                        SpeechResult.Error("AnythingLLM does not support speech recognition")
+                    override suspend fun chat(userMessage: String): String {
+                        history.add(ChatMessage(MessageRole.USER, userMessage))
+                        return when (val result = anythingLlmProvider.generateText(providerSetting, history)) {
+                            is GenerationResult.Success -> {
+                                history.add(ChatMessage(MessageRole.ASSISTANT, result.text))
+                                result.text
+                            }
+                            is GenerationResult.Error -> "Error: ${result.message}"
+                        }
+                    }
+                    override suspend fun analyzeImage(imageData: ByteArray, prompt: String): String =
+                        "AnythingLLM does not support image analysis"
+                    override fun clearHistory() { history.clear() }
+                }
+            }
+
             AiProvider.GEMINI_LIVE -> {
                 // Gemini Live uses WebSocket streaming, not REST API.
                 // Return a standard GeminiService as fallback for non-live operations
@@ -196,7 +230,8 @@ object AiServiceFactory {
      */
     fun createTestService(settings: ApiSettings): OpenAiCompatibleService? {
         return when (settings.aiProvider) {
-            AiProvider.GEMINI, AiProvider.ANTHROPIC, AiProvider.BAIDU, AiProvider.GEMINI_LIVE -> null // Not OpenAI-compatible
+            AiProvider.GEMINI, AiProvider.ANTHROPIC, AiProvider.BAIDU,
+            AiProvider.GEMINI_LIVE, AiProvider.ANYTHINGLLM -> null // Not OpenAI-compatible
 
             AiProvider.DEEPSEEK -> DeepSeekService(
                 apiKey = settings.getCurrentApiKey(),

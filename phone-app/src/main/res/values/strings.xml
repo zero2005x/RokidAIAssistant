@@ -166,8 +166,16 @@
     <string name="perplexity_api_key">Perplexity API Key</string>
     <string name="moonshot_api_key">Moonshot API Key</string>
     <string name="mistral_api_key" translatable="false">Mistral API Key</string>
+    <string name="anythingllm_api_key" translatable="false">AnythingLLM API Key</string>
     <string name="custom_api_key">Custom API Key (Optional)</string>
-    
+
+    <!-- AnythingLLM Provider Settings -->
+    <string name="anythingllm_provider_settings" translatable="false">AnythingLLM Settings</string>
+    <string name="anythingllm_server_url" translatable="false">Server URL</string>
+    <string name="anythingllm_server_url_hint" translatable="false">e.g., http://localhost:3001</string>
+    <string name="anythingllm_workspace_slug" translatable="false">Workspace Slug</string>
+    <string name="anythingllm_workspace_slug_hint" translatable="false">e.g., my-workspace</string>
+
     <!-- Custom Provider Settings -->
     <string name="custom_provider_settings">Custom Provider Settings</string>
     <string name="base_url">Base URL</string>
@@ -202,6 +210,7 @@
     <string name="provider_perplexity">Perplexity</string>
     <string name="provider_moonshot">Moonshot (Kimi)</string>
     <string name="provider_mistral" translatable="false">Mistral AI</string>
+    <string name="provider_anythingllm" translatable="false">AnythingLLM</string>
     <string name="provider_custom">Custom / Self-Hosted</string>
     <string name="provider_gemini_live">Gemini Live</string>
     

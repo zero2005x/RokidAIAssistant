@@ -42,7 +42,12 @@ class SettingsRepository(private val context: Context) {
         private const val KEY_PERPLEXITY_API_KEY = "perplexity_api_key"
         private const val KEY_MOONSHOT_API_KEY = "moonshot_api_key"
         private const val KEY_CUSTOM_API_KEY = "custom_api_key"
-        
+
+        // Keys for AnythingLLM provider settings (stored encrypted)
+        private const val KEY_ANYTHINGLLM_SERVER_URL = "anythingllm_server_url"
+        private const val KEY_ANYTHINGLLM_API_KEY = "anythingllm_api_key"
+        private const val KEY_ANYTHINGLLM_WORKSPACE_SLUG = "anythingllm_workspace_slug"
+
         // Keys for custom provider settings
         private const val KEY_CUSTOM_BASE_URL = "custom_base_url"
         private const val KEY_CUSTOM_MODEL_NAME = "custom_model_name"
@@ -140,7 +145,10 @@ class SettingsRepository(private val context: Context) {
             perplexityApiKey = prefs.getString(KEY_PERPLEXITY_API_KEY, "") ?: "",
             moonshotApiKey = prefs.getString(KEY_MOONSHOT_API_KEY, "") ?: "",
             customApiKey = prefs.getString(KEY_CUSTOM_API_KEY, "") ?: "",
-            customBaseUrl = prefs.getString(KEY_CUSTOM_BASE_URL, "http://localhost:11434/v1/") 
+            anythingllmServerUrl = prefs.getString(KEY_ANYTHINGLLM_SERVER_URL, "") ?: "",
+            anythingllmApiKey = prefs.getString(KEY_ANYTHINGLLM_API_KEY, "") ?: "",
+            anythingllmWorkspaceSlug = prefs.getString(KEY_ANYTHINGLLM_WORKSPACE_SLUG, "") ?: "",
+            customBaseUrl = prefs.getString(KEY_CUSTOM_BASE_URL, "http://localhost:11434/v1/")
                 ?: "http://localhost:11434/v1/",
             customModelName = prefs.getString(KEY_CUSTOM_MODEL_NAME, "llama4") ?: "llama4",
             sttProvider = SttProvider.fromName(
@@ -223,6 +231,9 @@ class SettingsRepository(private val context: Context) {
             putString(KEY_PERPLEXITY_API_KEY, settings.perplexityApiKey)
             putString(KEY_MOONSHOT_API_KEY, settings.moonshotApiKey)
             putString(KEY_CUSTOM_API_KEY, settings.customApiKey)
+            putString(KEY_ANYTHINGLLM_SERVER_URL, settings.anythingllmServerUrl)
+            putString(KEY_ANYTHINGLLM_API_KEY, settings.anythingllmApiKey)
+            putString(KEY_ANYTHINGLLM_WORKSPACE_SLUG, settings.anythingllmWorkspaceSlug)
             putString(KEY_CUSTOM_BASE_URL, settings.customBaseUrl)
             putString(KEY_CUSTOM_MODEL_NAME, settings.customModelName)
             putString(KEY_STT_PROVIDER, settings.sttProvider.name)
@@ -314,7 +325,19 @@ class SettingsRepository(private val context: Context) {
     fun updateMistralApiKey(apiKey: String) {
         saveSettings(getSettings().copy(mistralApiKey = apiKey))
     }
-    
+
+    fun updateAnythingLlmServerUrl(url: String) {
+        saveSettings(getSettings().copy(anythingllmServerUrl = url))
+    }
+
+    fun updateAnythingLlmApiKey(apiKey: String) {
+        saveSettings(getSettings().copy(anythingllmApiKey = apiKey))
+    }
+
+    fun updateAnythingLlmWorkspaceSlug(slug: String) {
+        saveSettings(getSettings().copy(anythingllmWorkspaceSlug = slug))
+    }
+
     fun updateCustomApiKey(apiKey: String) {
         saveSettings(getSettings().copy(customApiKey = apiKey))
     }

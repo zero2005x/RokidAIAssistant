@@ -263,6 +263,28 @@ sealed class ProviderSetting {
     }
     
     /**
+     * AnythingLLM Provider Settings
+     * Document-grounded provider that relays text queries to a configured workspace
+     * and exposes source/citation previews when available.
+     */
+    @Serializable
+    data class AnythingLLM(
+        override val id: String = "anythingllm",
+        override val displayName: String = "AnythingLLM",
+        override val enabled: Boolean = true,
+        val serverUrl: String = "",
+        val apiKey: String = "",
+        val workspaceSlug: String = ""
+    ) : ProviderSetting() {
+        @Transient
+        override val providerApiKey: String = apiKey
+        @Transient
+        override val providerBaseUrl: String = serverUrl
+        override fun isValid(): Boolean =
+            serverUrl.isNotBlank() && apiKey.isNotBlank() && workspaceSlug.isNotBlank()
+    }
+
+    /**
      * Custom OpenAI-compatible Provider Settings
      * Supports Ollama, LM Studio, vLLM, and other local deployments
      */
@@ -300,6 +322,7 @@ sealed class ProviderSetting {
             Perplexity(),
             Moonshot(),
             Mistral(),
+            AnythingLLM(),
             Custom()
         )
         
@@ -319,6 +342,7 @@ sealed class ProviderSetting {
             "perplexity" -> Perplexity()
             "moonshot" -> Moonshot()
             "mistral" -> Mistral()
+            "anythingllm" -> AnythingLLM()
             "custom" -> Custom()
             else -> null
         }

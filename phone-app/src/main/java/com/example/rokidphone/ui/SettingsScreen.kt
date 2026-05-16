@@ -26,6 +26,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.rokidphone.R
+import com.example.rokidphone.ai.provider.AnythingLLMProvider
+import com.example.rokidphone.ai.provider.ProviderSetting
+import com.example.rokidphone.ai.provider.ValidationResult
 import com.example.rokidphone.data.*
 import com.example.rokidphone.service.ai.AiServiceFactory
 import com.example.rokidphone.service.stt.SttProvider
@@ -125,9 +128,23 @@ fun SettingsScreen(
                     )
                 }
             }
-            
-            // API Key settings section (for non-custom providers)
-            if (settings.aiProvider != AiProvider.CUSTOM) {
+
+            // AnythingLLM Settings (only shown for ANYTHINGLLM provider)
+            if (settings.aiProvider == AiProvider.ANYTHINGLLM) {
+                item {
+                    AnythingLLMProviderSection(
+                        serverUrl = settings.anythingllmServerUrl,
+                        onServerUrlChange = { onSettingsChange(settings.copy(anythingllmServerUrl = it)) },
+                        apiKey = settings.anythingllmApiKey,
+                        onApiKeyChange = { onSettingsChange(settings.copy(anythingllmApiKey = it)) },
+                        workspaceSlug = settings.anythingllmWorkspaceSlug,
+                        onWorkspaceSlugChange = { onSettingsChange(settings.copy(anythingllmWorkspaceSlug = it)) }
+                    )
+                }
+            }
+
+            // API Key settings section (for non-custom, non-AnythingLLM providers)
+            if (settings.aiProvider != AiProvider.CUSTOM && settings.aiProvider != AiProvider.ANYTHINGLLM) {
                 item {
                                 SettingsSection(title = stringResource(R.string.api_keys)) {
                         when (settings.aiProvider) {
@@ -1456,6 +1473,172 @@ fun CustomProviderSection(
                                 stringResource(R.string.connection_success) 
                             else 
                                 result,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * AnythingLLM Provider Settings Section
+ */
+@Composable
+fun AnythingLLMProviderSection(
+    serverUrl: String,
+    onServerUrlChange: (String) -> Unit,
+    apiKey: String,
+    onApiKeyChange: (String) -> Unit,
+    workspaceSlug: String,
+    onWorkspaceSlugChange: (String) -> Unit
+) {
+    var isValidUrl by remember(serverUrl) {
+        mutableStateOf(serverUrl.startsWith("http://") || serverUrl.startsWith("https://"))
+    }
+    var isTesting by remember { mutableStateOf(false) }
+    var testResult by remember { mutableStateOf<String?>(null) }
+    var testSuccess by remember { mutableStateOf<Boolean?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(R.string.anythingllm_provider_settings),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Server URL
+            OutlinedTextField(
+                value = serverUrl,
+                onValueChange = {
+                    onServerUrlChange(it)
+                    isValidUrl = it.startsWith("http://") || it.startsWith("https://")
+                },
+                label = { Text(stringResource(R.string.anythingllm_server_url)) },
+                placeholder = { Text(stringResource(R.string.anythingllm_server_url_hint)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                isError = serverUrl.isNotBlank() && !isValidUrl,
+                supportingText = {
+                    if (serverUrl.isNotBlank() && !isValidUrl) {
+                        Text(stringResource(R.string.invalid_url), color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // API Key
+            var passwordVisible by remember { mutableStateOf(false) }
+            OutlinedTextField(
+                value = apiKey,
+                onValueChange = onApiKeyChange,
+                label = { Text(stringResource(R.string.anythingllm_api_key)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (passwordVisible) stringResource(R.string.hide) else stringResource(R.string.show)
+                        )
+                    }
+                }
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Workspace Slug
+            OutlinedTextField(
+                value = workspaceSlug,
+                onValueChange = onWorkspaceSlugChange,
+                label = { Text(stringResource(R.string.anythingllm_workspace_slug)) },
+                placeholder = { Text(stringResource(R.string.anythingllm_workspace_slug_hint)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Test Connection button
+            Button(
+                onClick = {
+                    isTesting = true
+                    testResult = null
+                    testSuccess = null
+                    coroutineScope.launch {
+                        if (serverUrl.isNotBlank() && !isValidUrl) {
+                            testSuccess = false
+                            testResult = context.getString(R.string.invalid_url)
+                        } else {
+                            val providerSetting = ProviderSetting.AnythingLLM(
+                                serverUrl = serverUrl,
+                                apiKey = apiKey,
+                                workspaceSlug = workspaceSlug
+                            )
+                            val result = AnythingLLMProvider().validateSetting(providerSetting)
+                            testSuccess = result is ValidationResult.Valid
+                            testResult = when (result) {
+                                is ValidationResult.Valid -> null
+                                is ValidationResult.Invalid -> result.reason
+                            }
+                        }
+                        isTesting = false
+                    }
+                },
+                enabled = !isTesting,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (isTesting) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.testing_connection))
+                } else {
+                    Icon(Icons.Default.NetworkCheck, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.test_connection))
+                }
+            }
+
+            // Test result card
+            if (testSuccess != null || testResult != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (testSuccess == true)
+                            MaterialTheme.colorScheme.primaryContainer
+                        else
+                            MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = if (testSuccess == true) Icons.Default.CheckCircle else Icons.Default.Error,
+                            contentDescription = null,
+                            tint = if (testSuccess == true) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (testSuccess == true)
+                                stringResource(R.string.connection_success)
+                            else
+                                testResult ?: "",
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
