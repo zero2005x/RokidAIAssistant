@@ -10,7 +10,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
-import androidx.core.app.ActivityCompat
 import com.example.rokidcommon.protocol.Message
 import com.example.rokidcommon.protocol.MessageType
 import kotlinx.coroutines.*
@@ -80,10 +79,7 @@ class BluetoothSppClient(
      */
     private fun getSafeDeviceName(device: BluetoothDevice): String {
         val hasPermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
-            ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.BLUETOOTH_CONNECT
-            ) == PackageManager.PERMISSION_GRANTED
+            context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
         return if (hasPermission) device.name ?: "unknown" else "unknown (missing permission)"
     }
     
@@ -612,10 +608,7 @@ class BluetoothSppClient(
      */
     private fun hasBluetoothPermission(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.BLUETOOTH_CONNECT
-            ) == PackageManager.PERMISSION_GRANTED
+            context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
         } else {
             true // On Android 11 and below, BLUETOOTH permissions are install-time
         }
