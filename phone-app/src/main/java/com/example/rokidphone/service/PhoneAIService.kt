@@ -23,6 +23,7 @@ import com.example.rokidphone.data.db.RecordingRepository
 import com.example.rokidphone.service.ai.AiServiceFactory
 import com.example.rokidphone.service.ai.AiServiceProvider
 import com.example.rokidphone.service.ai.GeminiLiveSession
+import com.example.rokidphone.service.ai.PrivateServerService
 import com.example.rokidphone.service.cxr.CxrMobileManager
 import com.example.rokidphone.service.stt.SttProvider
 import com.example.rokidphone.service.stt.SttService
@@ -547,8 +548,10 @@ class PhoneAIService : Service() {
                     return
                 }
                 
-                // Check STT service availability before allowing recording
-                if (sttService == null && speechService == null) {
+                // Check STT service availability before allowing recording.
+                // Private Server handles STT on the server side — no local STT needed.
+                val isPrivateServer = aiService is PrivateServerService
+                if (!isPrivateServer && sttService == null && speechService == null) {
                     Log.e(TAG, "STT service not available - API key not configured")
                     val errorMsg = getString(R.string.service_not_ready)
                     bluetoothManager?.sendMessage(Message.aiError(errorMsg))
@@ -695,9 +698,15 @@ class PhoneAIService : Service() {
                 payload = cleanedResult
             ))
             
-            // TTS voice playback
-            ttsService?.speak(cleanedResult) { }
-            
+            // TTS voice playback — use VPS audio if Private Server, otherwise local TTS
+            val privateServer = aiService as? PrivateServerService
+            val vpsAudio = privateServer?.lastAudioResponse
+            if (vpsAudio != null && vpsAudio.isNotEmpty()) {
+                playAudioResponse(vpsAudio)
+            } else {
+                ttsService?.speak(cleanedResult) { }
+            }
+
         } catch (e: Exception) {
             Log.e(TAG, "Failed to analyze photo", e)
             bluetoothManager?.sendMessage(Message.aiError(
@@ -711,6 +720,16 @@ class PhoneAIService : Service() {
      */
     private suspend fun processVoiceData(audioData: ByteArray) {
         try {
+            val settings = SettingsRepository.getInstance(this).getSettings()
+
+            // Private Server: single-request flow (audio -> VPS -> STT + Claude + TTS)
+            if (aiService is PrivateServerService) {
+                processVoiceDataViaPrivateServer(audioData, settings)
+                return
+            }
+
+            // Standard flow: local STT -> AI chat -> local TTS
+
             // Check if any speech service is available
             if (sttService == null && speechService == null) {
                 Log.e(TAG, "Speech service not available - no API key configured")
@@ -720,17 +739,15 @@ class PhoneAIService : Service() {
                     type = MessageType.AI_ERROR,
                     payload = errorMsg
                 ))
-                // Notify UI to show settings prompt
                 notifyApiKeyMissing()
                 return
             }
-            
+
             // 1. Notify glasses: recognizing
             bluetoothManager?.sendMessage(Message.aiProcessing(getString(R.string.recognizing_speech)))
-            
+
             // 2. Speech recognition - prefer dedicated STT service if available
             Log.d(TAG, "Starting speech recognition...")
-            val settings = SettingsRepository.getInstance(this).getSettings()
             val transcriptResult = if (sttService != null) {
                 Log.d(TAG, "Using dedicated STT service: ${sttService?.provider?.name}")
                 sttService?.transcribe(audioData, settings.speechLanguage)
@@ -738,7 +755,7 @@ class PhoneAIService : Service() {
                 Log.d(TAG, "Using AI-based speech service, language: ${settings.speechLanguage}")
                 speechService?.transcribe(audioData, settings.speechLanguage)
             }
-            
+
             val transcript = when (transcriptResult) {
                 is SpeechResult.Success -> {
                     Log.d(TAG, "Transcript: ${transcriptResult.text}")
@@ -747,7 +764,6 @@ class PhoneAIService : Service() {
                 is SpeechResult.Error -> {
                     Log.e(TAG, "Transcription error: ${transcriptResult.message}")
                     bluetoothManager?.sendMessage(Message.aiError(transcriptResult.message))
-                    // Check if error is API key related
                     if (transcriptResult.message.contains("API", ignoreCase = true) ||
                         transcriptResult.message.contains("key", ignoreCase = true) ||
                         transcriptResult.message.contains("401") ||
@@ -763,44 +779,44 @@ class PhoneAIService : Service() {
                     return
                 }
             }
-            
+
             // 3. Send user voice text to glasses and phone UI
             bluetoothManager?.sendMessage(Message(
                 type = MessageType.USER_TRANSCRIPT,
                 payload = transcript
             ))
-            
+
             ServiceBridge.emitConversation(Message(
                 type = MessageType.USER_TRANSCRIPT,
                 payload = transcript
             ))
-            
+
             // 3.1 Save user message to database for history
             saveUserMessage(transcript)
-            
+
             // 4. Notify thinking
             bluetoothManager?.sendMessage(Message.aiProcessing(getString(R.string.thinking)))
-            
+
             // 5. AI conversation (using main AI service)
             Log.d(TAG, "Getting AI response...")
             val rawAiResponse = aiService?.chat(transcript) ?: "Sorry, an error occurred while processing."
-            
+
             // Clean markdown formatting for better display on glasses
             val aiResponse = cleanMarkdown(rawAiResponse)
-            
+
             Log.d(TAG, "AI response: $aiResponse")
-            
+
             // 6. Send AI response to glasses and phone UI
             bluetoothManager?.sendMessage(Message.aiResponseText(aiResponse))
-            
+
             ServiceBridge.emitConversation(Message(
                 type = MessageType.AI_RESPONSE_TEXT,
                 payload = aiResponse
             ))
-            
+
             // 6.1 Save AI response to database for history
             saveAssistantMessage(aiResponse, settings.aiModelId)
-            
+
             // 6.2 Save glasses recording to database (with transcript and AI response)
             try {
                 recordingRepository?.saveGlassesRecording(
@@ -814,17 +830,130 @@ class PhoneAIService : Service() {
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to save glasses recording", e)
             }
-            
+
             // 7. TTS voice playback (optional)
             ttsService?.speak(aiResponse) { }
-            
+
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
-            // Service is being stopped, don't treat this as an error
             Log.d(TAG, "Voice processing cancelled (service stopping)")
-            throw e  // Re-throw to properly propagate cancellation
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Error processing voice data", e)
             bluetoothManager?.sendMessage(Message.aiError(getString(R.string.processing_failed, e.message ?: "")))
+        }
+    }
+
+    /**
+     * Process voice data via Private Server in a single request.
+     * Sends raw audio to VPS which handles STT + Claude + TTS, then returns
+     * both user transcript and AI response with audio.
+     */
+    private suspend fun processVoiceDataViaPrivateServer(
+        audioData: ByteArray,
+        settings: ApiSettings
+    ) {
+        val privateServer = aiService as PrivateServerService
+
+        // 1. Notify glasses: processing
+        bluetoothManager?.sendMessage(Message.aiProcessing(getString(R.string.recognizing_speech)))
+        ServiceBridge.emitConversation(Message(
+            type = MessageType.AI_PROCESSING,
+            payload = getString(R.string.recognizing_speech)
+        ))
+
+        // 2. Single request: audio -> VPS -> STT + Claude + TTS
+        Log.d(TAG, "Private Server: sending ${audioData.size} bytes for combined processing")
+        val result = privateServer.processVoiceAudio(audioData)
+
+        if (result == null) {
+            val errorMsg = "Server communication failed"
+            bluetoothManager?.sendMessage(Message.aiError(errorMsg))
+            ServiceBridge.emitConversation(Message(
+                type = MessageType.AI_ERROR,
+                payload = errorMsg
+            ))
+            return
+        }
+
+        // 3. Show user transcript
+        bluetoothManager?.sendMessage(Message(
+            type = MessageType.USER_TRANSCRIPT,
+            payload = result.userTranscript
+        ))
+        ServiceBridge.emitConversation(Message(
+            type = MessageType.USER_TRANSCRIPT,
+            payload = result.userTranscript
+        ))
+        saveUserMessage(result.userTranscript)
+
+        // 4. Show AI response
+        val aiResponse = cleanMarkdown(result.aiResponseText)
+        bluetoothManager?.sendMessage(Message.aiResponseText(aiResponse))
+        ServiceBridge.emitConversation(Message(
+            type = MessageType.AI_RESPONSE_TEXT,
+            payload = aiResponse
+        ))
+        saveAssistantMessage(aiResponse, settings.aiModelId)
+
+        // 5. Save recording
+        try {
+            recordingRepository?.saveGlassesRecording(
+                audioData = audioData,
+                transcript = result.userTranscript,
+                aiResponse = aiResponse,
+                providerId = settings.aiProvider.name,
+                modelId = settings.aiModelId
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save glasses recording", e)
+        }
+
+        // 6. Play VPS audio response (server-generated TTS)
+        if (result.aiResponseAudio != null && result.aiResponseAudio.isNotEmpty()) {
+            Log.d(TAG, "Playing VPS audio response: ${result.aiResponseAudio.size} bytes")
+            playAudioResponse(result.aiResponseAudio)
+        } else {
+            // Fallback to local TTS if no audio from server
+            ttsService?.speak(aiResponse) { }
+        }
+
+        Log.d(TAG, "Private Server voice processing complete")
+    }
+
+    /**
+     * Play raw audio bytes (OGG format from VPS TTS) through the device speaker.
+     */
+    private fun playAudioResponse(audioData: ByteArray) {
+        try {
+            val tempFile = java.io.File.createTempFile("vps_tts_", ".ogg", cacheDir)
+            tempFile.writeBytes(audioData)
+
+            val mediaPlayer = android.media.MediaPlayer()
+            mediaPlayer.setDataSource(tempFile.absolutePath)
+            mediaPlayer.setOnCompletionListener {
+                it.release()
+                tempFile.delete()
+            }
+            mediaPlayer.setOnErrorListener { mp, _, _ ->
+                mp.release()
+                tempFile.delete()
+                Log.e(TAG, "MediaPlayer error playing VPS audio")
+                // Fallback to local TTS
+                serviceScope.launch {
+                    val text = (aiService as? PrivateServerService)?.lastAiResponseText ?: ""
+                    if (text.isNotBlank()) ttsService?.speak(text) { }
+                }
+                true
+            }
+            mediaPlayer.prepare()
+            mediaPlayer.start()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to play VPS audio", e)
+            // Fallback to local TTS
+            serviceScope.launch {
+                val text = (aiService as? PrivateServerService)?.lastAiResponseText ?: ""
+                if (text.isNotBlank()) ttsService?.speak(text) { }
+            }
         }
     }
     
