@@ -181,6 +181,8 @@
     <string name="provider_perplexity">Perplexity</string>
     <string name="provider_moonshot">Moonshot (Kimi)</string>
     <string name="provider_custom">กำหนดเอง / โฮสต์เอง</string>
+    <string name="provider_local_gemma">On-Device Gemma (Offline)</string>
+    <string name="provider_local_gemma_info">Runs a Gemma model entirely on your device. No API key and no network are required. Install a Gemma model file (.task or .gguf) into the app model folder to enable on-device chat.</string>
     <string name="provider_gemini_live">Gemini Live</string>
     
     <!-- Speech Service Names (Legacy) -->
