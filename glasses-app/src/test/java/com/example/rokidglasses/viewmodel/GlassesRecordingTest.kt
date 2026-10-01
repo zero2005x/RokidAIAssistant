@@ -274,10 +274,18 @@ class GlassesRecordingTest {
 
         fromPhone.emit(Message(type = MessageType.AI_RESPONSE_TEXT, payload = long))
 
-        val state = model.uiState.value
-        assertThat(state.isPaginated).isTrue()
-        assertThat(state.totalPages).isGreaterThan(1)
-        // Pages are trimmed, so no page starts or ends with stray whitespace.
-        assertThat(state.displayText).isEqualTo(state.displayText.trim())
+        val first = model.uiState.value
+        assertThat(first.isPaginated).isTrue()
+        assertThat(first.totalPages).isGreaterThan(1)
+        // Pagination keeps every character and only breaks after whitespace or punctuation,
+        // never in the middle of a word.
+        val pages = mutableListOf(first.displayText)
+        repeat(first.totalPages - 1) {
+            model.nextPage()
+            pages += model.uiState.value.displayText
+        }
+        assertThat(pages.joinToString("")).isEqualTo(long)
+        assertThat(pages.dropLast(1).all { it.last().isWhitespace() || it.last() in "，。！？、,.;:" })
+            .isTrue()
     }
 }
