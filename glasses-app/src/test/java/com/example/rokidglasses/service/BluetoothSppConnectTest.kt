@@ -110,6 +110,20 @@ class BluetoothSppConnectTest {
     }
 
     /**
+     * Waits for a value that is published just after the connection state. The client sets
+     * CONNECTED first and the device name a statement later, so a test that asserts the name
+     * the moment it sees CONNECTED can run in between on a loaded machine.
+     */
+    private fun <T> awaitValue(expected: T, timeoutMs: Long = 8_000, read: () -> T) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            if (read() == expected) return
+            Thread.sleep(10)
+        }
+        throw AssertionError("Timed out waiting for $expected; was ${read()}")
+    }
+
+    /**
      * Waits for a failed attempt to finish.
      *
      * DISCONNECTED is also the starting state, so waiting for it alone would return
@@ -174,6 +188,7 @@ class BluetoothSppConnectTest {
         client.connect(device, maxRetries = 1)
 
         awaitState(BluetoothClientState.CONNECTED)
+        awaitValue("Rokid Phone") { client.connectedDeviceName.value }
         assertThat(client.connectedDeviceName.value).isEqualTo("Rokid Phone")
         assertThat(client.connectedSocket).isNotNull()
     }
