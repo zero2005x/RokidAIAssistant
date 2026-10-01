@@ -49,6 +49,18 @@ class SettingsRepository(private val context: Context) {
 
         // Per-provider model memory (JSON map: provider name -> model id)
         private const val KEY_PROVIDER_MODEL_IDS = "provider_model_ids"
+        private const val KEY_DECISION_ROUTING_ENABLED = "decision_routing_enabled"
+        private const val KEY_GLASSES_DISPLAY_METRICS = "glasses_display_metrics"
+        private const val KEY_GLASSES_DISPLAY_CONFIG = "glasses_display_config"
+        private const val KEY_DECISION_BACKEND = "decision_backend"
+        private const val KEY_DECISION_GEMINI_MODEL = "decision_gemini_model"
+        private const val KEY_DECISION_OPENAI_MODEL = "decision_openai_model"
+        private const val KEY_JEV_API_KEY = "jev_api_key"
+        private const val KEY_LAYA_BASE_URL = "laya_base_url"
+        private const val KEY_LAYA_API_KEY = "laya_api_key"
+        private const val KEY_FAST_ROUTING_MODEL = "fast_routing_model"
+        private const val KEY_BALANCED_ROUTING_MODEL = "balanced_routing_model"
+        private const val KEY_QUALITY_ROUTING_MODEL = "quality_routing_model"
 
         // Alibaba Cloud Model Studio region
         private const val KEY_ALIBABA_REGION = "alibaba_region"
@@ -170,7 +182,7 @@ class SettingsRepository(private val context: Context) {
         val savedProvider = AiProvider.fromName(
             prefs.getString(KEY_AI_PROVIDER, AiProvider.GEMINI.name) ?: AiProvider.GEMINI.name
         )
-        val legacyModelId = prefs.getString(KEY_AI_MODEL, "gemini-2.5-flash") ?: "gemini-2.5-flash"
+        val legacyModelId = prefs.getString(KEY_AI_MODEL, "gemini-3.8-flash") ?: "gemini-3.8-flash"
         val providerModelIds = parseProviderModelIds(
             prefs.getString(KEY_PROVIDER_MODEL_IDS, null),
             savedProvider,
@@ -192,6 +204,22 @@ class SettingsRepository(private val context: Context) {
             aiProvider = savedProvider,
             aiModelId = legacyModelId,
             providerModelIds = providerModelIds,
+            glassesDisplayMetrics = com.example.rokidcommon.protocol.GlassesDisplayMetrics.fromJson(prefs.getString(KEY_GLASSES_DISPLAY_METRICS, null)),
+            glassesDisplayConfig = com.example.rokidcommon.protocol.GlassesDisplayConfig
+                .fromJson(prefs.getString(KEY_GLASSES_DISPLAY_CONFIG, null))
+                ?: com.example.rokidcommon.protocol.GlassesDisplayConfig(),
+            decisionRoutingEnabled = prefs.getBoolean(KEY_DECISION_ROUTING_ENABLED, false),
+            decisionBackend = runCatching {
+                DecisionBackend.valueOf(prefs.getString(KEY_DECISION_BACKEND, DecisionBackend.JEV.name) ?: "")
+            }.getOrDefault(DecisionBackend.JEV),
+            decisionGeminiModel = prefs.getString(KEY_DECISION_GEMINI_MODEL, "gemini-3.8-flash") ?: "gemini-3.8-flash",
+            decisionOpenaiModel = prefs.getString(KEY_DECISION_OPENAI_MODEL, "gpt-6-luna") ?: "gpt-6-luna",
+            jevApiKey = prefs.getString(KEY_JEV_API_KEY, "") ?: "",
+            layaBaseUrl = prefs.getString(KEY_LAYA_BASE_URL, "") ?: "",
+            layaApiKey = prefs.getString(KEY_LAYA_API_KEY, "") ?: "",
+            fastRoutingModel = parseRoutingModel(prefs.getString(KEY_FAST_ROUTING_MODEL, null)),
+            balancedRoutingModel = parseRoutingModel(prefs.getString(KEY_BALANCED_ROUTING_MODEL, null)),
+            qualityRoutingModel = parseRoutingModel(prefs.getString(KEY_QUALITY_ROUTING_MODEL, null)),
             geminiApiKey = prefs.getString(KEY_GEMINI_API_KEY, "") ?: "",
             openaiApiKey = prefs.getString(KEY_OPENAI_API_KEY, "") ?: "",
             anthropicApiKey = prefs.getString(KEY_ANTHROPIC_API_KEY, "") ?: "",
@@ -313,6 +341,18 @@ class SettingsRepository(private val context: Context) {
         return obj.toString()
     }
 
+    private fun parseRoutingModel(raw: String?): RoutingModel? = runCatching {
+        if (raw.isNullOrBlank()) return@runCatching null
+        val json = org.json.JSONObject(raw)
+        val provider = AiProvider.valueOf(json.getString("provider"))
+        val modelId = json.getString("modelId").trim()
+        if (modelId.isBlank()) null else RoutingModel(provider, modelId)
+    }.getOrNull()
+
+    private fun serializeRoutingModel(value: RoutingModel?): String? = value?.let {
+        org.json.JSONObject().put("provider", it.provider.name).put("modelId", it.modelId).toString()
+    }
+
     /**
      * Parse capability overrides. Current format is a JSON array (a comma join is lossy
      * for values containing ','); falls back to the legacy comma-separated format so
@@ -341,6 +381,18 @@ class SettingsRepository(private val context: Context) {
             putString(KEY_AI_PROVIDER, settings.aiProvider.name)
             putString(KEY_AI_MODEL, settings.aiModelId)
             putString(KEY_PROVIDER_MODEL_IDS, serializeProviderModelIds(settings.providerModelIds))
+            putBoolean(KEY_DECISION_ROUTING_ENABLED, settings.decisionRoutingEnabled)
+            putString(KEY_GLASSES_DISPLAY_METRICS, settings.glassesDisplayMetrics?.toJson())
+            putString(KEY_GLASSES_DISPLAY_CONFIG, settings.glassesDisplayConfig.normalized().toJson())
+            putString(KEY_DECISION_BACKEND, settings.decisionBackend.name)
+            putString(KEY_DECISION_GEMINI_MODEL, settings.decisionGeminiModel)
+            putString(KEY_DECISION_OPENAI_MODEL, settings.decisionOpenaiModel)
+            putString(KEY_JEV_API_KEY, settings.jevApiKey)
+            putString(KEY_LAYA_BASE_URL, settings.layaBaseUrl)
+            putString(KEY_LAYA_API_KEY, settings.layaApiKey)
+            putString(KEY_FAST_ROUTING_MODEL, serializeRoutingModel(settings.fastRoutingModel))
+            putString(KEY_BALANCED_ROUTING_MODEL, serializeRoutingModel(settings.balancedRoutingModel))
+            putString(KEY_QUALITY_ROUTING_MODEL, serializeRoutingModel(settings.qualityRoutingModel))
             putString(KEY_GEMINI_API_KEY, settings.geminiApiKey)
             putString(KEY_OPENAI_API_KEY, settings.openaiApiKey)
             putString(KEY_ANTHROPIC_API_KEY, settings.anthropicApiKey)
@@ -402,6 +454,10 @@ class SettingsRepository(private val context: Context) {
     /**
      * Update single setting
      */
+    fun updateGlassesDisplayMetrics(metrics: com.example.rokidcommon.protocol.GlassesDisplayMetrics) {
+        updateSettings { it.copy(glassesDisplayMetrics = metrics) }
+    }
+
     fun updateAiProvider(provider: AiProvider) {
         // Restore the model the user last selected for this provider
         // (per-provider model memory), not the first catalog entry.

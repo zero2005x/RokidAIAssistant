@@ -241,12 +241,12 @@
     
     <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Nhận dạng giọng nói Gemini</string>
-    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_openai_whisper">OpenAI Transcribe</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
     
     <!-- STT Provider Names -->
     <string name="stt_provider_gemini">Gemini</string>
-    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_openai_whisper">OpenAI Transcribe</string>
     <string name="stt_provider_groq_whisper">Groq Whisper</string>
     <string name="stt_provider_google_cloud">Google Cloud STT</string>
     <string name="stt_provider_azure">Azure Speech</string>
@@ -530,4 +530,53 @@
     <string name="recordings_status_analyzed">Đã phân tích</string>
     <string name="recordings_status_error">Lỗi</string>
     <string name="api_key_not_configured">Chưa cấu hình khóa API. Vui lòng thiết lập khóa API trong phần Cài đặt.</string>
+
+    <!-- Decision routing and glasses display -->
+    <string name="routing_display_settings">Chọn mô hình và màn hình kính</string>
+    <string name="routing_title">Chọn mô hình</string>
+    <string name="routing_open_summary">Cấu hình dịch vụ và ba mô hình</string>
+    <string name="glasses_display_title">Chữ trên kính</string>
+    <string name="glasses_display_open_summary">Phông, cỡ, vùng và vị trí</string>
+    <string name="glasses_display_description">Điều chỉnh toàn bộ chữ và vùng hiển thị. Chỉ đồng bộ khi áp dụng.</string>
+    <string name="glasses_preview_connected">● Đã kết nối</string>
+    <string name="glasses_preview_text">Vùng chữ trên kính.\nĐiều chỉnh phông và vị trí.</string>
+    <string name="glasses_preview_hint">Vuốt lên để xem thêm</string>
+    <string name="glasses_preview_disclaimer">Minh họa: tỷ lệ và xuống dòng tùy kính. sp là cỡ chữ chính; chữ khác đổi theo tỷ lệ.</string>
+    <string name="glasses_font">Phông chữ</string>
+    <string name="glasses_font_system">Hệ thống</string>
+    <string name="glasses_font_monospace">Đơn cách</string>
+    <string name="glasses_font_size">Cỡ chữ chính</string>
+    <string name="glasses_width">Chiều rộng</string>
+    <string name="glasses_height">Chiều cao</string>
+    <string name="glasses_left">Vị trí ngang</string>
+    <string name="glasses_top">Vị trí dọc</string>
+    <string name="glasses_reset">Đặt lại</string>
+    <string name="glasses_apply">Áp dụng cho kính</string>
+    <string name="glasses_slider_value">%1$s: %2$d %3$s</string>
+    <string name="routing_fast">Nhanh</string>
+    <string name="routing_balanced">Cân bằng</string>
+    <string name="routing_quality">Chất lượng</string>
+    <string name="routing_enabled">Chọn theo độ khó câu hỏi</string>
+    <string name="routing_description">Chỉ dùng cho chữ và câu hỏi đã nhận dạng giọng nói. Ưu tiên chất lượng; khi không chắc dùng mô hình chính.</string>
+    <string name="routing_backend">Dịch vụ đánh giá</string>
+    <string name="routing_jev_key">Khóa API TypeSafe</string>
+    <string name="routing_laya_url">URL máy chủ Laya</string>
+    <string name="routing_laya_url_hint">URL điện thoại truy cập được, không có /v1/systemone. Nên dùng HTTPS; HTTP nội bộ cần cho phép máy chủ.</string>
+    <string name="routing_laya_key">Khóa API Laya (nếu có)</string>
+    <string name="routing_unset">Chưa đặt; dùng mô hình chính</string>
+    <string name="routing_clear_slot">Xóa ô %1$s</string>
+    <string name="routing_data_disclosure">Khi bật, câu hỏi hiện tại được nhập hoặc chép từ giọng nói sẽ được gửi đến dịch vụ phân loại đã chọn, ngay cả khi mô hình trả lời chạy trên điện thoại. Không gồm lịch sử trò chuyện, ảnh hoặc âm thanh.</string>
+    <string name="routing_laya_http_warning">HTTP gửi câu hỏi và khóa tùy chọn không mã hóa. Dùng mạng riêng tin cậy; APK phải cho phép máy chủ này.</string>
+    <string name="routing_reason_disabled">Mô hình chính (tắt tự chọn)</string>
+    <string name="routing_reason_uncertain">Không chắc độ khó hoặc dịch vụ lỗi; dùng mô hình chính</string>
+    <string name="routing_reason_empty_slot">Ô %1$s trống; dùng mô hình chính</string>
+    <string name="routing_reason_unconfigured_slot">Ô %1$s không dùng được hoặc thiếu khóa; dùng mô hình chính</string>
+    <string name="routing_reason_selected">%1$s chọn %2$s (độ tin cậy %3$d%%)</string>
+    <string name="routing_reason_fallback">%1$s thất bại; dùng mô hình chính</string>
+    <string name="routing_reason_failed">Yêu cầu AI thất bại</string>
+    <string name="routing_error">Yêu cầu AI thất bại: %1$s</string>
+    <string name="routing_decision_model">Mô hình phân loại</string>
+    <string name="routing_llm_description">Dùng khóa nhà cung cấp hiện có. Chỉ gửi câu hỏi hiện tại để phân loại, thêm một yêu cầu API có tính phí. Độ chắc chắn của LLM không phải xác suất đã hiệu chỉnh. Khi không chắc chắn hoặc hết thời gian, dùng mô hình chính.</string>
+    <string name="routing_reason_selected_llm">%1$s chọn %2$s bằng phân loại có cấu trúc.</string>
+    <string name="glasses_preview_metrics">Vùng hiển thị ứng dụng: %1$d × %2$d px</string>
 </resources>

@@ -260,12 +260,12 @@
     
     <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Gemini Audio Recognition</string>
-    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_openai_whisper">OpenAI Transcribe</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
     
     <!-- STT Provider Names -->
     <string name="stt_provider_gemini">Gemini Audio</string>
-    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_openai_whisper">OpenAI Transcribe</string>
     <string name="stt_provider_groq_whisper">Groq Whisper</string>
     <string name="stt_provider_google_cloud">Google Cloud STT</string>
     <string name="stt_provider_azure">Azure Speech</string>
@@ -553,4 +553,53 @@
     <string name="recordings_status_analyzed">Analyzed</string>
     <string name="recordings_status_error">Error</string>
 
+
+    <!-- Decision routing and glasses display -->
+    <string name="routing_display_settings">Model routing and glasses display</string>
+    <string name="routing_title">model routing</string>
+    <string name="routing_open_summary">Choose decision backend and fast, balanced, quality models</string>
+    <string name="glasses_display_title">Glasses text display</string>
+    <string name="glasses_display_open_summary">Font, size, viewport and position</string>
+    <string name="glasses_display_description">Adjust all glasses text and its viewport. Changes sync only after Apply.</string>
+    <string name="glasses_preview_connected">● Connected</string>
+    <string name="glasses_preview_text">This is the glasses text viewport.\nAdjust the font and position.</string>
+    <string name="glasses_preview_hint">Swipe up for more</string>
+    <string name="glasses_preview_disclaimer">Illustration only: screen ratio and text layout depend on the connected glasses. Size is the main text size in sp; other text scales with it.</string>
+    <string name="glasses_font">Font</string>
+    <string name="glasses_font_system">System</string>
+    <string name="glasses_font_monospace">Monospace</string>
+    <string name="glasses_font_size">Main text size</string>
+    <string name="glasses_width">Width</string>
+    <string name="glasses_height">Height</string>
+    <string name="glasses_left">Horizontal position</string>
+    <string name="glasses_top">Vertical position</string>
+    <string name="glasses_reset">Reset</string>
+    <string name="glasses_apply">Apply to glasses</string>
+    <string name="glasses_slider_value">%1$s: %2$d %3$s</string>
+    <string name="routing_fast">Fast</string>
+    <string name="routing_balanced">Balanced</string>
+    <string name="routing_quality">Quality</string>
+    <string name="routing_enabled">Select models by question difficulty</string>
+    <string name="routing_description">Text and transcribed questions only. Prioritize quality; use the primary model when uncertain.</string>
+    <string name="routing_backend">Decision backend</string>
+    <string name="routing_jev_key">TypeSafe API key</string>
+    <string name="routing_laya_url">Laya server URL</string>
+    <string name="routing_laya_url_hint">Phone-accessible URL, without /v1/systemone. HTTPS recommended; private HTTP needs an allowed host.</string>
+    <string name="routing_laya_key">Laya API key (if configured on server)</string>
+    <string name="routing_unset">Not set; use primary model</string>
+    <string name="routing_clear_slot">Clear %1$s slot</string>
+    <string name="routing_data_disclosure">When enabled, the current text or transcribed question is sent to the selected decision backend, even if the answering model runs on this phone. Classification does not include conversation history, photos or audio.</string>
+    <string name="routing_laya_http_warning">HTTP sends question text and the optional API key without encryption. Use a trusted private network; the host must be explicitly allowed by this APK.</string>
+    <string name="routing_reason_disabled">Primary model (routing disabled)</string>
+    <string name="routing_reason_uncertain">Difficulty uncertain or decision service unavailable; primary model used</string>
+    <string name="routing_reason_empty_slot">%1$s slot empty; primary model used</string>
+    <string name="routing_reason_unconfigured_slot">%1$s slot unavailable or missing credentials; primary model used</string>
+    <string name="routing_reason_selected">%1$s chose %2$s (confidence %3$d%%)</string>
+    <string name="routing_reason_fallback">%1$s failed; primary model used</string>
+    <string name="routing_reason_failed">AI request failed</string>
+    <string name="routing_error">AI request failed: %1$s</string>
+    <string name="routing_decision_model">Decision model</string>
+    <string name="routing_llm_description">Uses the existing provider key. Only the current question is sent for classification; this adds a paid API request. LLM certainty is not a calibrated probability. Uncertain or timed-out decisions use the primary model.</string>
+    <string name="routing_reason_selected_llm">%1$s selected %2$s using structured classification.</string>
+    <string name="glasses_preview_metrics">Application viewport: %1$d × %2$d px</string>
 </resources>

@@ -127,6 +127,7 @@ class BaiduServiceTest {
         val result = service.chat("Hello")
 
         assertThat(result).contains("Authentication failed")
+        assertThat(service.lastChatError).isEqualTo(result)
     }
 
     // ==================== Chat Tests ====================
@@ -144,6 +145,7 @@ class BaiduServiceTest {
         val result = service.chat("你好")
 
         assertThat(result).isEqualTo("欢迎使用百度！")
+        assertThat(service.lastChatError).isNull()
     }
 
     @Test
@@ -253,6 +255,7 @@ class BaiduServiceTest {
         val result = service.chat("Hello")
 
         assertThat(result).contains("Rate limit exceeded")
+        assertThat(service.lastChatError).contains("Rate limit exceeded")
     }
 
     @Test
@@ -268,6 +271,7 @@ class BaiduServiceTest {
         val result = service.chat("Hello")
 
         assertThat(result).contains("unavailable")
+        assertThat(service.lastChatError).contains("HTTP 500")
     }
 
     // ==================== Conversation History ====================

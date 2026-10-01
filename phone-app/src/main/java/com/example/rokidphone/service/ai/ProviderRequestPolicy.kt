@@ -83,7 +83,7 @@ object ProviderRequestPolicies {
             // Reasoning models reject sampling params and return reasoning_content.
             allowSampling = !capabilities.reasoning,
             allowPenalties = !capabilities.reasoning,
-            imageContentFormat = ImageContentFormat.NONE
+            imageContentFormat = if (capabilities.imageInput) ImageContentFormat.OPENAI_IMAGE_URL else ImageContentFormat.NONE
         )
         AiProvider.PERPLEXITY -> ProviderRequestPolicy(
             // Sonar documents temperature/top_p but not penalty parameters.
@@ -125,7 +125,7 @@ object ProviderRequestPolicies {
         modelId.matches(Regex("^o\\d.*"))
 
     internal fun isOpenAiGpt5Family(modelId: String): Boolean =
-        modelId.startsWith("gpt-5")
+        modelId.startsWith("gpt-5") || modelId.startsWith("gpt-6")
 
     /** Verbosity was introduced with GPT-5. */
     internal fun openAiSupportsVerbosity(modelId: String): Boolean = isOpenAiGpt5Family(modelId)
@@ -137,6 +137,9 @@ object ProviderRequestPolicies {
             modelId.startsWith("gpt-5-mini") || modelId.startsWith("gpt-5-nano") ||
             modelId.startsWith("gpt-5-2025")
         val allowed = when {
+            modelId.startsWith("gpt-6-astra") -> setOf("low", "medium", "high", "xhigh", "max")
+            modelId.startsWith("gpt-6-sol") || modelId.startsWith("gpt-6-luna") ->
+                setOf("none", "low", "medium", "high", "xhigh", "max")
             modelId == "gpt-5-pro" || modelId.startsWith("gpt-5-pro-") -> setOf("high")
             modelId.contains("-pro") && isOpenAiGpt5Family(modelId) -> setOf("medium", "high", "xhigh")
             isOpenAiOSeries(modelId) -> setOf("low", "medium", "high")
@@ -150,7 +153,7 @@ object ProviderRequestPolicies {
 
     /** Models verified as Responses-API-first on the OpenAI platform (2026-08-02). */
     fun openAiPrefersResponses(modelId: String): Boolean =
-        modelId.startsWith("gpt-5.6")
+        modelId.startsWith("gpt-5.6") || modelId.startsWith("gpt-6")
 
     private fun openAiPolicy(modelId: String, reasoningEffort: String?): ProviderRequestPolicy {
         val oSeries = isOpenAiOSeries(modelId)
@@ -166,7 +169,7 @@ object ProviderRequestPolicies {
             supportsVerbosity = openAiSupportsVerbosity(modelId),
             supportsStreamOptions = true,
             supportsAudioTranscriptions = true,
-            transcriptionModel = "whisper-1",
+            transcriptionModel = "gpt-transcribe",
             imageContentFormat = ImageContentFormat.OPENAI_IMAGE_URL
         )
     }

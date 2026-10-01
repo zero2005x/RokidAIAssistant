@@ -240,7 +240,8 @@ class ConversationRepository private constructor(context: Context) {
         hasImage: Boolean = false,
         imagePath: String? = null,
         tokenCount: Int? = null,
-        finishReason: String? = null
+        finishReason: String? = null,
+        routingReason: String? = null
     ): Message = withContext(Dispatchers.IO) {
         val id = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
@@ -255,7 +256,8 @@ class ConversationRepository private constructor(context: Context) {
             hasImage = hasImage,
             imagePath = imagePath,
             tokenCount = tokenCount,
-            finishReason = finishReason
+            finishReason = finishReason,
+            metadata = routingReason
         )
         
         // Insert + counter bump must be atomic, otherwise messageCount drifts permanently.
@@ -295,7 +297,8 @@ class ConversationRepository private constructor(context: Context) {
         content: String,
         modelId: String? = null,
         tokenCount: Int? = null,
-        finishReason: String? = null
+        finishReason: String? = null,
+        routingReason: String? = null
     ): Message {
         return addMessage(
             conversationId = conversationId,
@@ -303,7 +306,8 @@ class ConversationRepository private constructor(context: Context) {
             content = content,
             modelId = modelId,
             tokenCount = tokenCount,
-            finishReason = finishReason
+            finishReason = finishReason,
+            routingReason = routingReason
         )
     }
     
@@ -414,7 +418,8 @@ data class Message(
     val hasImage: Boolean,
     val imagePath: String?,
     val finishReason: String?,
-    val errorMessage: String?
+    val errorMessage: String?,
+    val routingReason: String? = null
 )
 
 /**
@@ -459,6 +464,7 @@ private fun MessageEntity.toMessage(): Message {
         hasImage = hasImage,
         imagePath = imagePath,
         finishReason = finishReason,
-        errorMessage = errorMessage
+        errorMessage = errorMessage,
+        routingReason = metadata
     )
 }

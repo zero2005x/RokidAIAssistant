@@ -18,7 +18,7 @@ import com.example.rokidphone.data.AiProvider
  */
 object FallbackModelCatalog {
 
-    const val LAST_VERIFIED_DATE = "2026-08-02"
+    const val LAST_VERIFIED_DATE = "2026-09-30"
 
     private fun chatCaps(
         vision: Boolean = false,
@@ -51,6 +51,8 @@ object FallbackModelCatalog {
     private val geminiCaps = chatCaps(vision = true, audioIn = true, context = 1_000_000L)
 
     val geminiModels = listOf(
+        m("gemini-3.8-flash", "Gemini 3.8 Flash", AiProvider.GEMINI, geminiCaps,
+            description = "Current stable Flash with multimodal input"),
         m("gemini-3.6-flash", "Gemini 3.6 Flash", AiProvider.GEMINI, geminiCaps,
             description = "Latest stable Flash, 1M context, multimodal"),
         m("gemini-3.5-flash", "Gemini 3.5 Flash", AiProvider.GEMINI, geminiCaps,
@@ -68,6 +70,14 @@ object FallbackModelCatalog {
     )
 
     val geminiLiveModels = listOf(
+        m("gemini-3.8-live", "Gemini 3.8 Live", AiProvider.GEMINI_LIVE,
+            ModelCapabilities(imageInput = true, audioInput = true, audioOutput = true,
+                streaming = true, realtime = true),
+            description = "Stable real-time audio conversation model"),
+        m("gemini-3.8-live-extended-thinking", "Gemini 3.8 Live Extended Thinking", AiProvider.GEMINI_LIVE,
+            ModelCapabilities(imageInput = true, audioInput = true, audioOutput = true,
+                streaming = true, realtime = true, reasoning = true),
+            description = "Live audio with extended reasoning"),
         m(
             "gemini-2.5-flash-exp", "Gemini 2.5 Flash (Live)", AiProvider.GEMINI_LIVE,
             ModelCapabilities(
@@ -83,6 +93,12 @@ object FallbackModelCatalog {
     private val openAiChatCaps = chatCaps(vision = true, reasoning = true, context = 1_000_000L)
 
     val openaiModels = listOf(
+        m("gpt-6-astra", "GPT-6 Astra", AiProvider.OPENAI, openAiChatCaps,
+            description = "Flagship quality; Responses API"),
+        m("gpt-6-sol", "GPT-6 Sol", AiProvider.OPENAI, openAiChatCaps,
+            description = "Balanced GPT-6 tier; Responses API"),
+        m("gpt-6-luna", "GPT-6 Luna", AiProvider.OPENAI, openAiChatCaps,
+            description = "Fast and efficient GPT-6 tier; Responses API"),
         m("gpt-5.6", "GPT-5.6", AiProvider.OPENAI, openAiChatCaps,
             description = "2026 flagship; Responses API preferred"),
         m("gpt-5.6-terra", "GPT-5.6 Terra", AiProvider.OPENAI, openAiChatCaps,
@@ -104,6 +120,12 @@ object FallbackModelCatalog {
     private val claudeCaps = chatCaps(vision = true, reasoning = true, context = 200_000L)
 
     val anthropicModels = listOf(
+        m("claude-sonnet-5-5", "Claude Sonnet 5.5", AiProvider.ANTHROPIC,
+            chatCaps(vision = true, reasoning = true, context = 1_000_000L, maxOut = 128_000L),
+            description = "Current stable Sonnet"),
+        m("claude-opus-5-5", "Claude Opus 5.5", AiProvider.ANTHROPIC,
+            chatCaps(vision = true, reasoning = true, context = 1_000_000L, maxOut = 128_000L),
+            description = "Current stable Opus"),
         m("claude-sonnet-5", "Claude Sonnet 5", AiProvider.ANTHROPIC, claudeCaps,
             description = "Balanced 5-series flagship"),
         m("claude-opus-5", "Claude Opus 5", AiProvider.ANTHROPIC, claudeCaps,
@@ -118,10 +140,13 @@ object FallbackModelCatalog {
 
     // ==================== DeepSeek ====================
     val deepseekModels = listOf(
+        m("deepseek-flash", "DeepSeek V4.1 Flash", AiProvider.DEEPSEEK,
+            chatCaps(vision = true, tools = true, context = 128_000L),
+            description = "Current V4.1 Flash; image input"),
         m(
             "deepseek-v4-flash", "DeepSeek V4 Flash", AiProvider.DEEPSEEK,
-            chatCaps(tools = true, reasoning = false, context = 128_000L),
-            description = "V4 general chat model (non-thinking)"
+            chatCaps(vision = true, tools = true, context = 128_000L), ModelStatus.DEPRECATED,
+            "Temporary alias for deepseek-flash"
         ),
         m(
             "deepseek-v4-pro", "DeepSeek V4 Pro", AiProvider.DEEPSEEK,
@@ -143,11 +168,6 @@ object FallbackModelCatalog {
     // ==================== Groq ====================
     val groqModels = listOf(
         m(
-            "llama-3.3-70b-versatile", "Llama 3.3 70B (production)", AiProvider.GROQ,
-            chatCaps(tools = true, context = 131_072L),
-            description = "Production model, optimized for tool use"
-        ),
-        m(
             "openai/gpt-oss-120b", "GPT-OSS 120B (production)", AiProvider.GROQ,
             chatCaps(tools = true, context = 131_072L),
             description = "OpenAI open-weight 120B hosted on Groq"
@@ -157,6 +177,12 @@ object FallbackModelCatalog {
             chatCaps(tools = true, context = 131_072L),
             description = "OpenAI open-weight 20B hosted on Groq"
         ),
+        m("qwen/qwen3.8-27b", "Qwen 3.8 27B", AiProvider.GROQ,
+            chatCaps(vision = true, tools = true, reasoning = true, context = 131_072L),
+            description = "Replacement for Qwen 3.6 27B"),
+        m("llama-3.3-70b-versatile", "Llama 3.3 70B (retired)", AiProvider.GROQ,
+            chatCaps(tools = true, context = 131_072L), ModelStatus.DEPRECATED,
+            "Retired on 2026-08-16; migrate to GPT-OSS 120B"),
         m(
             "meta-llama/llama-4-scout-17b-16e-instruct", "Llama 4 Scout (preview)", AiProvider.GROQ,
             chatCaps(vision = true, tools = true, context = 131_072L), ModelStatus.PREVIEW,
@@ -185,6 +211,9 @@ object FallbackModelCatalog {
 
     // ==================== xAI ====================
     val xaiModels = listOf(
+        m("grok-4.7", "Grok 4.7", AiProvider.XAI,
+            chatCaps(vision = true, tools = true, reasoning = true, context = 500_000L),
+            description = "Current Grok flagship with image input"),
         m(
             "grok-4.5", "Grok 4.5", AiProvider.XAI,
             chatCaps(vision = true, tools = true, reasoning = true, context = 256_000L),
@@ -209,6 +238,12 @@ object FallbackModelCatalog {
 
     // ==================== Alibaba Cloud Model Studio ====================
     val alibabaModels = listOf(
+        m("qwen3.8-max", "Qwen3.8 Max", AiProvider.ALIBABA,
+            chatCaps(vision = true, tools = true, context = 1_000_000L),
+            description = "Current multimodal Qwen flagship"),
+        m("qwen3.8-flash", "Qwen3.8 Flash", AiProvider.ALIBABA,
+            chatCaps(vision = true, tools = true, context = 1_000_000L),
+            description = "Fast multimodal Qwen tier"),
         m(
             "qwen3.7-max", "Qwen3.7 Max", AiProvider.ALIBABA,
             chatCaps(tools = true, context = 262_144L),
@@ -325,6 +360,9 @@ object FallbackModelCatalog {
 
     // ==================== Moonshot ====================
     val moonshotModels = listOf(
+        m("kimi-k2.6", "Kimi K2.6", AiProvider.MOONSHOT,
+            chatCaps(vision = true, tools = true, context = 262_144L),
+            description = "Current general-purpose text and vision model"),
         m(
             "kimi-k2.5", "Kimi K2.5 (instant)", AiProvider.MOONSHOT,
             chatCaps(vision = true, tools = true, context = 262_144L),
@@ -483,8 +521,13 @@ object FallbackModelCatalog {
     /** Legacy model ID → replacement per provider, applied to stored settings on migration. */
     val legacyModelMigration: Map<AiProvider, Map<String, String>> = mapOf(
         AiProvider.DEEPSEEK to mapOf(
-            "deepseek-chat" to "deepseek-v4-flash",
+            "deepseek-chat" to "deepseek-flash",
+            "deepseek-v4-flash" to "deepseek-flash",
             "deepseek-reasoner" to "deepseek-v4-pro"
+        ),
+        AiProvider.GROQ to mapOf(
+            "llama-3.3-70b-versatile" to "openai/gpt-oss-120b",
+            "qwen/qwen3.6-27b" to "qwen/qwen3.8-27b"
         )
     )
 

@@ -32,7 +32,7 @@ import org.json.JSONObject
  */
 class GeminiService(
     apiKey: String,
-    modelId: String = "gemini-2.5-flash",
+    modelId: String = "gemini-3.8-flash",
     systemPrompt: String = "",
     temperature: Float = 0.7f,
     maxTokens: Int = 2048,
@@ -387,6 +387,7 @@ Rules:
             
             if (apiKey.isBlank()) {
                 Log.e(TAG, "API key is not configured")
+                lastChatError = ERROR_API_KEY_NOT_CONFIGURED
                 return@withContext ERROR_API_KEY_NOT_CONFIGURED
             }
             
@@ -447,7 +448,8 @@ Rules:
                             text
                         } else null
                     } else {
-                        Log.e(TAG, "API error: ${response.code}, body: $responseBody")
+                        lastChatError = ProviderApiException.fromHttpStatus(response.code, responseBody).message
+                        Log.e(TAG, "API error: ${response.code}")
                         // Handle 503 (overloaded) with longer delay
                         if (response.code == 503 || response.code == 429) {
                             Log.w(TAG, "Server overloaded (${response.code}), will retry with longer delay...")
@@ -458,7 +460,10 @@ Rules:
                 }
             }
             
-            result ?: "Sorry, AI service is temporarily unavailable. Please try again later."
+            result ?: run {
+                lastChatError = lastChatError ?: "empty_response"
+                "Sorry, AI service is temporarily unavailable. Please try again later."
+            }
         }
     }
     
@@ -467,9 +472,11 @@ Rules:
      */
     override suspend fun analyzeImage(imageData: ByteArray, prompt: String): String {
         return withContext(ioDispatcher) {
+            lastChatError = null
             Log.d(TAG, "Image analysis request, size: ${imageData.size} bytes")
             
             if (apiKey.isBlank()) {
+                lastChatError = ERROR_API_KEY_NOT_CONFIGURED
                 Log.e(TAG, "API key is not configured")
                 return@withContext "Sorry, unable to analyze this image. API key not configured."
             }
@@ -477,6 +484,7 @@ Rules:
             val prepared = try {
                 ImagePayloadHelper.prepare(imageData)
             } catch (e: ProviderImageException) {
+                lastChatError = ProviderApiException.sanitize(e.message)
                 return@withContext "Sorry, unable to analyze this image: ${e.message}"
             }
             val imageBase64 = Base64.encodeToString(prepared.data, Base64.NO_WRAP)
@@ -529,21 +537,12 @@ Rules:
                                 text
                             }
                         } else {
-                            Log.e(TAG, "API error: ${response.code}, body: $responseBody")
-                            // Handle 503 (overloaded) with longer delay
-                            if (response.code == 503 || response.code == 429) {
-                                Log.w(TAG, "Server overloaded (${response.code}), will retry with longer delay...")
-                                kotlinx.coroutines.delay(2000L * attempt) // Exponential backoff
-                            }
-                            // Parse error message if available
-                            try {
-                                val errorJson = JSONObject(responseBody ?: "{}")
-                                val errorMsg = errorJson.optJSONObject("error")?.optString("message")
-                                if (!errorMsg.isNullOrEmpty()) {
-                                    Log.e(TAG, "Gemini API error message: $errorMsg")
-                                }
-                            } catch (e: Exception) { /* ignore parse errors */ }
-                            null
+                            val error = ProviderApiException.fromHttpStatus(response.code, responseBody,
+                                response.header("Retry-After"))
+                            if (error.isRetryable && attempt < MAX_RETRIES) {
+                                kotlinx.coroutines.delay(error.retryAfterMs ?: (2000L * attempt))
+                                null
+                            } else throw error
                         }
                     }
                 } catch (e: Exception) {
@@ -552,6 +551,7 @@ Rules:
                 }
             }
             
+            if (result == null) lastChatError = lastChatError ?: "empty_response"
             result ?: "Sorry, unable to analyze this image."
         }
     }

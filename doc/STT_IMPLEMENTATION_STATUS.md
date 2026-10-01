@@ -2,6 +2,14 @@
 
 ## Overview
 
+### 2026-09-30 provider check
+
+The 18 registered STT options remain available through the same factory. OpenAI's built-in transcription adapter now sends `gpt-transcribe` on the existing file transcription endpoint; the UI label `OPENAI_WHISPER` is retained for stored-setting compatibility. [OpenAI file transcription](https://developers.openai.com/api/docs/guides/speech-to-text).
+
+AssemblyAI's async transcription request does not pin `speech_models`, so its service now routes that request to Universal-3.5 Pro when supported and falls back to Universal-2 for other languages. Do not pin the retired `universal-3-pro` ID. [AssemblyAI changelog](https://www.assemblyai.com/changelog).
+
+The remaining configured STT adapters keep their existing request contracts. This is a code and documentation review; paid live calls for each provider and accuracy comparisons were not performed.
+
 This document reflects the **current code state** of STT provider support in `phone-app`.
 
 - **Total STT Providers**: 18

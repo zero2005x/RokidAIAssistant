@@ -25,7 +25,7 @@ abstract class BaseAiService(
     protected val topP: Float = 1.0f,
     protected val frequencyPenalty: Float = 0.0f,
     protected val presencePenalty: Float = 0.0f
-) {
+) : ChatErrorSource {
     companion object {
         private const val TAG = "BaseAiService"
         protected const val MAX_RETRIES = 3
@@ -40,6 +40,15 @@ abstract class BaseAiService(
     
     // Conversation history
     protected val conversationHistory = mutableListOf<Pair<String, String>>() // (role, content)
+    override var lastChatError: String? = null
+        protected set
+
+    /** Supply the same recent turns when a question is routed to another provider. */
+    fun seedHistory(turns: List<Pair<String, String>>) {
+        lastChatError = null
+        conversationHistory.clear()
+        conversationHistory.addAll(turns.takeLast(10))
+    }
     
     /**
      * Get current date time string
@@ -151,9 +160,15 @@ abstract class BaseAiService(
         for (attempt in 1..MAX_RETRIES) {
             try {
                 val result = action(attempt)
-                if (result != null) return result
+                if (result != null) {
+                    lastChatError = null
+                    return result
+                }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 lastException = e
+                lastChatError = com.example.rokidphone.ai.catalog.ProviderApiException.sanitize(e.message)
                 val isNetworkError = isNetworkException(e)
                 
                 if (isNetworkError && attempt < MAX_RETRIES) {

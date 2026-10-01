@@ -32,7 +32,7 @@ import org.json.JSONObject
 class GeminiLiveSession(
     private val context: Context,
     private val apiKey: String,
-    private val modelId: String = "gemini-2.5-flash-preview-native-audio-dialog",
+    private val modelId: String = "gemini-3.8-live",
     private val systemPrompt: String = ""
 ) {
     companion object {

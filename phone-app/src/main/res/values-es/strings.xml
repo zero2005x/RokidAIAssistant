@@ -239,12 +239,12 @@
     
     <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Reconocimiento de voz Gemini</string>
-    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_openai_whisper">OpenAI Transcribe</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
     
     <!-- STT Provider Names -->
     <string name="stt_provider_gemini">Gemini</string>
-    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_openai_whisper">OpenAI Transcribe</string>
     <string name="stt_provider_groq_whisper">Groq Whisper</string>
     <string name="stt_provider_google_cloud">Google Cloud STT</string>
     <string name="stt_provider_azure">Azure Speech</string>
@@ -528,4 +528,53 @@
     <string name="recordings_status_analyzed">Analizado</string>
     <string name="recordings_status_error">Error</string>
     <string name="api_key_not_configured">La clave de API no está configurada. Configura una clave de API en Ajustes.</string>
+
+    <!-- Decision routing and glasses display -->
+    <string name="routing_display_settings">Selección de modelos y pantalla</string>
+    <string name="routing_title">Selección</string>
+    <string name="routing_open_summary">Configura el servicio y los tres modelos</string>
+    <string name="glasses_display_title">Texto en las gafas</string>
+    <string name="glasses_display_open_summary">Fuente, tamaño, área y posición</string>
+    <string name="glasses_display_description">Ajusta todo el texto y su área. Solo se sincroniza al aplicar.</string>
+    <string name="glasses_preview_connected">● Conectado</string>
+    <string name="glasses_preview_text">Área de texto de las gafas.\nAjusta la fuente y la posición.</string>
+    <string name="glasses_preview_hint">Desliza arriba para más</string>
+    <string name="glasses_preview_disclaimer">Vista orientativa: la proporción y el ajuste dependen de las gafas. sp indica el tamaño principal; el resto escala con él.</string>
+    <string name="glasses_font">Fuente</string>
+    <string name="glasses_font_system">Sistema</string>
+    <string name="glasses_font_monospace">Monoespaciada</string>
+    <string name="glasses_font_size">Tamaño del texto principal</string>
+    <string name="glasses_width">Anchura</string>
+    <string name="glasses_height">Altura</string>
+    <string name="glasses_left">Posición horizontal</string>
+    <string name="glasses_top">Posición vertical</string>
+    <string name="glasses_reset">Restablecer</string>
+    <string name="glasses_apply">Aplicar a las gafas</string>
+    <string name="glasses_slider_value">%1$s: %2$d %3$s</string>
+    <string name="routing_fast">Rápido</string>
+    <string name="routing_balanced">Equilibrado</string>
+    <string name="routing_quality">Calidad</string>
+    <string name="routing_enabled">Elegir según la dificultad</string>
+    <string name="routing_description">Solo texto y preguntas transcritas. Prioriza calidad y usa el modelo principal si hay dudas.</string>
+    <string name="routing_backend">Servicio de decisión</string>
+    <string name="routing_jev_key">Clave API de TypeSafe</string>
+    <string name="routing_laya_url">URL del servidor Laya</string>
+    <string name="routing_laya_url_hint">URL accesible desde el teléfono sin /v1/systemone. Se recomienda HTTPS; HTTP privado requiere un host permitido.</string>
+    <string name="routing_laya_key">Clave API de Laya (opcional)</string>
+    <string name="routing_unset">Sin configurar; usar principal</string>
+    <string name="routing_clear_slot">Vaciar ranura %1$s</string>
+    <string name="routing_data_disclosure">Al activarlo, la pregunta actual escrita o transcrita se envía al servicio de decisión elegido, incluso si el modelo de respuesta se ejecuta en este teléfono. No incluye historial, fotos ni audio.</string>
+    <string name="routing_laya_http_warning">HTTP envía preguntas y la clave opcional sin cifrar. Usa una red privada de confianza; este APK debe permitir el host.</string>
+    <string name="routing_reason_disabled">Modelo principal (selección desactivada)</string>
+    <string name="routing_reason_uncertain">Dificultad incierta o servicio no disponible; se usa el principal</string>
+    <string name="routing_reason_empty_slot">Ranura %1$s vacía; se usa el principal</string>
+    <string name="routing_reason_unconfigured_slot">Ranura %1$s no disponible o sin credenciales; se usa el principal</string>
+    <string name="routing_reason_selected">%1$s eligió %2$s (confianza %3$d%%)</string>
+    <string name="routing_reason_fallback">%1$s falló; se usa el principal</string>
+    <string name="routing_reason_failed">Falló la solicitud de IA</string>
+    <string name="routing_error">Falló la solicitud de IA: %1$s</string>
+    <string name="routing_decision_model">Modelo de decisión</string>
+    <string name="routing_llm_description">Usa la clave existente del proveedor. Solo se envía la pregunta actual para clasificarla, con una solicitud API de pago adicional. La certeza del LLM no es una probabilidad calibrada. Si hay dudas o se agota el tiempo, se usa el modelo principal.</string>
+    <string name="routing_reason_selected_llm">%1$s eligió %2$s mediante clasificación estructurada.</string>
+    <string name="glasses_preview_metrics">Área de la aplicación: %1$d × %2$d px</string>
 </resources>

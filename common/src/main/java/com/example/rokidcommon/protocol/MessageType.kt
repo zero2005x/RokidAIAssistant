@@ -29,7 +29,8 @@ enum class MessageType(val code: Int) {
     // Display control (0x30-0x3F)
     DISPLAY_TEXT(0x30),          // Phone -> Glasses: Display text
     DISPLAY_CLEAR(0x31),         // Phone -> Glasses: Clear display
-    DISPLAY_STATUS(0x32),        // Phone -> Glasses: Status update
+    DISPLAY_STATUS(0x32),
+    DISPLAY_METRICS(0x33),        // Phone requests; glasses report application metrics and camera transport        // Phone -> Glasses: Status update
     
     // Photo transfer (0x40-0x4F)
     PHOTO_START(0x40),           // Glasses -> Phone: Start photo transfer

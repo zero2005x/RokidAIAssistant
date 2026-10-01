@@ -76,9 +76,9 @@ fun HomeScreen(
         
         // Status overview cards
         item {
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 // Glasses connection status
                 InfoCard(
@@ -101,7 +101,7 @@ fun HomeScreen(
                         ConnectionState.ERROR -> MaterialTheme.colorScheme.error
                         else -> MaterialTheme.colorScheme.onSurfaceVariant
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxWidth()
                 )
                 
                 // Current AI model
@@ -109,7 +109,7 @@ fun HomeScreen(
                     icon = Icons.Default.Psychology,
                     title = stringResource(R.string.current_model),
                     value = currentModel?.displayName ?: currentModelId,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
@@ -161,18 +161,18 @@ fun HomeScreen(
             )
         }
         
-        // Quick access cards row
+        // Quick access actions use the full width so labels remain readable.
         item {
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 // Chat history quick access
                 QuickAccessCard(
                     icon = Icons.Default.History,
                     title = stringResource(R.string.conversation_history),
                     onClick = onViewConversationHistory,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxWidth()
                 )
                 
                 // Gallery quick access
@@ -180,27 +180,14 @@ fun HomeScreen(
                     icon = Icons.Default.PhotoLibrary,
                     title = stringResource(R.string.nav_gallery),
                     onClick = onViewGallery,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxWidth()
                 )
-            }
-        }
-        
-        // Second row of quick access cards
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Recordings quick access
                 QuickAccessCard(
                     icon = Icons.Default.Mic,
                     title = stringResource(R.string.recordings),
                     onClick = onViewRecordings,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxWidth()
                 )
-                
-                // Placeholder for future feature
-                Spacer(modifier = Modifier.weight(1f))
             }
         }
         

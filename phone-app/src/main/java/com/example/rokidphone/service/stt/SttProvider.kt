@@ -26,7 +26,7 @@ enum class SttProvider(
     ),
     OPENAI_WHISPER(
         displayNameResId = R.string.stt_provider_openai_whisper,
-        description = "OpenAI Whisper API, industry standard",
+        description = "OpenAI GPT-Transcribe file transcription",
         website = "https://openai.com",
         authType = SttAuthType.API_KEY,
         supportsStreaming = false,

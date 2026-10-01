@@ -13,6 +13,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.core.view.WindowCompat
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -23,12 +26,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
+import com.example.rokidglasses.ui.MeasuredTextPaginator
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.material3.LocalTextStyle
+import com.example.rokidcommon.protocol.GlassesFont
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rokidglasses.service.WakeWordService
@@ -290,7 +302,7 @@ fun GlassesMainScreen(
     var swipeOffset by remember { mutableFloatStateOf(0f) }
     val swipeThreshold = 50f
     
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
@@ -333,44 +345,77 @@ fun GlassesMainScreen(
                 }
             }
     ) {
-        // Status indicator (top right)
-        StatusIndicator(
-            isConnected = uiState.isConnected,
-            isListening = uiState.isListening,
-            deviceName = uiState.connectedDeviceName,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(16.dp)
-        )
-        
-        // Page indicator (top left) - only show when paginated
-        if (uiState.isPaginated) {
-            PageIndicator(
-                currentPage = uiState.currentPage + 1,
-                totalPages = uiState.totalPages,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(16.dp)
-            )
+        val displayConfig = uiState.displayConfig.normalized()
+        val viewportHeight = maxHeight * displayConfig.heightPercent / 100f
+        val deviceDensity = LocalDensity.current
+        val widthPx = with(deviceDensity) { maxWidth.roundToPx() }
+        val heightPx = with(deviceDensity) { maxHeight.roundToPx() }
+        LaunchedEffect(widthPx, heightPx, deviceDensity.density, deviceDensity.fontScale) {
+            viewModel.updateDisplayMetrics(com.example.rokidcommon.protocol.GlassesDisplayMetrics(
+                widthPx, heightPx, deviceDensity.density, deviceDensity.fontScale))
         }
-        
-        // Main display area (centered)
-        MainDisplayArea(
-            displayText = uiState.displayText,
-            isProcessing = uiState.isProcessing,
-            isPaginated = uiState.isPaginated,
-            currentPage = uiState.currentPage,
-            totalPages = uiState.totalPages,
-            modifier = Modifier.align(Alignment.Center)
-        )
-        
-        // Hint text (bottom)
-        HintText(
-            hint = uiState.hintText,
+        val scaledDensity = Density(deviceDensity.density,
+            deviceDensity.fontScale * displayConfig.fontSizeSp / 22f)
+        val family = if (displayConfig.font == GlassesFont.MONOSPACE) FontFamily.Monospace else FontFamily.Default
+        CompositionLocalProvider(
+            LocalDensity provides scaledDensity,
+            LocalTextStyle provides LocalTextStyle.current.copy(fontFamily = family)
+        ) {
+        Box(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 24.dp)
-        )
+                .offset(
+                    x = maxWidth * displayConfig.leftPercent / 100f,
+                    y = maxHeight * displayConfig.topPercent / 100f
+                )
+                .size(
+                    width = maxWidth * displayConfig.widthPercent / 100f,
+                    height = maxHeight * displayConfig.heightPercent / 100f
+                )
+                .clipToBounds()
+        ) {
+        Column(Modifier.fillMaxSize().padding(6.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .heightIn(max = viewportHeight * com.example.rokidcommon.protocol.GlassesDisplayLayout.HEADER_FRACTION)
+                    .horizontalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                if (uiState.isPaginated) {
+                    PageIndicator(uiState.currentPage + 1, uiState.totalPages)
+                } else Spacer(Modifier.width(1.dp))
+                StatusIndicator(
+                    isConnected = uiState.isConnected,
+                    isListening = uiState.isListening,
+                    deviceName = uiState.connectedDeviceName
+                )
+            }
+            BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                val measurer = rememberTextMeasurer()
+                val density = LocalDensity.current
+                val textStyle = TextStyle(fontSize = 22.sp, lineHeight = 30.sp,
+                    fontWeight = FontWeight.Medium, fontFamily = family, textAlign = TextAlign.Center)
+                val widthPx = with(density) { (maxWidth - 12.dp).roundToPx().coerceAtLeast(1) }
+                val heightPx = with(density) { maxHeight.roundToPx().coerceAtLeast(1) }
+                LaunchedEffect(widthPx, heightPx, textStyle, density, measurer) {
+                    viewModel.updateTextLayout { text ->
+                        MeasuredTextPaginator.paginate(text, widthPx, heightPx, textStyle, measurer)
+                    }
+                }
+                MainDisplayArea(
+                    displayText = uiState.displayText,
+                    isProcessing = uiState.isProcessing,
+                    isPaginated = uiState.isPaginated,
+                    currentPage = uiState.currentPage,
+                    totalPages = uiState.totalPages,
+                    textStyle = textStyle
+                )
+            }
+            HintText(hint = uiState.hintText, modifier = Modifier.fillMaxWidth()
+                .heightIn(max = viewportHeight * com.example.rokidcommon.protocol.GlassesDisplayLayout.HINT_FRACTION)
+                .verticalScroll(rememberScrollState()))
+        }
         
         // Device selector dialog
         if (showDeviceSelector) {
@@ -383,6 +428,8 @@ fun GlassesMainScreen(
                 },
                 onDismiss = { showDeviceSelector = false }
             )
+        }
+        }
         }
     }
 }
@@ -406,73 +453,35 @@ fun DeviceSelectorDialog(
         }
     }
     
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = Color(0xFF1A1A1A),
-        title = {
-            Text(
-                text = stringResource(R.string.select_phone),
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        text = {
+    // Render inside the configured viewport, sharing font scale and family with every other glasses label.
+    val selectedFontFamily = LocalTextStyle.current.fontFamily
+    Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF1A1A1A)) {
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.select_phone), color = Color.White,
+                fontSize = 18.sp, fontWeight = FontWeight.Bold)
             if (sortedDevices.isEmpty()) {
-                Text(
-                    text = stringResource(R.string.no_paired_devices) + "\n" + stringResource(R.string.pair_device_hint),
-                    color = Color.White.copy(alpha = 0.7f),
-                    fontSize = 14.sp
-                )
-            } else {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    sortedDevices.forEach { device ->
-                        @Suppress("MissingPermission")
-                        val deviceName = device.name ?: stringResource(R.string.unknown_device)
-                        val isRecommended = cxrConnectedPhoneName != null && 
-                            deviceName.equals(cxrConnectedPhoneName, ignoreCase = true)
-                        
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onDeviceSelected(device) },
-                            color = if (isRecommended) Color(0xFF1E3A5F) else Color(0xFF2A2A2A),
-                            shape = MaterialTheme.shapes.small
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = deviceName,
-                                    color = Color.White,
-                                    fontSize = 16.sp
-                                )
-                                if (isRecommended) {
-                                    Text(
-                                        text = "★ " + stringResource(R.string.recommended),
-                                        color = Color(0xFF64B5F6),
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-                        }
+                Text(stringResource(R.string.no_paired_devices) + "\n" + stringResource(R.string.pair_device_hint),
+                    color = Color.LightGray, fontSize = 14.sp)
+            }
+            sortedDevices.forEach { device ->
+                @Suppress("MissingPermission")
+                val deviceName = device.name ?: stringResource(R.string.unknown_device)
+                val recommended = deviceName.equals(cxrConnectedPhoneName, ignoreCase = true)
+                Surface(onClick = { onDeviceSelected(device) }, modifier = Modifier.fillMaxWidth(),
+                    color = if (recommended) Color(0xFF1E3A5F) else Color(0xFF2A2A2A)) {
+                    Column(Modifier.padding(8.dp)) {
+                        Text(deviceName, color = Color.White, fontSize = 16.sp)
+                        if (recommended) Text("★ " + stringResource(R.string.recommended),
+                            color = Color(0xFF64B5F6), fontSize = 12.sp)
                     }
                 }
             }
-        },
-        confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel), color = Color(0xFF64B5F6))
+                Text(stringResource(R.string.cancel), color = Color(0xFF64B5F6), fontFamily = selectedFontFamily)
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -552,74 +561,16 @@ fun MainDisplayArea(
     isPaginated: Boolean = false,
     currentPage: Int = 0,
     totalPages: Int = 1,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = TextStyle(fontSize = 22.sp, lineHeight = 30.sp,
+        fontWeight = FontWeight.Medium, textAlign = TextAlign.Center)
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        AnimatedVisibility(
-            visible = isProcessing,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(32.dp),
-                color = Color(0xFF64B5F6),
-                strokeWidth = 3.dp
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        AnimatedContent(
-            targetState = displayText,
-            transitionSpec = {
-                if (isPaginated) {
-                    // Slide animation for pagination
-                    slideInVertically { height -> height } + fadeIn() togetherWith 
-                    slideOutVertically { height -> -height } + fadeOut()
-                } else {
-                    fadeIn() togetherWith fadeOut()
-                }
-            },
-            label = "display_text"
-        ) { text ->
-            Text(
-                text = text,
-                color = Color.White,
-                fontSize = if (isPaginated) 20.sp else 24.sp,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center,
-                lineHeight = if (isPaginated) 28.sp else 32.sp,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-        
-        // Navigation hints for paginated content
-        if (isPaginated) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (currentPage > 0) {
-                    Text(
-                        text = "▲",
-                        color = Color(0xFF64B5F6),
-                        fontSize = 16.sp
-                    )
-                }
-                if (currentPage < totalPages - 1) {
-                    Text(
-                        text = "▼",
-                        color = Color(0xFF64B5F6),
-                        fontSize = 16.sp
-                    )
-                }
-            }
+    Box(modifier.fillMaxSize().padding(horizontal = 6.dp), contentAlignment = Alignment.Center) {
+        if (isProcessing) {
+            CircularProgressIndicator(Modifier.size(32.dp), color = Color(0xFF64B5F6), strokeWidth = 3.dp)
+        } else {
+            Text(text = displayText, color = Color.White, style = textStyle,
+                modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()))
         }
     }
 }

@@ -100,21 +100,21 @@ column is only used when the API is unreachable and no cache exists.
 > some providers — check each official console; they are not guaranteed to
 > exist permanently.
 
-### Representative fallback models (verified 2026-08-02)
+### Representative fallback models (verified 2026-09-30)
 
 | Provider   | Fallback examples (stable unless noted)                                  |
 | ---------- | ------------------------------------------------------------------------ |
-| Gemini     | gemini-3.6-flash, gemini-3.5-flash(-lite), gemini-2.5-pro/flash/lite     |
-| OpenAI     | gpt-5.6, gpt-5.6-terra, gpt-5.6-luna (gpt-5.4, gpt-4o: legacy)           |
-| Anthropic  | claude-sonnet-5, claude-opus-5, claude-fable-5, claude-opus-4-8, claude-haiku-4-5 |
-| DeepSeek   | deepseek-v4-flash, deepseek-v4-pro (deepseek-chat/reasoner: deprecated → migrated) |
-| Groq       | llama-3.3-70b-versatile, gpt-oss-120b/20b (Llama 4 Scout/Maverick: preview) |
-| xAI        | grok-4.5 (vision), grok-4.1-fast, grok-4                                 |
-| Alibaba    | qwen3.7-max/plus/flash, qwen2.5-vl-72b/32b (vision)                      |
+| Gemini     | gemini-3.8-flash, gemini-3.6-flash, gemini-3.5-flash(-lite), gemini-2.5-pro/flash/lite |
+| OpenAI     | gpt-6-astra/sol/luna, gpt-5.6/terra/luna (gpt-5.4, gpt-4o: legacy)       |
+| Anthropic  | claude-sonnet-5-5, claude-opus-5-5, claude-sonnet-5, claude-opus-5       |
+| DeepSeek   | deepseek-flash, deepseek-v4-pro (deepseek-v4-flash: temporary alias)       |
+| Groq       | gpt-oss-120b/20b, qwen3.8-27b (Llama 3.3 retired; Llama 4 Scout/Maverick: preview) |
+| xAI        | grok-4.7, grok-4.5 (vision), grok-4.1-fast, grok-4                       |
+| Alibaba    | qwen3.8-max/flash, qwen3.7-max/plus/flash, qwen2.5-vl-72b/32b            |
 | Z.AI       | glm-5.1, glm-5v-turbo (vision), glm-4.7-flash                            |
 | Baidu      | ernie-5.1, ernie-5.0, ernie-4.5-turbo-128k, ernie-4.5-turbo-vl (vision)  |
 | Perplexity | sonar, sonar-pro, sonar-reasoning-pro, sonar-deep-research               |
-| Moonshot   | kimi-k2.5, kimi-k2.5-thinking                                            |
+| Moonshot   | kimi-k2.6, kimi-k2.5, kimi-k2.5-thinking                                  |
 | Mistral    | mistral-medium-3-5, mistral-large-2512, mistral-small-2603, ministral-3-8b |
 | On-Device Gemma | gemma-3n-E2B-it, gemma-3n-E4B-it (installed local files also listed)  |
 
@@ -383,7 +383,8 @@ can switch explicitly with the "Legacy authentication" toggle.
 ### DeepSeek migration
 
 Stored selections of the legacy `deepseek-chat` / `deepseek-reasoner` IDs are
-migrated automatically to `deepseek-v4-flash` / `deepseek-v4-pro`. You may
+migrated automatically to `deepseek-flash` / `deepseek-v4-pro`. Stored
+`deepseek-v4-flash` selections also migrate to `deepseek-flash`. You may
 still enter the old IDs manually (shown with a deprecated warning).
 
 **Path**: `phone-app/src/.../ui/settings/SettingsScreen.kt`

@@ -331,6 +331,14 @@ private fun MessageBubble(
                     )
                 }
             }
+            if (!isUser && !message.routingReason.isNullOrBlank()) {
+                Text(
+                    text = com.example.rokidphone.data.RoutingReason.display(
+                        androidx.compose.ui.platform.LocalContext.current, message.routingReason),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
         
         if (isUser) {

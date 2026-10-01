@@ -319,13 +319,29 @@ data class ProviderConfig(
  * API Settings
  */
 data class ApiSettings(
+    val glassesDisplayMetrics: com.example.rokidcommon.protocol.GlassesDisplayMetrics? = null,
+    val glassesDisplayConfig: com.example.rokidcommon.protocol.GlassesDisplayConfig =
+        com.example.rokidcommon.protocol.GlassesDisplayConfig(),
     // AI Chat settings
     val aiProvider: AiProvider = AiProvider.GEMINI,
-    val aiModelId: String = "gemini-2.5-flash",
+    val aiModelId: String = "gemini-3.8-flash",
 
     // Per-provider model memory: provider name -> last selected model ID.
     // Switching providers restores the model the user picked for that provider.
     val providerModelIds: Map<String, String> = emptyMap(),
+
+    // Optional System One model routing for text requests. Empty slots use the
+    // primary model; credentials for Jev and Laya are stored with the other keys.
+    val decisionRoutingEnabled: Boolean = false,
+    val decisionBackend: DecisionBackend = DecisionBackend.JEV,
+    val decisionGeminiModel: String = "gemini-3.8-flash",
+    val decisionOpenaiModel: String = "gpt-6-luna",
+    val jevApiKey: String = "",
+    val layaBaseUrl: String = "",
+    val layaApiKey: String = "",
+    val fastRoutingModel: RoutingModel? = null,
+    val balancedRoutingModel: RoutingModel? = null,
+    val qualityRoutingModel: RoutingModel? = null,
 
     // API Keys for each provider
     val geminiApiKey: String = "",
@@ -564,8 +580,20 @@ data class ApiSettings(
             .values.flatMap { it.entries }.associate { it.toPair() }
         val newMap = providerModelIds.mapValues { (_, id) -> migrations[id] ?: id }
         val newActive = migrations[aiModelId] ?: aiModelId
-        return if (newMap != providerModelIds || newActive != aiModelId) {
-            copy(providerModelIds = newMap, aiModelId = newActive)
+        fun migrateSlot(slot: RoutingModel?): RoutingModel? = slot?.let {
+            val replacements = com.example.rokidphone.ai.catalog.FallbackModelCatalog
+                .legacyModelMigration[it.provider]
+            it.copy(modelId = replacements?.get(it.modelId) ?: it.modelId)
+        }
+        val newFast = migrateSlot(fastRoutingModel)
+        val newBalanced = migrateSlot(balancedRoutingModel)
+        val newQuality = migrateSlot(qualityRoutingModel)
+        return if (newMap != providerModelIds || newActive != aiModelId ||
+            newFast != fastRoutingModel || newBalanced != balancedRoutingModel || newQuality != qualityRoutingModel
+        ) {
+            copy(providerModelIds = newMap, aiModelId = newActive,
+                fastRoutingModel = newFast, balancedRoutingModel = newBalanced,
+                qualityRoutingModel = newQuality)
         } else this
     }
 

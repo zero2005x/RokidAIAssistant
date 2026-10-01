@@ -239,12 +239,12 @@
     
     <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Gemini 语音识别</string>
-    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_openai_whisper">OpenAI Transcribe</string>
     <string name="speech_service_google_cloud">Google Cloud 语音转文字</string>
     
     <!-- STT Provider Names -->
     <string name="stt_provider_gemini">Gemini 语音</string>
-    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_openai_whisper">OpenAI Transcribe</string>
     <string name="stt_provider_groq_whisper">Groq Whisper</string>
     <string name="stt_provider_google_cloud">Google Cloud STT</string>
     <string name="stt_provider_azure">Azure 语音</string>
@@ -527,4 +527,53 @@
     <string name="recordings_status_analyzed">已分析</string>
     <string name="recordings_status_error">错误</string>
     <string name="api_key_not_configured">API 密钥尚未配置。请在设置中配置 API 密钥。</string>
+
+    <!-- Decision routing and glasses display -->
+    <string name="routing_display_settings">模型选择与眼镜显示</string>
+    <string name="routing_title">自动选模</string>
+    <string name="routing_open_summary">设置判断服务与三个模型</string>
+    <string name="glasses_display_title">眼镜文字显示</string>
+    <string name="glasses_display_open_summary">字形、字号、范围与位置</string>
+    <string name="glasses_display_description">调整全部文字与显示范围，按“应用”后同步。</string>
+    <string name="glasses_preview_connected">● 已连接</string>
+    <string name="glasses_preview_text">这是眼镜上的文字显示范围。\n可以调整字体与位置。</string>
+    <string name="glasses_preview_hint">向上滑动查看更多</string>
+    <string name="glasses_preview_disclaimer">示意预览：实际比例与换行依眼镜而定。字号为主文字的 sp 大小，其余文字按比例调整。</string>
+    <string name="glasses_font">字形</string>
+    <string name="glasses_font_system">系统字体</string>
+    <string name="glasses_font_monospace">等宽字体</string>
+    <string name="glasses_font_size">主文字字号</string>
+    <string name="glasses_width">宽度</string>
+    <string name="glasses_height">高度</string>
+    <string name="glasses_left">水平位置</string>
+    <string name="glasses_top">垂直位置</string>
+    <string name="glasses_reset">重置</string>
+    <string name="glasses_apply">应用到眼镜</string>
+    <string name="glasses_slider_value">%1$s: %2$d %3$s</string>
+    <string name="routing_fast">快速</string>
+    <string name="routing_balanced">均衡</string>
+    <string name="routing_quality">高质量</string>
+    <string name="routing_enabled">按问题难度选择模型</string>
+    <string name="routing_description">仅用于文字及语音转写后的提问；质量优先，不确定时使用主要模型。</string>
+    <string name="routing_backend">判断服务</string>
+    <string name="routing_jev_key">TypeSafe API 密钥</string>
+    <string name="routing_laya_url">Laya 服务器网址</string>
+    <string name="routing_laya_url_hint">手机可连接的网址，不含 /v1/systemone。建议 HTTPS；私有 HTTP 需要允许该主机。</string>
+    <string name="routing_laya_key">Laya API 密钥（服务器设置时）</string>
+    <string name="routing_unset">未设置，使用主要模型</string>
+    <string name="routing_clear_slot">清除%1$s槽位</string>
+    <string name="routing_data_disclosure">开启后，本次文字或转录提问会发送到所选决策后端，即使回答模型在手机本机运行。分类不包含对话历史、照片或音频。</string>
+    <string name="routing_laya_http_warning">HTTP 以未加密方式发送问题及可选 API 密钥。使用可信的私有网络；此 APK 必须明确允许该主机。</string>
+    <string name="routing_reason_disabled">主要模型（自动选模未开启）</string>
+    <string name="routing_reason_uncertain">难度不确定或判断服务不可用，使用主要模型</string>
+    <string name="routing_reason_empty_slot">%1$s槽位未设置，使用主要模型</string>
+    <string name="routing_reason_unconfigured_slot">%1$s槽位不可用或缺少凭证，使用主要模型</string>
+    <string name="routing_reason_selected">%1$s 判断为%2$s（置信度 %3$d%%）</string>
+    <string name="routing_reason_fallback">%1$s 回答失败，使用主要模型</string>
+    <string name="routing_reason_failed">AI 请求失败</string>
+    <string name="routing_error">AI 请求失败：%1$s</string>
+    <string name="routing_decision_model">决策模型</string>
+    <string name="routing_llm_description">使用已有供应商密钥，只发送本次问题进行分类，会增加一次付费 API 请求。LLM 的确定程度不是经过校准的概率；不确定或超时时使用主要模型。</string>
+    <string name="routing_reason_selected_llm">%1$s 通过结构化分类选择%2$s。</string>
+    <string name="glasses_preview_metrics">APP 显示范围：%1$d × %2$d px</string>
 </resources>

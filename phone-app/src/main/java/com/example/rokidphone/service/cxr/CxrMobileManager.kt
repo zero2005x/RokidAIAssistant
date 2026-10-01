@@ -80,6 +80,8 @@ class CxrMobileManager(private val context: Context) {
     private var retryCount = 0
     private var lastConnectedDevice: BluetoothDevice? = null
     private var retryJob: Job? = null
+    private var initJob: Job? = null
+    @Volatile private var released = false
     private val retryScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     
     // Mutex to serialize Bluetooth init/deinit operations and prevent race conditions
@@ -99,13 +101,7 @@ class CxrMobileManager(private val context: Context) {
         }
     }
     
-    // Bluetooth status callback — guarded against null invocations.
-    // The CXR SDK's internal BluetoothController.init() may call deinit() first,
-    // which resets mCallback to null. When updateStatus() subsequently fires,
-    // the SDK tries to invoke the null callback → NPE crash.
-    // By wrapping every callback method with isCallbackRegistered checks and using
-    // try-catch, we prevent the crash even if the SDK invokes the callback before
-    // proper registration completes.
+    // Ignore callbacks from a disconnected SDK session. This cannot intercept errors inside the SDK.
     private val bluetoothCallback = object : BluetoothStatusCallback {
         override fun onConnectionInfo(
             socketUuid: String?,
@@ -197,20 +193,9 @@ class CxrMobileManager(private val context: Context) {
         onPhotoResult?.invoke(status, photo)
     }
     
-    /**
-     * Initialize Bluetooth connection.
-     *
-     * FIX for crash: The CXR SDK's BluetoothController.init() internally calls
-     * deinit() which resets mCallback to null, then fires updateStatus(BLUETOOTH_UNAVAILABLE)
-     * on the null callback → NPE. To prevent this:
-     * 1. We explicitly deinitBluetooth() first and wait for the SDK to settle.
-     * 2. We mark isCallbackRegistered = true only AFTER calling initBluetooth(),
-     *    so any premature updateStatus() during deinit is safely ignored.
-     * 3. All operations are serialized with a Mutex.
-     *
-     * This method is now a suspend function launched in retryScope.
-     */
+    /** Initialize the legacy SDK transport, serializing init/deinit operations. */
     fun initBluetooth(device: BluetoothDevice): Boolean {
+        if (released) return false
         if (!isSdkAvailable()) {
             Log.e(TAG, "CXR-M SDK not available")
             return false
@@ -223,7 +208,8 @@ class CxrMobileManager(private val context: Context) {
 
         // Launch the actual init on a background scope so we can use the mutex
         // and delay without blocking the caller.
-        retryScope.launch {
+        initJob?.cancel()
+        initJob = retryScope.launch {
             initBluetoothInternal(device)
         }
         return true
@@ -253,15 +239,18 @@ class CxrMobileManager(private val context: Context) {
                 // Step 3: Wait for SDK internals to settle after deinit.
                 delay(DEINIT_SETTLE_DELAY_MS)
 
+                if (lastConnectedDevice != device) return@withLock
+                // The SDK can invoke callbacks synchronously during initialization.
+                isCallbackRegistered = true
                 // Step 4: Now init with the callback.
                 Log.d(TAG, "Initializing Bluetooth with device: ${device.name}")
                 cxrApi.initBluetooth(context, device, bluetoothCallback)
 
-                // Step 5: Only NOW mark the callback as registered, so subsequent
-                // SDK callbacks (onConnectionInfo, onConnected, etc.) are processed.
-                isCallbackRegistered = true
+                // Initialization completed; callbacks are already registered.
                 Log.d(TAG, "Bluetooth callback registered")
 
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to init Bluetooth", e)
                 isCallbackRegistered = false
@@ -299,23 +288,27 @@ class CxrMobileManager(private val context: Context) {
      * Disconnect Bluetooth
      */
     fun disconnectBluetooth() {
-        try {
-            isCallbackRegistered = false  // Prevent stale callbacks during deinit
-            retryJob?.cancel()
-            retryCount = 0
-            lastConnectedDevice = null
-            cxrApi.deinitBluetooth()
-            _bluetoothState.value = BluetoothState.Disconnected
-            Log.d(TAG, "Bluetooth disconnected")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to disconnect Bluetooth", e)
+        val wasInitialized = lastConnectedDevice != null
+        isCallbackRegistered = false
+        lastConnectedDevice = null
+        retryJob?.cancel()
+        initJob?.cancel()
+        retryCount = 0
+        _bluetoothState.value = BluetoothState.Disconnected
+        if (wasInitialized) retryScope.launch {
+            bluetoothMutex.withLock {
+                // A newer connection may have been requested while waiting for the mutex.
+                if (lastConnectedDevice == null) runCatching { cxrApi.deinitBluetooth() }
+                    .onFailure { Log.w(TAG, "CXR deinit failed: ${it.javaClass.simpleName}") }
+            }
         }
     }
-    
+
     /**
      * Schedule auto-retry for BLE connection with exponential backoff
      */
     private fun scheduleRetry() {
+        if (released) return
         val device = lastConnectedDevice ?: run {
             Log.w(TAG, "No device to retry connection")
             return
@@ -485,14 +478,19 @@ class CxrMobileManager(private val context: Context) {
      * Release resources
      */
     fun release() {
-        try {
-            retryJob?.cancel()
-            retryScope.cancel()
-            removeAiEventListener()
-            disconnectBluetooth()
-            Log.d(TAG, "CxrMobileManager released")
-        } catch (e: Exception) {
-            Log.e(TAG, "Error releasing CxrMobileManager", e)
+        released = true
+        isCallbackRegistered = false
+        lastConnectedDevice = null
+        retryJob?.cancel()
+        initJob?.cancel()
+        removeAiEventListener()
+        _bluetoothState.value = BluetoothState.Disconnected
+        retryScope.launch {
+            try {
+                bluetoothMutex.withLock { runCatching { cxrApi.deinitBluetooth() } }
+            } finally {
+                retryScope.cancel()
+            }
         }
     }
 }

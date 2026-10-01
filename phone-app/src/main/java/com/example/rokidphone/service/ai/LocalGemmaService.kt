@@ -52,9 +52,11 @@ class LocalGemmaService(
     private val modelId: String,
     @Suppress("unused") private val systemPrompt: String = "",
     private val engine: LocalInferenceEngine? = null
-) : AiServiceProvider {
+) : AiServiceProvider, ChatErrorSource {
 
     override val provider: AiProvider = AiProvider.LOCAL_GEMMA
+    override var lastChatError: String? = null
+        private set
 
     override suspend fun transcribe(pcmAudioData: ByteArray, languageCode: String): SpeechResult =
         SpeechResult.Error(
@@ -63,7 +65,8 @@ class LocalGemmaService(
         )
 
     override suspend fun chat(userMessage: String): String {
-        val engine = engine ?: return modelUnavailableMessage()
+        lastChatError = null
+        val engine = engine ?: return modelUnavailableMessage().also { lastChatError = it }
         return engine.generate(userMessage)
     }
 

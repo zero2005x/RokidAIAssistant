@@ -241,12 +241,12 @@
     
     <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Розпізнавання мови Gemini</string>
-    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_openai_whisper">OpenAI Transcribe</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
     
     <!-- STT Provider Names -->
     <string name="stt_provider_gemini">Gemini</string>
-    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_openai_whisper">OpenAI Transcribe</string>
     <string name="stt_provider_groq_whisper">Groq Whisper</string>
     <string name="stt_provider_google_cloud">Google Cloud STT</string>
     <string name="stt_provider_azure">Azure Speech</string>
@@ -530,4 +530,53 @@
     <string name="recordings_status_analyzed">Проаналізовано</string>
     <string name="recordings_status_error">Помилка</string>
     <string name="api_key_not_configured">Ключ API не налаштовано. Налаштуйте ключ API в налаштуваннях.</string>
+
+    <!-- Decision routing and glasses display -->
+    <string name="routing_display_settings">Моделі й екран окулярів</string>
+    <string name="routing_title">Вибір моделі</string>
+    <string name="routing_open_summary">Налаштувати сервіс і три моделі</string>
+    <string name="glasses_display_title">Текст в окулярах</string>
+    <string name="glasses_display_open_summary">Шрифт, розмір, область і позиція</string>
+    <string name="glasses_display_description">Налаштуйте весь текст і його область. Синхронізація після застосування.</string>
+    <string name="glasses_preview_connected">● Підключено</string>
+    <string name="glasses_preview_text">Область тексту в окулярах.\nНалаштуйте шрифт і позицію.</string>
+    <string name="glasses_preview_hint">Проведіть угору</string>
+    <string name="glasses_preview_disclaimer">Умовний приклад: пропорції й переноси залежать від окулярів. sp задає розмір основного тексту; інший масштабується.</string>
+    <string name="glasses_font">Шрифт</string>
+    <string name="glasses_font_system">Системний</string>
+    <string name="glasses_font_monospace">Моноширинний</string>
+    <string name="glasses_font_size">Розмір основного тексту</string>
+    <string name="glasses_width">Ширина</string>
+    <string name="glasses_height">Висота</string>
+    <string name="glasses_left">Горизонтальна позиція</string>
+    <string name="glasses_top">Вертикальна позиція</string>
+    <string name="glasses_reset">Скинути</string>
+    <string name="glasses_apply">Застосувати до окулярів</string>
+    <string name="glasses_slider_value">%1$s: %2$d %3$s</string>
+    <string name="routing_fast">Швидкий</string>
+    <string name="routing_balanced">Збалансований</string>
+    <string name="routing_quality">Якісний</string>
+    <string name="routing_enabled">Вибір за складністю питання</string>
+    <string name="routing_description">Лише текст і розпізнані питання. Пріоритет якості; за невпевненості основна модель.</string>
+    <string name="routing_backend">Сервіс оцінки</string>
+    <string name="routing_jev_key">API-ключ TypeSafe</string>
+    <string name="routing_laya_url">URL сервера Laya</string>
+    <string name="routing_laya_url_hint">URL, доступний із телефона, без /v1/systemone. Рекомендовано HTTPS; приватний HTTP потребує дозволеного вузла.</string>
+    <string name="routing_laya_key">API-ключ Laya (якщо задано)</string>
+    <string name="routing_unset">Не задано; основна модель</string>
+    <string name="routing_clear_slot">Очистити слот %1$s</string>
+    <string name="routing_data_disclosure">Поточне текстове або розпізнане запитання надсилається вибраному сервісу класифікації, навіть якщо модель відповіді працює на телефоні. Історія розмови, фото й аудіо не додаються.</string>
+    <string name="routing_laya_http_warning">HTTP надсилає текст і необов’язковий ключ без шифрування. Використовуйте довірену приватну мережу; APK має дозволяти цей вузол.</string>
+    <string name="routing_reason_disabled">Основна модель (автовибір вимкнено)</string>
+    <string name="routing_reason_uncertain">Складність невідома або сервіс недоступний; основна модель</string>
+    <string name="routing_reason_empty_slot">Слот %1$s порожній; основна модель</string>
+    <string name="routing_reason_unconfigured_slot">Слот %1$s недоступний або немає ключа; основна модель</string>
+    <string name="routing_reason_selected">%1$s вибрав %2$s (впевненість %3$d%%)</string>
+    <string name="routing_reason_fallback">Помилка %1$s; основна модель</string>
+    <string name="routing_reason_failed">Помилка запиту ШІ</string>
+    <string name="routing_error">Помилка запиту ШІ: %1$s</string>
+    <string name="routing_decision_model">Модель класифікації</string>
+    <string name="routing_llm_description">Використовується наявний ключ провайдера. Для класифікації надсилається лише поточне запитання; додається один платний запит API. Впевненість LLM не є каліброваною ймовірністю. За невизначеності або тайм-ауту використовується основна модель.</string>
+    <string name="routing_reason_selected_llm">%1$s обрав %2$s за допомогою структурованої класифікації.</string>
+    <string name="glasses_preview_metrics">Область застосунку: %1$d × %2$d px</string>
 </resources>

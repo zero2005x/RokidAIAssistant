@@ -241,12 +241,12 @@
     
     <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">التعرف على الصوت Gemini</string>
-    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_openai_whisper">OpenAI Transcribe</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
     
     <!-- STT Provider Names -->
     <string name="stt_provider_gemini">Gemini</string>
-    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_openai_whisper">OpenAI Transcribe</string>
     <string name="stt_provider_groq_whisper">Groq Whisper</string>
     <string name="stt_provider_google_cloud">Google Cloud STT</string>
     <string name="stt_provider_azure">Azure Speech</string>
@@ -530,4 +530,53 @@
     <string name="recordings_status_analyzed">تم التحليل</string>
     <string name="recordings_status_error">خطأ</string>
     <string name="api_key_not_configured">لم يتم إعداد مفتاح API. يُرجى إعداد مفتاح API في الإعدادات.</string>
+
+    <!-- Decision routing and glasses display -->
+    <string name="routing_display_settings">اختيار النماذج وشاشة النظارة</string>
+    <string name="routing_title">اختيار النموذج</string>
+    <string name="routing_open_summary">ضبط الخدمة والنماذج الثلاثة</string>
+    <string name="glasses_display_title">النص في النظارة</string>
+    <string name="glasses_display_open_summary">الخط والحجم والمساحة والموضع</string>
+    <string name="glasses_display_description">اضبط كل النص ومساحته. تتم المزامنة بعد التطبيق فقط.</string>
+    <string name="glasses_preview_connected">● متصل</string>
+    <string name="glasses_preview_text">مساحة النص في النظارة.\nاضبط الخط والموضع.</string>
+    <string name="glasses_preview_hint">اسحب لأعلى للمزيد</string>
+    <string name="glasses_preview_disclaimer">معاينة توضيحية؛ النسبة والتفاف النص حسب النظارة. sp هو حجم النص الرئيسي والباقي يتغير بالتناسب.</string>
+    <string name="glasses_font">الخط</string>
+    <string name="glasses_font_system">النظام</string>
+    <string name="glasses_font_monospace">أحادي المسافة</string>
+    <string name="glasses_font_size">حجم النص الرئيسي</string>
+    <string name="glasses_width">العرض</string>
+    <string name="glasses_height">الارتفاع</string>
+    <string name="glasses_left">الموضع الأفقي</string>
+    <string name="glasses_top">الموضع العمودي</string>
+    <string name="glasses_reset">إعادة ضبط</string>
+    <string name="glasses_apply">تطبيق على النظارة</string>
+    <string name="glasses_slider_value">%1$s: %2$d %3$s</string>
+    <string name="routing_fast">سريع</string>
+    <string name="routing_balanced">متوازن</string>
+    <string name="routing_quality">جودة</string>
+    <string name="routing_enabled">الاختيار حسب صعوبة السؤال</string>
+    <string name="routing_description">للنص والأسئلة المفرغة صوتيا فقط. الأولوية للجودة؛ يستخدم النموذج الرئيسي عند الشك.</string>
+    <string name="routing_backend">خدمة التقييم</string>
+    <string name="routing_jev_key">مفتاح API لـ TypeSafe</string>
+    <string name="routing_laya_url">عنوان خادم Laya</string>
+    <string name="routing_laya_url_hint">عنوان يصل إليه الهاتف دون /v1/systemone. يوصى بـ HTTPS؛ يتطلب HTTP الخاص مضيفا مسموحا.</string>
+    <string name="routing_laya_key">مفتاح API لـ Laya (اختياري)</string>
+    <string name="routing_unset">غير محدد؛ النموذج الرئيسي</string>
+    <string name="routing_clear_slot">مسح خانة %1$s</string>
+    <string name="routing_data_disclosure">عند التفعيل يُرسل السؤال الحالي المكتوب أو المفرغ من الصوت إلى خدمة التصنيف المختارة، حتى لو كان نموذج الإجابة يعمل على الهاتف. لا يشمل سجل المحادثة أو الصور أو الصوت.</string>
+    <string name="routing_laya_http_warning">يرسل HTTP السؤال والمفتاح الاختياري دون تشفير. استخدم شبكة خاصة موثوقة؛ يجب أن يسمح APK بهذا المضيف.</string>
+    <string name="routing_reason_disabled">النموذج الرئيسي (الاختيار التلقائي معطل)</string>
+    <string name="routing_reason_uncertain">الصعوبة غير مؤكدة أو الخدمة غير متاحة؛ النموذج الرئيسي</string>
+    <string name="routing_reason_empty_slot">خانة %1$s فارغة؛ النموذج الرئيسي</string>
+    <string name="routing_reason_unconfigured_slot">خانة %1$s غير متاحة أو بلا مفتاح؛ النموذج الرئيسي</string>
+    <string name="routing_reason_selected">اختار %1$s نموذج %2$s (ثقة %3$d%%)</string>
+    <string name="routing_reason_fallback">فشل %1$s؛ النموذج الرئيسي</string>
+    <string name="routing_reason_failed">فشل طلب الذكاء الاصطناعي</string>
+    <string name="routing_error">فشل طلب الذكاء الاصطناعي: %1$s</string>
+    <string name="routing_decision_model">نموذج التصنيف</string>
+    <string name="routing_llm_description">يستخدم مفتاح المزود الحالي. يُرسل السؤال الحالي فقط للتصنيف، مما يضيف طلب API مدفوعًا. يقين نموذج اللغة ليس احتمالًا معايرًا. عند عدم اليقين أو انتهاء المهلة يُستخدم النموذج الرئيسي.</string>
+    <string name="routing_reason_selected_llm">اختار %1$s الفئة %2$s باستخدام تصنيف منظم.</string>
+    <string name="glasses_preview_metrics">مساحة عرض التطبيق: %1$d × %2$d px</string>
 </resources>

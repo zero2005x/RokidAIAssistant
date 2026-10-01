@@ -205,7 +205,7 @@ class ProviderSettingTest {
         assertThat(setting.id).isEqualTo("gemini")
         assertThat(setting.displayName).isEqualTo("Google Gemini")
         assertThat(setting.enabled).isFalse()
-        assertThat(setting.modelId).isEqualTo("gemini-3.6-flash")
+        assertThat(setting.modelId).isEqualTo("gemini-3.8-flash")
         assertThat(setting.baseUrl).contains("generativelanguage.googleapis.com")
     }
 
