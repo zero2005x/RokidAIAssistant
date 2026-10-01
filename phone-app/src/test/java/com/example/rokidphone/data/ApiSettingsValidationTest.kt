@@ -220,7 +220,8 @@ class ApiSettingsValidationTest {
             .migrateLegacyModelIds()
 
         assertThat(migrated.aiModelId).isEqualTo("deepseek-v4-pro")
-        assertThat(migrated.providerModelIds[AiProvider.DEEPSEEK.name]).isEqualTo("deepseek-v4-flash")
+        // DeepSeek retired the V3 chat alias in favour of V4.1 Flash (`deepseek-flash`).
+        assertThat(migrated.providerModelIds[AiProvider.DEEPSEEK.name]).isEqualTo("deepseek-flash")
         assertThat(migrated.providerModelIds[AiProvider.OPENAI.name]).isEqualTo("gpt-5.6")
     }
 

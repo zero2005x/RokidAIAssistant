@@ -55,8 +55,10 @@ class OpenAiAudioFileTranscriptionTest {
         assertThat(request.headers["Authorization"]).isEqualTo("Bearer sk-test")
         val body = request.body.readUtf8()
         assertThat(body).contains("filename=\"audio.m4a\"")
-        assertThat(body).contains("whisper-1")
-        assertThat(body).contains("en")
+        assertThat(body).contains("gpt-transcribe")
+        // gpt-transcribe takes the language hint as an array field, not `language`.
+        assertThat(body).contains("name=\"languages[]\"\r\n\r\nen\r\n")
+        assertThat(body).doesNotContain("name=\"language\"")
     }
 
     @Test

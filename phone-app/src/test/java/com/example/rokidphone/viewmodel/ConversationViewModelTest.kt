@@ -7,6 +7,7 @@ import com.example.rokidcommon.protocol.MessageType
 import com.example.rokidphone.ai.provider.ProviderManager
 import com.example.rokidphone.data.AiProvider
 import com.example.rokidphone.data.ApiSettings
+import com.example.rokidphone.data.RoutingReason
 import com.example.rokidphone.data.SettingsRepository
 import com.example.rokidphone.data.db.Conversation
 import com.example.rokidphone.data.db.ConversationRepository
@@ -311,8 +312,12 @@ class ConversationViewModelTest {
         model.sendMessage()
         advanceUntilIdle()
 
-        assertThat(model.uiState.value.error).isEqualTo("Failed to send: upstream down")
+        // Provider failures keep the provider's own reason and are localized, not stored as an answer.
+        assertThat(model.uiState.value.error)
+            .isEqualTo(RoutingReason.failure(application, "upstream down"))
+        assertThat(model.uiState.value.error).contains("upstream down")
         assertThat(model.uiState.value.isLoading).isFalse()
+        coVerify(exactly = 0) { repository.addAssistantMessage(any(), any(), any(), any(), any()) }
     }
 
     @Test
