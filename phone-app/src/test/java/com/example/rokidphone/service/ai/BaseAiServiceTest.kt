@@ -72,6 +72,25 @@ class BaseAiServiceTest {
     }
 
     @Test
+    fun `executeWithRetry - cancellation is rethrown and never recorded as a provider error`() = runTest {
+        val service = TestBaseAiService()
+        var calls = 0
+
+        try {
+            service.callExecuteWithRetry<String> { attempt ->
+                calls = attempt
+                throw kotlinx.coroutines.CancellationException("stop")
+            }
+            org.junit.Assert.fail("cancellation must propagate")
+        } catch (expected: kotlinx.coroutines.CancellationException) {
+            assertThat(expected.message).isEqualTo("stop")
+        }
+
+        assertThat(calls).isEqualTo(1)
+        assertThat(service.lastChatError).isNull()
+    }
+
+    @Test
     fun `executeWithRetry - non network exception stops immediately`() = runTest {
         // 測試：非網路錯誤不應重試
         val service = TestBaseAiService()

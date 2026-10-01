@@ -32,6 +32,28 @@ class ImageFailureTest {
         assertEquals(1, server.server.requestCount)
     }
 
+    @Test fun geminiRefusesDataThatIsNotAnImageWithoutCallingTheApi() = runBlocking {
+        val service = GeminiService("key", baseUrl = server.baseUrl)
+
+        val answer = service.analyzeImage(ByteArray(16), "describe")
+
+        assertTrue(answer.startsWith("Sorry, unable to analyze this image:"))
+        assertNotNull(service.lastChatError)
+        assertEquals(0, server.server.requestCount)
+    }
+
+    @Test fun geminiPhotoWaitsAsLongAsTheServerAsksThenSucceeds() = runBlocking {
+        server.server.enqueue(MockResponse(code = 503, body = """{"error":{"message":"overloaded"}}""",
+            headers = okhttp3.Headers.headersOf("Retry-After", "0")))
+        server.server.enqueue(MockResponse(code = 200, body = TestFixtures.MockResponses.geminiChatSuccess("a red bicycle")))
+        val service = GeminiService("key", baseUrl = server.baseUrl)
+
+        val answer = service.analyzeImage(TestFixtures.createTestJpeg(), "describe")
+
+        assertEquals("a red bicycle", answer)
+        assertEquals(2, server.server.requestCount)
+    }
+
     @Test fun newGoogleAuthKeysAreRedactedFromErrors() {
         assertEquals("credential *** rejected", ProviderApiException.sanitize("credential AQ.example_auth-key rejected"))
     }

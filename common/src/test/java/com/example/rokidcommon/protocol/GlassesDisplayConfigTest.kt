@@ -29,4 +29,27 @@ class GlassesDisplayConfigTest {
     fun malformedConfigIsIgnored() {
         assertNull(GlassesDisplayConfig.fromJson("{not-json}"))
     }
+
+    @Test
+    fun missingOrIncompleteConfigIsIgnored() {
+        assertNull(GlassesDisplayConfig.fromJson(null))
+        assertNull(GlassesDisplayConfig.fromJson(""))
+        assertNull(GlassesDisplayConfig.fromJson("   "))
+        assertNull(GlassesDisplayConfig.fromJson("{}"))
+        // A font name this build does not know about.
+        assertNull(GlassesDisplayConfig.fromJson(
+            """{"fontSizeSp":22,"font":"COMIC","widthPercent":88,"heightPercent":78,"leftPercent":6,"topPercent":11}"""))
+    }
+
+    @Test
+    fun theDefaultsAreAComfortableCentredViewport() {
+        val defaults = GlassesDisplayConfig()
+
+        assertEquals(22, defaults.fontSizeSp)
+        assertEquals(GlassesFont.SYSTEM, defaults.font)
+        assertEquals(88, defaults.widthPercent)
+        assertEquals(78, defaults.heightPercent)
+        // Already inside the safe area, so normalising changes nothing.
+        assertEquals(defaults, defaults.normalized())
+    }
 }

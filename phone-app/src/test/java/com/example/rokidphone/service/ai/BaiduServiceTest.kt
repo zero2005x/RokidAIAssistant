@@ -259,6 +259,30 @@ class BaiduServiceTest {
     }
 
     @Test
+    fun `chat - an empty result is reported as an empty response`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.baiduTokenSuccess()))
+        mockServer.server.enqueue(jsonResponse("""{"result":"   "}"""))
+
+        val result = service.chat("Hello")
+
+        assertThat(result).contains("couldn't generate")
+        assertThat(service.lastChatError).isEqualTo("empty_response")
+    }
+
+    @Test
+    fun `chat - an unreadable body is an error and not an answer`() = runTest {
+        val service = createService()
+        mockServer.server.enqueue(jsonResponse(TestFixtures.MockResponses.baiduTokenSuccess()))
+        mockServer.server.enqueue(jsonResponse("this is not json"))
+
+        val result = service.chat("Hello")
+
+        assertThat(result).startsWith("Sorry, an error occurred")
+        assertThat(service.lastChatError).isNotNull()
+    }
+
+    @Test
     fun `chat - server error returns fallback`() = runTest {
         val service = createService()
         mockServer.server.enqueue(
