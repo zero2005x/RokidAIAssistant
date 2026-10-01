@@ -406,9 +406,6 @@ fun GlassesMainScreen(
                 MainDisplayArea(
                     displayText = uiState.displayText,
                     isProcessing = uiState.isProcessing,
-                    isPaginated = uiState.isPaginated,
-                    currentPage = uiState.currentPage,
-                    totalPages = uiState.totalPages,
                     textStyle = textStyle
                 )
             }
@@ -558,9 +555,6 @@ fun StatusDot(
 fun MainDisplayArea(
     displayText: String,
     isProcessing: Boolean,
-    isPaginated: Boolean = false,
-    currentPage: Int = 0,
-    totalPages: Int = 1,
     modifier: Modifier = Modifier,
     textStyle: TextStyle = TextStyle(fontSize = 22.sp, lineHeight = 30.sp,
         fontWeight = FontWeight.Medium, textAlign = TextAlign.Center)

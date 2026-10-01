@@ -56,7 +56,10 @@ class PhoneAIService : Service() {
     
     companion object {
         private const val TAG = "PhoneAIService"
-        
+
+        // Fast Gemini model used for the development fallback and as the speech fallback.
+        private const val GEMINI_FLASH_MODEL = "gemini-3.8-flash"
+
         // Pre-compiled patterns for cleanMarkdown (compiled once, not per call)
         private val boldAsteriskRegex = Regex("\\*\\*(.+?)\\*\\*")
         private val italicAsteriskRegex = Regex("(?<![\\w*])\\*(.+?)\\*(?![\\w*])")
@@ -197,7 +200,7 @@ class PhoneAIService : Service() {
                     glassesDisplayConfig = GlassesDisplayConfig(),
                     glassesDisplayMetrics = null,
                     decisionBackend = com.example.rokidphone.data.DecisionBackend.JEV,
-                    decisionGeminiModel = "gemini-3.8-flash",
+                    decisionGeminiModel = GEMINI_FLASH_MODEL,
                     decisionOpenaiModel = "gpt-6-luna",
                     decisionRoutingEnabled = false,
                     jevApiKey = "",
@@ -759,9 +762,7 @@ class PhoneAIService : Service() {
                 getString(R.string.image_analysis_prompt)
             )
             val analysisError = (imageService as? com.example.rokidphone.service.ai.ChatErrorSource)?.lastChatError
-            if (analysisError != null || analysisResult.isBlank()) {
-                throw IllegalStateException(analysisError ?: "empty_response")
-            }
+            check(analysisError == null && analysisResult.isNotBlank()) { analysisError ?: "empty_response" }
             
             // Clean markdown for glasses display
             val cleanedResult = cleanMarkdown(analysisResult)
@@ -1524,7 +1525,7 @@ class PhoneAIService : Service() {
                 Log.d(TAG, "No API key for ${settings.aiProvider}, using development fallback")
                 settings.copy(
                     aiProvider = AiProvider.GEMINI,
-                    aiModelId = "gemini-3.8-flash",
+                    aiModelId = GEMINI_FLASH_MODEL,
                     geminiApiKey = BuildConfig.GEMINI_API_KEY
                 )
             } else {
@@ -1578,7 +1579,7 @@ class PhoneAIService : Service() {
             Log.d(TAG, "No STT provider configured, using fallback Gemini")
             return AiServiceFactory.createService(settings.copy(
                 aiProvider = AiProvider.GEMINI,
-                aiModelId = "gemini-3.8-flash",
+                aiModelId = GEMINI_FLASH_MODEL,
                 geminiApiKey = BuildConfig.GEMINI_API_KEY
             ))
         }
@@ -1596,7 +1597,7 @@ class PhoneAIService : Service() {
      */
     private fun getSttFallbackModelId(provider: AiProvider): String? {
         return when (provider) {
-            AiProvider.GEMINI -> "gemini-3.8-flash"
+            AiProvider.GEMINI -> GEMINI_FLASH_MODEL
             AiProvider.OPENAI -> "gpt-5-mini"
             AiProvider.GROQ -> "openai/gpt-oss-120b"
             else -> AvailableModels.getModelsForProvider(provider).firstOrNull()?.id

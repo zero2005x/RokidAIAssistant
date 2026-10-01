@@ -143,7 +143,6 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
         
         // Check API key before sending
         val settings = settingsRepository.getSettings()
-        val apiKey = settings.getCurrentApiKey()
         if (!settings.decisionRoutingEnabled && !settings.isValid()) {
             Log.e(TAG, "API key not configured")
             _uiState.update { 
@@ -230,20 +229,7 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
                 routingReason = if (settings.decisionRoutingEnabled) reply.reason else null
             )
             
-            // Push AI response to glasses (if enabled in settings)
-            val pushToGlasses = settingsRepository.getSettings().pushChatToGlasses
-            if (pushToGlasses) {
-                try {
-                    val cleanedResponse = ServiceBridge.cleanMarkdown(response)
-                    ServiceBridge.sendToGlasses(ProtocolMessage.aiProcessing("Thinking..."))
-                    ServiceBridge.sendToGlasses(ProtocolMessage.aiResponseText(cleanedResponse))
-                    Log.d(TAG, "AI response pushed to glasses")
-                } catch (e: Exception) {
-                    Log.w(TAG, "Failed to push AI response to glasses", e)
-                }
-            } else {
-                Log.d(TAG, "Push chat to glasses disabled, skipping")
-            }
+            pushResponseToGlasses(response)
             
             // Auto-generate title (if this is the first message)
             val messageCount = conversationRepository.getMessageCount(conversationId)
@@ -255,15 +241,31 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
             
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send message", e)
-            _uiState.update { 
+            _uiState.update {
                 it.copy(
-                    isLoading = false, 
+                    isLoading = false,
                     error = "Failed to send: ${e.message}"
-                ) 
+                )
             }
         }
     }
-    
+
+    /** Pushes the answer to the glasses when the user has that turned on; a failure never loses the answer. */
+    private suspend fun pushResponseToGlasses(response: String) {
+        if (!settingsRepository.getSettings().pushChatToGlasses) {
+            Log.d(TAG, "Push chat to glasses disabled, skipping")
+            return
+        }
+        try {
+            val cleanedResponse = ServiceBridge.cleanMarkdown(response)
+            ServiceBridge.sendToGlasses(ProtocolMessage.aiProcessing("Thinking..."))
+            ServiceBridge.sendToGlasses(ProtocolMessage.aiResponseText(cleanedResponse))
+            Log.d(TAG, "AI response pushed to glasses")
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to push AI response to glasses", e)
+        }
+    }
+
     /**
      * Clear messages in the current conversation
      */

@@ -9,6 +9,7 @@ import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -554,7 +555,7 @@ class GlassesViewModel(
             MessageType.SYSTEM_CONFIG -> {
                 val config = GlassesDisplayConfig.fromJson(message.payload)
                 if (config != null) {
-                    displayPrefs.edit().putString("config", config.toJson()).apply()
+                    displayPrefs.edit { putString("config", config.toJson()) }
                     _uiState.update { it.copy(displayConfig = config) }
                     measuredPagination = null
                     if (fullAiResponse.isNotEmpty() && _uiState.value.displayText in responsePages &&

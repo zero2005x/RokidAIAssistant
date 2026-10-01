@@ -735,7 +735,6 @@ private fun DisplayConfigSlider(label: String, value: Int, range: IntRange, unit
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun DecisionRoutingSection(
     settings: ApiSettings,
@@ -744,10 +743,6 @@ private fun DecisionRoutingSection(
 ) {
     var pickingDecisionModel by remember { mutableStateOf(false) }
     var editingSlot by remember { mutableStateOf<Int?>(null) }
-    var pickedProvider by remember { mutableStateOf(settings.aiProvider) }
-    var pickingModel by remember { mutableStateOf(false) }
-    val slots = listOf(settings.fastRoutingModel, settings.balancedRoutingModel, settings.qualityRoutingModel)
-    val names = listOf(stringResource(R.string.routing_fast), stringResource(R.string.routing_balanced), stringResource(R.string.routing_quality))
     SettingsSection(title = stringResource(R.string.routing_title)) {
         SettingsRowWithSwitch(
             title = stringResource(R.string.routing_enabled),
@@ -758,78 +753,157 @@ private fun DecisionRoutingSection(
         if (settings.decisionRoutingEnabled) {
             Text(stringResource(R.string.routing_data_disclosure), style = MaterialTheme.typography.bodySmall)
             Spacer(Modifier.height(8.dp))
-            Text(stringResource(R.string.routing_backend), style = MaterialTheme.typography.labelLarge)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                DecisionBackend.entries.forEach { backend ->
-                    FilterChip(
-                        selected = settings.decisionBackend == backend,
-                        onClick = { onSettingsChange(settings.copy(decisionBackend = backend)) },
-                        label = { Text(backend.name) }
-                    )
-                }
-            }
-            if (settings.decisionBackend == DecisionBackend.JEV) {
-                ApiKeyField(stringResource(R.string.routing_jev_key), settings.jevApiKey,
-                    { onSettingsChange(settings.copy(jevApiKey = it)) }, true)
-            } else if (settings.decisionBackend == DecisionBackend.LAYA) {
-                OutlinedTextField(
-                    value = settings.layaBaseUrl,
-                    onValueChange = { onSettingsChange(settings.copy(layaBaseUrl = it)) },
-                    label = { Text(stringResource(R.string.routing_laya_url)) },
-                    supportingText = { Text(stringResource(R.string.routing_laya_url_hint)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-                if (settings.layaBaseUrl.trim().startsWith("http://")) {
-                    Text(stringResource(R.string.routing_laya_http_warning),
-                        color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-                }
-                ApiKeyField(stringResource(R.string.routing_laya_key), settings.layaApiKey,
-                    { onSettingsChange(settings.copy(layaApiKey = it)) }, true)
-            }
-            if (settings.decisionBackend in setOf(DecisionBackend.GEMINI, DecisionBackend.OPENAI)) {
-                Text(stringResource(R.string.routing_llm_description), style = MaterialTheme.typography.bodySmall)
-                val provider = if (settings.decisionBackend == DecisionBackend.GEMINI) AiProvider.GEMINI else AiProvider.OPENAI
-                SettingsRow(title = stringResource(R.string.routing_decision_model),
-                    subtitle = if (provider == AiProvider.GEMINI) settings.decisionGeminiModel else settings.decisionOpenaiModel,
-                    onClick = { pickingDecisionModel = true })
-                if (!settings.isProviderConfigured(provider)) Text(stringResource(R.string.api_key_not_configured),
-                    color = MaterialTheme.colorScheme.error)
-            }
+            DecisionBackendFields(settings, onSettingsChange) { pickingDecisionModel = true }
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-            slots.forEachIndexed { index, slot ->
-                SettingsRow(
-                    title = names[index],
-                    subtitle = slot?.let { "${it.provider.name} / ${it.modelId}" } ?: stringResource(R.string.routing_unset),
-                    onClick = {
-                        editingSlot = index
-                        pickedProvider = slot?.provider ?: settings.aiProvider
-                    }
-                )
-                if (slot != null) {
-                    TextButton(onClick = {
-                        onSettingsChange(when (index) {
-                            0 -> settings.copy(fastRoutingModel = null)
-                            1 -> settings.copy(balancedRoutingModel = null)
-                            else -> settings.copy(qualityRoutingModel = null)
-                        })
-                    }) { Text(stringResource(R.string.routing_clear_slot, names[index])) }
-                }
-            }
+            RoutingSlotRows(settings, onSettingsChange) { editingSlot = it }
         }
     }
     if (pickingDecisionModel) {
-        val provider = if (settings.decisionBackend == DecisionBackend.GEMINI) AiProvider.GEMINI else AiProvider.OPENAI
-        ModelCatalogDialog(provider = provider,
-            currentModelId = if (provider == AiProvider.GEMINI) settings.decisionGeminiModel else settings.decisionOpenaiModel,
-            apiKey = settings.getApiKeyForProvider(provider), baseUrl = null, repository = repository,
-            onSelect = { model ->
-                onSettingsChange(if (provider == AiProvider.GEMINI) settings.copy(decisionGeminiModel = model)
-                    else settings.copy(decisionOpenaiModel = model))
-                pickingDecisionModel = false
-            }, onDismiss = { pickingDecisionModel = false })
+        DecisionModelDialog(settings, repository, onSettingsChange) { pickingDecisionModel = false }
     }
-    if (editingSlot != null && !pickingModel) {
+    editingSlot?.let { slot ->
+        RoutingSlotDialogs(slot, settings, repository, onSettingsChange) { editingSlot = null }
+    }
+}
+
+private fun ApiSettings.decisionLlmProvider(): AiProvider =
+    if (decisionBackend == DecisionBackend.GEMINI) AiProvider.GEMINI else AiProvider.OPENAI
+
+private fun ApiSettings.decisionModelFor(provider: AiProvider): String =
+    if (provider == AiProvider.GEMINI) decisionGeminiModel else decisionOpenaiModel
+
+/** Slot 0 is the fast tier, 1 the balanced tier, anything else the quality tier. */
+private fun ApiSettings.routingSlot(index: Int): RoutingModel? = when (index) {
+    0 -> fastRoutingModel
+    1 -> balancedRoutingModel
+    else -> qualityRoutingModel
+}
+
+private fun ApiSettings.withRoutingSlot(index: Int, model: RoutingModel?): ApiSettings = when (index) {
+    0 -> copy(fastRoutingModel = model)
+    1 -> copy(balancedRoutingModel = model)
+    else -> copy(qualityRoutingModel = model)
+}
+
+/** Backend choice and the fields that backend needs. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun DecisionBackendFields(
+    settings: ApiSettings,
+    onSettingsChange: (ApiSettings) -> Unit,
+    onPickDecisionModel: () -> Unit
+) {
+    Text(stringResource(R.string.routing_backend), style = MaterialTheme.typography.labelLarge)
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        DecisionBackend.entries.forEach { backend ->
+            FilterChip(
+                selected = settings.decisionBackend == backend,
+                onClick = { onSettingsChange(settings.copy(decisionBackend = backend)) },
+                label = { Text(backend.name) }
+            )
+        }
+    }
+    when (settings.decisionBackend) {
+        DecisionBackend.JEV -> ApiKeyField(stringResource(R.string.routing_jev_key), settings.jevApiKey,
+            { onSettingsChange(settings.copy(jevApiKey = it)) }, true)
+        DecisionBackend.LAYA -> LayaFields(settings, onSettingsChange)
+        DecisionBackend.GEMINI, DecisionBackend.OPENAI -> LlmDecisionFields(settings, onPickDecisionModel)
+    }
+}
+
+@Composable
+private fun LayaFields(settings: ApiSettings, onSettingsChange: (ApiSettings) -> Unit) {
+    OutlinedTextField(
+        value = settings.layaBaseUrl,
+        onValueChange = { onSettingsChange(settings.copy(layaBaseUrl = it)) },
+        label = { Text(stringResource(R.string.routing_laya_url)) },
+        supportingText = { Text(stringResource(R.string.routing_laya_url_hint)) },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true
+    )
+    if (settings.layaBaseUrl.trim().startsWith(URL_SCHEME_HTTP)) {
+        Text(stringResource(R.string.routing_laya_http_warning),
+            color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+    }
+    ApiKeyField(stringResource(R.string.routing_laya_key), settings.layaApiKey,
+        { onSettingsChange(settings.copy(layaApiKey = it)) }, true)
+}
+
+@Composable
+private fun LlmDecisionFields(settings: ApiSettings, onPickDecisionModel: () -> Unit) {
+    Text(stringResource(R.string.routing_llm_description), style = MaterialTheme.typography.bodySmall)
+    val provider = settings.decisionLlmProvider()
+    SettingsRow(title = stringResource(R.string.routing_decision_model),
+        subtitle = settings.decisionModelFor(provider),
+        onClick = onPickDecisionModel)
+    if (!settings.isProviderConfigured(provider)) Text(stringResource(R.string.api_key_not_configured),
+        color = MaterialTheme.colorScheme.error)
+}
+
+/** One row per difficulty tier, with a button to clear a tier that has a model pinned. */
+@Composable
+private fun RoutingSlotRows(
+    settings: ApiSettings,
+    onSettingsChange: (ApiSettings) -> Unit,
+    onEdit: (Int) -> Unit
+) {
+    val names = listOf(
+        stringResource(R.string.routing_fast),
+        stringResource(R.string.routing_balanced),
+        stringResource(R.string.routing_quality)
+    )
+    names.forEachIndexed { index, name ->
+        val slot = settings.routingSlot(index)
+        SettingsRow(
+            title = name,
+            subtitle = slot?.let { "${it.provider.name} / ${it.modelId}" } ?: stringResource(R.string.routing_unset),
+            onClick = { onEdit(index) }
+        )
+        if (slot != null) {
+            TextButton(onClick = { onSettingsChange(settings.withRoutingSlot(index, null)) }) {
+                Text(stringResource(R.string.routing_clear_slot, name))
+            }
+        }
+    }
+}
+
+@Composable
+private fun DecisionModelDialog(
+    settings: ApiSettings,
+    repository: com.example.rokidphone.ai.catalog.ModelCatalogRepository,
+    onSettingsChange: (ApiSettings) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val provider = settings.decisionLlmProvider()
+    ModelCatalogDialog(
+        provider = provider,
+        currentModelId = settings.decisionModelFor(provider),
+        apiKey = settings.getApiKeyForProvider(provider),
+        baseUrl = null,
+        repository = repository,
+        onSelect = { model ->
+            onSettingsChange(
+                if (provider == AiProvider.GEMINI) settings.copy(decisionGeminiModel = model)
+                else settings.copy(decisionOpenaiModel = model)
+            )
+            onDismiss()
+        },
+        onDismiss = onDismiss
+    )
+}
+
+/** Pick a provider, then one of its models, for the tier at [index]. */
+@Composable
+private fun RoutingSlotDialogs(
+    index: Int,
+    settings: ApiSettings,
+    repository: com.example.rokidphone.ai.catalog.ModelCatalogRepository,
+    onSettingsChange: (ApiSettings) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var pickedProvider by remember(index) { mutableStateOf(settings.routingSlot(index)?.provider ?: settings.aiProvider) }
+    var pickingModel by remember(index) { mutableStateOf(false) }
+    if (!pickingModel) {
         ProviderSelectionDialog(
             currentProvider = pickedProvider,
             availableProviders = AiProvider.entries.filter { it != AiProvider.GEMINI_LIVE },
@@ -837,14 +911,13 @@ private fun DecisionRoutingSection(
                 pickedProvider = provider
                 pickingModel = true
             },
-            onDismiss = { editingSlot = null },
+            onDismiss = onDismiss,
             isConfigured = { settings.isProviderConfigured(it) }
         )
-    }
-    if (editingSlot != null && pickingModel) {
+    } else {
         ModelCatalogDialog(
             provider = pickedProvider,
-            currentModelId = slots[editingSlot!!]?.modelId ?: settings.getModelIdForProvider(pickedProvider),
+            currentModelId = settings.routingSlot(index)?.modelId ?: settings.getModelIdForProvider(pickedProvider),
             apiKey = settings.getApiKeyForProvider(pickedProvider),
             baseUrl = when (pickedProvider) {
                 AiProvider.CUSTOM -> settings.customBaseUrl
@@ -853,19 +926,10 @@ private fun DecisionRoutingSection(
             },
             repository = repository,
             onSelect = { modelId ->
-                val selected = RoutingModel(pickedProvider, modelId)
-                onSettingsChange(when (editingSlot) {
-                    0 -> settings.copy(fastRoutingModel = selected)
-                    1 -> settings.copy(balancedRoutingModel = selected)
-                    else -> settings.copy(qualityRoutingModel = selected)
-                })
-                editingSlot = null
-                pickingModel = false
+                onSettingsChange(settings.withRoutingSlot(index, RoutingModel(pickedProvider, modelId)))
+                onDismiss()
             },
-            onDismiss = {
-                editingSlot = null
-                pickingModel = false
-            }
+            onDismiss = onDismiss
         )
     }
 }
@@ -1983,7 +2047,7 @@ fun CustomProviderSection(
             )
 
             // Cleartext HTTP warning for local endpoints
-            if (baseUrl.startsWith("http://")) {
+            if (baseUrl.startsWith(URL_SCHEME_HTTP)) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = stringResource(R.string.custom_cleartext_warning),

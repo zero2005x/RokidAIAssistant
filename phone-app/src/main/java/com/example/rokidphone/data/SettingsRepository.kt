@@ -20,7 +20,10 @@ class SettingsRepository(private val context: Context) {
     
     companion object {
         private const val PREFS_NAME = "rokid_api_settings"
-        
+
+        // Model used when nothing has been stored yet.
+        private const val DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
+
         // Keys for general settings
         private const val KEY_AI_PROVIDER = "ai_provider"
         private const val KEY_AI_MODEL = "ai_model"
@@ -239,7 +242,7 @@ class SettingsRepository(private val context: Context) {
         val savedProvider = AiProvider.fromName(
             prefs.getString(KEY_AI_PROVIDER, AiProvider.GEMINI.name) ?: AiProvider.GEMINI.name
         )
-        val legacyModelId = prefs.getString(KEY_AI_MODEL, "gemini-3.8-flash") ?: "gemini-3.8-flash"
+        val legacyModelId = prefs.getString(KEY_AI_MODEL, DEFAULT_GEMINI_MODEL) ?: DEFAULT_GEMINI_MODEL
         val providerModelIds = parseProviderModelIds(
             prefs.getString(KEY_PROVIDER_MODEL_IDS, null),
             savedProvider,
@@ -269,7 +272,7 @@ class SettingsRepository(private val context: Context) {
             decisionBackend = runCatching {
                 DecisionBackend.valueOf(prefs.getString(KEY_DECISION_BACKEND, DecisionBackend.JEV.name) ?: "")
             }.getOrDefault(DecisionBackend.JEV),
-            decisionGeminiModel = prefs.getString(KEY_DECISION_GEMINI_MODEL, "gemini-3.8-flash") ?: "gemini-3.8-flash",
+            decisionGeminiModel = prefs.getString(KEY_DECISION_GEMINI_MODEL, DEFAULT_GEMINI_MODEL) ?: DEFAULT_GEMINI_MODEL,
             decisionOpenaiModel = prefs.getString(KEY_DECISION_OPENAI_MODEL, "gpt-6-luna") ?: "gpt-6-luna",
             jevApiKey = prefs.getString(KEY_JEV_API_KEY, "") ?: "",
             layaBaseUrl = prefs.getString(KEY_LAYA_BASE_URL, "") ?: "",

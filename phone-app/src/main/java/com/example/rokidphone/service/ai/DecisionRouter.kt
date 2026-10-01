@@ -6,6 +6,7 @@ import com.example.rokidphone.data.ApiSettings
 import com.example.rokidphone.data.DecisionBackend
 import com.example.rokidphone.data.RoutingModel
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -16,6 +17,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 import com.example.rokidphone.ai.catalog.ProviderApiException
 import com.example.rokidphone.data.RoutingReason
 
@@ -37,7 +39,8 @@ class DecisionRouter(
     private val jevEndpoint: String = "https://api.typesafe.ai/v1/systemone",
     private val geminiDecisionBase: String = "https://generativelanguage.googleapis.com/v1beta/models",
     private val openaiDecisionEndpoint: String = "https://api.openai.com/v1/responses",
-    private val serviceFactory: (ApiSettings) -> AiServiceProvider = AiServiceFactory::createService
+    private val serviceFactory: (ApiSettings) -> AiServiceProvider = AiServiceFactory::createService,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
     // Also enforce the budget on injected clients, and prevent a LAN endpoint redirecting to HTTP elsewhere.
@@ -127,74 +130,99 @@ class DecisionRouter(
             model.provider != AiProvider.GEMINI_LIVE &&
             settings.isProviderConfigured(model.provider)
 
+    /** The tier to answer with and the confidence behind it, or null when the choice is uncertain. */
     private suspend fun decide(question: String, settings: ApiSettings): Pair<String, Double>? =
-        withContext(Dispatchers.IO) {
-            if (settings.decisionBackend in setOf(DecisionBackend.GEMINI, DecisionBackend.OPENAI)) {
-                return@withContext try {
-                    LlmDecisionClient(decisionClient, geminiDecisionBase, openaiDecisionEndpoint)
-                        .decide(question, settings)?.let { it to 0.0 }
-                } catch (e: CancellationException) { throw e }
-                catch (e: Exception) {
-                    Log.w("DecisionRouter", "LLM decision failed: ${e.javaClass.simpleName}, HTTP ${(e as? ProviderApiException)?.httpStatus}")
-                    null
-                }
-            }
-            val endpoint = when (settings.decisionBackend) {
-                DecisionBackend.JEV -> jevEndpoint
-                DecisionBackend.LAYA -> {
-                    val base = settings.layaBaseUrl.trim().trimEnd('/')
-                    if (!isAllowedLayaUrl(base)) return@withContext null
-                    "$base/v1/systemone"
-                }
-                else -> return@withContext null
-            }
-            val key = when (settings.decisionBackend) {
-                DecisionBackend.JEV -> settings.jevApiKey
-                DecisionBackend.LAYA -> settings.layaApiKey
-                else -> return@withContext null
-            }
-            if (settings.decisionBackend == DecisionBackend.JEV && key.isBlank()) return@withContext null
-            val criteria = JSONObject()
-                .put("fast", "Simple factual, short or routine question that needs little synthesis")
-                .put("balanced", "Moderate question requiring explanation or several reasoning steps")
-                .put("quality", "Complex, ambiguous, high-stakes or multi-step question where answer quality matters most")
-            val body = JSONObject()
-                .put("state", question.take(4000))
-                .put("model", "jev-latest")
-                .put("questions", JSONObject().put("difficulty", JSONObject()
-                    .put("type", "choice")
-                    .put("instructions", "Choose the model tier needed to answer this user's question accurately. When uncertain, prefer quality over speed.")
-                    .put("criteria", criteria)))
-            try {
-                val requestBuilder = Request.Builder().url(endpoint)
-                    .post(body.toString().toRequestBody(jsonMediaType))
-                if (key.isNotBlank()) requestBuilder.header("Authorization", "Bearer $key")
-                decisionClient.newCall(requestBuilder.build()).execute().use { response ->
-                    if (!response.isSuccessful) return@withContext null
-                    val answer = JSONObject(response.body?.string().orEmpty())
-                        .getJSONObject("answers").getJSONObject("difficulty")
-                    val choice = answer.getString("choice").lowercase(Locale.ROOT)
-                    val probability = answer.getJSONObject("probabilities").getDouble(choice)
-                    val confidence = answer.optDouble("confidence", 0.0)
-                    val threshold = if (choice == "quality") 0.30 else 0.50
-                    val probabilities = answer.getJSONObject("probabilities")
-                    val values = listOf("fast", "balanced", "quality").map { probabilities.getDouble(it) }
-                    if (choice !in setOf("fast", "balanced", "quality") ||
-                        values.any { !it.isFinite() || it !in 0.0..1.0 } ||
-                        kotlin.math.abs(values.sum() - 1.0) > 0.02 ||
-                        probability < values.max() || probability < 0.55 ||
-                        !confidence.isFinite() || confidence !in threshold..1.0
-                    ) null else choice to confidence
-                }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Log.w("DecisionRouter", "Decision request failed: ${e.javaClass.simpleName}")
-                null
+        withContext(ioDispatcher) {
+            when (settings.decisionBackend) {
+                DecisionBackend.GEMINI, DecisionBackend.OPENAI -> decideWithLlm(question, settings)
+                DecisionBackend.JEV, DecisionBackend.LAYA -> decideWithSystemOne(question, settings)
             }
         }
 
+    /** A structured classification by the user's own Gemini or OpenAI model; it carries no probability. */
+    private suspend fun decideWithLlm(question: String, settings: ApiSettings): Pair<String, Double>? = try {
+        LlmDecisionClient(decisionClient, geminiDecisionBase, openaiDecisionEndpoint, ioDispatcher)
+            .decide(question, settings)?.let { it to 0.0 }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Log.w("DecisionRouter", "LLM decision failed: ${e.javaClass.simpleName}, HTTP ${(e as? ProviderApiException)?.httpStatus}")
+        null
+    }
+
+    /** Jev and Laya speak the same System One protocol; only the endpoint and the key differ. */
+    private fun decideWithSystemOne(question: String, settings: ApiSettings): Pair<String, Double>? {
+        val (endpoint, key) = systemOneTarget(settings) ?: return null
+        return try {
+            decisionClient.newCall(systemOneRequest(endpoint, key, question)).execute().use { response ->
+                if (response.isSuccessful) parseSystemOneAnswer(JSONObject(response.body.string())) else null
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w("DecisionRouter", "Decision request failed: ${e.javaClass.simpleName}")
+            null
+        }
+    }
+
+    /** Where to ask and with which key, or null when the backend is not usable. */
+    private fun systemOneTarget(settings: ApiSettings): Pair<String, String>? = when (settings.decisionBackend) {
+        DecisionBackend.JEV -> settings.jevApiKey.takeIf { it.isNotBlank() }?.let { jevEndpoint to it }
+        DecisionBackend.LAYA -> {
+            val base = settings.layaBaseUrl.trim().trimEnd('/')
+            if (isAllowedLayaUrl(base)) "$base/v1/systemone" to settings.layaApiKey else null
+        }
+        else -> null
+    }
+
+    private fun systemOneRequest(endpoint: String, key: String, question: String): Request {
+        val criteria = JSONObject()
+            .put("fast", "Simple factual, short or routine question that needs little synthesis")
+            .put("balanced", "Moderate question requiring explanation or several reasoning steps")
+            .put("quality", "Complex, ambiguous, high-stakes or multi-step question where answer quality matters most")
+        val body = JSONObject()
+            .put("state", question.take(MAX_QUESTION_CHARS))
+            .put("model", "jev-latest")
+            .put("questions", JSONObject().put("difficulty", JSONObject()
+                .put("type", "choice")
+                .put("instructions", "Choose the model tier needed to answer this user's question accurately. When uncertain, prefer quality over speed.")
+                .put("criteria", criteria)))
+        val builder = Request.Builder().url(endpoint).post(body.toString().toRequestBody(jsonMediaType))
+        if (key.isNotBlank()) builder.header("Authorization", "Bearer $key")
+        return builder.build()
+    }
+
+    private fun parseSystemOneAnswer(response: JSONObject): Pair<String, Double>? {
+        val answer = response.getJSONObject("answers").getJSONObject("difficulty")
+        val choice = answer.getString("choice").lowercase(Locale.ROOT)
+        val probabilities = answer.getJSONObject("probabilities")
+        val probability = probabilities.getDouble(choice)
+        val confidence = answer.optDouble("confidence", 0.0)
+        val values = TIERS.map { probabilities.getDouble(it) }
+        return if (isUsableDecision(choice, probability, values, confidence)) choice to confidence else null
+    }
+
+    /**
+     * Rejects anything that is not a proper probability distribution, is not clearly led by the
+     * chosen tier, or lacks the confidence that tier needs (the fast tier asks for more than quality).
+     */
+    private fun isUsableDecision(choice: String, probability: Double, values: List<Double>, confidence: Double): Boolean {
+        val threshold = if (choice == "quality") QUALITY_CONFIDENCE else OTHER_CONFIDENCE
+        return choice in TIERS &&
+            values.all { it.isFinite() && it in 0.0..1.0 } &&
+            abs(values.sum() - 1.0) <= PROBABILITY_SUM_TOLERANCE &&
+            probability >= values.max() && probability >= MIN_TIER_PROBABILITY &&
+            confidence.isFinite() && confidence in threshold..1.0
+    }
+
     companion object {
+        private val TIERS = listOf("fast", "balanced", "quality")
+        private const val MAX_QUESTION_CHARS = 4000
+        private const val QUALITY_CONFIDENCE = 0.30
+        private const val OTHER_CONFIDENCE = 0.50
+        private const val MIN_TIER_PROBABILITY = 0.55
+        private const val PROBABILITY_SUM_TOLERANCE = 0.02
+
         fun isAllowedLayaUrl(base: String): Boolean {
             val url = base.toHttpUrlOrNull() ?: return false
             if (url.username.isNotEmpty() || url.password.isNotEmpty() ||

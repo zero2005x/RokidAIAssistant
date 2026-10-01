@@ -20,6 +20,9 @@ object FallbackModelCatalog {
 
     const val LAST_VERIFIED_DATE = "2026-09-30"
 
+    /** Current DeepSeek V4.1 Flash id; the older Flash ids migrate to it. */
+    private const val DEEPSEEK_FLASH = "deepseek-flash"
+
     private fun chatCaps(
         vision: Boolean = false,
         audioIn: Boolean = false,
@@ -140,7 +143,7 @@ object FallbackModelCatalog {
 
     // ==================== DeepSeek ====================
     val deepseekModels = listOf(
-        m("deepseek-flash", "DeepSeek V4.1 Flash", AiProvider.DEEPSEEK,
+        m(DEEPSEEK_FLASH, "DeepSeek V4.1 Flash", AiProvider.DEEPSEEK,
             chatCaps(vision = true, tools = true, context = 128_000L),
             description = "Current V4.1 Flash; image input"),
         m(
@@ -521,8 +524,8 @@ object FallbackModelCatalog {
     /** Legacy model ID → replacement per provider, applied to stored settings on migration. */
     val legacyModelMigration: Map<AiProvider, Map<String, String>> = mapOf(
         AiProvider.DEEPSEEK to mapOf(
-            "deepseek-chat" to "deepseek-flash",
-            "deepseek-v4-flash" to "deepseek-flash",
+            "deepseek-chat" to DEEPSEEK_FLASH,
+            "deepseek-v4-flash" to DEEPSEEK_FLASH,
             "deepseek-reasoner" to "deepseek-v4-pro"
         ),
         AiProvider.GROQ to mapOf(
