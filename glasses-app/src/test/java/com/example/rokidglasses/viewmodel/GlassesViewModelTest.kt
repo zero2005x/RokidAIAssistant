@@ -253,14 +253,16 @@ class GlassesViewModelTest {
         assertThat(model.uiState.value.isPaginated).isFalse()
         assertThat(model.uiState.value.hintText).isEqualTo(string(R.string.tap_touchpad_start))
 
-        // A long result is paged and says so.
+        // A long result is paged and says so. The page position is drawn by the page
+        // indicator, so the text itself carries no "(1/N)" suffix.
         val long = (1..60).joinToString(" ") { "word$it" }
         receive(Message(type = MessageType.PHOTO_ANALYSIS_RESULT, payload = long))
-        assertThat(model.uiState.value.isPaginated).isTrue()
-        assertThat(model.uiState.value.displayText)
-            .contains("(1/${model.uiState.value.totalPages})")
-        assertThat(model.uiState.value.hintText)
-            .isEqualTo(string(R.string.swipe_left_right_pages))
+        val paged = model.uiState.value
+        assertThat(paged.isPaginated).isTrue()
+        assertThat(paged.totalPages).isGreaterThan(1)
+        assertThat(paged.currentPage).isEqualTo(0)
+        assertThat(paged.displayText).doesNotContain("(1/")
+        assertThat(paged.hintText).isEqualTo(string(R.string.swipe_left_right_pages))
 
         // No payload falls back to the localized "no result" text.
         receive(Message(type = MessageType.PHOTO_ANALYSIS_RESULT))

@@ -241,12 +241,12 @@
     
     <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Gemini 음성 인식</string>
-    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_openai_whisper">OpenAI Transcribe</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
     
     <!-- STT Provider Names -->
     <string name="stt_provider_gemini">Gemini 음성</string>
-    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_openai_whisper">OpenAI Transcribe</string>
     <string name="stt_provider_groq_whisper">Groq Whisper</string>
     <string name="stt_provider_google_cloud">Google Cloud STT</string>
     <string name="stt_provider_azure">Azure Speech</string>
@@ -529,4 +529,53 @@
     <string name="recordings_status_analyzed">분석됨</string>
     <string name="recordings_status_error">오류</string>
     <string name="api_key_not_configured">API 키가 구성되지 않았습니다. 설정에서 API 키를 설정하세요.</string>
+
+    <!-- Decision routing and glasses display -->
+    <string name="routing_display_settings">모델 선택 및 표시</string>
+    <string name="routing_title">모델 선택</string>
+    <string name="routing_open_summary">판단 서비스와 세 모델 설정</string>
+    <string name="glasses_display_title">안경 텍스트 표시</string>
+    <string name="glasses_display_open_summary">글꼴, 크기, 범위 및 위치</string>
+    <string name="glasses_display_description">모든 텍스트와 표시 영역을 조절합니다. 적용 후에만 동기화합니다.</string>
+    <string name="glasses_preview_connected">● 연결됨</string>
+    <string name="glasses_preview_text">안경 텍스트 표시 영역입니다.\n글꼴과 위치를 조절하세요.</string>
+    <string name="glasses_preview_hint">위로 밀어 더 보기</string>
+    <string name="glasses_preview_disclaimer">예시 미리보기입니다. 화면 비율과 줄바꿈은 안경에 따라 달라집니다. sp는 본문 크기이며 다른 글자도 비례합니다.</string>
+    <string name="glasses_font">글꼴</string>
+    <string name="glasses_font_system">시스템</string>
+    <string name="glasses_font_monospace">고정폭</string>
+    <string name="glasses_font_size">본문 글자 크기</string>
+    <string name="glasses_width">너비</string>
+    <string name="glasses_height">높이</string>
+    <string name="glasses_left">가로 위치</string>
+    <string name="glasses_top">세로 위치</string>
+    <string name="glasses_reset">초기화</string>
+    <string name="glasses_apply">안경에 적용</string>
+    <string name="glasses_slider_value">%1$s: %2$d %3$s</string>
+    <string name="routing_fast">빠름</string>
+    <string name="routing_balanced">균형</string>
+    <string name="routing_quality">고품질</string>
+    <string name="routing_enabled">질문 난이도로 모델 선택</string>
+    <string name="routing_description">텍스트 및 음성 인식 질문에만 적용됩니다. 품질 우선이며 불확실하면 기본 모델을 사용합니다.</string>
+    <string name="routing_backend">판단 서비스</string>
+    <string name="routing_jev_key">TypeSafe API 키</string>
+    <string name="routing_laya_url">Laya 서버 URL</string>
+    <string name="routing_laya_url_hint">휴대폰에서 접속 가능한 URL, /v1/systemone 제외. HTTPS 권장; 사설 HTTP는 호스트 허용이 필요합니다.</string>
+    <string name="routing_laya_key">Laya API 키 (서버 설정 시)</string>
+    <string name="routing_unset">미설정: 기본 모델 사용</string>
+    <string name="routing_clear_slot">%1$s 슬롯 지우기</string>
+    <string name="routing_data_disclosure">활성화하면 응답 모델이 이 휴대전화에서 실행되더라도 현재 입력 또는 전사된 질문이 선택한 판단 백엔드로 전송됩니다. 대화 기록, 사진, 오디오는 포함되지 않습니다.</string>
+    <string name="routing_laya_http_warning">HTTP는 질문과 선택적 API 키를 암호화하지 않습니다. 신뢰할 수 있는 사설망을 사용하고 이 APK에서 호스트를 명시적으로 허용해야 합니다.</string>
+    <string name="routing_reason_disabled">기본 모델 (자동 선택 꺼짐)</string>
+    <string name="routing_reason_uncertain">난이도 불확실 또는 판단 서비스 사용 불가: 기본 모델 사용</string>
+    <string name="routing_reason_empty_slot">%1$s 슬롯 미설정: 기본 모델 사용</string>
+    <string name="routing_reason_unconfigured_slot">%1$s 슬롯 사용 불가 또는 인증 정보 없음: 기본 모델 사용</string>
+    <string name="routing_reason_selected">%1$s에서 %2$s 선택 (신뢰도 %3$d%%)</string>
+    <string name="routing_reason_fallback">%1$s 실패: 기본 모델 사용</string>
+    <string name="routing_reason_failed">AI 요청 실패</string>
+    <string name="routing_error">AI 요청 실패: %1$s</string>
+    <string name="routing_decision_model">판단 모델</string>
+    <string name="routing_llm_description">기존 공급자 키를 사용합니다. 분류를 위해 현재 질문만 전송하며 유료 API 요청이 한 번 추가됩니다. LLM의 확실성은 보정된 확률이 아닙니다. 불확실하거나 시간이 초과되면 기본 모델을 사용합니다.</string>
+    <string name="routing_reason_selected_llm">%1$s이(가) 구조화된 분류로 %2$s을(를) 선택했습니다.</string>
+    <string name="glasses_preview_metrics">앱 표시 영역: %1$d × %2$d px</string>
 </resources>

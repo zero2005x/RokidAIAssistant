@@ -7,6 +7,7 @@ import com.example.rokidcommon.protocol.MessageType
 import com.example.rokidphone.ai.provider.ProviderManager
 import com.example.rokidphone.data.AiProvider
 import com.example.rokidphone.data.ApiSettings
+import com.example.rokidphone.data.RoutingReason
 import com.example.rokidphone.data.SettingsRepository
 import com.example.rokidphone.data.db.Conversation
 import com.example.rokidphone.data.db.ConversationRepository
@@ -14,11 +15,14 @@ import com.example.rokidphone.data.db.Message
 import com.example.rokidphone.data.db.MessageRole
 import com.example.rokidphone.service.ServiceBridge
 import com.example.rokidphone.service.ai.AiServiceProvider
+import com.example.rokidphone.service.ai.DecisionRouter
+import com.example.rokidphone.service.ai.RoutedReply
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import kotlinx.coroutines.CoroutineScope
@@ -311,8 +315,90 @@ class ConversationViewModelTest {
         model.sendMessage()
         advanceUntilIdle()
 
-        assertThat(model.uiState.value.error).isEqualTo("Failed to send: upstream down")
+        // Provider failures keep the provider's own reason and are localized, not stored as an answer.
+        assertThat(model.uiState.value.error)
+            .isEqualTo(RoutingReason.failure(application, "upstream down"))
+        assertThat(model.uiState.value.error).contains("upstream down")
         assertThat(model.uiState.value.isLoading).isFalse()
+        coVerify(exactly = 0) {
+            repository.addAssistantMessage(any(), any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `a failed exchange is pushed to the glasses only when the setting is on`() = scope.runTest {
+        val pushed = mutableListOf<com.example.rokidcommon.protocol.Message>()
+        collectors.launch { ServiceBridge.sendToGlassesFlow.collect { pushed += it } }
+        coEvery { aiService.chat(any()) } throws IOException("upstream down")
+        val model = viewModel()
+        model.selectConversation("c1")
+
+        model.updateInputText("question")
+        model.sendMessage()
+        advanceUntilIdle()
+
+        assertThat(pushed.map { it.type }).containsExactly(MessageType.AI_ERROR)
+        assertThat(pushed.single().payload).isEqualTo(RoutingReason.failure(application, "upstream down"))
+
+        pushed.clear()
+        settings = settings.copy(pushChatToGlasses = false)
+        model.updateInputText("again")
+        model.sendMessage()
+        advanceUntilIdle()
+
+        assertThat(pushed).isEmpty()
+        assertThat(model.uiState.value.error).isNotNull()
+    }
+
+    @Test
+    fun `earlier turns reach the model without images or system notes`() = scope.runTest {
+        coEvery { repository.getMessagesForConversationSync("c1") } returns listOf(
+            message("m1", MessageRole.USER, "earlier question"),
+            message("m2", MessageRole.ASSISTANT, "earlier answer"),
+            message("m3", MessageRole.SYSTEM, "internal note"),
+            message("m4", MessageRole.USER, "look at this").copy(hasImage = true),
+            // The message just sent is the last one stored and is not repeated as history.
+            message("m5", MessageRole.USER, "question")
+        )
+        val prompts = mutableListOf<String>()
+        coEvery { aiService.chat(capture(prompts)) } returns "answer"
+        val model = viewModel()
+        model.selectConversation("c1")
+
+        model.updateInputText("question")
+        model.sendMessage()
+        advanceUntilIdle()
+
+        assertThat(prompts).hasSize(1)
+        val prompt = prompts.single()
+        assertThat(prompt).contains("user: earlier question")
+        assertThat(prompt).contains("assistant: earlier answer")
+        assertThat(prompt).doesNotContain("internal note")
+        assertThat(prompt).doesNotContain("look at this")
+        assertThat(prompt).endsWith("Current question: question")
+    }
+
+    @Test
+    fun `with routing on the router picks the model and its reason is stored`() = scope.runTest {
+        // Routing replaces the single-provider key check: the router decides what is usable.
+        settings = settings.copy(openaiApiKey = "", decisionRoutingEnabled = true)
+        mockkConstructor(DecisionRouter::class)
+        coEvery { anyConstructed<DecisionRouter>().reply(any(), any(), any(), any()) } returns
+            RoutedReply("routed answer", AiProvider.ANTHROPIC, "claude-haiku-4-5", "REASON")
+        val model = viewModel()
+        model.selectConversation("c1")
+
+        model.updateInputText("question")
+        model.sendMessage()
+        advanceUntilIdle()
+
+        assertThat(model.uiState.value.error).isNull()
+        coVerify {
+            repository.addAssistantMessage(
+                eq("c1"), eq("routed answer"), eq("claude-haiku-4-5"), any(), any(), eq("REASON")
+            )
+        }
+        coVerify(exactly = 0) { providerManager.getActiveService() }
     }
 
     @Test

@@ -241,12 +241,12 @@
     
     <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Gemini 語音辨識</string>
-    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_openai_whisper">OpenAI Transcribe</string>
     <string name="speech_service_google_cloud">Google Cloud 語音轉文字</string>
     
     <!-- STT Provider Names -->
     <string name="stt_provider_gemini">Gemini 語音</string>
-    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_openai_whisper">OpenAI Transcribe</string>
     <string name="stt_provider_groq_whisper">Groq Whisper</string>
     <string name="stt_provider_google_cloud">Google Cloud STT</string>
     <string name="stt_provider_azure">Azure 語音</string>
@@ -529,4 +529,53 @@
     <string name="recordings_status_analyzed">已分析</string>
     <string name="recordings_status_error">錯誤</string>
     <string name="api_key_not_configured">API 金鑰尚未設定。請在設定中設定 API 金鑰。</string>
+
+    <!-- Decision routing and glasses display -->
+    <string name="routing_display_settings">模型選擇與眼鏡顯示</string>
+    <string name="routing_title">自動選模</string>
+    <string name="routing_open_summary">設定判斷服務與快速、均衡、高品質模型</string>
+    <string name="glasses_display_title">眼鏡文字顯示</string>
+    <string name="glasses_display_open_summary">字形、字級、顯示範圍與位置</string>
+    <string name="glasses_display_description">調整全部眼鏡文字與顯示範圍，按「套用」後才同步。</string>
+    <string name="glasses_preview_connected">● 已連線</string>
+    <string name="glasses_preview_text">這是眼鏡上的文字顯示範圍。\n你可以調整字體與位置。</string>
+    <string name="glasses_preview_hint">向上滑動查看更多</string>
+    <string name="glasses_preview_disclaimer">此為示意預覽：實際比例與換行依眼鏡螢幕而定。字級為主文字的 sp 大小，其餘文字按比例調整。</string>
+    <string name="glasses_font">字形</string>
+    <string name="glasses_font_system">系統字體</string>
+    <string name="glasses_font_monospace">等寬字體</string>
+    <string name="glasses_font_size">主文字字級</string>
+    <string name="glasses_width">寬度</string>
+    <string name="glasses_height">高度</string>
+    <string name="glasses_left">水平位置</string>
+    <string name="glasses_top">垂直位置</string>
+    <string name="glasses_reset">重設</string>
+    <string name="glasses_apply">套用到眼鏡</string>
+    <string name="glasses_slider_value">%1$s：%2$d %3$s</string>
+    <string name="routing_fast">快速</string>
+    <string name="routing_balanced">均衡</string>
+    <string name="routing_quality">高品質</string>
+    <string name="routing_enabled">依問題難度選擇模型</string>
+    <string name="routing_description">只用於文字與語音轉文字後的提問；品質優先，判斷不確定時使用主要模型。</string>
+    <string name="routing_backend">判斷服務</string>
+    <string name="routing_jev_key">TypeSafe API 金鑰</string>
+    <string name="routing_laya_url">Laya 伺服器網址</string>
+    <string name="routing_laya_url_hint">填寫手機可連線的網址，不含 /v1/systemone。建議 HTTPS；私有 HTTP 需加入允許的主機。</string>
+    <string name="routing_laya_key">Laya API 金鑰（若伺服器有設定）</string>
+    <string name="routing_unset">未設定，使用主要模型</string>
+    <string name="routing_clear_slot">清除%1$s槽位</string>
+    <string name="routing_data_disclosure">開啟後，本次文字或轉錄提問會送到你選擇的決策後端，即使回答模型在手機本機執行。分類不包含對話歷史、照片或音訊。</string>
+    <string name="routing_laya_http_warning">HTTP 會以未加密方式傳送問題文字與選填的 API 金鑰。請使用可信任的私有網路；此 APK 必須明確允許該主機。</string>
+    <string name="routing_reason_disabled">主要模型（自動選模未啟用）</string>
+    <string name="routing_reason_uncertain">難度不確定或判斷服務不可用，使用主要模型</string>
+    <string name="routing_reason_empty_slot">%1$s槽位未設定，使用主要模型</string>
+    <string name="routing_reason_unconfigured_slot">%1$s槽位不可用或缺少憑證，使用主要模型</string>
+    <string name="routing_reason_selected">%1$s 判斷為%2$s（信心 %3$d%%）</string>
+    <string name="routing_reason_fallback">%1$s 回答失敗，改用主要模型</string>
+    <string name="routing_reason_failed">AI 請求失敗</string>
+    <string name="routing_error">AI 請求失敗：%1$s</string>
+    <string name="routing_decision_model">決策模型</string>
+    <string name="routing_llm_description">使用既有供應商金鑰，只傳送本次問題進行分類，會增加一次付費 API 請求。LLM 的確定程度不是經校準的機率；不確定或逾時時使用主要模型。</string>
+    <string name="routing_reason_selected_llm">%1$s 透過結構化分類選擇%2$s。</string>
+    <string name="glasses_preview_metrics">APP 顯示範圍：%1$d × %2$d px</string>
 </resources>

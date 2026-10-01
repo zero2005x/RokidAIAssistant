@@ -34,7 +34,7 @@ class SettingsMigrationTest {
     }
 
     @Test
-    fun `deepseek-chat migrates to deepseek-v4-flash`() {
+    fun `deepseek-chat migrates to deepseek-flash`() {
         val settings = ApiSettings(
             aiProvider = AiProvider.DEEPSEEK,
             aiModelId = "deepseek-chat",
@@ -43,13 +43,13 @@ class SettingsMigrationTest {
 
         val migrated = settings.migrateLegacyModelIds()
 
-        assertThat(migrated.aiModelId).isEqualTo("deepseek-v4-flash")
+        assertThat(migrated.aiModelId).isEqualTo("deepseek-flash")
         // The migration map is a global id→id mapping: legacy IDs are migrated
         // on every provider, not only DeepSeek.
         val migratedOther = settings.copy(
             providerModelIds = mapOf(AiProvider.OPENAI.name to "deepseek-chat")
         ).migrateLegacyModelIds()
-        assertThat(migratedOther.providerModelIds[AiProvider.OPENAI.name]).isEqualTo("deepseek-v4-flash")
+        assertThat(migratedOther.providerModelIds[AiProvider.OPENAI.name]).isEqualTo("deepseek-flash")
     }
 
     @Test
@@ -77,11 +77,26 @@ class SettingsMigrationTest {
     }
 
     @Test
+    fun `retired Groq model migrates in primary and routing slot`() {
+        val settings = ApiSettings(
+            aiProvider = AiProvider.GROQ,
+            aiModelId = "llama-3.3-70b-versatile",
+            providerModelIds = mapOf(AiProvider.GROQ.name to "llama-3.3-70b-versatile"),
+            fastRoutingModel = RoutingModel(AiProvider.GROQ, "qwen/qwen3.6-27b")
+        )
+
+        val migrated = settings.migrateLegacyModelIds()
+        assertThat(migrated.aiModelId).isEqualTo("openai/gpt-oss-120b")
+        assertThat(migrated.providerModelIds[AiProvider.GROQ.name]).isEqualTo("openai/gpt-oss-120b")
+        assertThat(migrated.fastRoutingModel?.modelId).isEqualTo("qwen/qwen3.8-27b")
+    }
+
+    @Test
     fun `legacy aiModelId is used when provider has no stored model`() {
         val settings = ApiSettings(aiProvider = AiProvider.OPENAI, aiModelId = "gpt-4o")
         assertThat(settings.getModelIdForProvider(AiProvider.OPENAI)).isEqualTo("gpt-4o")
         // Another provider falls back to its verified default, not the active model.
-        assertThat(settings.getModelIdForProvider(AiProvider.GEMINI)).isEqualTo("gemini-3.6-flash")
+        assertThat(settings.getModelIdForProvider(AiProvider.GEMINI)).isEqualTo("gemini-3.8-flash")
     }
 
     @Test
@@ -142,7 +157,7 @@ class SettingsMigrationTest {
             // A fresh instance reads the same encrypted store and migrates.
             val reloaded = SettingsRepository(context)
             assertThat(reloaded.getSettings().providerModelIds[AiProvider.DEEPSEEK.name])
-                .isEqualTo("deepseek-v4-flash")
+                .isEqualTo("deepseek-flash")
         } else {
             // Keystore unavailable (e.g. some test environments): the failure is
             // explicit and NOTHING was written to plaintext preferences.

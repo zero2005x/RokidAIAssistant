@@ -187,12 +187,12 @@
     
     <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">การรู้จำเสียง Gemini</string>
-    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_openai_whisper">OpenAI Transcribe</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
     
     <!-- STT Provider Names -->
     <string name="stt_provider_gemini">Gemini</string>
-    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_openai_whisper">OpenAI Transcribe</string>
     <string name="stt_provider_groq_whisper">Groq Whisper</string>
     <string name="stt_provider_google_cloud">Google Cloud STT</string>
     <string name="stt_provider_azure">Azure Speech</string>
@@ -532,4 +532,53 @@
     <string name="recordings_status_analyzed">วิเคราะห์แล้ว</string>
     <string name="recordings_status_error">ข้อผิดพลาด</string>
     <string name="api_key_not_configured">ยังไม่ได้กำหนดค่าคีย์ API โปรดตั้งค่าคีย์ API ในการตั้งค่า</string>
+
+    <!-- Decision routing and glasses display -->
+    <string name="routing_display_settings">เลือกรุ่นและจอแว่น</string>
+    <string name="routing_title">เลือกรุ่น</string>
+    <string name="routing_open_summary">ตั้งค่าบริการและโมเดลสามรุ่น</string>
+    <string name="glasses_display_title">ข้อความบนแว่น</string>
+    <string name="glasses_display_open_summary">แบบอักษร ขนาด พื้นที่และตำแหน่ง</string>
+    <string name="glasses_display_description">ปรับข้อความทั้งหมดและพื้นที่แสดงผล ซิงค์เมื่อกดใช้เท่านั้น</string>
+    <string name="glasses_preview_connected">● เชื่อมต่อแล้ว</string>
+    <string name="glasses_preview_text">พื้นที่ข้อความบนแว่น\nปรับแบบอักษรและตำแหน่ง</string>
+    <string name="glasses_preview_hint">ปัดขึ้นเพื่อดูเพิ่ม</string>
+    <string name="glasses_preview_disclaimer">เป็นภาพตัวอย่าง สัดส่วนและการขึ้นบรรทัดขึ้นกับแว่น sp คือขนาดข้อความหลัก ข้อความอื่นปรับตามสัดส่วน</string>
+    <string name="glasses_font">แบบอักษร</string>
+    <string name="glasses_font_system">ระบบ</string>
+    <string name="glasses_font_monospace">ความกว้างคงที่</string>
+    <string name="glasses_font_size">ขนาดข้อความหลัก</string>
+    <string name="glasses_width">ความกว้าง</string>
+    <string name="glasses_height">ความสูง</string>
+    <string name="glasses_left">ตำแหน่งแนวนอน</string>
+    <string name="glasses_top">ตำแหน่งแนวตั้ง</string>
+    <string name="glasses_reset">รีเซ็ต</string>
+    <string name="glasses_apply">ใช้กับแว่น</string>
+    <string name="glasses_slider_value">%1$s: %2$d %3$s</string>
+    <string name="routing_fast">รวดเร็ว</string>
+    <string name="routing_balanced">สมดุล</string>
+    <string name="routing_quality">คุณภาพ</string>
+    <string name="routing_enabled">เลือกตามความยากของคำถาม</string>
+    <string name="routing_description">ใช้กับข้อความและคำถามที่ถอดเสียงเท่านั้น เน้นคุณภาพและใช้รุ่นหลักเมื่อไม่แน่ใจ</string>
+    <string name="routing_backend">บริการประเมิน</string>
+    <string name="routing_jev_key">คีย์ API TypeSafe</string>
+    <string name="routing_laya_url">URL เซิร์ฟเวอร์ Laya</string>
+    <string name="routing_laya_url_hint">URL ที่โทรศัพท์เข้าถึงได้ ไม่มี /v1/systemone แนะนำ HTTPS ส่วน HTTP ภายในต้องอนุญาตโฮสต์</string>
+    <string name="routing_laya_key">คีย์ API Laya (ถ้ามี)</string>
+    <string name="routing_unset">ยังไม่ตั้ง; ใช้รุ่นหลัก</string>
+    <string name="routing_clear_slot">ล้างช่อง %1$s</string>
+    <string name="routing_data_disclosure">เมื่อเปิดใช้งาน คำถามปัจจุบันที่พิมพ์หรือถอดเสียงจะถูกส่งไปยังบริการตัดสินใจที่เลือก แม้โมเดลตอบจะทำงานบนโทรศัพท์นี้ โดยไม่รวมประวัติสนทนา รูปภาพ หรือเสียง</string>
+    <string name="routing_laya_http_warning">HTTP ส่งคำถามและคีย์ที่เลือกใช้โดยไม่เข้ารหัส ใช้เครือข่ายส่วนตัวที่เชื่อถือได้ และ APK ต้องอนุญาตโฮสต์นี้</string>
+    <string name="routing_reason_disabled">รุ่นหลัก (ปิดการเลือกอัตโนมัติ)</string>
+    <string name="routing_reason_uncertain">ไม่แน่ใจความยากหรือบริการใช้ไม่ได้ ใช้รุ่นหลัก</string>
+    <string name="routing_reason_empty_slot">ช่อง %1$s ว่าง ใช้รุ่นหลัก</string>
+    <string name="routing_reason_unconfigured_slot">ช่อง %1$s ใช้ไม่ได้หรือไม่มีคีย์ ใช้รุ่นหลัก</string>
+    <string name="routing_reason_selected">%1$s เลือก %2$s (ความมั่นใจ %3$d%%)</string>
+    <string name="routing_reason_fallback">%1$s ล้มเหลว ใช้รุ่นหลัก</string>
+    <string name="routing_reason_failed">คำขอ AI ล้มเหลว</string>
+    <string name="routing_error">คำขอ AI ล้มเหลว: %1$s</string>
+    <string name="routing_decision_model">โมเดลตัดสินใจ</string>
+    <string name="routing_llm_description">ใช้คีย์ผู้ให้บริการที่มีอยู่ ส่งเฉพาะคำถามปัจจุบันเพื่อจัดประเภท โดยเพิ่มคำขอ API ที่มีค่าใช้จ่ายหนึ่งครั้ง ความมั่นใจของ LLM ไม่ใช่ความน่าจะเป็นที่ผ่านการปรับเทียบ หากไม่แน่ใจหรือหมดเวลา จะใช้โมเดลหลัก</string>
+    <string name="routing_reason_selected_llm">%1$s เลือก %2$s ด้วยการจัดประเภทแบบมีโครงสร้าง</string>
+    <string name="glasses_preview_metrics">พื้นที่แสดงผลแอป: %1$d × %2$d px</string>
 </resources>

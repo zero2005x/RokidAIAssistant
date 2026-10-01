@@ -241,12 +241,12 @@
     
     <!-- Speech Service Names (Legacy) -->
     <string name="speech_service_gemini">Gemini 音声認識</string>
-    <string name="speech_service_openai_whisper">OpenAI Whisper</string>
+    <string name="speech_service_openai_whisper">OpenAI Transcribe</string>
     <string name="speech_service_google_cloud">Google Cloud STT</string>
     
     <!-- STT Provider Names -->
     <string name="stt_provider_gemini">Gemini 音声</string>
-    <string name="stt_provider_openai_whisper">OpenAI Whisper</string>
+    <string name="stt_provider_openai_whisper">OpenAI Transcribe</string>
     <string name="stt_provider_groq_whisper">Groq Whisper</string>
     <string name="stt_provider_google_cloud">Google Cloud STT</string>
     <string name="stt_provider_azure">Azure Speech</string>
@@ -529,4 +529,53 @@
     <string name="recordings_status_analyzed">分析済み</string>
     <string name="recordings_status_error">エラー</string>
     <string name="api_key_not_configured">API キーが設定されていません。設定で API キーを設定してください。</string>
+
+    <!-- Decision routing and glasses display -->
+    <string name="routing_display_settings">モデル選択と表示</string>
+    <string name="routing_title">モデル選択</string>
+    <string name="routing_open_summary">判定サービスと3つのモデルを設定</string>
+    <string name="glasses_display_title">グラスの文字表示</string>
+    <string name="glasses_display_open_summary">フォント、サイズ、範囲、位置</string>
+    <string name="glasses_display_description">すべての文字と表示範囲を調整します。適用後に同期されます。</string>
+    <string name="glasses_preview_connected">● 接続済み</string>
+    <string name="glasses_preview_text">グラスの文字表示範囲です。\nフォントと位置を調整できます。</string>
+    <string name="glasses_preview_hint">上にスワイプして続きを読む</string>
+    <string name="glasses_preview_disclaimer">概略プレビューです。比率や改行はグラスによって異なります。sp は本文のサイズで、他の文字も比例して変わります。</string>
+    <string name="glasses_font">フォント</string>
+    <string name="glasses_font_system">システム</string>
+    <string name="glasses_font_monospace">等幅</string>
+    <string name="glasses_font_size">本文の文字サイズ</string>
+    <string name="glasses_width">幅</string>
+    <string name="glasses_height">高さ</string>
+    <string name="glasses_left">水平位置</string>
+    <string name="glasses_top">垂直位置</string>
+    <string name="glasses_reset">リセット</string>
+    <string name="glasses_apply">グラスに適用</string>
+    <string name="glasses_slider_value">%1$s: %2$d %3$s</string>
+    <string name="routing_fast">高速</string>
+    <string name="routing_balanced">バランス</string>
+    <string name="routing_quality">高品質</string>
+    <string name="routing_enabled">質問の難易度でモデルを選択</string>
+    <string name="routing_description">テキストと音声認識後の質問のみ。品質を優先し、不確かな場合はメインモデルを使用します。</string>
+    <string name="routing_backend">判定サービス</string>
+    <string name="routing_jev_key">TypeSafe API キー</string>
+    <string name="routing_laya_url">Laya サーバー URL</string>
+    <string name="routing_laya_url_hint">スマートフォンから接続できる URL（/v1/systemone は不要）。HTTPS 推奨。プライベート HTTP はホストの許可が必要です。</string>
+    <string name="routing_laya_key">Laya API キー（設定時のみ）</string>
+    <string name="routing_unset">未設定：メインモデルを使用</string>
+    <string name="routing_clear_slot">%1$s 枠をクリア</string>
+    <string name="routing_data_disclosure">有効にすると、今回の入力または文字起こしの質問が、回答モデルが端末内で動作する場合も、選択した判定バックエンドに送信されます。会話履歴、写真、音声は含まれません。</string>
+    <string name="routing_laya_http_warning">HTTP では質問と任意の API キーが暗号化されません。信頼できるプライベートネットワークを使用し、この APK でホストを明示的に許可してください。</string>
+    <string name="routing_reason_disabled">メインモデル（自動選択は無効）</string>
+    <string name="routing_reason_uncertain">難易度が不確か、または判定サービスが利用不可：メインモデルを使用</string>
+    <string name="routing_reason_empty_slot">%1$s 枠が未設定：メインモデルを使用</string>
+    <string name="routing_reason_unconfigured_slot">%1$s 枠が利用不可、または認証情報なし：メインモデルを使用</string>
+    <string name="routing_reason_selected">%1$s が %2$s を選択（信頼度 %3$d%%）</string>
+    <string name="routing_reason_fallback">%1$s が失敗：メインモデルを使用</string>
+    <string name="routing_reason_failed">AI リクエスト失敗</string>
+    <string name="routing_error">AI リクエスト失敗：%1$s</string>
+    <string name="routing_decision_model">判定モデル</string>
+    <string name="routing_llm_description">既存のプロバイダーキーを使用します。分類のために今回の質問のみを送信し、有料の API リクエストが1回追加されます。LLM の確実性は校正済みの確率ではありません。不確実またはタイムアウトの場合はメインモデルを使用します。</string>
+    <string name="routing_reason_selected_llm">%1$s が構造化分類で %2$s を選択しました。</string>
+    <string name="glasses_preview_metrics">アプリ表示領域：%1$d × %2$d px</string>
 </resources>

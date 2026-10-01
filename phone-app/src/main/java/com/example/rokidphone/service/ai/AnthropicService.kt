@@ -106,7 +106,10 @@ class AnthropicService(
                 }
             }
 
-            result ?: "Sorry, Claude service is temporarily unavailable. Please try again later."
+            result ?: run {
+                lastChatError = lastChatError ?: "empty_response"
+                "Sorry, Claude service is temporarily unavailable. Please try again later."
+            }
         }
     }
 
@@ -284,6 +287,7 @@ class AnthropicService(
 
     private fun parseChatResponse(response: okhttp3.Response, userMessage: String): String? {
         val responseBody = response.body?.string()
+        if (!response.isSuccessful) lastChatError = ProviderApiException.fromHttpStatus(response.code, responseBody).message
         if (!response.isSuccessful || responseBody == null) {
             if (BuildConfig.DEBUG) {
                 Log.e(TAG, "API error: ${response.code}, body: $responseBody")

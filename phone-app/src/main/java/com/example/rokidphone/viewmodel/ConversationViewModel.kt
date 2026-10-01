@@ -14,6 +14,7 @@ import com.example.rokidphone.data.db.ConversationRepository
 import com.example.rokidphone.data.db.Message
 import com.example.rokidphone.data.db.MessageRole
 import com.example.rokidphone.service.ServiceBridge
+import com.example.rokidphone.service.ai.DecisionRouter
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.File
@@ -34,6 +35,7 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
     private val conversationRepository = ConversationRepository.getInstance(application)
     private val settingsRepository = SettingsRepository.getInstance(application)
     private val providerManager = ProviderManager.getInstance(application)
+    private val decisionRouter = DecisionRouter()
     
     // All conversations list
     val conversations: StateFlow<List<Conversation>> = conversationRepository
@@ -141,8 +143,7 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
         
         // Check API key before sending
         val settings = settingsRepository.getSettings()
-        val apiKey = settings.getCurrentApiKey()
-        if (apiKey.isBlank()) {
+        if (!settings.decisionRoutingEnabled && !settings.isValid()) {
             Log.e(TAG, "API key not configured")
             _uiState.update { 
                 it.copy(
@@ -202,38 +203,33 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
             // Save user message
             conversationRepository.addUserMessage(conversationId, text)
             
-            // Get AI service
-            val aiService = providerManager.getActiveService()
-            if (aiService == null) {
+            val settings = settingsRepository.getSettings()
+            val aiService = if (settings.decisionRoutingEnabled) null else providerManager.getActiveService()
+            if (!settings.decisionRoutingEnabled && aiService == null) {
                 _uiState.update { it.copy(isLoading = false, error = "AI service not configured") }
                 return
             }
-            
-            // Get AI response
-            val response = aiService.chat(text)
-            
-            // Save AI response
-            val settings = settingsRepository.getSettings()
+            val history = conversationRepository.getMessagesForConversationSync(conversationId)
+                .dropLast(1).filter { !it.hasImage && it.role != MessageRole.SYSTEM }
+                .map { (if (it.role == MessageRole.ASSISTANT) "assistant" else "user") to it.content }
+            val reply = decisionRouter.reply(text, settings, history, aiService)
+            if (reply.error != null) {
+                val errorText = com.example.rokidphone.data.RoutingReason.failure(getApplication<Application>(), reply.error)
+                _uiState.update { it.copy(isLoading = false, error = errorText) }
+                if (settings.pushChatToGlasses) ServiceBridge.sendToGlasses(ProtocolMessage.aiError(errorText))
+                return
+            }
+            val response = reply.text
+
+            // Save actual model and the deterministic decision reason.
             conversationRepository.addAssistantMessage(
                 conversationId = conversationId,
                 content = response,
-                modelId = settings.aiModelId
+                modelId = reply.modelId,
+                routingReason = if (settings.decisionRoutingEnabled) reply.reason else null
             )
             
-            // Push AI response to glasses (if enabled in settings)
-            val pushToGlasses = settingsRepository.getSettings().pushChatToGlasses
-            if (pushToGlasses) {
-                try {
-                    val cleanedResponse = ServiceBridge.cleanMarkdown(response)
-                    ServiceBridge.sendToGlasses(ProtocolMessage.aiProcessing("Thinking..."))
-                    ServiceBridge.sendToGlasses(ProtocolMessage.aiResponseText(cleanedResponse))
-                    Log.d(TAG, "AI response pushed to glasses")
-                } catch (e: Exception) {
-                    Log.w(TAG, "Failed to push AI response to glasses", e)
-                }
-            } else {
-                Log.d(TAG, "Push chat to glasses disabled, skipping")
-            }
+            pushResponseToGlasses(response)
             
             // Auto-generate title (if this is the first message)
             val messageCount = conversationRepository.getMessageCount(conversationId)
@@ -245,15 +241,31 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
             
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send message", e)
-            _uiState.update { 
+            _uiState.update {
                 it.copy(
-                    isLoading = false, 
+                    isLoading = false,
                     error = "Failed to send: ${e.message}"
-                ) 
+                )
             }
         }
     }
-    
+
+    /** Pushes the answer to the glasses when the user has that turned on; a failure never loses the answer. */
+    private suspend fun pushResponseToGlasses(response: String) {
+        if (!settingsRepository.getSettings().pushChatToGlasses) {
+            Log.d(TAG, "Push chat to glasses disabled, skipping")
+            return
+        }
+        try {
+            val cleanedResponse = ServiceBridge.cleanMarkdown(response)
+            ServiceBridge.sendToGlasses(ProtocolMessage.aiProcessing("Thinking..."))
+            ServiceBridge.sendToGlasses(ProtocolMessage.aiResponseText(cleanedResponse))
+            Log.d(TAG, "AI response pushed to glasses")
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to push AI response to glasses", e)
+        }
+    }
+
     /**
      * Clear messages in the current conversation
      */

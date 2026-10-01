@@ -3,6 +3,7 @@ package com.example.rokidphone.ui
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -25,12 +27,19 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.rokidphone.R
 import com.example.rokidphone.ai.provider.AnythingLLMProvider
 import com.example.rokidphone.ai.provider.ProviderSetting
 import com.example.rokidphone.ai.provider.ValidationResult
 import com.example.rokidphone.data.*
 import com.example.rokidphone.service.ai.AiServiceFactory
+import com.example.rokidphone.service.ServiceBridge
+import com.example.rokidcommon.protocol.GlassesDisplayConfig
+import com.example.rokidcommon.protocol.GlassesFont
+import com.example.rokidcommon.protocol.Message
+import com.example.rokidcommon.protocol.MessageType
+import androidx.compose.ui.text.font.FontFamily
 import com.example.rokidphone.service.stt.SttProvider
 import com.example.rokidphone.service.stt.SttServiceFactory
 import kotlinx.coroutines.launch
@@ -66,6 +75,8 @@ fun SettingsScreen(
             )
         )
     }
+    var detailPage by remember { mutableStateOf<String?>(null) }
+    androidx.activity.compose.BackHandler(enabled = detailPage != null) { detailPage = null }
     var showProviderDialog by remember { mutableStateOf(false) }
     var showModelDialog by remember { mutableStateOf(false) }
     var showSpeechServiceDialog by remember { mutableStateOf(false) }
@@ -77,9 +88,13 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.api_settings)) },
+                title = { Text(stringResource(when (detailPage) {
+                    "routing" -> R.string.routing_title
+                    "display" -> R.string.glasses_display_title
+                    else -> R.string.api_settings
+                })) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { if (detailPage != null) detailPage = null else onBack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
@@ -96,6 +111,12 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            if (detailPage != null) {
+                item {
+                    if (detailPage == "routing") DecisionRoutingSection(settings, onSettingsChange, catalogRepository)
+                    else GlassesDisplaySettingsSection(settings, onSettingsChange)
+                }
+            } else {
             // Secure storage failure warning (never silently falls back to plaintext)
             item {
                 val secureStorageError by SettingsRepository.getInstance(context)
@@ -162,6 +183,16 @@ fun SettingsScreen(
                 }
             }
             
+            item {
+                SettingsSection(title = stringResource(R.string.routing_display_settings)) {
+                    SettingsRow(title = stringResource(R.string.routing_title),
+                        subtitle = stringResource(R.string.routing_open_summary), onClick = { detailPage = "routing" })
+                    HorizontalDivider()
+                    SettingsRow(title = stringResource(R.string.glasses_display_title),
+                        subtitle = stringResource(R.string.glasses_display_open_summary), onClick = { detailPage = "display" })
+                }
+            }
+
             // Custom Provider Settings (only shown for CUSTOM provider)
             if (settings.aiProvider == AiProvider.CUSTOM) {
                 item {
@@ -519,6 +550,7 @@ fun SettingsScreen(
                     KofiButton(modifier = Modifier.fillMaxWidth())
                 }
             }
+            }
         }
     }
     
@@ -626,6 +658,278 @@ fun SettingsScreen(
                 showLanguageDialog = false
             },
             onDismiss = { showLanguageDialog = false }
+        )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun GlassesDisplaySettingsSection(
+    settings: ApiSettings,
+    onSettingsChange: (ApiSettings) -> Unit
+) {
+    var draft by remember(settings.glassesDisplayConfig) {
+        mutableStateOf(settings.glassesDisplayConfig.normalized())
+    }
+    val scope = rememberCoroutineScope()
+    SettingsSection(title = stringResource(R.string.glasses_display_title)) {
+        Text(stringResource(R.string.glasses_display_description),
+            style = MaterialTheme.typography.bodySmall)
+        Spacer(Modifier.height(12.dp))
+        GlassesDisplayPreview(draft.normalized(), settings.glassesDisplayMetrics)
+        Text(stringResource(R.string.glasses_preview_disclaimer), style = MaterialTheme.typography.bodySmall)
+        Spacer(Modifier.height(10.dp))
+        Text(stringResource(R.string.glasses_font), style = MaterialTheme.typography.labelLarge)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            GlassesFont.entries.forEach { font ->
+                FilterChip(
+                    selected = draft.font == font,
+                    onClick = { draft = draft.copy(font = font) },
+                    label = { Text(if (font == GlassesFont.SYSTEM) stringResource(R.string.glasses_font_system) else stringResource(R.string.glasses_font_monospace)) }
+                )
+            }
+        }
+        DisplayConfigSlider(stringResource(R.string.glasses_font_size), draft.fontSizeSp, 12..36, "sp") {
+            draft = draft.copy(fontSizeSp = it).normalized()
+        }
+        DisplayConfigSlider(stringResource(R.string.glasses_width), draft.widthPercent, 30..94) {
+            draft = draft.copy(widthPercent = it).normalized()
+        }
+        DisplayConfigSlider(stringResource(R.string.glasses_height), draft.heightPercent, 30..94) {
+            draft = draft.copy(heightPercent = it).normalized()
+        }
+        DisplayConfigSlider(stringResource(R.string.glasses_left), draft.leftPercent, 3..(97 - draft.widthPercent)) {
+            draft = draft.copy(leftPercent = it).normalized()
+        }
+        DisplayConfigSlider(stringResource(R.string.glasses_top), draft.topPercent, 3..(97 - draft.heightPercent)) {
+            draft = draft.copy(topPercent = it).normalized()
+        }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = { draft = GlassesDisplayConfig() }) { Text(stringResource(R.string.glasses_reset)) }
+            Button(
+                enabled = draft != settings.glassesDisplayConfig,
+                onClick = {
+                    val applied = draft.normalized()
+                    onSettingsChange(settings.copy(glassesDisplayConfig = applied))
+                    scope.launch {
+                        ServiceBridge.sendToGlasses(Message(
+                            type = MessageType.SYSTEM_CONFIG,
+                            payload = applied.toJson()
+                        ))
+                    }
+                }
+            ) { Text(stringResource(R.string.glasses_apply)) }
+        }
+    }
+}
+
+@Composable
+private fun DisplayConfigSlider(label: String, value: Int, range: IntRange, unit: String = "%", onChange: (Int) -> Unit) {
+    Text(stringResource(R.string.glasses_slider_value, label, value, unit),
+        style = MaterialTheme.typography.bodyMedium)
+    Slider(
+        value = value.toFloat(),
+        onValueChange = { onChange(it.toInt().coerceIn(range)) },
+        valueRange = range.first.toFloat()..range.last.toFloat(),
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+private fun DecisionRoutingSection(
+    settings: ApiSettings,
+    onSettingsChange: (ApiSettings) -> Unit,
+    repository: com.example.rokidphone.ai.catalog.ModelCatalogRepository
+) {
+    var pickingDecisionModel by remember { mutableStateOf(false) }
+    var editingSlot by remember { mutableStateOf<Int?>(null) }
+    SettingsSection(title = stringResource(R.string.routing_title)) {
+        SettingsRowWithSwitch(
+            title = stringResource(R.string.routing_enabled),
+            subtitle = stringResource(R.string.routing_description),
+            checked = settings.decisionRoutingEnabled,
+            onCheckedChange = { onSettingsChange(settings.copy(decisionRoutingEnabled = it)) }
+        )
+        if (settings.decisionRoutingEnabled) {
+            Text(stringResource(R.string.routing_data_disclosure), style = MaterialTheme.typography.bodySmall)
+            Spacer(Modifier.height(8.dp))
+            DecisionBackendFields(settings, onSettingsChange) { pickingDecisionModel = true }
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            RoutingSlotRows(settings, onSettingsChange) { editingSlot = it }
+        }
+    }
+    if (pickingDecisionModel) {
+        DecisionModelDialog(settings, repository, onSettingsChange) { pickingDecisionModel = false }
+    }
+    editingSlot?.let { slot ->
+        RoutingSlotDialogs(slot, settings, repository, onSettingsChange) { editingSlot = null }
+    }
+}
+
+private fun ApiSettings.decisionLlmProvider(): AiProvider =
+    if (decisionBackend == DecisionBackend.GEMINI) AiProvider.GEMINI else AiProvider.OPENAI
+
+private fun ApiSettings.decisionModelFor(provider: AiProvider): String =
+    if (provider == AiProvider.GEMINI) decisionGeminiModel else decisionOpenaiModel
+
+/** Slot 0 is the fast tier, 1 the balanced tier, anything else the quality tier. */
+private fun ApiSettings.routingSlot(index: Int): RoutingModel? = when (index) {
+    0 -> fastRoutingModel
+    1 -> balancedRoutingModel
+    else -> qualityRoutingModel
+}
+
+private fun ApiSettings.withRoutingSlot(index: Int, model: RoutingModel?): ApiSettings = when (index) {
+    0 -> copy(fastRoutingModel = model)
+    1 -> copy(balancedRoutingModel = model)
+    else -> copy(qualityRoutingModel = model)
+}
+
+/** Backend choice and the fields that backend needs. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun DecisionBackendFields(
+    settings: ApiSettings,
+    onSettingsChange: (ApiSettings) -> Unit,
+    onPickDecisionModel: () -> Unit
+) {
+    Text(stringResource(R.string.routing_backend), style = MaterialTheme.typography.labelLarge)
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        DecisionBackend.entries.forEach { backend ->
+            FilterChip(
+                selected = settings.decisionBackend == backend,
+                onClick = { onSettingsChange(settings.copy(decisionBackend = backend)) },
+                label = { Text(backend.name) }
+            )
+        }
+    }
+    when (settings.decisionBackend) {
+        DecisionBackend.JEV -> ApiKeyField(stringResource(R.string.routing_jev_key), settings.jevApiKey,
+            { onSettingsChange(settings.copy(jevApiKey = it)) }, true)
+        DecisionBackend.LAYA -> LayaFields(settings, onSettingsChange)
+        DecisionBackend.GEMINI, DecisionBackend.OPENAI -> LlmDecisionFields(settings, onPickDecisionModel)
+    }
+}
+
+@Composable
+private fun LayaFields(settings: ApiSettings, onSettingsChange: (ApiSettings) -> Unit) {
+    OutlinedTextField(
+        value = settings.layaBaseUrl,
+        onValueChange = { onSettingsChange(settings.copy(layaBaseUrl = it)) },
+        label = { Text(stringResource(R.string.routing_laya_url)) },
+        supportingText = { Text(stringResource(R.string.routing_laya_url_hint)) },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true
+    )
+    if (settings.layaBaseUrl.trim().startsWith(URL_SCHEME_HTTP)) {
+        Text(stringResource(R.string.routing_laya_http_warning),
+            color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+    }
+    ApiKeyField(stringResource(R.string.routing_laya_key), settings.layaApiKey,
+        { onSettingsChange(settings.copy(layaApiKey = it)) }, true)
+}
+
+@Composable
+private fun LlmDecisionFields(settings: ApiSettings, onPickDecisionModel: () -> Unit) {
+    Text(stringResource(R.string.routing_llm_description), style = MaterialTheme.typography.bodySmall)
+    val provider = settings.decisionLlmProvider()
+    SettingsRow(title = stringResource(R.string.routing_decision_model),
+        subtitle = settings.decisionModelFor(provider),
+        onClick = onPickDecisionModel)
+    if (!settings.isProviderConfigured(provider)) Text(stringResource(R.string.api_key_not_configured),
+        color = MaterialTheme.colorScheme.error)
+}
+
+/** One row per difficulty tier, with a button to clear a tier that has a model pinned. */
+@Composable
+private fun RoutingSlotRows(
+    settings: ApiSettings,
+    onSettingsChange: (ApiSettings) -> Unit,
+    onEdit: (Int) -> Unit
+) {
+    val names = listOf(
+        stringResource(R.string.routing_fast),
+        stringResource(R.string.routing_balanced),
+        stringResource(R.string.routing_quality)
+    )
+    names.forEachIndexed { index, name ->
+        val slot = settings.routingSlot(index)
+        SettingsRow(
+            title = name,
+            subtitle = slot?.let { "${it.provider.name} / ${it.modelId}" } ?: stringResource(R.string.routing_unset),
+            onClick = { onEdit(index) }
+        )
+        if (slot != null) {
+            TextButton(onClick = { onSettingsChange(settings.withRoutingSlot(index, null)) }) {
+                Text(stringResource(R.string.routing_clear_slot, name))
+            }
+        }
+    }
+}
+
+@Composable
+private fun DecisionModelDialog(
+    settings: ApiSettings,
+    repository: com.example.rokidphone.ai.catalog.ModelCatalogRepository,
+    onSettingsChange: (ApiSettings) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val provider = settings.decisionLlmProvider()
+    ModelCatalogDialog(
+        provider = provider,
+        currentModelId = settings.decisionModelFor(provider),
+        apiKey = settings.getApiKeyForProvider(provider),
+        baseUrl = null,
+        repository = repository,
+        onSelect = { model ->
+            onSettingsChange(
+                if (provider == AiProvider.GEMINI) settings.copy(decisionGeminiModel = model)
+                else settings.copy(decisionOpenaiModel = model)
+            )
+            onDismiss()
+        },
+        onDismiss = onDismiss
+    )
+}
+
+/** Pick a provider, then one of its models, for the tier at [index]. */
+@Composable
+private fun RoutingSlotDialogs(
+    index: Int,
+    settings: ApiSettings,
+    repository: com.example.rokidphone.ai.catalog.ModelCatalogRepository,
+    onSettingsChange: (ApiSettings) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var pickedProvider by remember(index) { mutableStateOf(settings.routingSlot(index)?.provider ?: settings.aiProvider) }
+    var pickingModel by remember(index) { mutableStateOf(false) }
+    if (!pickingModel) {
+        ProviderSelectionDialog(
+            currentProvider = pickedProvider,
+            availableProviders = AiProvider.entries.filter { it != AiProvider.GEMINI_LIVE },
+            onSelect = { provider ->
+                pickedProvider = provider
+                pickingModel = true
+            },
+            onDismiss = onDismiss,
+            isConfigured = { settings.isProviderConfigured(it) }
+        )
+    } else {
+        ModelCatalogDialog(
+            provider = pickedProvider,
+            currentModelId = settings.routingSlot(index)?.modelId ?: settings.getModelIdForProvider(pickedProvider),
+            apiKey = settings.getApiKeyForProvider(pickedProvider),
+            baseUrl = when (pickedProvider) {
+                AiProvider.CUSTOM -> settings.customBaseUrl
+                AiProvider.ALIBABA -> settings.copy(aiProvider = pickedProvider).getCurrentBaseUrl()
+                else -> null
+            },
+            repository = repository,
+            onSelect = { modelId ->
+                onSettingsChange(settings.withRoutingSlot(index, RoutingModel(pickedProvider, modelId)))
+                onDismiss()
+            },
+            onDismiss = onDismiss
         )
     }
 }
@@ -825,7 +1129,8 @@ fun ProviderSelectionDialog(
     currentProvider: AiProvider,
     onSelect: (AiProvider) -> Unit,
     onDismiss: () -> Unit,
-    isConfigured: (AiProvider) -> Boolean = { false }
+    isConfigured: (AiProvider) -> Boolean = { false },
+    availableProviders: List<AiProvider> = AiProvider.entries
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -836,7 +1141,7 @@ fun ProviderSelectionDialog(
                     .fillMaxWidth()
                     .heightIn(max = 480.dp)
             ) {
-                items(AiProvider.entries.toList(), key = { it.name }) { provider ->
+                items(availableProviders, key = { it.name }) { provider ->
                     val descriptor = com.example.rokidphone.ai.catalog.ProviderRegistry.descriptorFor(provider)
                     Row(
                         modifier = Modifier
@@ -1742,7 +2047,7 @@ fun CustomProviderSection(
             )
 
             // Cleartext HTTP warning for local endpoints
-            if (baseUrl.startsWith("http://")) {
+            if (baseUrl.startsWith(URL_SCHEME_HTTP)) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = stringResource(R.string.custom_cleartext_warning),

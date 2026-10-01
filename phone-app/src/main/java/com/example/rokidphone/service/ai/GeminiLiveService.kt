@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class GeminiLiveService(
     private val apiKey: String,
-    private val modelId: String = "gemini-2.5-flash-preview-native-audio-dialog",
+    private val modelId: String = "gemini-3.8-live",
     private val systemPrompt: String = "",
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
     /** Opens the Live API socket; substituted in tests so no connection is made. */

@@ -38,7 +38,7 @@ object AiServiceFactory {
      * Create AI service based on settings
      */
     fun createService(settings: ApiSettings): AiServiceProvider {
-        val apiKey = settings.getCurrentApiKey()
+        val apiKey = settings.getCurrentApiKey().trim()
         val systemPrompt = settings.systemPrompt
         val modelId = settings.getCurrentModelId()
         val descriptor = ProviderRegistry.descriptorFor(settings.aiProvider)
@@ -343,7 +343,7 @@ object AiServiceFactory {
             AiProvider.GROQ -> OpenAiCompatibleService(
                 apiKey = apiKey,
                 baseUrl = AiProvider.GROQ.defaultBaseUrl,
-                modelId = "llama-3.3-70b-versatile",
+                modelId = "openai/gpt-oss-120b",
                 providerType = AiProvider.GROQ
             )
             // All other chat providers do not expose a transcription endpoint.

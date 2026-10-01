@@ -1,6 +1,25 @@
 # AI 供應商 API 呼叫對照與更新紀錄
 
-核對日期：2026-09-11。範圍為 `AiProvider` / `ProviderRegistry` 原有的全部 16 個選項，以及共用的文字、圖片、串流、模型清單和內建語音轉文字呼叫。以下是 App 實際使用的介面，不代表各平台所有產品都已整合。模型能否使用仍取決於帳戶權限及服務端當下的模型清單。
+核對日期：2026-09-30。範圍為 `AiProvider` / `ProviderRegistry` 原有的全部 16 個選項，以及共用的文字、圖片、串流、模型清單和內建語音轉文字呼叫。以下是 App 實際使用的介面，不代表各平台所有產品都已整合。模型能否使用仍取決於帳戶權限及服務端當下的模型清單。
+
+## 2026-09-30 增量更新
+
+本次逐一檢查下表既有供應商是否有與 App 的文字對話、影像理解或語音轉寫直接相關的 API 更新。沒有加入與本 App 無關的影片生成、訓練或代理工具介面。付費 API 未使用使用者憑證實網測試。
+
+| 供應商 | 評估與 App 變更 |
+| --- | --- |
+| Gemini / Gemini Live | 增列 `gemini-3.8-flash`、`gemini-3.8-live` 與 Extended Thinking；新安裝的文字預設改為 3.8 Flash，已儲存的模型選擇保留。[變更紀錄](https://ai.google.dev/gemini-api/docs/changelog) |
+| OpenAI | 增列 GPT-6 Astra/Sol/Luna；按模型限制處理 reasoning effort 與採樣欄位，改用 Responses 優先。內建轉寫模型改為 `gpt-transcribe`，保留既有 multipart 路徑。[模型](https://developers.openai.com/api/docs/models)、[轉寫](https://developers.openai.com/api/docs/guides/speech-to-text) |
+| Anthropic | 增列 Claude Sonnet/Opus 5.5；既有 4.7+ 不送自訂採樣參數的規則適用 5.5。[模型](https://platform.claude.com/docs/en/models/overview) |
+| DeepSeek | 增列 `deepseek-flash`（V4.1 Flash）與圖片能力；已儲存的 V4 Flash 別名遷移到新 ID，保留 V4 Pro。[變更紀錄](https://api-docs.deepseek.com/updates/) |
+| xAI | 增列 Grok 4.7 的文字／圖片模型選項。新的語音轉寫 API 需要獨立 STT adapter，未把聊天端點誤作轉寫端點。[變更紀錄](https://docs.x.ai/developers/release-notes) |
+| Alibaba / Qwen | 增列 `qwen3.8-max`、`qwen3.8-flash` 及圖片能力；區域與密鑰設定維持既有契約。[模型](https://www.alibabacloud.com/help/en/model-studio/models) |
+| Groq | `llama-3.3-70b-versatile` 已於 2026-08-16 停用，改用 `openai/gpt-oss-120b` 作預設與已儲存設定的替代；`qwen/qwen3.6-27b` 遷移至 `qwen/qwen3.8-27b`。[停用公告](https://console.groq.com/docs/deprecations) |
+| Moonshot / Kimi | 增列可沿用現有文字／圖片 Chat Completions 流程的 `kimi-k2.6`。K3 已評估，但官方要求多輪請求原樣帶回包含 `reasoning_content` 的完整 assistant 訊息；目前 App 只儲存可見文字，所以本次不把 K3 列為可用備援模型。[K2.6](https://platform.kimi.ai/docs/guide/kimi-k2-6-quickstart)、[K3 契約](https://platform.kimi.ai/docs/guide/kimi-k3-quickstart) |
+| Z.AI、Baidu、Perplexity、Mistral | 保留既有請求介面與模型清單的即時載入方式；本次沒有確認到必須變更現有呼叫契約的新功能。各供應商詳見下表官方文件連結。 |
+| AnythingLLM、Local Gemma、Custom | 這些由使用者自架或本機環境決定可用功能，無通用雲端版本可自動遷移；保留現有端點／模型偵測。 |
+
+Jev 與 Laya 是新增的決策後端，用於選擇上述生成模型，不計入既有 16 個生成供應商。使用方式見 [選模與眼鏡顯示設定](DECISION_ROUTING_AND_DISPLAY.md)。
 
 ## 供應商對照
 
@@ -27,7 +46,7 @@
 
 ## 語音與原始 app 模組
 
-Gemini 內建轉寫走 generateContent 音訊輸入；OpenAI/Groq 內建轉寫走 multipart `POST audio/transcriptions`，分別使用 `whisper-1` / `whisper-large-v3-turbo`，不拿聊天 model ID 當轉寫模型。其餘聊天供應商仍透過獨立 STT 選擇處理語音。專用 STT 的 18 個選項另見 [STT_IMPLEMENTATION_STATUS.md](STT_IMPLEMENTATION_STATUS.md)，本次未宣稱對每家付費 STT 服務完成實網驗證。
+Gemini 內建轉寫走 generateContent 音訊輸入；OpenAI/Groq 內建轉寫走 multipart `POST audio/transcriptions`，分別使用 `gpt-transcribe` / `whisper-large-v3-turbo`，不拿聊天 model ID 當轉寫模型。其餘聊天供應商仍透過獨立 STT 選擇處理語音。專用 STT 的 18 個選項另見 [STT_IMPLEMENTATION_STATUS.md](STT_IMPLEMENTATION_STATUS.md)，本次未宣稱對每家付費 STT 服務完成實網驗證。
 
 原始 `app` 模組的 `services/GeminiService.kt` 使用 `GenerativeModel.generateContent/sendMessage` SDK 封裝；其 Whisper 路徑同為 `/v1/audio/transcriptions`。本次主要更新 `phone-app` 的多供應商 HTTP adapter，未新增 Firebase、替換 SDK 或新增供應商。
 

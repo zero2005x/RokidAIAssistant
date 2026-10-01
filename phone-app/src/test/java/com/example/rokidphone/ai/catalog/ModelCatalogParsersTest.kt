@@ -193,7 +193,10 @@ class ModelCatalogParsersTest {
         assertThat(models.map { it.id }).containsExactly("deepseek-v4-flash", "deepseek-v4-pro")
         assertThat(models.first { it.id == "deepseek-v4-pro" }.capabilities.reasoning).isTrue()
         assertThat(models.first { it.id == "deepseek-v4-flash" }.capabilities.reasoning).isFalse()
-        assertThat(models.all { !it.capabilities.imageInput }).isTrue()
+        // Since 2026-09-10 the retired Flash ID routes to vision-capable V4.1 Flash.
+        // https://api-docs.deepseek.com/updates/
+        assertThat(models.first { it.id == "deepseek-v4-flash" }.capabilities.imageInput).isTrue()
+        assertThat(models.first { it.id == "deepseek-v4-pro" }.capabilities.imageInput).isFalse()
     }
 
     @Test

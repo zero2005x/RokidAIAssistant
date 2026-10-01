@@ -9,6 +9,7 @@ import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -16,6 +17,7 @@ import com.example.rokidcommon.Constants
 import com.example.rokidcommon.protocol.ConnectionState
 import com.example.rokidcommon.protocol.Message
 import com.example.rokidcommon.protocol.MessageType
+import com.example.rokidcommon.protocol.GlassesDisplayConfig
 import com.example.rokidglasses.R
 import com.example.rokidglasses.sdk.CameraMode
 import com.example.rokidglasses.sdk.CxrServiceManager
@@ -34,6 +36,7 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 
 data class GlassesUiState(
+    val displayConfig: GlassesDisplayConfig = GlassesDisplayConfig(),
     val isConnected: Boolean = false,
     val isListening: Boolean = false,
     val isProcessing: Boolean = false,
@@ -77,11 +80,13 @@ class GlassesViewModel(
         private const val TAG = "GlassesViewModel"
         // Max characters per page for glasses display
         private const val MAX_CHARS_PER_PAGE = 120
-        private const val MAX_LINES_PER_PAGE = 4
         private const val MAX_AUDIO_BUFFER_BYTES = 4 * 1024 * 1024
     }
     
+    private val displayPrefs = context.getSharedPreferences("glasses_display", Context.MODE_PRIVATE)
     private val _uiState = MutableStateFlow(GlassesUiState(
+        displayConfig = GlassesDisplayConfig.fromJson(displayPrefs.getString("config", null))
+            ?: GlassesDisplayConfig(),
         displayText = context.getString(R.string.say_hey_rokid),
         hintText = context.getString(R.string.tap_touchpad_record)
     ))
@@ -90,6 +95,24 @@ class GlassesViewModel(
     // Store full AI response for pagination
     private var fullAiResponse: String = ""
     private var responsePages: List<String> = emptyList()
+    private var measuredPagination: ((String) -> List<String>)? = null
+
+    /** The renderer reports its actual remaining size after status and hint rows are laid out. */
+    fun updateTextLayout(paginate: (String) -> List<String>) {
+        measuredPagination = paginate
+        if (fullAiResponse.isEmpty() || _uiState.value.isProcessing ||
+            _uiState.value.displayText !in responsePages) return
+        val oldOffset = responsePages.take(_uiState.value.currentPage).sumOf { it.length }
+        responsePages = paginate(fullAiResponse)
+        var offset = 0
+        val page = responsePages.indexOfFirst { part ->
+            offset += part.length
+            offset > oldOffset
+        }.coerceAtLeast(0)
+        _uiState.update { it.copy(currentPage = page, totalPages = responsePages.size,
+            isPaginated = responsePages.size > 1, displayText = responsePages[page],
+            hintText = context.getString(if (responsePages.size > 1) R.string.swipe_for_more else R.string.tap_continue)) }
+    }
     
     private var audioRecord: AudioRecord? = null
     private var recordingJob: Job? = null
@@ -196,6 +219,20 @@ class GlassesViewModel(
         }
     }
     
+    private var displayMetrics: com.example.rokidcommon.protocol.GlassesDisplayMetrics? = null
+
+    fun updateDisplayMetrics(metrics: com.example.rokidcommon.protocol.GlassesDisplayMetrics) {
+        displayMetrics = metrics
+        sendDisplayMetrics()
+    }
+
+    private fun sendDisplayMetrics() {
+        val metrics = displayMetrics ?: return
+        if (_uiState.value.isConnected) viewModelScope.launch {
+            bluetoothClient.sendMessage(Message(type = MessageType.DISPLAY_METRICS, payload = metrics.toJson()))
+        }
+    }
+
     private fun initializeBluetooth() {
         // Listen to Bluetooth connection state
         viewModelScope.launch {
@@ -222,6 +259,7 @@ class GlassesViewModel(
                         BluetoothClientState.CONNECTED -> context.getString(R.string.tap_touchpad_start)
                     }
                 ) }
+                if (state == BluetoothClientState.CONNECTED) sendDisplayMetrics()
             }
         }
         
@@ -510,9 +548,28 @@ class GlassesViewModel(
      * Handle message from phone
      */
     private fun handlePhoneMessage(message: Message) {
-        Log.d(TAG, "Received from phone: ${message.type}, payload: ${message.payload}")
+        Log.d(TAG, "Received from phone: ${message.type}, payload size: ${message.payload.orEmpty().length}")
         
         when (message.type) {
+            MessageType.DISPLAY_METRICS -> sendDisplayMetrics()
+            MessageType.SYSTEM_CONFIG -> {
+                val config = GlassesDisplayConfig.fromJson(message.payload)
+                if (config != null) {
+                    displayPrefs.edit { putString("config", config.toJson()) }
+                    _uiState.update { it.copy(displayConfig = config) }
+                    measuredPagination = null
+                    if (fullAiResponse.isNotEmpty() && _uiState.value.displayText in responsePages &&
+                        !_uiState.value.isProcessing && !_uiState.value.isListening) {
+                        responsePages = paginateText(fullAiResponse)
+                        _uiState.update { it.copy(
+                            currentPage = 0,
+                            totalPages = responsePages.size,
+                            isPaginated = responsePages.size > 1,
+                            displayText = responsePages.firstOrNull().orEmpty()
+                        ) }
+                    }
+                }
+            }
             MessageType.AI_PROCESSING -> {
                 _uiState.update { it.copy(
                     isProcessing = true,
@@ -629,14 +686,13 @@ class GlassesViewModel(
                 fullAiResponse = analysisText
                 responsePages = paginateText(analysisText)
                 val isPaginated = responsePages.size > 1
-                val pageIndicator = if (isPaginated) " (1/${responsePages.size})" else ""
                 val hintText = if (isPaginated) 
                     context.getString(R.string.swipe_left_right_pages)
                 else 
                     context.getString(R.string.tap_touchpad_start)
                 
                 _uiState.update { it.copy(
-                    displayText = responsePages[0] + pageIndicator,
+                    displayText = responsePages[0],
                     hintText = hintText,
                     currentPage = 0,
                     totalPages = responsePages.size,
@@ -705,75 +761,33 @@ class GlassesViewModel(
         Log.d(TAG, "Playing audio: ${audioData.size} bytes")
     }
     
-    /**
-     * Paginate long text for glasses display
-     * Splits text into pages based on character limit and line count
-     */
+    /** Paginate conservatively for the chosen viewport without dropping punctuation. */
     private fun paginateText(text: String): List<String> {
-        if (text.length <= MAX_CHARS_PER_PAGE) {
-            return listOf(text)
-        }
-        
+        if (text.isEmpty()) return listOf("")
+        measuredPagination?.let { return it(text) }
+        val config = _uiState.value.displayConfig.normalized()
+        val areaRatio = (config.widthPercent / 88f) * (config.heightPercent / 78f)
+        val fontRatio = 22f / config.fontSizeSp
+        val maxChars = (MAX_CHARS_PER_PAGE * areaRatio * fontRatio * fontRatio)
+            .toInt().coerceIn(8, 160)
         val pages = mutableListOf<String>()
-        val words = text.split(" ", "，", "。", "、", "！", "？")
-        var currentPage = StringBuilder()
-        var lineCount = 0
-        var charCount = 0
-        
-        for (word in words) {
-            val wordWithSpace = if (currentPage.isEmpty()) word else " $word"
-            val newCharCount = charCount + wordWithSpace.length
-            
-            // Check if adding this word would exceed limits
-            if (newCharCount > MAX_CHARS_PER_PAGE || lineCount >= MAX_LINES_PER_PAGE) {
-                if (currentPage.isNotEmpty()) {
-                    pages.add(currentPage.toString().trim())
-                    currentPage = StringBuilder()
-                    charCount = 0
-                    lineCount = 0
-                }
+        var start = 0
+        while (start < text.length) {
+            // Before the first layout pass, constrain explicit line breaks too.
+            var hardEnd = minOf(start + maxChars, text.length)
+            var newlines = 0
+            for (i in start until hardEnd) {
+                if (text[i] == '\n' && ++newlines >= 3) { hardEnd = i + 1; break }
             }
-            
-            currentPage.append(wordWithSpace)
-            charCount = currentPage.length
-            
-            // Count newlines for line tracking
-            if (word.contains("\n")) {
-                lineCount += word.count { it == '\n' }
-            }
+            if (hardEnd < text.length && Character.isHighSurrogate(text[hardEnd - 1])) hardEnd--
+            val window = text.substring(start, hardEnd)
+            val natural = window.indexOfLast { it.isWhitespace() || it in "，。！？、,.;:" }
+            val end = if (hardEnd < text.length && natural >= maxChars / 2) {
+                start + natural + 1
+            } else hardEnd
+            pages.add(text.substring(start, end))
+            start = end
         }
-        
-        // Add remaining text
-        if (currentPage.isNotEmpty()) {
-            pages.add(currentPage.toString().trim())
-        }
-        
-        // If simple word splitting didn't work well, use character-based splitting
-        if (pages.isEmpty() || (pages.size == 1 && text.length > MAX_CHARS_PER_PAGE)) {
-            pages.clear()
-            var i = 0
-            while (i < text.length) {
-                val end = minOf(i + MAX_CHARS_PER_PAGE, text.length)
-                // Try to break at natural boundaries
-                var breakPoint = end
-                if (end < text.length) {
-                    val lastSpace = text.lastIndexOf(' ', end)
-                    val lastPunctuation = maxOf(
-                        text.lastIndexOf('。', end),
-                        text.lastIndexOf('，', end),
-                        text.lastIndexOf('.', end),
-                        text.lastIndexOf(',', end)
-                    )
-                    val naturalBreak = maxOf(lastSpace, lastPunctuation)
-                    if (naturalBreak > i) {
-                        breakPoint = naturalBreak + 1
-                    }
-                }
-                pages.add(text.substring(i, breakPoint).trim())
-                i = breakPoint
-            }
-        }
-        
         return pages
     }
     

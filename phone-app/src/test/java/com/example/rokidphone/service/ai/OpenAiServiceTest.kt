@@ -56,8 +56,7 @@ class OpenAiServiceTest {
     }
 
     @Test
-    fun `transcribe - successful whisper response returns text`() = runTest {
-        // 測試：OpenAI Whisper 轉錄成功
+    fun `transcribe - sends plural language array in SDK multipart format`() = runTest {
         val service = createService()
         serverRule.server.enqueue(jsonResponse(TestFixtures.MockResponses.openAiWhisperSuccess("test speech")))
 
@@ -65,6 +64,10 @@ class OpenAiServiceTest {
 
         assertThat(result).isInstanceOf(SpeechResult.Success::class.java)
         assertThat((result as SpeechResult.Success).text).isEqualTo("test speech")
+        val body = serverRule.server.takeRequest().body.readUtf8()
+        assertThat(body).contains("gpt-transcribe")
+        assertThat(body).doesNotContain("name=\"language\"")
+        assertThat(body).contains("name=\"languages[]\"\r\n\r\nen\r\n")
     }
 
     @Test

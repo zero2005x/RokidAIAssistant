@@ -96,21 +96,21 @@ echo "GEMINI_API_KEY=your_key_here" >> local.properties
 > 圖片請求。部分服務商可能提供 trial/free quota — 請以官方 Console 為準，
 > 不保證永久存在。
 
-### 代表性 fallback 模型（2026-08-02 驗證）
+### 代表性 fallback 模型（2026-09-30 驗證）
 
 | 服務商     | Fallback 範例（未標註者為 stable）                                       |
 | ---------- | ------------------------------------------------------------------------ |
-| Gemini     | gemini-3.6-flash、gemini-3.5-flash(-lite)、gemini-2.5-pro/flash/lite     |
-| OpenAI     | gpt-5.6、gpt-5.6-terra、gpt-5.6-luna（gpt-5.4、gpt-4o 為 legacy）        |
-| Anthropic  | claude-sonnet-5、claude-opus-5、claude-fable-5、claude-opus-4-8、claude-haiku-4-5 |
-| DeepSeek   | deepseek-v4-flash、deepseek-v4-pro（deepseek-chat/reasoner 已 deprecated，自動 migration） |
-| Groq       | llama-3.3-70b-versatile、gpt-oss-120b/20b（Llama 4 Scout/Maverick 為 preview） |
-| xAI        | grok-4.5（視覺）、grok-4.1-fast、grok-4                                  |
-| 阿里雲     | qwen3.7-max/plus/flash、qwen2.5-vl-72b/32b（視覺）                       |
+| Gemini     | gemini-3.8-flash、gemini-3.6-flash、gemini-3.5-flash(-lite)              |
+| OpenAI     | gpt-6-astra/sol/luna、gpt-5.6/terra/luna（gpt-5.4、gpt-4o 為 legacy）    |
+| Anthropic  | claude-sonnet-5-5、claude-opus-5-5、claude-sonnet-5、claude-opus-5        |
+| DeepSeek   | deepseek-flash、deepseek-v4-pro（deepseek-v4-flash 為暫時相容別名）         |
+| Groq       | gpt-oss-120b/20b、qwen3.8-27b（Llama 3.3 已停用；Llama 4 Scout/Maverick 為 preview） |
+| xAI        | grok-4.7、grok-4.5（視覺）、grok-4.1-fast、grok-4                          |
+| 阿里雲     | qwen3.8-max/flash、qwen3.7-max/plus/flash、qwen2.5-vl-72b/32b            |
 | Z.AI       | glm-5.1、glm-5v-turbo（視覺）、glm-4.7-flash                             |
 | 百度       | ernie-5.1、ernie-5.0、ernie-4.5-turbo-128k、ernie-4.5-turbo-vl（視覺）   |
 | Perplexity | sonar、sonar-pro、sonar-reasoning-pro、sonar-deep-research               |
-| Moonshot   | kimi-k2.5、kimi-k2.5-thinking                                            |
+| Moonshot   | kimi-k2.6、kimi-k2.5、kimi-k2.5-thinking                                 |
 | Mistral    | mistral-medium-3-5、mistral-large-2512、mistral-small-2603、ministral-3-8b |
 
 > 帳號的 Models API 回傳結果永遠優先於此表。更新方式：查閱各家官方模型文件，
@@ -312,7 +312,8 @@ Secret Key 的既有安裝會自動以 legacy 模式繼續運作 — 舊憑證�
 ### DeepSeek migration
 
 已儲存的舊 `deepseek-chat` / `deepseek-reasoner` 模型 ID 會自動遷移到
-`deepseek-v4-flash` / `deepseek-v4-pro`。仍可手動輸入舊 ID（會顯示
+`deepseek-flash` / `deepseek-v4-pro`；已儲存的 `deepseek-v4-flash` 也會遷移。
+仍可手動輸入舊 ID（會顯示
 deprecated 警告）。
 
 **檔案路徑**: `phone-app/src/.../ui/settings/SettingsScreen.kt`

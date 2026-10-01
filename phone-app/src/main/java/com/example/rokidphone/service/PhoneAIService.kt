@@ -10,6 +10,7 @@ import androidx.core.app.NotificationCompat
 import com.example.rokidcommon.Constants
 import com.example.rokidcommon.protocol.Message
 import com.example.rokidcommon.protocol.MessageType
+import com.example.rokidcommon.protocol.GlassesDisplayConfig
 import com.example.rokidcommon.protocol.photo.PhotoTransferState
 import com.example.rokidphone.BuildConfig
 import com.example.rokidphone.MainActivity
@@ -22,6 +23,9 @@ import com.example.rokidphone.data.db.ConversationRepository
 import com.example.rokidphone.data.db.RecordingRepository
 import com.example.rokidphone.service.ai.AiServiceFactory
 import com.example.rokidphone.service.ai.AiServiceProvider
+import com.example.rokidphone.service.ai.DecisionRouter
+import com.example.rokidphone.service.ai.RoutedReply
+import com.example.rokidphone.data.db.MessageRole
 import com.example.rokidphone.service.ai.GeminiLiveSession
 import com.example.rokidphone.service.cxr.CxrMobileManager
 import com.example.rokidphone.service.stt.SttProvider
@@ -34,6 +38,7 @@ import com.example.rokidphone.service.photo.PhotoRepository
 import com.example.rokidphone.service.photo.ReceivedPhoto
 import com.rokid.cxr.client.utils.ValueUtil
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -51,7 +56,10 @@ class PhoneAIService : Service() {
     
     companion object {
         private const val TAG = "PhoneAIService"
-        
+
+        // Fast Gemini model used for the development fallback and as the speech fallback.
+        private const val GEMINI_FLASH_MODEL = "gemini-3.8-flash"
+
         // Pre-compiled patterns for cleanMarkdown (compiled once, not per call)
         private val boldAsteriskRegex = Regex("\\*\\*(.+?)\\*\\*")
         private val italicAsteriskRegex = Regex("(?<![\\w*])\\*(.+?)\\*(?![\\w*])")
@@ -73,6 +81,7 @@ class PhoneAIService : Service() {
     // @Volatile gives visibility guarantees for the swap.
     @Volatile
     private var aiService: AiServiceProvider? = null
+    private val decisionRouter = DecisionRouter()
     
     // Speech recognition service (may differ from chat service)
     @Volatile
@@ -90,6 +99,8 @@ class PhoneAIService : Service() {
     
     // CXR-M SDK Manager (for Rokid glasses connection and photo capture)
     private var cxrManager: CxrMobileManager? = null
+    private var pendingCxrInit: kotlinx.coroutines.Job? = null
+    private var companionCamera = false
     
     // Gemini Live session (real-time bidirectional voice)
     private var liveSession: GeminiLiveSession? = null
@@ -185,7 +196,20 @@ class PhoneAIService : Service() {
             
             // Monitor settings changes
             serviceScope.launch {
-                settingsRepository.settingsFlow.collect { newSettings ->
+                settingsRepository.settingsFlow.distinctUntilChangedBy { it.copy(
+                    glassesDisplayConfig = GlassesDisplayConfig(),
+                    glassesDisplayMetrics = null,
+                    decisionBackend = com.example.rokidphone.data.DecisionBackend.JEV,
+                    decisionGeminiModel = GEMINI_FLASH_MODEL,
+                    decisionOpenaiModel = "gpt-6-luna",
+                    decisionRoutingEnabled = false,
+                    jevApiKey = "",
+                    layaBaseUrl = "",
+                    layaApiKey = "",
+                    fastRoutingModel = null,
+                    balancedRoutingModel = null,
+                    qualityRoutingModel = null
+                ) }.collect { newSettings ->
                     Log.d(TAG, "Settings changed, updating services...")
                     val validatedNewSettings = validateAndCorrectSettings(newSettings)
                     // Build replacements first, then swap and release the old STT
@@ -236,12 +260,26 @@ class PhoneAIService : Service() {
                         // Update notification
                         updateNotification(state)
                         
-                        // Initialize CXR Bluetooth when SPP connected
+                        pendingCxrInit?.cancel()
+                        companionCamera = false
+                        // Negotiate the companion transport before initializing the legacy CXR path.
                         if (state == BluetoothConnectionState.CONNECTED) {
-                            bluetoothManager?.connectedDevice?.let { device ->
-                                Log.d(TAG, "Initializing CXR Bluetooth with device: ${device.name}")
-                                cxrManager?.initBluetooth(device)
+                            val applied = SettingsRepository.getInstance(this@PhoneAIService)
+                                .getSettings().glassesDisplayConfig.normalized()
+                            bluetoothManager?.sendMessage(Message(
+                                type = MessageType.SYSTEM_CONFIG,
+                                payload = applied.toJson()
+                            ))
+                            bluetoothManager?.sendMessage(Message(type = MessageType.DISPLAY_METRICS))
+                            val device = bluetoothManager?.connectedDevice
+                            pendingCxrInit = serviceScope.launch {
+                                kotlinx.coroutines.delay(3000)
+                                if (!companionCamera && device != null &&
+                                    bluetoothManager?.connectionState?.value == BluetoothConnectionState.CONNECTED &&
+                                    bluetoothManager?.connectedDevice == device) cxrManager?.initBluetooth(device)
                             }
+                        } else {
+                            cxrManager?.disconnectBluetooth()
                         }
                     }
                 } catch (e: Exception) {
@@ -433,7 +471,7 @@ class PhoneAIService : Service() {
                     Log.d(TAG, "CXR: AI key pressed on glasses")
                     // Trigger photo capture when AI key is pressed
                     serviceScope.launch {
-                        capturePhotoFromGlasses()
+                        if (companionCamera) requestGlassesToCapturePhoto() else capturePhotoFromGlasses()
                     }
                 },
                 onKeyUp = {
@@ -557,6 +595,18 @@ class PhoneAIService : Service() {
         Log.d(TAG, "Received message from glasses: ${message.type}")
         
         when (message.type) {
+            MessageType.DISPLAY_METRICS -> {
+                val metrics = com.example.rokidcommon.protocol.GlassesDisplayMetrics.fromJson(message.payload)
+                if (metrics != null) {
+                    SettingsRepository.getInstance(this).updateGlassesDisplayMetrics(metrics)
+                    if (org.json.JSONObject(message.payload.orEmpty()).optString("cameraTransport") == "spp") {
+                        companionCamera = true
+                        pendingCxrInit?.cancel()
+                        cxrManager?.disconnectBluetooth()
+                        Log.d(TAG, "Companion camera transport: SPP; display ${metrics.widthPx}x${metrics.heightPx}")
+                    }
+                }
+            }
             MessageType.VOICE_END -> {
                 // Voice input ended, audio data is in binaryData
                 message.binaryData?.let { audioData ->
@@ -706,15 +756,18 @@ class PhoneAIService : Service() {
             ))
             
             // Use AI service to analyze the image with localized prompt
-            val analysisResult = aiService?.analyzeImage(
+            val imageService = aiService ?: throw IllegalStateException(getString(R.string.ai_analysis_unavailable))
+            val analysisResult = imageService.analyzeImage(
                 photoBytes, 
                 getString(R.string.image_analysis_prompt)
-            ) ?: getString(R.string.ai_analysis_unavailable)
+            )
+            val analysisError = (imageService as? com.example.rokidphone.service.ai.ChatErrorSource)?.lastChatError
+            check(analysisError == null && analysisResult.isNotBlank()) { analysisError ?: "empty_response" }
             
             // Clean markdown for glasses display
             val cleanedResult = cleanMarkdown(analysisResult)
             
-            Log.d(TAG, "Photo analysis result: $cleanedResult")
+            Log.d(TAG, "Photo analysis completed (${cleanedResult.length} characters)")
             
             // Update photo data with analysis result
             photoData.analysisResult = cleanedResult
@@ -734,14 +787,17 @@ class PhoneAIService : Service() {
             // TTS voice playback
             ttsService?.speak(cleanedResult) { }
             
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to analyze photo", e)
-            bluetoothManager?.sendMessage(Message.aiError(
-                getString(R.string.photo_analysis_failed, e.message ?: "")
-            ))
+            val error = getString(R.string.photo_analysis_failed,
+                com.example.rokidphone.ai.catalog.ProviderApiException.sanitize(e.message))
+            Log.w(TAG, "Photo analysis failed: ${e.javaClass.simpleName}")
+            bluetoothManager?.sendMessage(Message.aiError(error))
+            ServiceBridge.emitConversation(Message(type = MessageType.AI_ERROR, payload = error))
         }
     }
-    
+
     /**
      * Process voice data received from glasses
      */
@@ -819,7 +875,14 @@ class PhoneAIService : Service() {
             
             // 5. AI conversation (using main AI service)
             Log.d(TAG, "Getting AI response...")
-            val rawAiResponse = aiService?.chat(transcript) ?: "Sorry, an error occurred while processing."
+            val routedReply = replyToTranscript(transcript, settings)
+            if (routedReply.error != null) {
+                val errorText = com.example.rokidphone.data.RoutingReason.failure(this, routedReply.error)
+                bluetoothManager?.sendMessage(Message.aiError(errorText))
+                ServiceBridge.emitConversation(Message(type = MessageType.AI_ERROR, payload = errorText))
+                return
+            }
+            val rawAiResponse = routedReply.text
             
             // Clean markdown formatting for better display on glasses
             val aiResponse = cleanMarkdown(rawAiResponse)
@@ -835,7 +898,7 @@ class PhoneAIService : Service() {
             ))
             
             // 6.1 Save AI response to database for history
-            saveAssistantMessage(aiResponse, settings.aiModelId)
+            saveAssistantMessage(aiResponse, routedReply.modelId, if (settings.decisionRoutingEnabled) routedReply.reason else null)
             
             // 6.2 Save glasses recording to database (with transcript and AI response)
             try {
@@ -843,8 +906,8 @@ class PhoneAIService : Service() {
                     audioData = audioData,
                     transcript = transcript,
                     aiResponse = aiResponse,
-                    providerId = settings.aiProvider.name,
-                    modelId = settings.aiModelId,
+                    providerId = routedReply.provider.name,
+                    modelId = routedReply.modelId,
                     recordingId = pendingGlassesRecordingId
                 )
                 pendingGlassesRecordingId = null
@@ -915,7 +978,7 @@ class PhoneAIService : Service() {
         liveSession = GeminiLiveSession(
             context = this,
             apiKey = apiKey,
-            modelId = settings.aiModelId.ifBlank { "gemini-2.5-flash-preview-native-audio-dialog" },
+            modelId = settings.aiModelId.ifBlank { "gemini-3.8-live" },
             systemPrompt = buildSystemPromptWithLanguage(settings.systemPrompt, settings.responseLanguage)
         )
         
@@ -1095,7 +1158,12 @@ class PhoneAIService : Service() {
             
             // 4. AI conversation
             Log.d(TAG, "Getting AI response for phone recording...")
-            val rawAiResponse = aiService?.chat(transcript) ?: getString(R.string.ai_analysis_unavailable)
+            val routedReply = replyToTranscript(transcript, settings)
+            if (routedReply.error != null) {
+                notifyProcessingError(recordingId, com.example.rokidphone.data.RoutingReason.failure(this, routedReply.error))
+                return
+            }
+            val rawAiResponse = routedReply.text
             val aiResponse = cleanMarkdown(rawAiResponse)
             
             Log.d(TAG, "Phone recording AI response completed (${aiResponse.length} characters)")
@@ -1104,8 +1172,8 @@ class PhoneAIService : Service() {
             recordingRepository?.updateAiResponse(
                 id = recordingId,
                 response = aiResponse,
-                providerId = settings.aiProvider.name,
-                modelId = settings.aiModelId
+                providerId = routedReply.provider.name,
+                modelId = routedReply.modelId
             )
             
             // 6. Send result to glasses (if enabled) and phone UI
@@ -1125,7 +1193,7 @@ class PhoneAIService : Service() {
             
             // 7. Save to conversation history
             saveUserMessage(transcript)
-            saveAssistantMessage(aiResponse, settings.aiModelId)
+            saveAssistantMessage(aiResponse, routedReply.modelId, if (settings.decisionRoutingEnabled) routedReply.reason else null)
             
             // 8. TTS playback (optional)
             ttsService?.speak(aiResponse) { }
@@ -1329,14 +1397,29 @@ class PhoneAIService : Service() {
     /**
      * Save AI response to database
      */
-    private suspend fun saveAssistantMessage(content: String, modelId: String?) {
+    private suspend fun replyToTranscript(transcript: String, settings: ApiSettings): RoutedReply {
+        val history = currentVoiceConversationId?.let { id ->
+            conversationRepository?.getMessagesForConversationSync(id)
+                ?.let { messages ->
+                    if (messages.lastOrNull()?.role == MessageRole.USER &&
+                        messages.lastOrNull()?.content == transcript) messages.dropLast(1) else messages
+                }
+                ?.filter { !it.hasImage && it.role != MessageRole.SYSTEM }
+                ?.takeLast(10)
+                ?.map { (if (it.role == MessageRole.ASSISTANT) "assistant" else "user") to it.content }
+        }.orEmpty()
+        return decisionRouter.reply(transcript, settings, history, aiService)
+    }
+
+    private suspend fun saveAssistantMessage(content: String, modelId: String?, routingReason: String? = null) {
         val settings = SettingsRepository.getInstance(this).getSettings()
         ensureVoiceConversationSession(settings)?.let { conversationId ->
             try {
                 conversationRepository?.addAssistantMessage(
                     conversationId = conversationId,
                     content = content,
-                    modelId = modelId
+                    modelId = modelId,
+                    routingReason = routingReason
                 )
                 Log.d(TAG, "Saved assistant message to conversation: $conversationId")
             } catch (e: CancellationException) {
@@ -1442,7 +1525,7 @@ class PhoneAIService : Service() {
                 Log.d(TAG, "No API key for ${settings.aiProvider}, using development fallback")
                 settings.copy(
                     aiProvider = AiProvider.GEMINI,
-                    aiModelId = "gemini-2.5-flash",
+                    aiModelId = GEMINI_FLASH_MODEL,
                     geminiApiKey = BuildConfig.GEMINI_API_KEY
                 )
             } else {
@@ -1496,7 +1579,7 @@ class PhoneAIService : Service() {
             Log.d(TAG, "No STT provider configured, using fallback Gemini")
             return AiServiceFactory.createService(settings.copy(
                 aiProvider = AiProvider.GEMINI,
-                aiModelId = "gemini-2.5-flash",
+                aiModelId = GEMINI_FLASH_MODEL,
                 geminiApiKey = BuildConfig.GEMINI_API_KEY
             ))
         }
@@ -1514,9 +1597,9 @@ class PhoneAIService : Service() {
      */
     private fun getSttFallbackModelId(provider: AiProvider): String? {
         return when (provider) {
-            AiProvider.GEMINI -> "gemini-2.5-flash"
+            AiProvider.GEMINI -> GEMINI_FLASH_MODEL
             AiProvider.OPENAI -> "gpt-5-mini"
-            AiProvider.GROQ -> "llama-3.3-70b-versatile"
+            AiProvider.GROQ -> "openai/gpt-oss-120b"
             else -> AvailableModels.getModelsForProvider(provider).firstOrNull()?.id
         }
     }

@@ -37,7 +37,9 @@ class BaiduService(
     private val topP: Float = 1.0f,
     internal val tokenUrl: String = DEFAULT_TOKEN_URL,
     internal val baseChatUrl: String = DEFAULT_BASE_CHAT_URL
-) : AiServiceProvider {
+) : AiServiceProvider, ChatErrorSource {
+    override var lastChatError: String? = null
+        private set
     
     companion object {
         private const val TAG = "BaiduService"
@@ -147,12 +149,14 @@ class BaiduService(
      */
     override suspend fun chat(userMessage: String): String {
         return withContext(Dispatchers.IO) {
+            lastChatError = null
             Log.d(TAG, "Chat request: $userMessage")
             
             // Get access token
             val accessToken = getAccessToken()
             if (accessToken == null) {
                 return@withContext "Authentication failed. Please check your Baidu API Key and Secret Key."
+                    .also { lastChatError = it }
             }
             
             // Build messages array (Baidu format is slightly different)
@@ -210,9 +214,10 @@ class BaiduService(
                                     cachedToken = null
                                     tokenExpiry = 0L
                                 }
-                                return@withContext "Token expired. Please try again."
+                                return@withContext "Token expired. Please try again.".also { lastChatError = it }
                             }
                             
+                            lastChatError = com.example.rokidphone.ai.catalog.ProviderApiException.sanitize(errorMsg)
                             return@withContext "Baidu API error: $errorMsg"
                         }
                         
@@ -224,14 +229,20 @@ class BaiduService(
                             Log.d(TAG, "Baidu response: $result")
                             result
                         } else {
+                            lastChatError = "empty_response"
                             "Sorry, I couldn't generate a response."
                         }
                     } else {
-                        Log.e(TAG, "API error: ${response.code}, body: $responseBody")
+                        lastChatError = com.example.rokidphone.ai.catalog.ProviderApiException
+                            .fromHttpStatus(response.code, responseBody).message
+                        Log.e(TAG, "API error: ${response.code}")
                         "Sorry, Baidu service is temporarily unavailable."
                     }
                 }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
+                lastChatError = com.example.rokidphone.ai.catalog.ProviderApiException.sanitize(e.message)
                 Log.e(TAG, "Chat error", e)
                 "Sorry, an error occurred: ${e.message}"
             }

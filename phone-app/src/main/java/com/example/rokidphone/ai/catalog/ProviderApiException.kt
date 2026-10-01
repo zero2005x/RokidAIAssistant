@@ -51,6 +51,7 @@ class ProviderApiException(
             Regex("sk-[A-Za-z0-9._\\-]+"),
             // Google API keys
             Regex("AIza[0-9A-Za-z_\\-]+"),
+            Regex("AQ\\.[0-9A-Za-z._\\-]+"),
             // JWTs (header.payload.signature)
             Regex("eyJ[A-Za-z0-9_\\-]+\\.[A-Za-z0-9_\\-]+\\.[A-Za-z0-9_\\-]*"),
             // Match query credential names; this is a redaction pattern, not a credential.

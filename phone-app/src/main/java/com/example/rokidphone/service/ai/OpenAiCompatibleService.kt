@@ -287,9 +287,10 @@ open class OpenAiCompatibleService(
         writer.write("Content-Disposition: form-data; name=\"model\"\r\n\r\n")
         writer.write("$transcriptionModel\r\n")
 
-        // language field
+        // Match the official Python SDK's bracket serialization for multipart arrays.
+        val languageField = if (transcriptionModel == "gpt-transcribe") "languages[]" else "language"
         writer.write("--$boundary\r\n")
-        writer.write("Content-Disposition: form-data; name=\"language\"\r\n\r\n")
+        writer.write("Content-Disposition: form-data; name=\"$languageField\"\r\n\r\n")
         writer.write("$normalizedLanguageCode\r\n")
 
         writer.write("--$boundary--\r\n")
@@ -396,16 +397,19 @@ open class OpenAiCompatibleService(
                         Log.d(TAG, "Response received (${finalText.length} chars)")
                         finalText
                     } else {
+                        lastChatError = "empty_response"
                         "Sorry, I couldn't generate a response."
                     }
                 } else {
                     val error = ProviderApiException.fromHttpStatus(response.code, responseBody)
                     Log.e(TAG, "API error: ${error.kind} (${error.httpStatus})")
+                    lastChatError = error.message
                     error.message ?: "Sorry, the service is temporarily unavailable."
                 }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Chat error", e)
+            lastChatError = ProviderApiException.sanitize(e.message)
             "Sorry, an error occurred: ${ProviderApiException.sanitize(e.message)}"
         }
     }
@@ -479,18 +483,21 @@ open class OpenAiCompatibleService(
                             addToHistory(userMessage, text)
                             text
                         } else {
+                            lastChatError = "empty_response"
                             "Sorry, I couldn't generate a response."
                         }
                     }
                     else -> {
                         val error = ProviderApiException.fromHttpStatus(response.code, responseBody)
                         Log.e(TAG, "Responses API error: ${error.kind}")
+                        lastChatError = error.message
                         error.message
                     }
                 }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Responses API error", e)
+            lastChatError = ProviderApiException.sanitize(e.message)
             "Sorry, an error occurred: ${ProviderApiException.sanitize(e.message)}"
         }
     }
@@ -737,13 +744,16 @@ open class OpenAiCompatibleService(
 
     override suspend fun analyzeImage(imageData: ByteArray, prompt: String): String {
         return withContext(Dispatchers.IO) {
+            lastChatError = null
             if (!effectiveCapabilities.imageInput || policy.imageContentFormat == ImageContentFormat.NONE) {
-                return@withContext "This provider does not support image analysis."
+                lastChatError = "This provider does not support image analysis."
+                return@withContext lastChatError!!
             }
 
             val prepared = try {
                 ImagePayloadHelper.prepare(imageData)
             } catch (e: ProviderImageException) {
+                lastChatError = ProviderApiException.sanitize(e.message)
                 return@withContext "Image analysis error: ${e.message}"
             }
 
@@ -804,7 +814,10 @@ open class OpenAiCompatibleService(
             client.newCall(request).execute().use { response ->
                 extractVisionResponse(response)
             }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
+            lastChatError = ProviderApiException.sanitize(e.message)
             Log.e(TAG, "Vision error", e)
             "Image analysis error: ${ProviderApiException.sanitize(e.message)}"
         }
@@ -837,15 +850,22 @@ open class OpenAiCompatibleService(
                 val responseBody = response.body?.string()
                 when {
                     response.code == 400 || response.code == 404 || response.code == 422 -> null
-                    response.isSuccessful && responseBody != null ->
-                        extractResponsesText(JSONObject(responseBody)) ?: "Unable to analyze image."
+                    response.isSuccessful && responseBody != null -> {
+                        val text = extractResponsesText(JSONObject(responseBody))
+                        if (text.isNullOrBlank()) lastChatError = "empty_response"
+                        text ?: "Unable to analyze image."
+                    }
                     else -> {
+                        lastChatError = ProviderApiException.fromHttpStatus(response.code, responseBody).message
                         Log.e(TAG, "Responses vision error: ${response.code}")
                         "Image analysis failed."
                     }
                 }
             }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
+            lastChatError = ProviderApiException.sanitize(e.message)
             "Image analysis error: ${ProviderApiException.sanitize(e.message)}"
         }
     }
@@ -853,14 +873,16 @@ open class OpenAiCompatibleService(
     private fun extractVisionResponse(response: okhttp3.Response): String {
         val responseBody = response.body?.string()
         if (!response.isSuccessful || responseBody == null) {
+            lastChatError = ProviderApiException.fromHttpStatus(response.code, responseBody).message
             Log.e(TAG, "Vision API error: ${response.code}")
             return "Image analysis failed."
         }
         val json = JSONObject(responseBody)
         val choices = json.optJSONArray("choices")
         val messageObj = choices?.optJSONObject(0)?.optJSONObject("message")
-        return ChatContentParser.extractText(messageObj?.opt("content"))
-            ?: "Unable to analyze image."
+        val text = ChatContentParser.extractText(messageObj?.opt("content"))
+        lastChatError = if (text.isNullOrBlank()) "empty_response" else null
+        return text ?: "Unable to analyze image."
     }
 
     // ==================== Connection test ====================
