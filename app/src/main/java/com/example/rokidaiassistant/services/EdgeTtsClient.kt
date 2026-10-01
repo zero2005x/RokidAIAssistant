@@ -1,6 +1,7 @@
 package com.example.rokidaiassistant.services
 
 import android.util.Log
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ensureActive
@@ -31,8 +32,11 @@ import kotlin.coroutines.coroutineContext
  * - zh-TW-HsiaoChenNeural (Taiwan female)
  * - zh-TW-YunJheNeural (Taiwan male)
  */
-class EdgeTtsClient {
-    
+class EdgeTtsClient(
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val webSocketFactory: WebSocket.Factory = defaultHttpClient
+) {
+
     companion object {
         private const val TAG = "EdgeTtsClient"
         
@@ -52,14 +56,19 @@ class EdgeTtsClient {
         
         // Timeout duration
         private const val TIMEOUT_SECONDS = 30L
+
+        // One shared client: every instance otherwise builds its own connection
+        // pool and dispatcher threads. Tests substitute the factory instead.
+        private val defaultHttpClient: OkHttpClient by lazy {
+            OkHttpClient.Builder()
+                .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .build()
+        }
     }
-    
-    private val httpClient = OkHttpClient.Builder()
-        .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        .build()
-    
+
+
     /**
      * Synthesize speech
      * 
@@ -75,7 +84,7 @@ class EdgeTtsClient {
         rate: String = "+0%",
         pitch: String = "+0Hz",
         volume: String = "+0%"
-    ): Result<ByteArray> = withContext(Dispatchers.IO) {
+    ): Result<ByteArray> = withContext(ioDispatcher) {
         var activeWebSocket: WebSocket? = null
         try {
             Log.d(TAG, "Starting speech synthesis: voice=$voice, text=${text.take(50)}...")
@@ -95,7 +104,7 @@ class EdgeTtsClient {
                 .header("Origin", "chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold")
                 .build()
             
-            val webSocket = httpClient.newWebSocket(request, object : WebSocketListener() {
+            val webSocket = webSocketFactory.newWebSocket(request, object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) {
                     Log.d(TAG, "WebSocket connection successful")
                     
@@ -293,7 +302,7 @@ class EdgeTtsClient {
                 .header("User-Agent", USER_AGENT)
                 .build()
             
-            val response = httpClient.newCall(request).execute()
+            val response = defaultHttpClient.newCall(request).execute()
             val body = response.body?.string()
             
             if (!response.isSuccessful || body.isNullOrEmpty()) {

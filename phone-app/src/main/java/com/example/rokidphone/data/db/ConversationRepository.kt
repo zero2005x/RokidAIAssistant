@@ -261,15 +261,19 @@ class ConversationRepository private constructor(context: Context) {
         )
         
         // Insert + counter bump must be atomic, otherwise messageCount drifts permanently.
-        database.withTransaction {
-            messageDao.insertMessage(entity)
+        // Reading the last position inside the same transaction is what makes seq
+        // monotonic: two messages written in the same millisecond still get 1 and 2.
+        val stored = database.withTransaction {
+            val positioned = entity.copy(seq = messageDao.getMaxSeq(conversationId) + 1)
+            messageDao.insertMessage(positioned)
             conversationDao.incrementMessageCount(conversationId)
+            positioned
         }
-        
+
         // Never log message content (PII leak on release builds); log id/length only.
         Log.d(TAG, "Added message to conversation $conversationId (len=${content.length})")
-        
-        entity.toMessage()
+
+        stored.toMessage()
     }
     
     /**

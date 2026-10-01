@@ -29,6 +29,51 @@ class SettingsRepository(private val context: Context) {
         private const val KEY_RESPONSE_LANGUAGE = "response_language"
         private const val KEY_SYSTEM_PROMPT = "system_prompt"
         
+        // Keys for the per-provider speech-to-text credentials (stored encrypted).
+        // These are edited on the settings screen and must survive a restart like
+        // every other credential; before they were persisted the user had to retype
+        // them on every launch.
+        private const val KEY_STT_DEEPGRAM_API_KEY = "stt_deepgram_api_key"
+        private const val KEY_STT_ASSEMBLYAI_API_KEY = "stt_assemblyai_api_key"
+        private const val KEY_STT_GCP_PROJECT_ID = "stt_gcp_project_id"
+        private const val KEY_STT_GCP_API_KEY = "stt_gcp_api_key"
+        private const val KEY_STT_GCP_SERVICE_ACCOUNT_JSON = "stt_gcp_service_account_json"
+        private const val KEY_STT_GCP_USE_SERVICE_ACCOUNT = "stt_gcp_use_service_account"
+        private const val KEY_STT_AZURE_SPEECH_KEY = "stt_azure_speech_key"
+        private const val KEY_STT_AZURE_SPEECH_REGION = "stt_azure_speech_region"
+        private const val KEY_STT_AWS_ACCESS_KEY_ID = "stt_aws_access_key_id"
+        private const val KEY_STT_AWS_SECRET_ACCESS_KEY = "stt_aws_secret_access_key"
+        private const val KEY_STT_AWS_REGION = "stt_aws_region"
+        private const val KEY_STT_IBM_API_KEY = "stt_ibm_api_key"
+        private const val KEY_STT_IBM_SERVICE_URL = "stt_ibm_service_url"
+        private const val KEY_STT_IFLYTEK_APP_ID = "stt_iflytek_app_id"
+        private const val KEY_STT_IFLYTEK_API_KEY = "stt_iflytek_api_key"
+        private const val KEY_STT_IFLYTEK_API_SECRET = "stt_iflytek_api_secret"
+        private const val KEY_STT_HUAWEI_AK = "stt_huawei_ak"
+        private const val KEY_STT_HUAWEI_SK = "stt_huawei_sk"
+        private const val KEY_STT_HUAWEI_REGION = "stt_huawei_region"
+        private const val KEY_STT_HUAWEI_PROJECT_ID = "stt_huawei_project_id"
+        private const val KEY_STT_VOLCENGINE_AK = "stt_volcengine_ak"
+        private const val KEY_STT_VOLCENGINE_SK = "stt_volcengine_sk"
+        private const val KEY_STT_VOLCENGINE_APP_ID = "stt_volcengine_app_id"
+        private const val KEY_STT_ALIYUN_ACCESS_KEY_ID = "stt_aliyun_access_key_id"
+        private const val KEY_STT_ALIYUN_ACCESS_KEY_SECRET = "stt_aliyun_access_key_secret"
+        private const val KEY_STT_ALIYUN_APP_KEY = "stt_aliyun_app_key"
+        private const val KEY_STT_TENCENT_SECRET_ID = "stt_tencent_secret_id"
+        private const val KEY_STT_TENCENT_SECRET_KEY = "stt_tencent_secret_key"
+        private const val KEY_STT_TENCENT_APP_ID = "stt_tencent_app_id"
+        private const val KEY_STT_TENCENT_ENGINE_MODEL_TYPE = "stt_tencent_engine_model_type"
+        private const val KEY_STT_BAIDU_ASR_API_KEY = "stt_baidu_asr_api_key"
+        private const val KEY_STT_BAIDU_ASR_SECRET_KEY = "stt_baidu_asr_secret_key"
+        private const val KEY_STT_REVAI_ACCESS_TOKEN = "stt_revai_access_token"
+        private const val KEY_STT_SPEECHMATICS_API_KEY = "stt_speechmatics_api_key"
+        private const val KEY_STT_OTTERAI_API_KEY = "stt_otterai_api_key"
+
+        // Defaults that are not the empty string.
+        private const val DEFAULT_AWS_REGION = "us-east-1"
+        private const val DEFAULT_HUAWEI_REGION = "cn-north-4"
+        private const val DEFAULT_TENCENT_ENGINE_MODEL_TYPE = "16k_zh"
+
         // Keys for API keys (stored encrypted)
         private const val KEY_GEMINI_API_KEY = "gemini_api_key"
         private const val KEY_OPENAI_API_KEY = "openai_api_key"
@@ -162,6 +207,18 @@ class SettingsRepository(private val context: Context) {
     /**
      * Load settings
      */
+    /**
+     * Reads a string setting, falling back to [default] when it is absent.
+     *
+     * SharedPreferences.getString is declared nullable, so every call site would
+     * otherwise need its own elvis repeating the default. Thirty-odd copies of that
+     * is noise, and each one adds a null branch that cannot be taken: getString only
+     * returns null when the default itself is null. Keeping the fallback here means
+     * one branch to reason about instead of one per setting.
+     */
+    private fun SharedPreferences.string(key: String, default: String = ""): String =
+        getString(key, default) ?: default
+
     private fun loadSettings(): ApiSettings {
         // Get saved system prompt or use current locale's default
         val savedSystemPrompt = prefs.getString(KEY_SYSTEM_PROMPT, null)
@@ -252,6 +309,42 @@ class SettingsRepository(private val context: Context) {
             sttProvider = SttProvider.fromNameOrNull(
                 prefs.getString(KEY_STT_PROVIDER, SttProvider.GEMINI.name) ?: SttProvider.GEMINI.name
             ) ?: SttProvider.GEMINI,
+            deepgramApiKey = prefs.string(KEY_STT_DEEPGRAM_API_KEY, ""),
+            assemblyaiApiKey = prefs.string(KEY_STT_ASSEMBLYAI_API_KEY, ""),
+            gcpProjectId = prefs.string(KEY_STT_GCP_PROJECT_ID, ""),
+            gcpApiKey = prefs.string(KEY_STT_GCP_API_KEY, ""),
+            gcpServiceAccountJson = prefs.string(KEY_STT_GCP_SERVICE_ACCOUNT_JSON, ""),
+            gcpUseServiceAccount = prefs.getBoolean(KEY_STT_GCP_USE_SERVICE_ACCOUNT, false),
+            azureSpeechKey = prefs.string(KEY_STT_AZURE_SPEECH_KEY, ""),
+            azureSpeechRegion = prefs.string(KEY_STT_AZURE_SPEECH_REGION, ""),
+            awsAccessKeyId = prefs.string(KEY_STT_AWS_ACCESS_KEY_ID, ""),
+            awsSecretAccessKey = prefs.string(KEY_STT_AWS_SECRET_ACCESS_KEY, ""),
+            awsRegion = prefs.string(KEY_STT_AWS_REGION, DEFAULT_AWS_REGION),
+            ibmApiKey = prefs.string(KEY_STT_IBM_API_KEY, ""),
+            ibmServiceUrl = prefs.string(KEY_STT_IBM_SERVICE_URL, ""),
+            iflytekAppId = prefs.string(KEY_STT_IFLYTEK_APP_ID, ""),
+            iflytekApiKey = prefs.string(KEY_STT_IFLYTEK_API_KEY, ""),
+            iflytekApiSecret = prefs.string(KEY_STT_IFLYTEK_API_SECRET, ""),
+            huaweiAk = prefs.string(KEY_STT_HUAWEI_AK, ""),
+            huaweiSk = prefs.string(KEY_STT_HUAWEI_SK, ""),
+            huaweiRegion = prefs.string(KEY_STT_HUAWEI_REGION, DEFAULT_HUAWEI_REGION),
+            huaweiProjectId = prefs.string(KEY_STT_HUAWEI_PROJECT_ID, ""),
+            volcengineAk = prefs.string(KEY_STT_VOLCENGINE_AK, ""),
+            volcangineSk = prefs.string(KEY_STT_VOLCENGINE_SK, ""),
+            volcengineAppId = prefs.string(KEY_STT_VOLCENGINE_APP_ID, ""),
+            aliyunAccessKeyId = prefs.string(KEY_STT_ALIYUN_ACCESS_KEY_ID, ""),
+            aliyunAccessKeySecret = prefs.string(KEY_STT_ALIYUN_ACCESS_KEY_SECRET, ""),
+            aliyunAppKey = prefs.string(KEY_STT_ALIYUN_APP_KEY, ""),
+            tencentSecretId = prefs.string(KEY_STT_TENCENT_SECRET_ID, ""),
+            tencentSecretKey = prefs.string(KEY_STT_TENCENT_SECRET_KEY, ""),
+            tencentAppId = prefs.string(KEY_STT_TENCENT_APP_ID, ""),
+            tencentEngineModelType =
+                prefs.string(KEY_STT_TENCENT_ENGINE_MODEL_TYPE, DEFAULT_TENCENT_ENGINE_MODEL_TYPE),
+            baiduAsrApiKey = prefs.string(KEY_STT_BAIDU_ASR_API_KEY, ""),
+            baiduAsrSecretKey = prefs.string(KEY_STT_BAIDU_ASR_SECRET_KEY, ""),
+            revaiAccessToken = prefs.string(KEY_STT_REVAI_ACCESS_TOKEN, ""),
+            speechmaticsApiKey = prefs.string(KEY_STT_SPEECHMATICS_API_KEY, ""),
+            otteraiApiKey = prefs.string(KEY_STT_OTTERAI_API_KEY, ""),
             // Use device locale (e.g. "ko-KR") as the first-run default so new users get
             // the correct TTS and response language automatically.
             // Existing users who already have a saved value keep their preference unchanged.
@@ -420,6 +513,41 @@ class SettingsRepository(private val context: Context) {
             putString(KEY_CUSTOM_BASE_URL, settings.customBaseUrl)
             putString(KEY_CUSTOM_MODEL_NAME, settings.customModelName)
             putString(KEY_STT_PROVIDER, settings.sttProvider.name)
+            putString(KEY_STT_DEEPGRAM_API_KEY, settings.deepgramApiKey)
+            putString(KEY_STT_ASSEMBLYAI_API_KEY, settings.assemblyaiApiKey)
+            putString(KEY_STT_GCP_PROJECT_ID, settings.gcpProjectId)
+            putString(KEY_STT_GCP_API_KEY, settings.gcpApiKey)
+            putString(KEY_STT_GCP_SERVICE_ACCOUNT_JSON, settings.gcpServiceAccountJson)
+            putBoolean(KEY_STT_GCP_USE_SERVICE_ACCOUNT, settings.gcpUseServiceAccount)
+            putString(KEY_STT_AZURE_SPEECH_KEY, settings.azureSpeechKey)
+            putString(KEY_STT_AZURE_SPEECH_REGION, settings.azureSpeechRegion)
+            putString(KEY_STT_AWS_ACCESS_KEY_ID, settings.awsAccessKeyId)
+            putString(KEY_STT_AWS_SECRET_ACCESS_KEY, settings.awsSecretAccessKey)
+            putString(KEY_STT_AWS_REGION, settings.awsRegion)
+            putString(KEY_STT_IBM_API_KEY, settings.ibmApiKey)
+            putString(KEY_STT_IBM_SERVICE_URL, settings.ibmServiceUrl)
+            putString(KEY_STT_IFLYTEK_APP_ID, settings.iflytekAppId)
+            putString(KEY_STT_IFLYTEK_API_KEY, settings.iflytekApiKey)
+            putString(KEY_STT_IFLYTEK_API_SECRET, settings.iflytekApiSecret)
+            putString(KEY_STT_HUAWEI_AK, settings.huaweiAk)
+            putString(KEY_STT_HUAWEI_SK, settings.huaweiSk)
+            putString(KEY_STT_HUAWEI_REGION, settings.huaweiRegion)
+            putString(KEY_STT_HUAWEI_PROJECT_ID, settings.huaweiProjectId)
+            putString(KEY_STT_VOLCENGINE_AK, settings.volcengineAk)
+            putString(KEY_STT_VOLCENGINE_SK, settings.volcangineSk)
+            putString(KEY_STT_VOLCENGINE_APP_ID, settings.volcengineAppId)
+            putString(KEY_STT_ALIYUN_ACCESS_KEY_ID, settings.aliyunAccessKeyId)
+            putString(KEY_STT_ALIYUN_ACCESS_KEY_SECRET, settings.aliyunAccessKeySecret)
+            putString(KEY_STT_ALIYUN_APP_KEY, settings.aliyunAppKey)
+            putString(KEY_STT_TENCENT_SECRET_ID, settings.tencentSecretId)
+            putString(KEY_STT_TENCENT_SECRET_KEY, settings.tencentSecretKey)
+            putString(KEY_STT_TENCENT_APP_ID, settings.tencentAppId)
+            putString(KEY_STT_TENCENT_ENGINE_MODEL_TYPE, settings.tencentEngineModelType)
+            putString(KEY_STT_BAIDU_ASR_API_KEY, settings.baiduAsrApiKey)
+            putString(KEY_STT_BAIDU_ASR_SECRET_KEY, settings.baiduAsrSecretKey)
+            putString(KEY_STT_REVAI_ACCESS_TOKEN, settings.revaiAccessToken)
+            putString(KEY_STT_SPEECHMATICS_API_KEY, settings.speechmaticsApiKey)
+            putString(KEY_STT_OTTERAI_API_KEY, settings.otteraiApiKey)
             putString(KEY_SPEECH_LANGUAGE, settings.speechLanguage)
             putString(KEY_RESPONSE_LANGUAGE, settings.responseLanguage)
             putString(KEY_SYSTEM_PROMPT, settings.systemPrompt)

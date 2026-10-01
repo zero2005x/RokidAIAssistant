@@ -24,7 +24,8 @@ import kotlin.coroutines.coroutineContext
  * a module dependency on `app`.
  */
 class EdgeTtsClient(
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val webSocketFactory: WebSocket.Factory = sharedHttpClient
 ) {
 
     companion object {
@@ -65,9 +66,6 @@ class EdgeTtsClient(
         }
     }
 
-    private val httpClient: OkHttpClient
-        get() = sharedHttpClient
-
     /**
      * Synthesize speech.
      *
@@ -101,7 +99,7 @@ class EdgeTtsClient(
                 .header("Origin", "chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold")
                 .build()
 
-            webSocket = httpClient.newWebSocket(
+            webSocket = webSocketFactory.newWebSocket(
                 request,
                 createWebSocketListener(requestId, text, voice, rate, pitch, volume, audioData, latch, errorRef, turnEndSeen)
             )

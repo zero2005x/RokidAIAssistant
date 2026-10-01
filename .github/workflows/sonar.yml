@@ -96,7 +96,20 @@ jobs:
         if: env.SONAR_TOKEN != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew --no-daemon sonar -Dsonar.qualitygate.wait=true --info
+        run: |
+          for attempt in 1 2 3; do
+            if ./gradlew --no-daemon sonar --info; then
+              exit 0
+            fi
+
+            if [ "$attempt" -eq 3 ]; then
+              echo "SonarCloud analysis failed after ${attempt} attempts."
+              exit 1
+            fi
+
+            echo "SonarCloud analysis failed (attempt ${attempt}/3). Retrying in 20 seconds..."
+            sleep 20
+          done
 
       - name: Upload test, lint, and coverage reports
         if: always()

@@ -26,26 +26,33 @@ import java.util.concurrent.TimeUnit
  * - PCM 16-bit
  * - 16kHz mono
  */
-class SpeechToTextService {
-    
+class SpeechToTextService(
+    /** Issues the transcription requests; substituted in tests so no call is made. */
+    private val httpClient: okhttp3.Call.Factory = defaultHttpClient
+) {
+
     companion object {
         private const val TAG = "SpeechToTextService"
-        
+
         // OpenAI Whisper API
         private const val WHISPER_API_URL = "https://api.openai.com/v1/audio/transcriptions"
-        
+
         // Google Speech-to-Text API
         private const val GOOGLE_STT_URL = "https://speech.googleapis.com/v1/speech:recognize"
-        
+
         // Timeout settings
         private const val TIMEOUT_SECONDS = 30L
+
+        // One shared client: a per-instance client leaks a connection pool and
+        // dispatcher threads for every service that is constructed.
+        private val defaultHttpClient: OkHttpClient by lazy {
+            OkHttpClient.Builder()
+                .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .build()
+        }
     }
-    
-    private val httpClient = OkHttpClient.Builder()
-        .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        .build()
     
     /**
      * Perform speech recognition using OpenAI Whisper API

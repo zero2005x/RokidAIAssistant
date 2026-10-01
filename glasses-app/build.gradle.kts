@@ -170,6 +170,7 @@ dependencies {
     testImplementation(libs.okhttp.mockwebserver)
     testImplementation(libs.robolectric)
     testImplementation(libs.truth)
+    testImplementation(libs.androidx.test.core)
 
     // Android Instrumented Test
     androidTestImplementation(libs.androidx.test.ext.junit)

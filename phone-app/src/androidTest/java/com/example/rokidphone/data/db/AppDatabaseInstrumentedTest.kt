@@ -50,19 +50,23 @@ class AppDatabaseInstrumentedTest {
         )
         conversationDao.insertConversation(conversation)
 
+        // These bypass the repository, which is what normally assigns seq, so set it
+        // here: conversations are ordered by seq rather than by created_at.
         val messageA = MessageEntity(
             id = "msg-1",
             conversationId = conversation.id,
             role = "user",
             content = "hello",
-            createdAt = 1L
+            createdAt = 1L,
+            seq = 1L
         )
         val messageB = MessageEntity(
             id = "msg-2",
             conversationId = conversation.id,
             role = "assistant",
             content = "hi",
-            createdAt = 2L
+            createdAt = 2L,
+            seq = 2L
         )
         messageDao.insertMessages(listOf(messageA, messageB))
 

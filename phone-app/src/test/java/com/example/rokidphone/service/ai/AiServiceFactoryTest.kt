@@ -124,6 +124,20 @@ class AiServiceFactoryTest {
     }
 
     @Test
+    fun `createService returns QianfanV2Service for BAIDU when qianfan credentials are configured`() {
+        val settings = fullyConfiguredSettings(AiProvider.BAIDU).copy(
+            baiduApiKey = "",
+            baiduSecretKey = "",
+            baiduQianfanApiKey = "qianfan-key"
+        )
+
+        val service = AiServiceFactory.createService(settings)
+
+        assertThat(service).isInstanceOf(QianfanV2Service::class.java)
+        assertThat(service.provider).isEqualTo(AiProvider.BAIDU)
+    }
+
+    @Test
     fun `createTestService returns DeepSeekService for DEEPSEEK provider`() {
         val service = AiServiceFactory.createTestService(fullyConfiguredSettings(AiProvider.DEEPSEEK))
         assertThat(service).isInstanceOf(DeepSeekService::class.java)
@@ -190,5 +204,36 @@ class AiServiceFactoryTest {
         // 測試：裝置端 provider 沒有可測試的雲端連線端點
         val service = AiServiceFactory.createTestService(fullyConfiguredSettings(AiProvider.LOCAL_GEMMA))
         assertThat(service).isNull()
+    }
+
+    @Test
+    fun `createBaiduTestService only returns legacy Baidu test services`() {
+        val legacy = fullyConfiguredSettings(AiProvider.BAIDU).copy(
+            baiduUseLegacyAuth = true,
+            baiduQianfanApiKey = ""
+        )
+        val qianfan = fullyConfiguredSettings(AiProvider.BAIDU).copy(
+            baiduApiKey = "",
+            baiduSecretKey = "",
+            baiduQianfanApiKey = "qianfan-key"
+        )
+
+        assertThat(AiServiceFactory.createBaiduTestService(legacy))
+            .isInstanceOf(BaiduService::class.java)
+        assertThat(AiServiceFactory.createBaiduTestService(qianfan)).isNull()
+        assertThat(AiServiceFactory.createBaiduTestService(fullyConfiguredSettings(AiProvider.OPENAI))).isNull()
+    }
+
+    @Test
+    fun `createSpeechService only supports Gemini OpenAI and Groq with non blank keys`() {
+        assertThat(AiServiceFactory.createSpeechService(AiProvider.GEMINI, "")).isNull()
+        assertThat(AiServiceFactory.createSpeechService(AiProvider.ANTHROPIC, "k")).isNull()
+
+        assertThat(AiServiceFactory.createSpeechService(AiProvider.GEMINI, "g"))
+            .isInstanceOf(GeminiService::class.java)
+        assertThat(AiServiceFactory.createSpeechService(AiProvider.OPENAI, "o"))
+            .isInstanceOf(OpenAiCompatibleService::class.java)
+        assertThat(AiServiceFactory.createSpeechService(AiProvider.GROQ, "q"))
+            .isInstanceOf(OpenAiCompatibleService::class.java)
     }
 }

@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.Flow
         MessageEntity::class,
         RecordingEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 @TypeConverters(Converters::class, RecordingConverters::class)
@@ -38,7 +38,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     DATABASE_NAME
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .build()
                     .also { instance = it }
             }
@@ -48,6 +48,32 @@ abstract class AppDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
                     """CREATE TABLE IF NOT EXISTS `recordings` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `file_path` TEXT NOT NULL, `source` TEXT NOT NULL, `status` TEXT NOT NULL, `duration_ms` INTEGER NOT NULL, `file_size_bytes` INTEGER NOT NULL, `sample_rate` INTEGER NOT NULL, `channels` INTEGER NOT NULL, `transcript` TEXT, `ai_response` TEXT, `provider_id` TEXT, `model_id` TEXT, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `transcribed_at` INTEGER, `analyzed_at` INTEGER, `error_message` TEXT, `is_favorite` INTEGER NOT NULL, `notes` TEXT, PRIMARY KEY(`id`))"""
+                )
+            }
+        }
+
+        /**
+         * Gives `messages` an explicit position so a conversation can be ordered
+         * without relying on created_at, which ties whenever two messages are written
+         * in the same millisecond.
+         *
+         * Existing rows are backfilled with the order the app was already showing
+         * them in (created_at, then id), so no conversation appears to reshuffle on
+         * upgrade; only future ties are fixed.
+         */
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `messages` ADD COLUMN `seq` INTEGER NOT NULL DEFAULT 0")
+                db.execSQL(
+                    """
+                    UPDATE `messages` SET `seq` = (
+                        SELECT COUNT(*) FROM `messages` AS older
+                        WHERE older.`conversation_id` = `messages`.`conversation_id`
+                          AND (older.`created_at` < `messages`.`created_at`
+                               OR (older.`created_at` = `messages`.`created_at`
+                                   AND older.`id` <= `messages`.`id`))
+                    )
+                    """.trimIndent()
                 )
             }
         }
@@ -152,7 +178,20 @@ data class MessageEntity(
     
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis(),
-    
+
+    /**
+     * Position of this message within its conversation, starting at 1.
+     *
+     * created_at alone cannot order messages: a question and a fast reply routinely
+     * land in the same millisecond, and the previous tiebreaker on the primary key
+     * ordered those by a random UUID, so the reply could render above the question.
+     * The repository assigns this inside the insert transaction.
+     */
+    // The default is declared so the column created by MIGRATION_2_3, which needs one
+    // for ALTER TABLE ADD COLUMN NOT NULL, matches the schema Room expects.
+    @ColumnInfo(name = "seq", defaultValue = "0")
+    val seq: Long = 0,
+
     @ColumnInfo(name = "token_count")
     val tokenCount: Int? = null,
     
@@ -197,7 +236,9 @@ interface ConversationDao {
     fun getConversationByIdFlow(id: String): Flow<ConversationEntity?>
     
     // Caller must escape '%', '_' and '\' in `query` before calling.
-    @Query("SELECT * FROM conversations WHERE title LIKE '%' || :query || '%' ESCAPE '\' ORDER BY updated_at DESC")
+    // The escape character must be written as "\\": in a Kotlin string "\'" is just an
+    // apostrophe, which would emit `ESCAPE ''` and make SQLite reject every search.
+    @Query("SELECT * FROM conversations WHERE title LIKE '%' || :query || '%' ESCAPE '\\' ORDER BY updated_at DESC")
     fun searchConversations(query: String): Flow<List<ConversationEntity>>
     
     @Upsert
@@ -243,21 +284,26 @@ interface ConversationDao {
 @Dao
 interface MessageDao {
     
-    // Tiebreaker on id: same-millisecond inserts (prompt + placeholder) must order deterministically.
-    @Query("SELECT * FROM messages WHERE conversation_id = :conversationId ORDER BY created_at ASC, id ASC")
+    // Ordered by seq, which the repository assigns per conversation on insert.
+    // created_at is not an ordering key: same-millisecond inserts are routine.
+    @Query("SELECT * FROM messages WHERE conversation_id = :conversationId ORDER BY seq ASC")
     fun getMessagesForConversation(conversationId: String): Flow<List<MessageEntity>>
 
-    @Query("SELECT * FROM messages WHERE conversation_id = :conversationId ORDER BY created_at ASC, id ASC")
+    @Query("SELECT * FROM messages WHERE conversation_id = :conversationId ORDER BY seq ASC")
     suspend fun getMessagesForConversationSync(conversationId: String): List<MessageEntity>
 
-    @Query("SELECT * FROM messages WHERE conversation_id = :conversationId ORDER BY created_at ASC, id ASC LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM messages WHERE conversation_id = :conversationId ORDER BY seq ASC LIMIT :limit OFFSET :offset")
     suspend fun getMessagesPaged(conversationId: String, limit: Int, offset: Int): List<MessageEntity>
-    
+
     @Query("SELECT * FROM messages WHERE id = :id")
     suspend fun getMessageById(id: String): MessageEntity?
-    
-    @Query("SELECT * FROM messages WHERE conversation_id = :conversationId ORDER BY created_at DESC LIMIT 1")
+
+    @Query("SELECT * FROM messages WHERE conversation_id = :conversationId ORDER BY seq DESC LIMIT 1")
     suspend fun getLastMessage(conversationId: String): MessageEntity?
+
+    /** Highest position used in this conversation, or 0 when it has no messages yet. */
+    @Query("SELECT COALESCE(MAX(seq), 0) FROM messages WHERE conversation_id = :conversationId")
+    suspend fun getMaxSeq(conversationId: String): Long
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMessage(message: MessageEntity)

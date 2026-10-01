@@ -27,20 +27,24 @@ sealed class TranscriptionResult {
  * Uses Google Gemini API for speech-to-text
  */
 class SpeechRecognitionService(
-    private val apiKey: String  // Gemini API Key
+    private val apiKey: String,  // Gemini API Key
+    private val client: okhttp3.Call.Factory = defaultClient
 ) {
     companion object {
         private const val TAG = "SpeechRecognitionService"
         // Gemini API endpoint
         private const val GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+
+        /** One shared client for every instance that does not supply its own. */
+        private val defaultClient: OkHttpClient by lazy {
+            OkHttpClient.Builder()
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(120, TimeUnit.SECONDS)
+                .writeTimeout(120, TimeUnit.SECONDS)
+                .build()
+        }
     }
-    
-    private val client = OkHttpClient.Builder()
-        .connectTimeout(60, TimeUnit.SECONDS)
-        .readTimeout(120, TimeUnit.SECONDS)
-        .writeTimeout(120, TimeUnit.SECONDS)
-        .build()
-    
+
     /**
      * Convert PCM audio data to WAV format
      */

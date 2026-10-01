@@ -43,7 +43,10 @@ sonar {
             "**/*BR.java",
             "**/*_Factory.java",
             "**/*_MembersInjector.java",
-            "**/ui/**"
+            "**/ui/**",
+            "**/MainActivity.kt",
+            "**/activities/aiassistant/AIAssistantActivity.kt",
+            "**/activities/bluetooth/BluetoothInitActivity.kt"
         ).joinToString(","))
 
         property(

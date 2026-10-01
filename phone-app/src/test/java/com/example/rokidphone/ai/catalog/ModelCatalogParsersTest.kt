@@ -157,6 +157,31 @@ class ModelCatalogParsersTest {
         assertThat(future.capabilities.textInput).isTrue()
     }
 
+    @Test
+    fun `Anthropic models parsing accepts flat capability booleans and max token overrides`() {
+        val body = """
+            {"data": [
+              {
+                "id": "claude-3-7-sonnet",
+                "capabilities": {
+                  "image_input": true,
+                  "tool_use": true,
+                  "extended_thinking": true
+                },
+                "max_input_tokens": 123456
+              }
+            ]}
+        """.trimIndent()
+
+        val model = ModelCatalogParsers.parse(AiProvider.ANTHROPIC, CatalogFormat.ANTHROPIC, body).single()
+
+        assertThat(model.displayName).isEqualTo("claude-3-7-sonnet")
+        assertThat(model.capabilities.imageInput).isTrue()
+        assertThat(model.capabilities.toolCalling).isTrue()
+        assertThat(model.capabilities.reasoning).isTrue()
+        assertThat(model.capabilities.maxContextTokens).isEqualTo(123456L)
+    }
+
     // ==================== DeepSeek / Groq / xAI (OpenAI-style) ====================
 
     @Test
@@ -263,8 +288,41 @@ class ModelCatalogParsersTest {
     }
 
     @Test
+    fun `Mistral models parsing supports nested audio fields and default completion_chat`() {
+        val longDescription = "A".repeat(170)
+        val body = """
+            {"data": [
+              {
+                "id": "voxtral-small-2507",
+                "name": "",
+                "description": "$longDescription",
+                "capabilities": {
+                  "audio": {"input": true},
+                  "structured_output": true,
+                  "reasoning": true
+                }
+              }
+            ]}
+        """.trimIndent()
+
+        val model = ModelCatalogParsers.parse(AiProvider.MISTRAL, CatalogFormat.MISTRAL, body).single()
+
+        assertThat(model.displayName).isEqualTo("voxtral-small-2507")
+        assertThat(model.capabilities.audioInput).isTrue()
+        assertThat(model.capabilities.structuredOutput).isTrue()
+        assertThat(model.capabilities.reasoning).isTrue()
+        assertThat(model.description).hasLength(160)
+    }
+
+    @Test
     fun `parse returns empty list for malformed payloads`() {
         assertThat(ModelCatalogParsers.parse(AiProvider.OPENAI, CatalogFormat.OPENAI_STYLE, "<html>bad gateway"))
+            .isEmpty()
+    }
+
+    @Test
+    fun `parse returns empty list for CatalogFormat NONE`() {
+        assertThat(ModelCatalogParsers.parse(AiProvider.OPENAI, CatalogFormat.NONE, """{"data":[{"id":"gpt-5"}]}"""))
             .isEmpty()
     }
 

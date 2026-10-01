@@ -37,6 +37,13 @@ class CxrServiceManager {
             } catch (e: ClassNotFoundException) {
                 Log.w(TAG, "CXR-S SDK not found in classpath")
                 false
+            } catch (e: LinkageError) {
+                // Class.forName runs the static initializer, which loads the
+                // cxr-bridge-jni native library. Off the glasses that raises an
+                // UnsatisfiedLinkError, which is an Error rather than an Exception:
+                // without this branch the caller crashes instead of degrading.
+                Log.w(TAG, "CXR-S SDK present but its native library could not be loaded", e)
+                false
             }
         }
         

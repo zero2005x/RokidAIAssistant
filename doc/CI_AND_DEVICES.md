@@ -28,6 +28,95 @@ but cannot perform authenticated Sonar analysis. Generated source exclusions and
 the existing Compose UI coverage exclusion are retained; provider/service logic
 remains in scope. The configured new-code baseline and 80% threshold are unchanged.
 
+## Unit test patterns
+
+Run a single class while iterating:
+
+```powershell
+.\gradlew.bat --no-daemon :phone-app:testDebugUnitTest --tests 'com.example.rokidphone.service.SystemTextToSpeechTest'
+```
+
+### Do not mock a `Result`-returning function that has default arguments
+
+Kotlin compiles a call that omits a default argument into the synthetic static
+`fn$default` bridge. MockK intercepts the instance method, not the bridge, and the
+bridge boxes the returned value class a second time. For a function returning
+`Result<T>` the caller then sees `Result(Result(value))`: `onSuccess` hands back a
+`Result` where a `T` is expected, the cast fails, and the production fallback path
+runs instead of the one under test — with no mock failure to point at it.
+
+`EdgeTtsClient.synthesize(text, voice, rate, pitch, volume = "+0%")` is such a
+function. Drive it through its injected `WebSocket.Factory` instead of stubbing it
+(`EdgeTtsClientTest`, `SystemTextToSpeechTest`); the fake transport also exercises
+the client's own frame parsing. Stubbing a `Result` function is fine when the call
+site passes every argument, so `RecordingRepository.stopRecording()` and
+`EnhancedAIService.quickChat(message)` are mocked directly.
+
+### Observing a replay-less SharedFlow
+
+`ServiceBridge`, `BluetoothPhotoReceiver` and `PhotoRepository` publish through
+`MutableSharedFlow(replay = 0)`, so an emission with no subscriber attached is lost.
+Subscribe with `async(start = CoroutineStart.UNDISPATCHED) { flow.first() }` before
+triggering the emission, and await the value.
+
+Do not subscribe from `backgroundScope`: `advanceUntilIdle()` does not run background
+coroutines — that is what keeps them from holding a test open — so the collector never
+gets to register and the assertion sees nothing, with no hint as to why.
+
+### Substituting dispatchers and scopes
+
+`TextToSpeechService` and `LiveAudioManager` expose their `CoroutineScope` and
+main-thread dispatcher as fields so tests can inject a `TestScope` and
+`Dispatchers.Unconfined` by reflection. ViewModels use `Dispatchers.setMain` with a
+`StandardTestDispatcher`. Nothing in the unit test suite touches a real device, a
+real socket, or an AI provider.
+
+### Keep production files on their existing LF line endings
+
+Some editors rewrite a whole file to CRLF the moment you touch one line. Git then
+records every line as changed, `git blame` attributes the entire file to that
+commit, and Sonar counts all of it as **new code** — which tanks the new-code
+coverage percentage even though nothing really changed. Six files were rewritten
+this way once and inflated the diff by ~2,165 lines.
+
+Before committing a change to anything under `src/main`, check that the diff is
+only what you meant to change:
+
+```powershell
+git diff --cached --numstat -- '*/src/main/*'
+git diff --cached --ignore-cr-at-eol --numstat -- '*/src/main/*'
+```
+
+If the two disagree, the file was re-encoded. Strip the carriage returns and
+re-stage before committing:
+
+```powershell
+$p = 'path/to/File.kt'
+[IO.File]::WriteAllText($p, ([IO.File]::ReadAllText($p) -replace "`r`n", "`n"))
+```
+
+### Never run two Gradle builds against this project at once
+
+The Kotlin incremental compiler keeps a per-module cache under
+`<module>/build/kotlin/<task>/cacheable/`. A second concurrent build on the same
+module fails with `Storage for [...source-to-classes.tab] is already registered`,
+and it can leave the JaCoCo exec data partly written, so a coverage report taken
+straight afterwards reads far lower than the truth. Let each build finish before
+starting the next; if a report looks impossibly bad, re-run `clean testCoverage`
+on its own before believing it.
+
+### Untestable in JVM unit tests
+
+Some classes cannot be covered by Robolectric tests at all, and attempting it
+wastes time:
+
+- Anything whose static initializer loads a native library, e.g. `CXRServiceBridge`
+  (`cxr-bridge-jni`) — the class fails to load with `UnsatisfiedLinkError`.
+- `EncryptedSharedPreferences`: the Android Keystore is unavailable, so creation
+  throws. `SettingsRepository` survives this because it catches the failure and
+  falls back to an in-memory store; a class that rethrows instead is untestable.
+- `FileProvider` on Windows, which cannot resolve its synthetic data directory.
+
 ## Windows Java loopback startup failure
 
 If Gradle fails before configuration with `Unable to establish loopback connection`

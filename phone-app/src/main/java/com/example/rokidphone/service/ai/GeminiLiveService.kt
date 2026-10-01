@@ -36,7 +36,9 @@ class GeminiLiveService(
     private val apiKey: String,
     private val modelId: String = "gemini-3.8-live",
     private val systemPrompt: String = "",
-    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
+    /** Opens the Live API socket; substituted in tests so no connection is made. */
+    private val webSocketFactory: okhttp3.WebSocket.Factory = defaultClient
 ) {
     companion object {
         private const val TAG = "GeminiLiveService"
@@ -53,6 +55,17 @@ class GeminiLiveService(
 
         // VAD configuration constant
         const val DEFAULT_SILENCE_DURATION_MS = 500
+
+        // One shared client: a per-instance client leaks a connection pool and
+        // dispatcher threads for every session that is created.
+        private val defaultClient: OkHttpClient by lazy {
+            OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(0, TimeUnit.SECONDS)      // No read timeout for WebSocket
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .pingInterval(20, TimeUnit.SECONDS)    // Keep-alive ping interval
+                .build()
+        }
     }
 
     // ========== Connection State ==========
@@ -81,12 +94,6 @@ class GeminiLiveService(
     private val isConnected = AtomicBoolean(false)
     private val connectionLock = Any()
 
-    private val client: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(0, TimeUnit.SECONDS)      // No read timeout for WebSocket
-        .writeTimeout(30, TimeUnit.SECONDS)
-        .pingInterval(20, TimeUnit.SECONDS)    // Keep-alive ping interval
-        .build()
 
     // ========== Callback Interfaces ==========
 
@@ -209,7 +216,7 @@ class GeminiLiveService(
             val request = Request.Builder()
                 .url("$WEBSOCKET_BASE_URL?key=$apiKey")
                 .build()
-            webSocket = client.newWebSocket(request, createWebSocketListener(tools))
+            webSocket = webSocketFactory.newWebSocket(request, createWebSocketListener(tools))
         }
     }
 

@@ -36,7 +36,11 @@ class TextToSpeechService(
      *  Pass the user's configured speechLanguage / responseLanguage locale here.
      *  Defaults to null which resolves to EDGE_VOICE_EN as the neutral fallback.
      */
-    private val preferredLocale: Locale? = null
+    private val preferredLocale: Locale? = null,
+    /** Speech synthesis backend; substituted in tests so no WebSocket is opened. */
+    private val edgeTtsClient: EdgeTtsClient = EdgeTtsClient(),
+    /** Used only for the Google Translate fallback; substituted in tests. */
+    private val httpClient: okhttp3.Call.Factory = defaultHttpClient
 ) {
     
     companion object {
@@ -55,19 +59,21 @@ class TextToSpeechService(
         // undetected text doesn't get read by the wrong voice.
         // TODO: If a device-locale-aware default is preferred, derive this from Locale.getDefault().
         const val DEFAULT_VOICE = EDGE_VOICE_EN
+
+        // One shared client: a per-instance client leaks a connection pool and
+        // dispatcher threads for every service that is constructed.
+        private val defaultHttpClient: OkHttpClient by lazy {
+            OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .build()
+        }
     }
-    
+
     private var systemTts: TextToSpeech? = null
     private var isSystemTtsReady = false
-    
-    // Edge TTS client
-    private val edgeTtsClient = EdgeTtsClient()
-    
-    private val httpClient = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
-        .build()
-    
+
+
     private var currentAudioTrack: AudioTrack? = null
     private var currentMediaPlayer: MediaPlayer? = null
     private var currentMediaFile: File? = null

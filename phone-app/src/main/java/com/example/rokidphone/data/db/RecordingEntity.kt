@@ -117,7 +117,9 @@ interface RecordingDao {
     fun getRecordingByIdFlow(id: String): Flow<RecordingEntity?>
     
     // Caller must escape '%', '_' and '\' in `query` before calling.
-    @Query("SELECT * FROM recordings WHERE title LIKE '%' || :query || '%' ESCAPE '\' OR transcript LIKE '%' || :query || '%' ESCAPE '\' ORDER BY created_at DESC")
+    // The escape character must be written as "\\": in a Kotlin string "\'" is just an
+    // apostrophe, which would emit `ESCAPE ''` and make SQLite reject every search.
+    @Query("SELECT * FROM recordings WHERE title LIKE '%' || :query || '%' ESCAPE '\\' OR transcript LIKE '%' || :query || '%' ESCAPE '\\' ORDER BY created_at DESC")
     fun searchRecordings(query: String): Flow<List<RecordingEntity>>
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)

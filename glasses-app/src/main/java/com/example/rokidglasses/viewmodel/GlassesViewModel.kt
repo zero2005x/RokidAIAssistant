@@ -158,6 +158,18 @@ class GlassesViewModel(
      * Used to receive messages and commands from phone side
      */
     private fun initializeCxrService() {
+        try {
+            initializeCxrServiceOrThrow()
+        } catch (e: Exception) {
+            Log.e(TAG, "CXR-S service could not be initialized", e)
+        } catch (e: LinkageError) {
+            // The SDK's native library is missing on this device; the glasses app
+            // still works over Bluetooth SPP, so degrade instead of crashing init.
+            Log.e(TAG, "CXR-S SDK native library unavailable", e)
+        }
+    }
+
+    private fun initializeCxrServiceOrThrow() {
         if (CxrServiceManager.isSdkAvailable()) {
             cxrServiceManager = CxrServiceManager.getInstance()
             val initialized = cxrServiceManager?.initialize() == true
