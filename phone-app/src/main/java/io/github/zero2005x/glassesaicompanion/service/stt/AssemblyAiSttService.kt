@@ -183,7 +183,7 @@ class AssemblyAiSttService(
                         when (status) {
                             "completed" -> {
                                 val text = json.optString("text", "").trim()
-                                Log.d(TAG, "Transcription completed: $text")
+                                Log.d(TAG, "Transcription completed (${text.length} characters)")
                                 return text.ifEmpty { null }
                             }
                             "error" -> {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- App Info -->
     <string name="app_name">Rokid AI Assistant</string>
     <string name="app_title">Rokid AI Assistant (Phone)</string>
@@ -231,9 +231,56 @@
     <string name="connection_failed">Connection failed: %s</string>
     <string name="invalid_url">Invalid URL format. Use http:// or https://</string>
     <string name="custom_url_https_required">Plain HTTP is only allowed for localhost. Please use an HTTPS address.</string>
-    <string name="api_key_optional">API Key is optional for local models</string>
-    
-    <!-- Notification & Status -->
+    <string name="bluetooth_permission_needed">Bluetooth access is needed to connect to your glasses. Everything else in the app still works without it.</string>
+    <string name="service_start_failed">Could not start the glasses connection service.</string>
+    <string name="microphone_permission_denied">Microphone access is needed to record audio. You can grant it in the system settings.</string>
+    <string name="recording_stopped_background_title">Recording stopped</string>
+    <string name="recording_stopped_background_message">Recording from the phone microphone only works while the app is open, so it was stopped when you left the app. What was recorded so far has been saved.</string>
+    <!-- First-launch notice -->
+    <string name="onboarding_title">Before you start</string>
+    <string name="onboarding_subtitle">Four short things to know about this app.</string>
+    <string name="onboarding_unofficial_title">An independent app</string>
+    <string name="onboarding_unofficial_body">This app is an independent project. It is not made by, endorsed by, or affiliated with Rokid.</string>
+    <string name="onboarding_glasses_title">Glasses are optional</string>
+    <string name="onboarding_glasses_body">Using Rokid glasses needs a separate companion app installed on the glasses. Without glasses you can still chat, analyse photos and record audio on your phone.</string>
+    <string name="onboarding_glasses_guide_button">Open the glasses setup guide</string>
+    <string name="onboarding_glasses_guide_url" translatable="false">https://zero2005x.github.io/RokidAIAssistant/glasses-setup/</string>
+    <string name="onboarding_data_title">Where your data goes</string>
+    <string name="onboarding_data_body">Your voice, photos and text are sent only to the AI service you choose, using your own API key. The developer of this app does not receive or store them. That service handles the data under its own terms, so check them before you send anything sensitive. If you choose to report an AI response, that response and your reason are sent to the developer.</string>
+    <string name="onboarding_people_title">Respect other people\'s privacy</string>
+    <string name="onboarding_people_body">Ask for permission before you record audio or take photos of other people, and follow the laws where you are.</string>
+    <string name="onboarding_accept">I understand</string>    <string name="api_key_optional">API Key is optional for local models</string>
+    <!-- Report an AI response -->
+    <string name="report_content_description">Report this response</string>
+    <string name="report_title">Report this response</string>
+    <string name="report_intro">Tell us what is wrong with this AI response. Reports help the developer improve filtering. Please do not include passwords or other secrets.</string>
+    <string name="report_reason_harmful">Harmful or offensive</string>
+    <string name="report_reason_sexual">Sexual or inappropriate</string>
+    <string name="report_reason_misleading">Inaccurate or misleading</string>
+    <string name="report_reason_privacy">Reveals personal data</string>
+    <string name="report_reason_other">Something else</string>
+    <string name="report_note_label">Details (optional)</string>
+    <string name="report_include_prompt">Also send the message this response answers</string>
+    <string name="report_what_is_sent">What will be sent</string>
+    <string name="report_what_is_sent_body">The response below, your reason and note, the AI provider and model name, the app version and your language. No API keys and no other conversations.</string>
+    <string name="report_retention" tools:ignore="PluralsCandidate">Reports are sent to the app developer and kept for up to %1$d days.</string>
+    <string name="report_send">Send report</string>
+    <string name="report_sending">Sending…</string>
+    <string name="report_sent_title">Report sent</string>
+    <string name="report_sent_message">Thank you. The developer has received your report.</string>
+    <string name="report_failed_retry">The report could not be sent. Check your connection and try again.</string>
+    <string name="report_failed_final">The report could not be sent.</string>    
+    <!-- Offline demo -->
+    <string name="demo_section_title">Try it first</string>
+    <string name="demo_try">Try the offline demo</string>
+    <string name="demo_try_description">See how chat looks without an API key. Replies are pre-written and nothing is sent over the network.</string>
+    <string name="demo_title">Demo (offline)</string>
+    <string name="demo_banner">Offline demo: replies are pre-written. Nothing leaves your phone.</string>
+    <string name="demo_greeting">Hi! This is an offline demo of the chat. I cannot answer real questions, but I can show you how replies look. Type anything to continue. To talk to a real AI service, add your own API key in Settings.</string>
+    <string name="demo_reply_1">This is what a real answer looks like: a short, readable reply in a bubble like this one. With your own API key, an AI service writes it for you.</string>
+    <string name="demo_reply_2">You can also analyse photos from your glasses, record audio to get a summary, and look through everything later in your history.</string>
+    <string name="demo_reply_3">Every AI reply has a small flag button. Tap it to report a response that is harmful, wrong or inappropriate.</string>
+    <string name="demo_reply_4">Ready for the real thing? Open Settings, choose an AI service and paste your API key.</string>    <!-- Notification & Status -->
     <string name="glasses_recording">Glasses recording...</string>
     <string name="recognizing_speech">Recognizing speech...</string>
     <string name="processing_failed">Processing failed: %s</string>

@@ -23,6 +23,7 @@ object NavRoutes {
     const val LLM_PARAMETERS = "llm_parameters"
     const val TTS_SETTINGS = "tts_settings"
     const val RECORDINGS = "recordings"
+    const val DEMO_CHAT = "demo_chat"
     const val RECORDING_DETAIL = "recording/{recordingId}"
     
     fun conversationDetail(conversationId: String) = "conversation/$conversationId"

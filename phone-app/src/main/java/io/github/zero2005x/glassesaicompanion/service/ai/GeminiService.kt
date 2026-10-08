@@ -1,5 +1,7 @@
 package io.github.zero2005x.glassesaicompanion.service.ai
 
+import io.github.zero2005x.glassesaicompanion.data.log.LogRedactor
+
 import android.util.Base64
 import android.util.Log
 import io.github.zero2005x.glassesaicompanion.ai.catalog.ProviderApiException
@@ -530,7 +532,7 @@ Rules:
                             val json = JSONObject(responseBody)
                             val text = extractTextFromResponse(json)
                             if (text.isNullOrBlank()) {
-                                Log.w(TAG, "Empty response from Gemini, response: $responseBody")
+                                Log.w(TAG, "Empty response from Gemini, response: ${LogRedactor.snippet(responseBody)}")
                                 null
                             } else {
                                 Log.d(TAG, "Image analysis successful, response length: ${text.length}")
@@ -566,7 +568,7 @@ Rules:
     ): String? {
         val responseBody = response.body.string()
         if (!response.isSuccessful) {
-            Log.e(TAG, "API error: ${response.code}, body: $responseBody")
+            Log.e(TAG, "API error: ${response.code}, body: ${LogRedactor.snippet(responseBody)}")
             handleRetryableError(response.code, attempt)
             return null
         }

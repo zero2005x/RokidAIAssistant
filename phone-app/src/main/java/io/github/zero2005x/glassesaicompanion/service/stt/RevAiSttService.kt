@@ -105,7 +105,7 @@ class RevAiSttService(
 
                         override fun onMessage(webSocket: WebSocket, text: String) {
                             try {
-                                Log.d(TAG, "Received message: $text")
+                                Log.d(TAG, "Received message (${text.length} characters)")
                                 val json = JSONObject(text)
                                 
                                 when (json.optString("type")) {
@@ -119,7 +119,7 @@ class RevAiSttService(
                                         val elements = json.optJSONArray("elements")
                                         if (elements != null) {
                                             val text = extractTextFromElements(elements)
-                                            Log.d(TAG, "Partial result: $text")
+                                            Log.d(TAG, "Partial result (${text.length} characters)")
                                         }
                                     }
                                     "final" -> {
@@ -129,7 +129,7 @@ class RevAiSttService(
                                             val text = extractTextFromElements(elements)
                                             if (text.isNotEmpty()) {
                                                 finalTranscript.append(text).append(" ")
-                                                Log.d(TAG, "Final result: $text")
+                                                Log.d(TAG, "Final result (${text.length} characters)")
                                             }
                                         }
                                     }

@@ -580,7 +580,7 @@ class GeminiLiveService(
         if (inputTranscription != null) {
             val text = inputTranscription.optString("text", "")
             if (text.isNotEmpty()) {
-                Log.d(TAG, "User speech transcription: $text")
+                Log.d(TAG, "User speech transcription (${text.length} characters)")
                 onInputTranscription?.invoke(text)
             }
         }

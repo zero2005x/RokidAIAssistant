@@ -144,7 +144,7 @@ class BaiduSttService(
                             val resultArray = json.optJSONArray("result")
                             if (resultArray != null && resultArray.length() > 0) {
                                 val transcript = resultArray.getString(0).trim()
-                                Log.d(TAG, "Transcript: $transcript")
+                                Log.d(TAG, "Transcript (${transcript.length} characters)")
                                 return@withContext SpeechResult.Success(transcript)
                             }
                         } else {

@@ -83,7 +83,7 @@ object NetworkClientFactory {
             val request = chain.request()
             val startTime = System.nanoTime()
             
-            Log.d(TAG, "Sending request: ${request.method} ${request.url}")
+            Log.d(TAG, "Sending request: ${request.method} ${request.url.newBuilder().query(null).fragment(null).build()}")
             
             return try {
                 val response = chain.proceed(request)

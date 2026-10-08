@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.zero2005x.glassesaicompanion.R
 import io.github.zero2005x.glassesaicompanion.data.db.*
+import io.github.zero2005x.glassesaicompanion.ui.components.rememberMicrophoneGate
 import io.github.zero2005x.glassesaicompanion.ui.theme.ExtendedTheme
 import io.github.zero2005x.glassesaicompanion.viewmodel.*
 import java.text.SimpleDateFormat
@@ -48,6 +49,8 @@ fun RecordingsScreen(
     var showSortMenu by remember { mutableStateOf(false) }
     var showRecordingOptions by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
+    // Microphone access is requested when the user starts a phone recording
+    val startPhoneRecordingWithPermission = rememberMicrophoneGate { viewModel.startPhoneRecording() }
 
     LaunchedEffect(uiState.error) {
         uiState.error?.let { error ->
@@ -168,7 +171,7 @@ fun RecordingsScreen(
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.record_from_phone)) },
                         onClick = {
-                            viewModel.startPhoneRecording()
+                            startPhoneRecordingWithPermission()
                             showRecordingOptions = false
                         },
                         leadingIcon = { Icon(Icons.Default.Phone, null) }

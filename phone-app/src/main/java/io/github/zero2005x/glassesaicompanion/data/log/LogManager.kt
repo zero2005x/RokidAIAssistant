@@ -106,7 +106,9 @@ class LogManager private constructor(private val context: Context) {
     /**
      * Add a log entry to the buffer
      */
-    fun log(level: LogLevel, tag: String, message: String, throwable: Throwable? = null) {
+    fun log(level: LogLevel, tag: String, rawMessage: String, throwable: Throwable? = null) {
+        // Secrets never reach the buffer, the log viewer, logcat or an export
+        val message = LogRedactor.redact(rawMessage)
         val entry = LogEntry(
             level = level,
             tag = tag,
@@ -251,7 +253,7 @@ class LogManager private constructor(private val context: Context) {
                 timestamp = timestamp,
                 level = LogLevel.fromChar(levelChar.first()),
                 tag = tag.trim(),
-                message = message
+                message = LogRedactor.redact(message)
             )
         } catch (e: Exception) {
             null
@@ -288,14 +290,14 @@ class LogManager private constructor(private val context: Context) {
             val logsToExport = getFilteredLogs(filter)
             
             FileWriter(file).use { writer ->
-                writer.write("=== Rokid AI Assistant Logs ===\n")
+                writer.write("=== ${context.getString(io.github.zero2005x.glassesaicompanion.R.string.app_name)} Logs ===\n")
                 writer.write("Exported: ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())}\n")
                 writer.write("Total entries: ${logsToExport.size}\n")
                 writer.write("Filter: Level >= ${filter.minLevel}, Tags: ${filter.tags.ifEmpty { "All" }}\n")
                 writer.write("=====================================\n\n")
                 
                 logsToExport.forEach { entry ->
-                    writer.write(entry.toExportString())
+                    writer.write(LogRedactor.redact(entry.toExportString()))
                     writer.write("\n")
                 }
             }
@@ -315,12 +317,12 @@ class LogManager private constructor(private val context: Context) {
         val logsToExport = getFilteredLogs(filter)
         val sb = StringBuilder()
         
-        sb.appendLine("=== Rokid AI Assistant Logs ===")
+        sb.appendLine("=== ${context.getString(io.github.zero2005x.glassesaicompanion.R.string.app_name)} Logs ===")
         sb.appendLine("Total entries: ${logsToExport.size}")
         sb.appendLine("=====================================\n")
         
         logsToExport.forEach { entry ->
-            sb.appendLine(entry.toExportString())
+            sb.appendLine(LogRedactor.redact(entry.toExportString()))
         }
         
         return sb.toString()

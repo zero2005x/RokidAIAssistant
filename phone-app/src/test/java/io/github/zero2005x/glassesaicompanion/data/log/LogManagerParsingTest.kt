@@ -51,6 +51,8 @@ class LogManagerParsingTest {
     fun setUp() {
         val context = mockk<Context>()
         every { context.filesDir } returns temporary.root
+        // The export header uses the app name resource, which differs per distribution channel.
+        every { context.getString(any()) } returns "Rokid AI Assistant"
         manager = LogManager::class.java.getDeclaredConstructor(Context::class.java)
             .apply { isAccessible = true }.newInstance(context)
     }

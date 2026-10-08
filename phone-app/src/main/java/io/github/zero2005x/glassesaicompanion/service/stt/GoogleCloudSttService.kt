@@ -1,5 +1,7 @@
 package io.github.zero2005x.glassesaicompanion.service.stt
 
+import io.github.zero2005x.glassesaicompanion.data.log.LogRedactor
+
 import android.util.Base64
 import android.util.Log
 import io.github.zero2005x.glassesaicompanion.service.SpeechErrorCode
@@ -104,7 +106,7 @@ class GoogleCloudSttService(
                                     .trim()
                                 
                                 if (transcript.isNotEmpty()) {
-                                    Log.d(TAG, "Transcript: $transcript")
+                                    Log.d(TAG, "Transcript (${transcript.length} characters)")
                                     return@withContext SpeechResult.Success(transcript)
                                 }
                             }
@@ -116,7 +118,7 @@ class GoogleCloudSttService(
                             errorCode = SpeechErrorCode.NO_SPEECH_DETECTED
                         )
                     } else {
-                        Log.e(TAG, "API error: ${response.code}, body: $responseBody")
+                        Log.e(TAG, "API error: ${response.code}, body: ${LogRedactor.snippet(responseBody)}")
                         val errorMsg = try {
                             responseBody?.let { JSONObject(it).optJSONObject("error")?.optString("message") }
                                 ?: "API error: ${response.code}"

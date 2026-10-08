@@ -146,7 +146,7 @@ class SpeechmaticsSttService(
 
                         override fun onMessage(webSocket: WebSocket, text: String) {
                             try {
-                                Log.d(TAG, "Received message: $text")
+                                Log.d(TAG, "Received message (${text.length} characters)")
                                 val json = JSONObject(text)
                                 
                                 when (json.optString("message")) {
@@ -160,7 +160,7 @@ class SpeechmaticsSttService(
                                         // Interim result
                                         val metadata = json.optJSONObject("metadata")
                                         val transcript = metadata?.optString("transcript", "")
-                                        Log.d(TAG, "Partial transcript: $transcript")
+                                        Log.d(TAG, "Partial transcript (${transcript?.length ?: 0} characters)")
                                     }
                                     "AddTranscript" -> {
                                         // Final result
@@ -168,7 +168,7 @@ class SpeechmaticsSttService(
                                         val transcript = metadata?.optString("transcript", "")
                                         if (!transcript.isNullOrEmpty()) {
                                             finalTranscript.append(transcript).append(" ")
-                                            Log.d(TAG, "Final transcript: $transcript")
+                                            Log.d(TAG, "Final transcript (${transcript.length} characters)")
                                         }
                                     }
                                     "EndOfTranscript" -> {

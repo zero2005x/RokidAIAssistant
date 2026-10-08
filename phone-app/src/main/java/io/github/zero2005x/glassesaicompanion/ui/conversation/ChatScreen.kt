@@ -3,7 +3,7 @@ package io.github.zero2005x.glassesaicompanion.ui.conversation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -21,6 +21,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import io.github.zero2005x.glassesaicompanion.R
+import io.github.zero2005x.glassesaicompanion.report.ReportButton
+import io.github.zero2005x.glassesaicompanion.report.ReportTarget
 import io.github.zero2005x.glassesaicompanion.data.db.Message
 import io.github.zero2005x.glassesaicompanion.data.db.MessageRole
 import io.github.zero2005x.glassesaicompanion.ui.theme.AppShapeTokens
@@ -45,6 +47,7 @@ fun ChatScreen(
     onBack: () -> Unit,
     onClearHistory: () -> Unit,
     onExport: (() -> Unit)? = null,
+    banner: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
@@ -140,6 +143,8 @@ fun ChatScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
+            banner?.invoke()
+
             // Message list
             LazyColumn(
                 modifier = Modifier
@@ -175,8 +180,10 @@ fun ChatScreen(
                         }
                     }
                 } else {
-                    items(messages, key = { it.id }) { message ->
-                        MessageBubble(message = message)
+                    itemsIndexed(messages, key = { _, message -> message.id }) { index, message ->
+                        // The user message this response answers (offered, never sent by default)
+                        val answeredPrompt = messages.take(index).lastOrNull { it.role == MessageRole.USER }?.content
+                        MessageBubble(message = message, answeredPrompt = answeredPrompt)
                     }
                     
                     // Loading indicator
@@ -251,7 +258,8 @@ fun ChatScreen(
 @Composable
 private fun MessageBubble(
     message: Message,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    answeredPrompt: String? = null
 ) {
     val isUser = message.role == MessageRole.USER
     val dateFormatter = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
@@ -328,6 +336,18 @@ private fun MessageBubble(
                         text = " · ${message.tokenCount} tokens",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
+                }
+
+                // Report this AI response to the developer (in-app, no need to leave the app)
+                if (!isUser && message.errorMessage == null && message.content.isNotBlank()) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    ReportButton(
+                        ReportTarget(
+                            assistantContent = message.content,
+                            userContent = answeredPrompt,
+                            modelId = message.modelId
+                        )
                     )
                 }
             }

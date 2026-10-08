@@ -38,3 +38,7 @@ PLAY_UPLOAD_STORE_FILE=path/to/play-upload.jks
 PLAY_UPLOAD_STORE_PASSWORD=your_upload_keystore_password
 PLAY_UPLOAD_KEY_ALIAS=your_upload_key_alias
 PLAY_UPLOAD_KEY_PASSWORD=your_upload_key_password
+
+# In-app AI response report endpoint (https only). Required to build the Play release.
+# See tools/report-endpoint/README.md
+REPORT_ENDPOINT_URL=https://your-report-endpoint.example.com

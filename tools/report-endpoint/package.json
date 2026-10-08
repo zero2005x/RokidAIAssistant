@@ -1,0 +1,9 @@
+{
+  "name": "glasses-ai-companion-report-endpoint",
+  "private": true,
+  "type": "module",
+  "description": "Reference receiver for the in-app AI response report (Cloudflare Worker + KV).",
+  "scripts": {
+    "test": "node --test worker.test.mjs"
+  }
+}

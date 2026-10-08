@@ -1,5 +1,7 @@
 package io.github.zero2005x.glassesaicompanion.service.ai
 
+import io.github.zero2005x.glassesaicompanion.data.log.LogRedactor
+
 import android.util.Log
 import io.github.zero2005x.glassesaicompanion.data.AiProvider
 import io.github.zero2005x.glassesaicompanion.service.SpeechResult
@@ -117,7 +119,7 @@ class BaiduService(
                                 null
                             }
                         } else {
-                            Log.e(TAG, "Token request failed: ${response.code}, body: $responseBody")
+                            Log.e(TAG, "Token request failed: ${response.code}, body: ${LogRedactor.snippet(responseBody)}")
                             null
                         }
                     }
@@ -150,7 +152,7 @@ class BaiduService(
     override suspend fun chat(userMessage: String): String {
         return withContext(Dispatchers.IO) {
             lastChatError = null
-            Log.d(TAG, "Chat request: $userMessage")
+            Log.d(TAG, "Chat request (${userMessage.length} characters)")
             
             // Get access token
             val accessToken = getAccessToken()
@@ -226,7 +228,7 @@ class BaiduService(
                         
                         if (result.isNotEmpty()) {
                             addToHistory(userMessage, result)
-                            Log.d(TAG, "Baidu response: $result")
+                            Log.d(TAG, "Baidu response (${result.length} characters)")
                             result
                         } else {
                             lastChatError = "empty_response"

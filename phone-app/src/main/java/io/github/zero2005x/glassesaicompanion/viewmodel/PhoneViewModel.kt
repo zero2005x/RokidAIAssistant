@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.rokidcommon.protocol.ConnectionState
 import com.example.rokidcommon.protocol.MessageType
 import io.github.zero2005x.glassesaicompanion.ConversationItem
+import io.github.zero2005x.glassesaicompanion.data.ForegroundRecordingPolicy
 import io.github.zero2005x.glassesaicompanion.data.db.RecordingRepository
 import io.github.zero2005x.glassesaicompanion.data.db.RecordingSource
 import io.github.zero2005x.glassesaicompanion.data.db.RecordingState
@@ -31,7 +32,8 @@ data class PhoneUiState(
     val showApiKeyWarning: Boolean = false,  // Flag to show API key warning dialog
     val showInitialSetup: Boolean = false,   // Flag to show initial setup dialog (no API key configured)
     val latestPhotoPath: String? = null,     // Path to the latest received photo
-    val recordingState: RecordingState = RecordingState.Idle  // Recording state
+    val recordingState: RecordingState = RecordingState.Idle,  // Recording state
+    val recordingStoppedInBackground: Boolean = false  // Phone recording was ended because the app was hidden
 )
 
 class PhoneViewModel(application: Application) : AndroidViewModel(application) {
@@ -266,5 +268,20 @@ class PhoneViewModel(application: Application) : AndroidViewModel(application) {
                 Log.e(TAG, "Failed to stop recording", error)
             }
         }
+    }
+    /**
+     * The app left the foreground. Phone-microphone recording is foreground-only, so an
+     * active phone recording is stopped (and saved) and the user is told on return.
+     */
+    fun onAppBackgrounded() {
+        if (ForegroundRecordingPolicy.shouldStopWhenBackgrounded(recordingRepository.recordingState.value)) {
+            Log.d(TAG, "App backgrounded during a phone recording; stopping it")
+            _uiState.update { it.copy(recordingStoppedInBackground = true) }
+            stopRecording()
+        }
+    }
+
+    fun dismissRecordingStoppedNotice() {
+        _uiState.update { it.copy(recordingStoppedInBackground = false) }
     }
 }

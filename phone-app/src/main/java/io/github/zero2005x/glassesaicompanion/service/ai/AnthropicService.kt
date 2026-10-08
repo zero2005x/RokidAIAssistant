@@ -1,5 +1,7 @@
 package io.github.zero2005x.glassesaicompanion.service.ai
 
+import io.github.zero2005x.glassesaicompanion.data.log.LogRedactor
+
 import android.util.Base64
 import android.util.Log
 import io.github.zero2005x.glassesaicompanion.BuildConfig
@@ -92,7 +94,7 @@ class AnthropicService(
      */
     override suspend fun chat(userMessage: String): String {
         return withContext(Dispatchers.IO) {
-            if (BuildConfig.DEBUG) Log.d(TAG, "Chat request: $userMessage")
+            if (BuildConfig.DEBUG) Log.d(TAG, "Chat request (${userMessage.length} characters)")
 
             val messages = buildChatMessages(userMessage)
             val requestJson = buildChatRequest(messages)
@@ -290,7 +292,7 @@ class AnthropicService(
         if (!response.isSuccessful) lastChatError = ProviderApiException.fromHttpStatus(response.code, responseBody).message
         if (!response.isSuccessful || responseBody == null) {
             if (BuildConfig.DEBUG) {
-                Log.e(TAG, "API error: ${response.code}, body: $responseBody")
+                Log.e(TAG, "API error: ${response.code}, body: ${LogRedactor.snippet(responseBody)}")
             } else {
                 Log.e(TAG, "API error: ${response.code}")
             }
@@ -304,7 +306,7 @@ class AnthropicService(
         if (text.isNullOrEmpty()) return null
 
         addToHistory(userMessage, text)
-        if (BuildConfig.DEBUG) Log.d(TAG, "Claude response: $text")
+        if (BuildConfig.DEBUG) Log.d(TAG, "Claude response (${text.length} characters)")
         return text
     }
     
@@ -369,7 +371,7 @@ class AnthropicService(
                         ChatContentParser.extractText(json?.opt("content"))
                     } else {
                         if (BuildConfig.DEBUG) {
-                            Log.e(TAG, "API error: ${response.code}, body: $responseBody")
+                            Log.e(TAG, "API error: ${response.code}, body: ${LogRedactor.snippet(responseBody)}")
                         } else {
                             Log.e(TAG, "API error: ${response.code}")
                         }

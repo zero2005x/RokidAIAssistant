@@ -1,10 +1,13 @@
 package io.github.zero2005x.glassesaicompanion
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,6 +23,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -27,21 +33,26 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import io.github.zero2005x.glassesaicompanion.data.OnboardingStore
 import io.github.zero2005x.glassesaicompanion.data.SettingsRepository
 import io.github.zero2005x.glassesaicompanion.data.validateForChat
 import io.github.zero2005x.glassesaicompanion.data.validateForSpeech
+import io.github.zero2005x.glassesaicompanion.report.AiReportHost
 import io.github.zero2005x.glassesaicompanion.service.PhoneAIService
+import io.github.zero2005x.glassesaicompanion.ui.components.rememberMicrophoneGate
 import io.github.zero2005x.glassesaicompanion.ui.LlmParametersScreen
 import io.github.zero2005x.glassesaicompanion.ui.TtsSettingsScreen
 import io.github.zero2005x.glassesaicompanion.ui.SettingsScreen
 import io.github.zero2005x.glassesaicompanion.ui.conversation.ChatScreen
 import io.github.zero2005x.glassesaicompanion.ui.conversation.ConversationHistoryScreen
+import io.github.zero2005x.glassesaicompanion.ui.demo.DemoChatScreen
 import io.github.zero2005x.glassesaicompanion.ui.gallery.ClearAllConfirmDialog
 import io.github.zero2005x.glassesaicompanion.ui.gallery.DeleteConfirmDialog
 import io.github.zero2005x.glassesaicompanion.ui.gallery.PhotoDetailScreen
 import io.github.zero2005x.glassesaicompanion.ui.gallery.PhotoGalleryScreen
 import io.github.zero2005x.glassesaicompanion.ui.home.HomeScreen
 import io.github.zero2005x.glassesaicompanion.ui.logs.LogViewerScreen
+import io.github.zero2005x.glassesaicompanion.ui.onboarding.OnboardingScreen
 import io.github.zero2005x.glassesaicompanion.ui.navigation.BottomNavDestination
 import io.github.zero2005x.glassesaicompanion.ui.navigation.NavRoutes
 import io.github.zero2005x.glassesaicompanion.ui.recording.RecordingDetailScreen
@@ -52,27 +63,63 @@ import io.github.zero2005x.glassesaicompanion.viewmodel.PhotoGalleryViewModel
 import io.github.zero2005x.glassesaicompanion.viewmodel.PhoneViewModel
 
 class MainActivity : AppCompatActivity() {
-    
+
+    /**
+     * Permissions without which the glasses link cannot work. Everything else in the app
+     * (chat, history, analysing a photo, ...) keeps working when these are denied.
+     *
+     * The Google Play flavor only talks to bonded devices over classic Bluetooth (SPP), so it
+     * needs just BLUETOOTH_CONNECT. The GitHub flavor also drives the Rokid CXR SDK, which
+     * scans and advertises.
+     */
+    private fun essentialPermissions(): List<String> = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
+            if (BuildConfig.PLAY_DISTRIBUTION) {
+                listOf(Manifest.permission.BLUETOOTH_CONNECT)
+            } else {
+                listOf(
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_SCAN,
+                    Manifest.permission.BLUETOOTH_ADVERTISE
+                )
+            }
+        BuildConfig.PLAY_DISTRIBUTION -> emptyList()
+        else -> listOf(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+
+    /** Nice to have: the foreground-service notification. Never blocks anything. */
+    private fun optionalPermissions(): List<String> =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            listOf(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            emptyList()
+        }
+
+    private fun isGranted(permission: String): Boolean =
+        ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val allGranted = permissions.isNotEmpty() && permissions.values.all { it }
-        if (allGranted) {
+        val essentialDenied = essentialPermissions().filter { permissions[it] == false }
+        if (essentialDenied.isEmpty()) {
             startAIService()
         } else {
-            val denied = permissions.filterValues { !it }.keys
-            android.util.Log.w("MainActivity", "Permissions denied: $denied - AI service not started")
-            // TODO: show a rationale/snackbar and direct the user to app settings;
-            // distinguish permanently-denied via shouldShowRequestPermissionRationale()
+            Log.w(TAG, "Essential permissions denied: $essentialDenied - AI service not started")
+            Toast.makeText(this, R.string.bluetooth_permission_needed, Toast.LENGTH_LONG).show()
         }
     }
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Auto start service
-        checkPermissionsAndStart()
-        
+
+        // Nothing is requested at launch: permissions are asked for in context, when the user
+        // starts the feature that needs them. Users who already granted Bluetooth access keep
+        // the automatic service start.
+        if (essentialPermissions().all(::isGranted)) {
+            startAIService()
+        }
+
         setContent {
             RokidPhoneTheme {
                 Surface(
@@ -87,38 +134,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    
+
+    /** User-initiated: ask for what is missing, then start the glasses service. */
     private fun checkPermissionsAndStart() {
-        val requiredPermissions = mutableListOf<String>()
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            requiredPermissions.addAll(listOf(
-                Manifest.permission.BLUETOOTH_CONNECT,
-                Manifest.permission.BLUETOOTH_SCAN,
-                Manifest.permission.BLUETOOTH_ADVERTISE
-            ))
-        } else {
-            requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-        
-        requiredPermissions.add(Manifest.permission.RECORD_AUDIO)
-        
-        // API 33+: foreground service notification requires this runtime permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requiredPermissions.add(Manifest.permission.POST_NOTIFICATIONS)
-        }
-        
-        val notGranted = requiredPermissions.filter {
-            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-        }
-        
-        if (notGranted.isEmpty()) {
+        val missing = (essentialPermissions() + optionalPermissions()).filterNot(::isGranted)
+        if (missing.isEmpty()) {
             startAIService()
         } else {
-            permissionLauncher.launch(notGranted.toTypedArray())
+            permissionLauncher.launch(missing.toTypedArray())
         }
     }
-    
+
     private fun startAIService() {
         val intent = Intent(this, PhoneAIService::class.java)
         try {
@@ -130,27 +156,54 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             // ForegroundServiceStartNotAllowedException (API 31+), SecurityException /
             // IllegalStateException for missing FGS-type permissions (API 34+)
-            android.util.Log.e("MainActivity", "Failed to start AI service", e)
-            // TODO: surface the failure to the user
+            Log.e(TAG, "Failed to start AI service", e)
+            Toast.makeText(this, R.string.service_start_failed, Toast.LENGTH_LONG).show()
         }
     }
-    
+
     private fun stopAIService() {
         stopService(Intent(this, PhoneAIService::class.java))
     }
-}
 
+    private companion object {
+        private const val TAG = "MainActivity"
+    }
+}
 /**
  * Main Screen with Bottom Navigation following Material Design 3
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhoneMainScreen(
     viewModel: PhoneViewModel = viewModel(),
     onStartService: () -> Unit,
     onStopService: () -> Unit
 ) {
+    // Every screen that shows AI-generated text can offer "report this response"
+    AiReportHost {
+        PhoneMainContent(viewModel, onStartService, onStopService)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PhoneMainContent(
+    viewModel: PhoneViewModel,
+    onStartService: () -> Unit,
+    onStopService: () -> Unit
+) {
     val context = LocalContext.current
+
+    // First launch: the user has to read and accept the notice before anything else
+    val onboardingStore = remember { OnboardingStore(context) }
+    var onboardingAccepted by remember { mutableStateOf(onboardingStore.isAccepted()) }
+    if (!onboardingAccepted) {
+        OnboardingScreen(onAccept = {
+            onboardingStore.markAccepted()
+            onboardingAccepted = true
+        })
+        return
+    }
+
     val settingsRepository = remember { SettingsRepository.getInstance(context) }
     val settings by settingsRepository.settingsFlow.collectAsState()
     
@@ -159,7 +212,23 @@ fun PhoneMainScreen(
     val currentDestination = navBackStackEntry?.destination
     
     val uiState by viewModel.uiState.collectAsState()
-    
+
+    // Phone-microphone recording is foreground-only: stop it when the app is hidden.
+    // A configuration change (rotation) also stops the activity, so it is excluded.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP && (context as? Activity)?.isChangingConfigurations != true) {
+                viewModel.onAppBackgrounded()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    // Microphone access is requested only when the user starts a phone recording
+    val startPhoneRecordingWithPermission = rememberMicrophoneGate { viewModel.startPhoneRecording() }
+
     // Check if initial setup is needed when settings are loaded.
     // Key on the derived boolean so unrelated settings changes (TTS rate,
     // model id, ...) don't re-trigger the check and re-show dismissed dialogs.
@@ -175,12 +244,29 @@ fun PhoneMainScreen(
                 viewModel.dismissInitialSetup()
                 navController.navigate(NavRoutes.SETTINGS)
             },
+            onTryDemo = {
+                viewModel.dismissInitialSetup()
+                navController.navigate(NavRoutes.DEMO_CHAT)
+            },
             onDismiss = {
                 viewModel.dismissInitialSetup()
             }
         )
     }
     
+    if (uiState.recordingStoppedInBackground) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissRecordingStoppedNotice() },
+            title = { Text(stringResource(R.string.recording_stopped_background_title)) },
+            text = { Text(stringResource(R.string.recording_stopped_background_message)) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.dismissRecordingStoppedNotice() }) {
+                    Text(stringResource(R.string.close))
+                }
+            }
+        )
+    }
+
     // Show API key warning dialog when triggered by service
     if (uiState.showApiKeyWarning) {
         ApiKeyMissingDialog(
@@ -278,7 +364,7 @@ fun PhoneMainScreen(
                     onStartService = onStartService,
                     onStopService = onStopService,
                     onCapturePhoto = { viewModel.requestCapturePhoto() },
-                    onStartPhoneRecording = { viewModel.startPhoneRecording() },
+                    onStartPhoneRecording = startPhoneRecordingWithPermission,
                     onStartGlassesRecording = { viewModel.startGlassesRecording() },
                     onPauseRecording = { viewModel.pauseRecording() },
                     onStopRecording = { viewModel.stopRecording() },
@@ -490,7 +576,8 @@ fun PhoneMainScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateToLogViewer = { navController.navigate(NavRoutes.LOG_VIEWER) },
                     onNavigateToLlmParameters = { navController.navigate(NavRoutes.LLM_PARAMETERS) },
-                    onNavigateToTtsSettings = { navController.navigate(NavRoutes.TTS_SETTINGS) }
+                    onNavigateToTtsSettings = { navController.navigate(NavRoutes.TTS_SETTINGS) },
+                    onNavigateToDemo = { navController.navigate(NavRoutes.DEMO_CHAT) }
                 )
             }
             
@@ -514,6 +601,10 @@ fun PhoneMainScreen(
                 )
             }
             
+            composable(NavRoutes.DEMO_CHAT) {
+                DemoChatScreen(onBack = { navController.popBackStack() })
+            }
+
             composable(NavRoutes.LOG_VIEWER) {
                 LogViewerScreen(
                     onNavigateBack = { navController.popBackStack() }
@@ -625,6 +716,7 @@ fun ApiKeyMissingDialog(
 @Composable
 fun InitialSetupDialog(
     onGoToSettings: () -> Unit,
+    onTryDemo: () -> Unit,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -648,6 +740,10 @@ fun InitialSetupDialog(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+                TextButton(onClick = onTryDemo) {
+                    Text(stringResource(R.string.demo_try))
+                }
             }
         },
         confirmButton = {

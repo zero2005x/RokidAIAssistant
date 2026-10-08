@@ -379,7 +379,7 @@ class AwsTranscribeSttService(
                     val text = parseEventStreamResponse(bytes.toByteArray())
                     if (!text.isNullOrEmpty()) {
                         state.transcript.append(text)
-                        Log.d(TAG, "Transcript segment: $text")
+                        Log.d(TAG, "Transcript segment (${text.length} characters)")
                     }
                 } catch (e: Exception) {
                     Log.w(TAG, "Error parsing response", e)
@@ -387,7 +387,7 @@ class AwsTranscribeSttService(
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                Log.d(TAG, "Text message: $text")
+                Log.d(TAG, "Text message (${text.length} characters)")
                 parseAwsErrorMessage(text, state)
             }
 

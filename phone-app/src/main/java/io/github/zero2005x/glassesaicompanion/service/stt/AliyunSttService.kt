@@ -1,5 +1,7 @@
 package io.github.zero2005x.glassesaicompanion.service.stt
 
+import io.github.zero2005x.glassesaicompanion.data.log.LogRedactor
+
 import android.util.Base64
 import android.util.Log
 import io.github.zero2005x.glassesaicompanion.service.SpeechErrorCode
@@ -130,7 +132,7 @@ class AliyunSttService(
                             return@withContext null
                         }
                     } else {
-                        Log.e(TAG, "Token request failed: ${response.code}, body: $responseBody")
+                        Log.e(TAG, "Token request failed: ${response.code}, body: ${LogRedactor.snippet(responseBody)}")
                         return@withContext null
                     }
                 }

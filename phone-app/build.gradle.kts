@@ -25,6 +25,10 @@ fun localProperty(name: String): String? = localProps.getProperty(name)?.takeIf 
 val developerGeminiKey = localProps.getProperty("GEMINI_API_KEY", "")
 val developerOpenAiKey = localProps.getProperty("OPENAI_API_KEY", "")
 
+// Where in-app AI content reports are posted (HTTPS only). Not a secret, but environment specific, so it
+// comes from local.properties or -PREPORT_ENDPOINT_URL=... instead of the source tree.
+val reportEndpointUrl: String =
+    localProperty("REPORT_ENDPOINT_URL") ?: providers.gradleProperty("REPORT_ENDPOINT_URL").orNull ?: ""
 
 android {
     namespace = "io.github.zero2005x.glassesaicompanion"
@@ -91,6 +95,7 @@ android {
             versionCode = 5
             versionName = "1.1.0"
             buildConfigField("boolean", "PLAY_DISTRIBUTION", "false")
+            buildConfigField("String", "REPORT_ENDPOINT_URL", "\"$reportEndpointUrl\"")
             buildConfigField("String", "GEMINI_API_KEY", "\"$developerGeminiKey\"")
             buildConfigField("String", "OPENAI_API_KEY", "\"$developerOpenAiKey\"")
             signingConfig = signingConfigs.findByName("githubRelease")
@@ -103,6 +108,7 @@ android {
             versionCode = 1
             versionName = "1.2.0"
             buildConfigField("boolean", "PLAY_DISTRIBUTION", "true")
+            buildConfigField("String", "REPORT_ENDPOINT_URL", "\"$reportEndpointUrl\"")
             buildConfigField("String", "GEMINI_API_KEY", "\"\"")
             buildConfigField("String", "OPENAI_API_KEY", "\"\"")
             signingConfig = signingConfigs.findByName("playUpload")
@@ -283,9 +289,30 @@ val verifyNoDeveloperKeysInRelease = tasks.register("verifyNoDeveloperKeysInRele
         }
     }
 }
+// Google Play policy: an app that generates content with AI must let users report it from inside
+// the app. The report dialog needs an endpoint, so a Play release without one must not be built.
+val verifyReportEndpointForPlayRelease = tasks.register("verifyReportEndpointForPlayRelease") {
+    group = "verification"
+    description = "Fails if the Play release would ship without an HTTPS AI-report endpoint."
+    val endpoint = reportEndpointUrl
+    doLast {
+        if (!endpoint.startsWith("https://", ignoreCase = true) || endpoint.length <= "https://".length) {
+            throw GradleException(
+                "REPORT_ENDPOINT_URL is not set to an https:// URL. The Play build needs it for the " +
+                    "in-app AI content report. Set it in local.properties or pass " +
+                    "-PREPORT_ENDPOINT_URL=https://..."
+            )
+        }
+    }
+}
+
 tasks.configureEach {
     if (name.matches(Regex("(assemble|bundle|package)Github[A-Za-z]*Release"))) {
         dependsOn(verifyNoDeveloperKeysInRelease)
+    }
+    // Only the bundle is what gets uploaded to Google Play; CI may still assemble a Play APK.
+    if (name.matches(Regex("bundlePlay[A-Za-z]*Release"))) {
+        dependsOn(verifyReportEndpointForPlayRelease)
     }
 }
 

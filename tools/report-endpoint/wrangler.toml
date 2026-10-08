@@ -1,0 +1,14 @@
+# Cloudflare Worker configuration for the report receiver.
+# Replace the KV namespace id with your own (see README.md). No secrets belong in this file.
+name = "glasses-ai-companion-reports"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+[vars]
+# Reports are deleted automatically after this many days. Keep it equal to
+# REPORT_RETENTION_DAYS in the app and to what the privacy policy says.
+RETENTION_DAYS = "90"
+
+[[kv_namespaces]]
+binding = "REPORTS"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"

@@ -29,6 +29,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.github.zero2005x.glassesaicompanion.R
+import io.github.zero2005x.glassesaicompanion.report.ReportButton
+import io.github.zero2005x.glassesaicompanion.report.ReportTarget
 import io.github.zero2005x.glassesaicompanion.service.photo.PhotoData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CancellationException
@@ -407,6 +409,7 @@ private fun PhotoInfoDialog(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    ReportButton(ReportTarget(assistantContent = photoData.analysisResult!!))
                 }
             }
         },

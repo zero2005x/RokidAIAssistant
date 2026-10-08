@@ -1,5 +1,7 @@
 package io.github.zero2005x.glassesaicompanion.ai.catalog
 
+import io.github.zero2005x.glassesaicompanion.data.log.LogRedactor
+
 /**
  * Classified provider error. [message] is always sanitized: it never contains
  * API keys, Authorization headers or request secrets.
@@ -45,43 +47,11 @@ class ProviderApiException(
         /** Upper clamp for Retry-After so absurd/overflowing values cannot stall retries. */
         private const val MAX_RETRY_AFTER_SECONDS = 3600L
 
-        private val credentialSanitizationPatterns = listOf(
-            Regex("Bearer\\s+[A-Za-z0-9._\\-]+"),
-            Regex("Basic\\s+[A-Za-z0-9+/=]+"),
-            Regex("sk-[A-Za-z0-9._\\-]+"),
-            // Google API keys
-            Regex("AIza[0-9A-Za-z_\\-]+"),
-            Regex("AQ\\.[0-9A-Za-z._\\-]+"),
-            // JWTs (header.payload.signature)
-            Regex("eyJ[A-Za-z0-9_\\-]+\\.[A-Za-z0-9_\\-]+\\.[A-Za-z0-9_\\-]*"),
-            // Match query credential names; this is a redaction pattern, not a credential.
-            Regex("(?:key|access_token)=[A-Za-z0-9._\\-]+"),
-            // Generic JSON credential fields: "api_key"/"secret"/"password"/...: "..."
-            Regex(
-                "\\\"(?:api[_-]?key|secret(?:[_-]?key)?|access[_-]?token|password)\\\"\\s*:\\s*\\\"([^\\\"]*)\\\"",
-                RegexOption.IGNORE_CASE
-            )
-        )
-
         /** Remove anything that looks like a credential from an arbitrary message. */
         fun sanitize(raw: String?): String {
             val nonNull = raw ?: return "Unknown provider error"
             if (nonNull.isBlank()) return "Unknown provider error"
-            var out: String = nonNull
-            for (pattern in credentialSanitizationPatterns) {
-                out = pattern.replace(out) { m ->
-                    when {
-                        // JSON field rule: keep the field name, mask the value.
-                        m.groupValues.size > 1 && m.value.startsWith("\"") ->
-                            m.value.substringBeforeLast(m.groupValues[1]) + "***\""
-                        m.value.startsWith("key=", ignoreCase = true) ||
-                            m.value.startsWith("access_token=", ignoreCase = true) ->
-                            m.value.substringBefore('=') + "=***"
-                        else -> "***"
-                    }
-                }
-            }
-            return out.take(MAX_MESSAGE_LENGTH)
+            return LogRedactor.redact(nonNull).take(MAX_MESSAGE_LENGTH)
         }
 
         fun fromHttpStatus(

@@ -17,6 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.zero2005x.glassesaicompanion.R
+import io.github.zero2005x.glassesaicompanion.report.ReportButton
+import io.github.zero2005x.glassesaicompanion.report.ReportTarget
 import io.github.zero2005x.glassesaicompanion.data.db.*
 import io.github.zero2005x.glassesaicompanion.ui.theme.ExtendedTheme
 import io.github.zero2005x.glassesaicompanion.viewmodel.RecordingViewModel
@@ -566,6 +568,13 @@ private fun AiResponseSection(
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
+                ReportButton(
+                    ReportTarget(
+                        assistantContent = recording.aiResponse!!,
+                        userContent = recording.transcript,
+                        modelId = recording.modelId
+                    )
+                )
                 
                 if (recording.modelId != null) {
                     Spacer(modifier = Modifier.height(8.dp))

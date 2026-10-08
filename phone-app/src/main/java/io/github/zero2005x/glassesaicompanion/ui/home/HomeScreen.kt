@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.rokidcommon.protocol.ConnectionState
 import io.github.zero2005x.glassesaicompanion.ConversationItem
+import io.github.zero2005x.glassesaicompanion.report.ReportButton
+import io.github.zero2005x.glassesaicompanion.report.ReportTarget
 import io.github.zero2005x.glassesaicompanion.R
 import io.github.zero2005x.glassesaicompanion.data.AvailableModels
 import io.github.zero2005x.glassesaicompanion.data.db.RecordingSource
@@ -214,8 +216,10 @@ fun HomeScreen(
                         modifier = Modifier.padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        conversations.takeLast(6).forEach { item ->
-                            ConversationBubbleCard(item = item)
+                        val recent = conversations.takeLast(6)
+                        recent.forEachIndexed { index, item ->
+                            val answeredPrompt = recent.take(index).lastOrNull { it.role == "user" }?.content
+                            ConversationBubbleCard(item = item, answeredPrompt = answeredPrompt)
                         }
                     }
                 }
@@ -519,12 +523,13 @@ private fun ServiceCard(
 }
 
 @Composable
-private fun ConversationBubbleCard(item: ConversationItem) {
+private fun ConversationBubbleCard(item: ConversationItem, answeredPrompt: String? = null) {
     val isUser = item.role == "user"
     
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
+        horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
+        verticalAlignment = Alignment.Bottom
     ) {
         Surface(
             shape = if (isUser) AppShapeTokens.MessageBubbleUser else AppShapeTokens.MessageBubbleAssistant,
@@ -539,6 +544,9 @@ private fun ConversationBubbleCard(item: ConversationItem) {
                 modifier = Modifier.padding(12.dp),
                 style = MaterialTheme.typography.bodyMedium
             )
+        }
+        if (!isUser) {
+            ReportButton(ReportTarget(assistantContent = item.content, userContent = answeredPrompt))
         }
     }
 }

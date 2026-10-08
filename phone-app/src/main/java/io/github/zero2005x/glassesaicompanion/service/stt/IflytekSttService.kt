@@ -1,5 +1,7 @@
 package io.github.zero2005x.glassesaicompanion.service.stt
 
+import io.github.zero2005x.glassesaicompanion.data.log.LogRedactor
+
 import android.util.Base64
 import android.util.Log
 import io.github.zero2005x.glassesaicompanion.service.SpeechErrorCode
@@ -80,7 +82,7 @@ class IflytekSttService(
                         if (response.isSuccessful && responseBody != null) {
                             parseTranscript(responseBody)
                         } else {
-                            Log.e(TAG, "API error: ${response.code}, body: $responseBody")
+                            Log.e(TAG, "API error: ${response.code}, body: ${LogRedactor.snippet(responseBody)}")
                             null
                         }
                     }
@@ -203,7 +205,7 @@ class IflytekSttService(
                 Log.w(TAG, "Empty transcript from iFLYTEK")
                 null
             } else {
-                Log.d(TAG, "Transcription: $text")
+                Log.d(TAG, "Transcription (${text.length} characters)")
                 text
             }
         } catch (e: Exception) {

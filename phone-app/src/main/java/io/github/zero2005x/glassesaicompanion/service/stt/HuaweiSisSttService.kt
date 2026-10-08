@@ -130,7 +130,7 @@ class HuaweiSisSttService(
 
                         override fun onMessage(webSocket: WebSocket, text: String) {
                             try {
-                                Log.d(TAG, "Received message: $text")
+                                Log.d(TAG, "Received message (${text.length} characters)")
                                 val json = JSONObject(text)
                                 
                                 when {

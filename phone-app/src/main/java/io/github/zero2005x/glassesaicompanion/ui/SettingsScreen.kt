@@ -59,6 +59,7 @@ fun SettingsScreen(
     onNavigateToLogViewer: () -> Unit = {},
     onNavigateToLlmParameters: () -> Unit = {},
     onNavigateToTtsSettings: () -> Unit = {},
+    onNavigateToDemo: () -> Unit = {},
     onTestConnection: (ApiSettings) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -532,6 +533,17 @@ fun SettingsScreen(
                 }
             }
             
+            // Offline demo: see the chat without an API key
+            item {
+                SettingsSection(title = stringResource(R.string.demo_section_title)) {
+                    SettingsRow(
+                        title = stringResource(R.string.demo_try),
+                        subtitle = stringResource(R.string.demo_try_description),
+                        onClick = onNavigateToDemo,
+                        icon = Icons.Default.PlayCircle
+                    )
+                }
+            }
 
             // Developer Tools section
             item {
