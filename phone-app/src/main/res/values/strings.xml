@@ -230,6 +230,7 @@
     <string name="connection_success">Connection successful!</string>
     <string name="connection_failed">Connection failed: %s</string>
     <string name="invalid_url">Invalid URL format. Use http:// or https://</string>
+    <string name="custom_url_https_required">Plain HTTP is only allowed for localhost. Please use an HTTPS address.</string>
     <string name="api_key_optional">API Key is optional for local models</string>
     
     <!-- Notification & Status -->
@@ -237,6 +238,8 @@
     <string name="recognizing_speech">Recognizing speech...</string>
     <string name="processing_failed">Processing failed: %s</string>
     <string name="waiting_glasses">Waiting for glasses connection...</string>
+    <string name="notification_channel_name" translatable="false">Glasses connection service</string>
+    <string name="notification_channel_description" translatable="false">Keeps the connection to your glasses alive while the app is in use</string>
     <string name="connected_glasses">Connected to glasses</string>
     
     <!-- AI Provider Names -->

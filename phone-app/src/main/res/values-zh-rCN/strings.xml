@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Info -->
     <string name="app_name">Rokid AI 助手</string>
@@ -576,4 +576,6 @@
     <string name="routing_llm_description">使用已有供应商密钥，只发送本次问题进行分类，会增加一次付费 API 请求。LLM 的确定程度不是经过校准的概率；不确定或超时时使用主要模型。</string>
     <string name="routing_reason_selected_llm">%1$s 通过结构化分类选择%2$s。</string>
     <string name="glasses_preview_metrics">APP 显示范围：%1$d × %2$d px</string>
+    <!-- Distribution policy: HTTPS only, plain HTTP is allowed for localhost -->
+    <string name="custom_url_https_required">仅允许对 localhost 使用纯 HTTP，请改用 HTTPS 地址。</string>
 </resources>

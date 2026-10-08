@@ -33,3 +33,8 @@ RELEASE_STORE_FILE=path/to/your/keystore.jks
 RELEASE_STORE_PASSWORD=your_keystore_password
 RELEASE_KEY_ALIAS=your_key_alias
 RELEASE_KEY_PASSWORD=your_key_password
+# Google Play upload key (use a different key from the GitHub release key above)
+PLAY_UPLOAD_STORE_FILE=path/to/play-upload.jks
+PLAY_UPLOAD_STORE_PASSWORD=your_upload_keystore_password
+PLAY_UPLOAD_KEY_ALIAS=your_upload_key_alias
+PLAY_UPLOAD_KEY_PASSWORD=your_upload_key_password

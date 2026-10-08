@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import io.github.zero2005x.glassesaicompanion.R
 import io.github.zero2005x.glassesaicompanion.data.ApiSettings
 import io.github.zero2005x.glassesaicompanion.data.TtsProvider
+import io.github.zero2005x.glassesaicompanion.data.distribution
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -79,7 +80,7 @@ fun TtsSettingsScreen(
                     IconButton(onClick = {
                         onSettingsChange(
                             settings.copy(
-                                ttsProvider = TtsProvider.EDGE_TTS,
+                                ttsProvider = distribution.defaultTtsProvider,
                                 ttsVoiceOverride = "",
                                 ttsSpeechRate = 1.0f,
                                 ttsPitch = 0.0f,
@@ -134,7 +135,7 @@ fun TtsSettingsScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    TtsProvider.entries.forEach { provider ->
+                    distribution.ttsProviders().forEach { provider ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()

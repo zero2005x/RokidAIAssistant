@@ -17,10 +17,10 @@ class PhoneApplication : Application() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 Constants.NOTIFICATION_CHANNEL_ID,
-                "Rokid AI Service",
+                getString(R.string.notification_channel_name),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Rokid AI Voice Assistant Service"
+                description = getString(R.string.notification_channel_description)
                 setShowBadge(false)
             }
             

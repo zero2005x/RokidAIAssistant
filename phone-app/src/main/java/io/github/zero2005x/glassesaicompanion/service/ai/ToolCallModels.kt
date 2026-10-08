@@ -1,5 +1,7 @@
 package io.github.zero2005x.glassesaicompanion.service.ai
 
+import io.github.zero2005x.glassesaicompanion.data.distribution
+
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -205,6 +207,25 @@ object ToolDeclarations {
     }
 
     /**
+     * The declarations to actually send to the model for this distribution channel.
+     *
+     * When [permissionGatedToolsEnabled] is false (Google Play build) the calendar tool is
+     * dropped and make_call no longer accepts a contact name, because those need
+     * READ_CALENDAR / READ_CONTACTS, which the app does not declare. The model is therefore
+     * never offered a tool that cannot work.
+     */
+    fun enabledDeclarations(
+        permissionGatedToolsEnabled: Boolean = distribution.permissionGatedToolsEnabled
+    ): List<JSONObject> {
+        if (permissionGatedToolsEnabled) return allDeclarations()
+        return listOf(
+            executeToolDeclaration(),
+            searchToolDeclaration(),
+            makeCallToolDeclaration(includeContactName = false)
+        )
+    }
+
+    /**
      * execute — Universal task execution tool
      *
      * The model can use this tool to request execution of arbitrary tasks,
@@ -309,13 +330,17 @@ object ToolDeclarations {
     /**
      * make_call — Start a phone call via dialer
      */
-    private fun makeCallToolDeclaration(): JSONObject {
+    private fun makeCallToolDeclaration(includeContactName: Boolean = true): JSONObject {
         return JSONObject().apply {
             put("function_declarations", JSONArray().apply {
                 put(JSONObject().apply {
                     put("name", "make_call")
                     put("description",
-                        "Initiate a phone call by using a phone number or contact name."
+                        if (includeContactName) {
+                            "Initiate a phone call by using a phone number or contact name."
+                        } else {
+                            "Open the phone dialer with a phone number."
+                        }
                     )
                     put("parameters", JSONObject().apply {
                         put("type", "object")
@@ -324,10 +349,12 @@ object ToolDeclarations {
                                 put("type", "string")
                                 put("description", "Target phone number in local or international format")
                             })
-                            put("contact_name", JSONObject().apply {
-                                put("type", "string")
-                                put("description", "Target contact name to dial")
-                            })
+                            if (includeContactName) {
+                                put("contact_name", JSONObject().apply {
+                                    put("type", "string")
+                                    put("description", "Target contact name to dial")
+                                })
+                            }
                         })
                     })
                 })

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Info -->
     <string name="app_name">Rokid AI Assistant</string>
@@ -579,4 +579,6 @@
     <string name="routing_llm_description">Dùng khóa nhà cung cấp hiện có. Chỉ gửi câu hỏi hiện tại để phân loại, thêm một yêu cầu API có tính phí. Độ chắc chắn của LLM không phải xác suất đã hiệu chỉnh. Khi không chắc chắn hoặc hết thời gian, dùng mô hình chính.</string>
     <string name="routing_reason_selected_llm">%1$s chọn %2$s bằng phân loại có cấu trúc.</string>
     <string name="glasses_preview_metrics">Vùng hiển thị ứng dụng: %1$d × %2$d px</string>
+    <!-- Distribution policy: HTTPS only, plain HTTP is allowed for localhost -->
+    <string name="custom_url_https_required">HTTP không mã hóa chỉ được phép với localhost. Vui lòng dùng địa chỉ HTTPS.</string>
 </resources>

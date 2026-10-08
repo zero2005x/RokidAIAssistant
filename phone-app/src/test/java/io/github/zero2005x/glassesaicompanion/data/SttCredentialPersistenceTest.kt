@@ -43,6 +43,9 @@ class SttCredentialPersistenceTest {
             .apply { isAccessible = true }
             .invoke(repository) as ApiSettings
 
+    /** The Play channel offers only three speech providers, so a stored Deepgram selection loads as Gemini there. */
+    private val loadedSttProvider = if (distribution.isPlay) SttProvider.GEMINI else SttProvider.DEEPGRAM
+
     /** Every speech-to-text credential, each with a value of its own. */
     private fun ApiSettings.withAllSttCredentials() = copy(
         sttProvider = SttProvider.DEEPGRAM,
@@ -140,7 +143,7 @@ class SttCredentialPersistenceTest {
     fun `every credential is read back from storage`() {
         val reloaded = reloadFromStorage()
 
-        assertThat(reloaded.sttProvider).isEqualTo(SttProvider.DEEPGRAM)
+        assertThat(reloaded.sttProvider).isEqualTo(loadedSttProvider)
         assertThat(reloaded.deepgramApiKey).isEqualTo("deepgram-key")
         assertThat(reloaded.assemblyaiApiKey).isEqualTo("assembly-key")
         assertThat(reloaded.gcpProjectId).isEqualTo("gcp-project")
@@ -205,7 +208,7 @@ class SttCredentialPersistenceTest {
         // toSttCredentials is what SttServiceFactory is built from.
         val credentials = reloadFromStorage().toSttCredentials()
 
-        assertThat(credentials.selectedProvider).isEqualTo(SttProvider.DEEPGRAM.name)
+        assertThat(credentials.selectedProvider).isEqualTo(loadedSttProvider.name)
         assertThat(credentials.deepgramApiKey).isEqualTo("deepgram-key")
         assertThat(credentials.tencentSecretId).isEqualTo("tencent-id")
         assertThat(credentials.speechmaticsApiKey).isEqualTo("speechmatics-key")

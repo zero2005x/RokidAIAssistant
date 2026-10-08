@@ -2,6 +2,7 @@ package io.github.zero2005x.glassesaicompanion.service.ai
 
 import android.content.Context
 import android.util.Log
+import io.github.zero2005x.glassesaicompanion.data.distribution
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -122,7 +123,7 @@ class GeminiLiveSession(
 
     /**
      * Tool declaration list
-     * Uses ToolDeclarations.allDeclarations() to provide default declarations
+     * Uses ToolDeclarations.enabledDeclarations() to provide default declarations
      */
     private var toolDeclarations: List<JSONObject>? = null
 
@@ -160,8 +161,10 @@ class GeminiLiveSession(
             toolCallRouter = ToolCallRouter(scope).also { router ->
                 val systemToolsHandler = SystemToolsHandler(context)
 
-                router.registerHandler("check_schedule") { call ->
-                    systemToolsHandler.handleCheckSchedule(call)
+                if (distribution.permissionGatedToolsEnabled) {
+                    router.registerHandler("check_schedule") { call ->
+                        systemToolsHandler.handleCheckSchedule(call)
+                    }
                 }
 
                 router.registerHandler("make_call") { call ->
@@ -514,6 +517,6 @@ class GeminiLiveSession(
      * Get default tool declarations (delegated to ToolDeclarations)
      */
     fun getDefaultToolDeclarations(): List<JSONObject> {
-        return ToolDeclarations.allDeclarations()
+        return ToolDeclarations.enabledDeclarations()
     }
 }

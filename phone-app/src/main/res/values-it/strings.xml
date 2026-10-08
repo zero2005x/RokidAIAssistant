@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Info -->
     <string name="app_name">Rokid AI Assistente</string>
@@ -579,4 +579,6 @@
     <string name="routing_llm_description">Usa la chiave esistente del fornitore. Viene inviata solo la domanda attuale per la classificazione, con una richiesta API a pagamento aggiuntiva. La certezza del LLM non è una probabilità calibrata. In caso di dubbio o timeout viene usato il modello principale.</string>
     <string name="routing_reason_selected_llm">%1$s ha scelto %2$s tramite classificazione strutturata.</string>
     <string name="glasses_preview_metrics">Area dell’applicazione: %1$d × %2$d px</string>
+    <!-- Distribution policy: HTTPS only, plain HTTP is allowed for localhost -->
+    <string name="custom_url_https_required">L’HTTP non cifrato è consentito solo per localhost. Usa un indirizzo HTTPS.</string>
 </resources>

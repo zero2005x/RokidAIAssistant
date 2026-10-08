@@ -54,7 +54,7 @@ class BluetoothSppManager(
 ) {
     companion object {
         private const val TAG = "BluetoothSppManager"
-        private const val SERVICE_NAME = "RokidAIAssistant"
+        private const val SERVICE_NAME = "GlassesAICompanion"
         // Custom UUID (to identify our application)
         private val APP_UUID: UUID = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567890")
         

@@ -27,7 +27,9 @@ import io.github.zero2005x.glassesaicompanion.service.ai.DecisionRouter
 import io.github.zero2005x.glassesaicompanion.service.ai.RoutedReply
 import io.github.zero2005x.glassesaicompanion.data.db.MessageRole
 import io.github.zero2005x.glassesaicompanion.service.ai.GeminiLiveSession
-import io.github.zero2005x.glassesaicompanion.service.cxr.CxrMobileManager
+import io.github.zero2005x.glassesaicompanion.service.cxr.CxrGlassesBridge
+import io.github.zero2005x.glassesaicompanion.service.cxr.CxrHost
+import io.github.zero2005x.glassesaicompanion.service.cxr.createCxrGlassesBridge
 import io.github.zero2005x.glassesaicompanion.service.stt.SttProvider
 import io.github.zero2005x.glassesaicompanion.service.stt.SttService
 import io.github.zero2005x.glassesaicompanion.service.stt.SttServiceFactory
@@ -36,7 +38,6 @@ import io.github.zero2005x.glassesaicompanion.service.ServiceBridge.notifyApiKey
 import io.github.zero2005x.glassesaicompanion.service.photo.PhotoData
 import io.github.zero2005x.glassesaicompanion.service.photo.PhotoRepository
 import io.github.zero2005x.glassesaicompanion.service.photo.ReceivedPhoto
-import com.rokid.cxr.client.utils.ValueUtil
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.sync.Mutex
@@ -97,9 +98,10 @@ class PhoneAIService : Service() {
     // Bluetooth manager (legacy SPP connection)
     private var bluetoothManager: BluetoothSppManager? = null
     
-    // CXR-M SDK Manager (for Rokid glasses connection and photo capture)
-    private var cxrManager: CxrMobileManager? = null
+    // Optional CXR-M SDK integration (GitHub flavor only; no-op in the Play flavor)
+    private var cxrBridge: CxrGlassesBridge? = null
     private var pendingCxrInit: kotlinx.coroutines.Job? = null
+    // True when the glasses app takes photos over the SPP link, so the SDK link is not needed
     private var companionCamera = false
     
     // Gemini Live session (real-time bidirectional voice)
@@ -156,7 +158,7 @@ class PhoneAIService : Service() {
         liveSession?.release()
         liveSession = null
         bluetoothManager?.disconnect()
-        cxrManager?.release()
+        cxrBridge?.release()
         ttsService?.shutdown()
         sttService?.release()
     }
@@ -276,10 +278,10 @@ class PhoneAIService : Service() {
                                 kotlinx.coroutines.delay(3000)
                                 if (!companionCamera && device != null &&
                                     bluetoothManager?.connectionState?.value == BluetoothConnectionState.CONNECTED &&
-                                    bluetoothManager?.connectedDevice == device) cxrManager?.initBluetooth(device)
+                                    bluetoothManager?.connectedDevice == device) cxrBridge?.onSppConnected(device)
                             }
                         } else {
-                            cxrManager?.disconnectBluetooth()
+                            cxrBridge?.onSppDisconnected()
                         }
                     }
                 } catch (e: Exception) {
@@ -450,124 +452,29 @@ class PhoneAIService : Service() {
         bluetoothManager?.sendMessage(Message(type = MessageType.CAPTURE_PHOTO))
     }
     
+    /** Host callbacks for the flavor-specific CXR integration. */
+    private val cxrHost = object : CxrHost {
+        override val context get() = this@PhoneAIService
+        override val scope get() = serviceScope
+        override suspend fun sendToGlasses(message: Message) {
+            bluetoothManager?.sendMessage(message)
+        }
+        override suspend fun onPhotoCaptured(photoData: ByteArray) {
+            handleCxrPhotoResult(photoData)
+        }
+        override val companionCamera get() = this@PhoneAIService.companionCamera
+        override suspend fun requestCompanionPhoto() {
+            requestGlassesToCapturePhoto()
+        }
+    }
+
     /**
-     * Initialize CXR-M SDK for Rokid glasses connection
-     * This enables:
-     * - AI key event listening (long press on glasses)
-     * - Remote photo capture from glasses
+     * Start the optional CXR-M SDK integration (AI key events, remote photo capture).
+     * The Play flavor ships a no-op bridge.
      */
     private fun initializeCxrSdk() {
-        if (!CxrMobileManager.isSdkAvailable()) {
-            Log.w(TAG, "CXR-M SDK not available")
-            return
-        }
-        
-        try {
-            cxrManager = CxrMobileManager(this)
-            
-            // Set AI event listener for glasses key press
-            cxrManager?.setAiEventListener(
-                onKeyDown = {
-                    Log.d(TAG, "CXR: AI key pressed on glasses")
-                    // Trigger photo capture when AI key is pressed
-                    serviceScope.launch {
-                        if (companionCamera) requestGlassesToCapturePhoto() else capturePhotoFromGlasses()
-                    }
-                },
-                onKeyUp = {
-                    Log.d(TAG, "CXR: AI key released")
-                },
-                onExit = {
-                    Log.d(TAG, "CXR: AI scene exited")
-                }
-            )
-            
-            // Monitor CXR Bluetooth connection state
-            serviceScope.launch {
-                cxrManager?.bluetoothState?.collect { state ->
-                    Log.d(TAG, "CXR Bluetooth state: $state")
-                    when (state) {
-                        is CxrMobileManager.BluetoothState.Connected -> {
-                            Log.d(TAG, "CXR connected: ${state.macAddress}")
-                        }
-                        is CxrMobileManager.BluetoothState.Disconnected -> {
-                            Log.d(TAG, "CXR disconnected")
-                        }
-                        is CxrMobileManager.BluetoothState.Failed -> {
-                            Log.e(TAG, "CXR connection failed: ${state.error}")
-                        }
-                        else -> {}
-                    }
-                }
-            }
-            
-            Log.d(TAG, "CXR-M SDK initialized")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize CXR-M SDK", e)
-        }
+        cxrBridge = createCxrGlassesBridge(cxrHost).also { it.start() }
     }
-    
-    /**
-     * Capture photo from glasses using CXR-M SDK
-     */
-    private suspend fun capturePhotoFromGlasses() {
-        val cxr = cxrManager ?: run {
-            Log.w(TAG, "CXR manager not available, using legacy photo transfer")
-            return
-        }
-        
-        if (!cxr.isBluetoothConnected()) {
-            Log.w(TAG, "CXR not connected to glasses")
-            bluetoothManager?.sendMessage(Message.aiError(getString(R.string.glasses_not_connected_cxr)))
-            return
-        }
-        
-        // Check API key before triggering photo capture (provider-agnostic)
-        val settingsRepository = SettingsRepository.getInstance(this)
-        val apiKey = settingsRepository.getSettings().getCurrentApiKey()
-        if (apiKey.isBlank()) {
-            Log.e(TAG, "API key is not configured, aborting photo capture")
-            bluetoothManager?.sendMessage(Message.aiError(getString(R.string.api_key_not_configured)))
-            return
-        }
-        
-        Log.d(TAG, "Capturing photo from glasses via CXR SDK...")
-        
-        // Notify glasses: taking photo
-        cxr.sendTtsContent(getString(R.string.taking_photo))
-        
-        // Take photo using CXR SDK
-        val status = cxr.takePhoto(
-            width = 1280,
-            height = 720,
-            quality = 80
-        ) { resultStatus, photoData ->
-            serviceScope.launch {
-                when (resultStatus) {
-                    ValueUtil.CxrStatus.RESPONSE_SUCCEED -> {
-                        if (photoData != null && photoData.isNotEmpty()) {
-                            Log.d(TAG, "CXR photo received: ${photoData.size} bytes")
-                            handleCxrPhotoResult(photoData)
-                        } else {
-                            Log.e(TAG, "CXR photo is empty")
-                            bluetoothManager?.sendMessage(Message.aiError(getString(R.string.photo_empty)))
-                        }
-                    }
-                    ValueUtil.CxrStatus.RESPONSE_TIMEOUT -> {
-                        Log.e(TAG, "CXR photo timeout")
-                        bluetoothManager?.sendMessage(Message.aiError(getString(R.string.photo_timeout)))
-                    }
-                    else -> {
-                        Log.e(TAG, "CXR photo failed: $resultStatus")
-                        bluetoothManager?.sendMessage(Message.aiError(getString(R.string.photo_capture_failed, resultStatus)))
-                    }
-                }
-            }
-        }
-        
-        Log.d(TAG, "CXR takePhoto request status: $status")
-    }
-    
     /**
      * Handle photo captured via CXR SDK
      */
@@ -602,7 +509,7 @@ class PhoneAIService : Service() {
                     if (org.json.JSONObject(message.payload.orEmpty()).optString("cameraTransport") == "spp") {
                         companionCamera = true
                         pendingCxrInit?.cancel()
-                        cxrManager?.disconnectBluetooth()
+                        cxrBridge?.onSppDisconnected()
                         Log.d(TAG, "Companion camera transport: SPP; display ${metrics.widthPx}x${metrics.heightPx}")
                     }
                 }
@@ -1460,8 +1367,8 @@ class PhoneAIService : Service() {
     
     private fun createNotification(): Notification {
         return NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID)
-            .setContentTitle("Rokid AI Assistant")
-            .setContentText("Service running, waiting for glasses connection...")
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText(getString(R.string.waiting_glasses))
             .setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(createPendingIntent())
             .setOngoing(true)

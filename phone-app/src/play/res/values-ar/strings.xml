@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Google Play flavor branding: overrides the Rokid-branded strings of the main source set. -->
+<resources>
+    <string name="app_name">Glasses AI Companion</string>
+    <string name="app_title">Glasses AI Companion</string>
+    <string name="home_welcome">مرحباً بك في Glasses AI Companion</string>
+    <string name="initial_setup_message">لاستخدام مساعد الصوت بالذكاء الاصطناعي وميزات التعرف على الصور، تحتاج إلى إعداد مفتاح API واحد على الأقل.\n\nالخدمات المدعومة:\n• Google Gemini\n• OpenAI\n• Anthropic Claude\n• نقطة نهاية مخصصة متوافقة مع OpenAI</string>
+    <string name="initial_setup_hint">يمكنك الحصول على مفتاح API من موقع خدمة الذكاء الاصطناعي التي تختارها.</string>
+    <string name="tts_settings_description">تكوين إخراج تحويل النص إلى كلام (TTS). يستخدم التطبيق محرك تحويل النص إلى كلام في هاتفك.</string>
+    <string name="tts_settings_note">تعتمد جودة الصوت واللغات المدعومة على محرك الصوت والأصوات المثبّتة على هاتفك.</string>
+</resources>

@@ -532,6 +532,7 @@ fun SettingsScreen(
                 }
             }
             
+
             // Developer Tools section
             item {
                 SettingsSection(title = stringResource(R.string.developer_tools)) {
@@ -544,10 +545,12 @@ fun SettingsScreen(
                 }
             }
 
-            // Support section
-            item {
-                SettingsSection(title = "Support") {
-                    KofiButton(modifier = Modifier.fillMaxWidth())
+            // Support section (not shown in the Google Play build)
+            if (distribution.showDonationLink) {
+                item {
+                    SettingsSection(title = "Support") {
+                        DonationButton(modifier = Modifier.fillMaxWidth())
+                    }
                 }
             }
             }
@@ -963,32 +966,6 @@ fun SettingsSection(
 }
 
 @Composable
-fun KofiButton(modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    Button(
-        onClick = {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://ko-fi.com/liangtinglin"))
-            context.startActivity(intent)
-        },
-        modifier = modifier,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFFFF5E5B)
-        )
-    ) {
-        Icon(
-            imageVector = Icons.Default.LocalCafe,
-            contentDescription = null,
-            tint = Color.White
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = "Support me on Ko-fi",
-            color = Color.White
-        )
-    }
-}
-
-@Composable
 fun SettingsRow(
     title: String,
     subtitle: String,
@@ -1141,7 +1118,8 @@ fun ProviderSelectionDialog(
                     .fillMaxWidth()
                     .heightIn(max = 480.dp)
             ) {
-                items(availableProviders, key = { it.name }) { provider ->
+                // The distribution (Play vs GitHub) decides which providers may be offered at all
+                items(availableProviders.filter { it in distribution.aiProviders() }, key = { it.name }) { provider ->
                     val descriptor = io.github.zero2005x.glassesaicompanion.ai.catalog.ProviderRegistry.descriptorFor(provider)
                     Row(
                         modifier = Modifier
@@ -1555,7 +1533,7 @@ fun SttProviderSelectionDialog(
     onSelect: (SttProvider) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val implementedProviders = remember { SttServiceFactory.getImplementedProviders() }
+    val implementedProviders = remember { distribution.sttProviders(SttServiceFactory.getImplementedProviders()) }
     
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -2003,7 +1981,7 @@ fun CustomProviderSection(
     onCapabilityOverridesChange: (Set<String>) -> Unit = {}
 ) {
     var isValidUrl by remember(baseUrl) { 
-        mutableStateOf(isHttpUrl(baseUrl))
+        mutableStateOf(isAllowedEndpointUrl(baseUrl))
     }
     var isTesting by remember { mutableStateOf(false) }
     var testResult by remember { mutableStateOf<String?>(null) }
@@ -2028,7 +2006,7 @@ fun CustomProviderSection(
                 value = baseUrl,
                 onValueChange = { 
                     onBaseUrlChange(it)
-                    isValidUrl = isHttpUrl(it)
+                    isValidUrl = isAllowedEndpointUrl(it)
                 },
                 label = { Text(stringResource(R.string.base_url)) },
                 placeholder = { Text(stringResource(R.string.base_url_hint)) },
@@ -2038,7 +2016,13 @@ fun CustomProviderSection(
                 supportingText = {
                     if (baseUrl.isNotBlank() && !isValidUrl) {
                         Text(
-                            text = stringResource(R.string.invalid_url),
+                            text = stringResource(
+                                if (baseUrl.trim().startsWith(URL_SCHEME_HTTP, ignoreCase = true)) {
+                                    R.string.custom_url_https_required
+                                } else {
+                                    R.string.invalid_url
+                                }
+                            ),
                             color = MaterialTheme.colorScheme.error
                         )
                     }

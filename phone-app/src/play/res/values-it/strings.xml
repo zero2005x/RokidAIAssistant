@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Google Play flavor branding: overrides the Rokid-branded strings of the main source set. -->
+<resources>
+    <string name="app_name">Glasses AI Companion</string>
+    <string name="app_title">Glasses AI Companion</string>
+    <string name="home_welcome">Benvenuto in Glasses AI Companion</string>
+    <string name="initial_setup_message">Per utilizzare l\'assistente vocale AI e le funzionalità di riconoscimento immagini, è necessario configurare almeno una chiave API.\n\nServizi supportati:\n• Google Gemini\n• OpenAI\n• Anthropic Claude\n• Endpoint personalizzato compatibile con OpenAI</string>
+    <string name="initial_setup_hint">Puoi ottenere una chiave API dal sito web del servizio di IA che scegli.</string>
+    <string name="tts_settings_description">Configura l’uscita di sintesi vocale (TTS). L’app usa il motore di sintesi vocale del tuo telefono.</string>
+    <string name="tts_settings_note">La qualità della voce e le lingue supportate dipendono dal motore vocale e dalle voci installati sul tuo telefono.</string>
+</resources>

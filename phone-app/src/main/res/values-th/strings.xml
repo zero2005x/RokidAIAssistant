@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Info -->
     <string name="app_name">Rokid AI Assistant</string>
@@ -581,4 +581,6 @@
     <string name="routing_llm_description">ใช้คีย์ผู้ให้บริการที่มีอยู่ ส่งเฉพาะคำถามปัจจุบันเพื่อจัดประเภท โดยเพิ่มคำขอ API ที่มีค่าใช้จ่ายหนึ่งครั้ง ความมั่นใจของ LLM ไม่ใช่ความน่าจะเป็นที่ผ่านการปรับเทียบ หากไม่แน่ใจหรือหมดเวลา จะใช้โมเดลหลัก</string>
     <string name="routing_reason_selected_llm">%1$s เลือก %2$s ด้วยการจัดประเภทแบบมีโครงสร้าง</string>
     <string name="glasses_preview_metrics">พื้นที่แสดงผลแอป: %1$d × %2$d px</string>
+    <!-- Distribution policy: HTTPS only, plain HTTP is allowed for localhost -->
+    <string name="custom_url_https_required">อนุญาต HTTP แบบไม่เข้ารหัสเฉพาะกับ localhost เท่านั้น โปรดใช้ที่อยู่ HTTPS</string>
 </resources>

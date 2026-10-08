@@ -69,8 +69,9 @@ jobs:
           python3 - <<'PY'
           import pathlib
           import xml.etree.ElementTree as ET
-          for module in ("common", "glasses-app", "phone-app"):
-              path = pathlib.Path(module) / "build/reports/coverage/test/debug/report.xml"
+          variants = {"common": "debug", "glasses-app": "debug", "phone-app": "githubDebug"}
+          for module, variant in variants.items():
+              path = pathlib.Path(module) / f"build/reports/coverage/test/{variant}/report.xml"
               report = ET.parse(path).getroot()
               covered = sum(int(line.get("ci", "0")) > 0
                             for line in report.findall("./package/sourcefile/line"))

@@ -172,11 +172,11 @@ class ApiSettingsTest {
     // ==================== TTS settings ====================
 
     @Test
-    fun `default TTS settings use EDGE_TTS with auto-detect`() {
-        // 測試：預設 TTS 設定應使用 EDGE_TTS 引擎並自動偵測語音
+    fun `default TTS settings use the channel default engine with auto-detect`() {
+        // 測試：預設 TTS 設定應使用該發行管道的預設引擎（GitHub: EDGE_TTS、Play: SYSTEM_TTS）並自動偵測語音
         val settings = ApiSettings()
 
-        assertThat(settings.ttsProvider).isEqualTo(TtsProvider.EDGE_TTS)
+        assertThat(settings.ttsProvider).isEqualTo(distribution.defaultTtsProvider)
         assertThat(settings.ttsVoiceOverride).isEmpty()
         assertThat(settings.ttsSpeechRate).isEqualTo(1.0f)
         assertThat(settings.ttsPitch).isEqualTo(0.0f)

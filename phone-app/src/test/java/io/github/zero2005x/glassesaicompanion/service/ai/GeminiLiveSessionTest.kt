@@ -1,5 +1,7 @@
 package io.github.zero2005x.glassesaicompanion.service.ai
 
+import io.github.zero2005x.glassesaicompanion.data.distribution
+
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -86,9 +88,10 @@ class GeminiLiveSessionTest {
     // ==================== getDefaultToolDeclarations ====================
 
     @Test
-    fun `getDefaultToolDeclarations returns four declarations`() {
+    fun `getDefaultToolDeclarations returns the declarations of this channel`() {
         val declarations: List<JSONObject> = session.getDefaultToolDeclarations()
-        assertThat(declarations).hasSize(4)
+        // Play build drops the calendar tool (no READ_CALENDAR); GitHub build offers all four.
+        assertThat(declarations).hasSize(if (distribution.permissionGatedToolsEnabled) 4 else 3)
     }
 
     @Test

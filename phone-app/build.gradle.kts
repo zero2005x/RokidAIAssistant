@@ -12,18 +12,25 @@ plugins {
     jacoco
 }
 
+val localPropsFile = rootProject.file("local.properties")
+val localProps = Properties().apply {
+    if (localPropsFile.exists()) {
+        localPropsFile.inputStream().use { load(it) }
+    }
+}
+fun localProperty(name: String): String? = localProps.getProperty(name)?.takeIf { it.isNotBlank() }
+
+// Developer API keys (local.properties) are only ever baked into the `github` flavor.
+// The `play` flavor always compiles empty constants, see productFlavors below.
+val developerGeminiKey = localProps.getProperty("GEMINI_API_KEY", "")
+val developerOpenAiKey = localProps.getProperty("OPENAI_API_KEY", "")
+
+
 android {
     namespace = "io.github.zero2005x.glassesaicompanion"
     compileSdk = 36
 
-    val localPropsFile = rootProject.file("local.properties")
-    val localProps = Properties().apply {
-        if (localPropsFile.exists()) {
-            localPropsFile.inputStream().use { load(it) }
-        }
-    }
-    fun localProperty(name: String): String? = localProps.getProperty(name)?.takeIf { it.isNotBlank() }
-
+    // GitHub APK signing (existing release key)
     val releaseStoreFile = localProperty("RELEASE_STORE_FILE")
     val releaseStorePassword = localProperty("RELEASE_STORE_PASSWORD")
     val releaseKeyAlias = localProperty("RELEASE_KEY_ALIAS")
@@ -35,36 +42,78 @@ android {
         releaseKeyPassword
     ).all { !it.isNullOrBlank() }
 
+    // Google Play upload key: a separate key from the GitHub release key on purpose,
+    // so that leaking one never affects the other distribution channel.
+    val playUploadStoreFile = localProperty("PLAY_UPLOAD_STORE_FILE")
+    val playUploadStorePassword = localProperty("PLAY_UPLOAD_STORE_PASSWORD")
+    val playUploadKeyAlias = localProperty("PLAY_UPLOAD_KEY_ALIAS")
+    val playUploadKeyPassword = localProperty("PLAY_UPLOAD_KEY_PASSWORD")
+    val hasPlayUploadSigning = listOf(
+        playUploadStoreFile,
+        playUploadStorePassword,
+        playUploadKeyAlias,
+        playUploadKeyPassword
+    ).all { !it.isNullOrBlank() }
+
     defaultConfig {
-        applicationId = "com.example.rokidphone"
         minSdk = 28
-        targetSdk = 34
-        versionCode = 5
-        versionName = "1.1.0"
+        targetSdk = 36
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        // API Keys - Read from local.properties, do not hardcode.
-        val geminiKey = localProps.getProperty("GEMINI_API_KEY", "")
-        val openaiKey = localProps.getProperty("OPENAI_API_KEY", "")
-        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiKey\"")
-        buildConfigField("String", "OPENAI_API_KEY", "\"$openaiKey\"")
     }
 
     signingConfigs {
         if (hasReleaseSigning) {
-            create("release") {
+            create("githubRelease") {
                 storeFile = rootProject.file(releaseStoreFile!!)
                 storePassword = releaseStorePassword
                 keyAlias = releaseKeyAlias
                 keyPassword = releaseKeyPassword
             }
         }
+        if (hasPlayUploadSigning) {
+            create("playUpload") {
+                storeFile = rootProject.file(playUploadStoreFile!!)
+                storePassword = playUploadStorePassword
+                keyAlias = playUploadKeyAlias
+                keyPassword = playUploadKeyPassword
+            }
+        }
+    }
+
+    flavorDimensions += "distribution"
+    productFlavors {
+        // Sideloaded APK distributed through GitHub releases. Keeps the legacy
+        // application id so existing installs keep upgrading in place.
+        create("github") {
+            dimension = "distribution"
+            applicationId = "com.example.rokidphone"
+            versionCode = 5
+            versionName = "1.1.0"
+            buildConfigField("boolean", "PLAY_DISTRIBUTION", "false")
+            buildConfigField("String", "GEMINI_API_KEY", "\"$developerGeminiKey\"")
+            buildConfigField("String", "OPENAI_API_KEY", "\"$developerOpenAiKey\"")
+            signingConfig = signingConfigs.findByName("githubRelease")
+        }
+
+        // Google Play distribution: curated provider list, no CXR SDK, no developer keys.
+        create("play") {
+            dimension = "distribution"
+            applicationId = "io.github.zero2005x.glassesaicompanion"
+            versionCode = 1
+            versionName = "1.2.0"
+            buildConfigField("boolean", "PLAY_DISTRIBUTION", "true")
+            buildConfigField("String", "GEMINI_API_KEY", "\"\"")
+            buildConfigField("String", "OPENAI_API_KEY", "\"\"")
+            signingConfig = signingConfigs.findByName("playUpload")
+        }
     }
 
     buildTypes {
         debug {
             enableUnitTestCoverage = true
+            // A flavor-level signingConfig would otherwise leak into debug builds.
+            signingConfig = signingConfigs.getByName("debug")
         }
 
         release {
@@ -73,9 +122,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            if (hasReleaseSigning) {
-                signingConfig = signingConfigs.getByName("release")
-            } else {
+            if (!hasReleaseSigning && !hasPlayUploadSigning) {
                 logger.lifecycle("Release signing is not configured. Building unsigned release artifacts.")
             }
         }
@@ -164,13 +211,15 @@ dependencies {
     implementation("androidx.bluetooth:bluetooth:1.0.0-alpha02")
     
     // Rokid CXR-M SDK (Mobile SDK - via Maven)
-    // Used for connecting to glasses, device control, and photo capture
-    implementation("com.rokid.cxr:client-m:1.0.4")
-    
-    // CXR SDK required dependencies
-    implementation("com.squareup.retrofit2:retrofit:3.0.0")
-    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.3.2")
+    // Used for connecting to glasses, device control, and photo capture.
+    // Intentionally GitHub-flavor only: the Google Play flavor ships without the SDK
+    // (no CXR classes, no native libraries, no SN auth file).
+    "githubImplementation"("com.rokid.cxr:client-m:1.0.4")
+
+    // CXR SDK required dependencies (not used by app code itself)
+    "githubImplementation"("com.squareup.retrofit2:retrofit:3.0.0")
+    "githubImplementation"("com.squareup.retrofit2:converter-gson:3.0.0")
+    "githubImplementation"("com.squareup.okhttp3:logging-interceptor:5.3.2")
     implementation("com.squareup.okio:okio:3.16.4")
     
     // DataStore for preferences
@@ -214,6 +263,30 @@ dependencies {
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.okhttp.mockwebserver)
     androidTestImplementation("androidx.room:room-testing:2.8.4")
+}
+
+// Release guard: never ship a developer's personal API keys inside a release APK/AAB.
+// The play flavor compiles empty constants, so only the github flavor can trip this.
+// Opt out explicitly with -PallowDeveloperKeysInRelease=true for a private build.
+val verifyNoDeveloperKeysInRelease = tasks.register("verifyNoDeveloperKeysInRelease") {
+    group = "verification"
+    description = "Fails if local.properties developer API keys would be embedded in a release build."
+    val keysPresent = developerGeminiKey.isNotBlank() || developerOpenAiKey.isNotBlank()
+    val allowed = providers.gradleProperty("allowDeveloperKeysInRelease").orNull == "true"
+    doLast {
+        if (keysPresent && !allowed) {
+            throw GradleException(
+                "GEMINI_API_KEY / OPENAI_API_KEY are set in local.properties and would be embedded " +
+                    "in the release build. Remove them (users enter keys in the app), or pass " +
+                    "-PallowDeveloperKeysInRelease=true for a private build."
+            )
+        }
+    }
+}
+tasks.configureEach {
+    if (name.matches(Regex("(assemble|bundle|package)Github[A-Za-z]*Release"))) {
+        dependsOn(verifyNoDeveloperKeysInRelease)
+    }
 }
 
 // Room schema export location (required for exportSchema = true; commit the JSON schemas).

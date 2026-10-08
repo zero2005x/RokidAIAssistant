@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Info -->
     <string name="app_name">مساعد Rokid AI</string>
@@ -579,4 +579,6 @@
     <string name="routing_llm_description">يستخدم مفتاح المزود الحالي. يُرسل السؤال الحالي فقط للتصنيف، مما يضيف طلب API مدفوعًا. يقين نموذج اللغة ليس احتمالًا معايرًا. عند عدم اليقين أو انتهاء المهلة يُستخدم النموذج الرئيسي.</string>
     <string name="routing_reason_selected_llm">اختار %1$s الفئة %2$s باستخدام تصنيف منظم.</string>
     <string name="glasses_preview_metrics">مساحة عرض التطبيق: %1$d × %2$d px</string>
+    <!-- Distribution policy: HTTPS only, plain HTTP is allowed for localhost -->
+    <string name="custom_url_https_required">يُسمح بـ HTTP غير المشفّر مع localhost فقط. يُرجى استخدام عنوان HTTPS.</string>
 </resources>

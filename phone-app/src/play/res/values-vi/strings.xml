@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Google Play flavor branding: overrides the Rokid-branded strings of the main source set. -->
+<resources>
+    <string name="app_name">Glasses AI Companion</string>
+    <string name="app_title">Glasses AI Companion</string>
+    <string name="home_welcome">Chào mừng đến Glasses AI Companion</string>
+    <string name="initial_setup_message">Để sử dụng trợ lý giọng nói AI và tính năng nhận dạng hình ảnh, bạn cần cấu hình ít nhất một khóa API.\n\nCác dịch vụ được hỗ trợ:\n• Google Gemini\n• OpenAI\n• Anthropic Claude\n• Điểm cuối tùy chỉnh tương thích OpenAI</string>
+    <string name="initial_setup_hint">Bạn có thể lấy khóa API trên trang web của dịch vụ AI mà bạn chọn.</string>
+    <string name="tts_settings_description">Cấu hình đầu ra chuyển văn bản thành giọng nói (TTS). Ứng dụng dùng công cụ chuyển văn bản thành giọng nói của điện thoại bạn.</string>
+    <string name="tts_settings_note">Chất lượng giọng nói và các ngôn ngữ được hỗ trợ phụ thuộc vào công cụ giọng nói và giọng đọc được cài trên điện thoại của bạn.</string>
+</resources>

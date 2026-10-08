@@ -16,7 +16,7 @@ import io.github.zero2005x.glassesaicompanion.data.db.RecordingRepository
 import io.github.zero2005x.glassesaicompanion.service.ai.AiServiceProvider
 import io.github.zero2005x.glassesaicompanion.service.ai.ChatErrorSource
 import io.github.zero2005x.glassesaicompanion.service.ai.RoutedReply
-import io.github.zero2005x.glassesaicompanion.service.cxr.CxrMobileManager
+import io.github.zero2005x.glassesaicompanion.service.cxr.CxrGlassesBridge
 import io.github.zero2005x.glassesaicompanion.service.photo.PhotoData
 import io.github.zero2005x.glassesaicompanion.service.photo.PhotoRepository
 import com.google.common.truth.Truth.assertThat
@@ -127,32 +127,32 @@ class PhoneAIServiceRoutingTest {
 
     @Test
     fun `display metrics from the glasses switch the camera to SPP and drop the legacy link`() = runBlocking {
-        val cxr = mockk<CxrMobileManager>(relaxed = true)
+        val cxr = mockk<CxrGlassesBridge>(relaxed = true)
         val pending = Job()
-        set("cxrManager", cxr)
+        set("cxrBridge", cxr)
         set("pendingCxrInit", pending)
         val metrics = GlassesDisplayMetrics(480, 640, 1.5f, 1.2f)
 
         call<Unit>("handleGlassesMessage", Message(type = MessageType.DISPLAY_METRICS, payload = metrics.toJson()))
 
         verify { settingsRepository.updateGlassesDisplayMetrics(metrics) }
-        verify { cxr.disconnectBluetooth() }
+        verify { cxr.onSppDisconnected() }
         assertThat(pending.isCancelled).isTrue()
         assertThat(get<Boolean>("companionCamera")).isTrue()
     }
 
     @Test
     fun `metrics from glasses without the SPP camera are stored but keep the legacy link`() = runBlocking {
-        val cxr = mockk<CxrMobileManager>(relaxed = true)
+        val cxr = mockk<CxrGlassesBridge>(relaxed = true)
         val pending = Job()
-        set("cxrManager", cxr)
+        set("cxrBridge", cxr)
         set("pendingCxrInit", pending)
         val legacy = """{"widthPx":480,"heightPx":640,"density":1.5,"fontScale":1.2}"""
 
         call<Unit>("handleGlassesMessage", Message(type = MessageType.DISPLAY_METRICS, payload = legacy))
 
         verify { settingsRepository.updateGlassesDisplayMetrics(GlassesDisplayMetrics(480, 640, 1.5f, 1.2f)) }
-        verify(exactly = 0) { cxr.disconnectBluetooth() }
+        verify(exactly = 0) { cxr.onSppDisconnected() }
         assertThat(pending.isCancelled).isFalse()
         assertThat(get<Boolean>("companionCamera")).isFalse()
     }

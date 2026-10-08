@@ -471,7 +471,7 @@ data class ApiSettings(
     val systemPrompt: String = "",
     
     // TTS settings
-    val ttsProvider: TtsProvider = TtsProvider.EDGE_TTS,
+    val ttsProvider: TtsProvider = distribution.defaultTtsProvider,
     val ttsVoiceOverride: String = "",
     val ttsSpeechRate: Float = 1.0f,
     val ttsPitch: Float = 0.0f,
@@ -805,8 +805,7 @@ fun ApiSettings.toSttCredentials(): io.github.zero2005x.glassesaicompanion.servi
 }
 
 /**
- * Check whether [url] uses an http(s) scheme. Single implementation shared by
+ * Check that [url] is an acceptable custom endpoint (HTTPS, or HTTP to loopback only). Single implementation shared by
  * the ApiSettings member and the file-level validation extensions.
  */
-private fun isValidHttpUrl(url: String): Boolean =
-    url.trim().let { it.startsWith("http://") || it.startsWith("https://") }
+private fun isValidHttpUrl(url: String): Boolean = isAllowedEndpointUrl(url)

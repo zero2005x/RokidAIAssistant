@@ -42,7 +42,7 @@ class BluetoothSppListenTest {
     private companion object {
         // Mirrors the manager's own private constants; the SDP record it publishes
         // is part of the contract the glasses client connects against.
-        const val SERVICE_NAME = "RokidAIAssistant"
+        const val SERVICE_NAME = "GlassesAICompanion"
         val APP_UUID: java.util.UUID =
             java.util.UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567890")
     }

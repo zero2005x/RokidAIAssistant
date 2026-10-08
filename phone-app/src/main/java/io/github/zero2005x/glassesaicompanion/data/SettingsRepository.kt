@@ -260,7 +260,7 @@ class SettingsRepository(private val context: Context) {
             baiduQianfanKey.isBlank() && baiduLegacyKey.isNotBlank() && baiduLegacySecret.isNotBlank()
         }
 
-        return ApiSettings(
+        return distribution.coerce(ApiSettings(
             aiProvider = savedProvider,
             aiModelId = legacyModelId,
             providerModelIds = providerModelIds,
@@ -361,7 +361,7 @@ class SettingsRepository(private val context: Context) {
             ) ?: Locale.getDefault().toLanguageTag(),
             systemPrompt = systemPrompt,
             ttsProvider = TtsProvider.fromName(
-                prefs.getString(KEY_TTS_PROVIDER, TtsProvider.EDGE_TTS.name) ?: TtsProvider.EDGE_TTS.name
+                prefs.getString(KEY_TTS_PROVIDER, distribution.defaultTtsProvider.name) ?: distribution.defaultTtsProvider.name
             ),
             ttsVoiceOverride = prefs.getString(KEY_TTS_VOICE_OVERRIDE, "") ?: "",
             ttsSpeechRate = prefs.getFloat(KEY_TTS_SPEECH_RATE, 1.0f),
@@ -376,7 +376,7 @@ class SettingsRepository(private val context: Context) {
             topP = prefs.getFloat(KEY_TOP_P, 1.0f),
             frequencyPenalty = prefs.getFloat(KEY_FREQUENCY_PENALTY, 0.0f),
             presencePenalty = prefs.getFloat(KEY_PRESENCE_PENALTY, 0.0f)
-        )
+        ))
     }
     
     /**
