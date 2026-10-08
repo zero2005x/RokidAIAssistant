@@ -1,0 +1,18 @@
+RokidAIAssistant
+Copyright 2026 Mazda Payrang
+
+This product is licensed under the Apache License, Version 2.0
+(see the LICENSE file).
+
+Third-party components
+----------------------
+
+This project depends on, but does not include, the Rokid CXR SDK
+(for example com.rokid.cxr:client-m), which is proprietary software
+of Rokid. It is downloaded from Rokid's Maven repository at build time,
+is not covered by the Apache License, Version 2.0, and its use is
+subject to Rokid's own terms. Rokid device credentials such as
+sn_auth_file.* and ROKID_CLIENT_SECRET are never part of this repository.
+
+Other dependencies are fetched through Gradle and remain under their
+respective licenses.

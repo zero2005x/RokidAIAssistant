@@ -386,4 +386,8 @@ A: Add keep rules to proguard-rules.pro:
 
 ## License
 
-This project is proprietary software.
+Licensed under the [Apache License, Version 2.0](LICENSE). See [NOTICE](NOTICE) for attribution.
+
+The Rokid CXR SDK is a separate, proprietary dependency downloaded from Rokid's Maven repository at build time. It is not part of this project and is not covered by this license; its use is subject to Rokid's own terms.
+
+Contributions are welcome under the same license with a DCO sign-off. See [CONTRIBUTING.md](CONTRIBUTING.md).

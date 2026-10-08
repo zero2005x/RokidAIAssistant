@@ -357,4 +357,8 @@ A: 在 proguard-rules.pro 加入 keep 規則：
 
 ## 授權
 
-本專案為專有軟體。
+本專案採用 [Apache License 2.0](../../LICENSE) 授權，署名資訊見 [NOTICE](../../NOTICE)。
+
+Rokid CXR SDK 是建置時從 Rokid Maven 下載的獨立專有相依套件，不屬於本專案，也不在本授權範圍內，使用時須遵守 Rokid 的條款。
+
+歡迎以相同授權貢獻，提交時需加上 DCO 簽署，詳見 [CONTRIBUTING.md](../../CONTRIBUTING.md)。
