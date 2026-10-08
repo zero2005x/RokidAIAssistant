@@ -119,7 +119,7 @@ RokidAIAssistant/
   非同步      Kotlin Coroutines              1.10.2                
   資料庫      Room                           2.8.4                 
   網路        Retrofit + OkHttp              3.0 / 5.3             
-  Rokid SDK   CXR client-m                   1.0.4                 
+  Rokid SDK   CXR client-m                   1.2.2                 
 
 ---
 

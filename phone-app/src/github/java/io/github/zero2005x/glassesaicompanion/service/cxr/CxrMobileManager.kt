@@ -3,6 +3,7 @@ package io.github.zero2005x.glassesaicompanion.service.cxr
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import com.rokid.cxr.client.extend.CxrApi
 import com.rokid.cxr.client.extend.callbacks.*
@@ -149,6 +150,19 @@ class CxrMobileManager(private val context: Context) {
             _bluetoothState.value = BluetoothState.Disconnected
         }
         
+        // Added in client-m 1.2.x: the glasses keep a list of clients and this phone is linked but is
+        // not the active one (the SDK would need activeBluetoothConnect() to take over, which could
+        // cut another client such as the official Rokid app, so it is not called here). The SDK passes
+        // "unknown" for both values when it has no details. It is neither a connection nor a
+        // failure, so only log it and leave the state (and the retry logic) as it is.
+        override fun onInActiveConnected(socketUuid: String?, macAddress: String?) {
+            if (!isCallbackRegistered) {
+                Log.w(TAG, "onInActiveConnected fired before callback registration, ignoring")
+                return
+            }
+            Log.w(TAG, "Bluetooth link is inactive (not an active CXR session): uuid=$socketUuid, mac=$macAddress")
+        }
+
         override fun onFailed(errorCode: ValueUtil.CxrBluetoothErrorCode?) {
             if (!isCallbackRegistered) {
                 Log.w(TAG, "onFailed fired before callback registration, ignoring")
@@ -265,8 +279,10 @@ class CxrMobileManager(private val context: Context) {
     private fun connectBluetooth(context: Context, socketUuid: String, macAddress: String) {
         try {
             Log.d(TAG, "Connecting Bluetooth: uuid=$socketUuid, mac=$macAddress")
-            // connectBluetooth parameters: context, socketUuid, macAddress, callback, secretKey, identifier
-            cxrApi.connectBluetooth(context, socketUuid, macAddress, bluetoothCallback, null, null)
+            // connectBluetooth parameters: context, socketUuid, macAddress, btClientName, callback, secretKey, identifier.
+            // client-m 1.2.x lets the glasses keep a list of paired clients; the name identifies this phone.
+            // Build.DEVICE is what the (now deprecated) overload without a name used, so behaviour is unchanged.
+            cxrApi.connectBluetooth(context, socketUuid, macAddress, Build.DEVICE, bluetoothCallback, null, null)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to connect Bluetooth", e)
             _bluetoothState.value = BluetoothState.Failed(e.message ?: "Connection error")

@@ -277,7 +277,7 @@ API Key: <your-api-key>
 **Location**: `phone-app/build.gradle.kts`
 
 ```kotlin
-implementation("com.rokid.cxr:client-m:1.0.4")
+implementation("com.rokid.cxr:client-m:1.2.2")
 ```
 
 **Purpose**:

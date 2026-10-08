@@ -140,7 +140,7 @@ See [Google Play launch plan](doc/PLAY_STORE_LAUNCH_PLAN.md) and the [privacy po
 | Async       | Kotlin Coroutines            | 1.10.2               |
 | Database    | Room                         | 2.8.4                |
 | Networking  | Retrofit + OkHttp            | 3.0 / 5.3            |
-| Rokid SDK   | CXR client-m                 | 1.0.4                |
+| Rokid SDK   | CXR client-m                 | 1.2.2                |
 
 ---
 

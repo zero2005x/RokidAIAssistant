@@ -220,7 +220,7 @@ dependencies {
     // Used for connecting to glasses, device control, and photo capture.
     // Intentionally GitHub-flavor only: the Google Play flavor ships without the SDK
     // (no CXR classes, no native libraries, no SN auth file).
-    "githubImplementation"("com.rokid.cxr:client-m:1.0.4")
+    "githubImplementation"("com.rokid.cxr:client-m:1.2.2")
 
     // CXR SDK required dependencies (not used by app code itself)
     "githubImplementation"("com.squareup.retrofit2:retrofit:3.0.0")
