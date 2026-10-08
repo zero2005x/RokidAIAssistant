@@ -1,7 +1,7 @@
 # Glasses AI Companion — Google Play 上架計畫
 
-- **狀態**：v0.5，2026-10-03（D1～D4 已決定；P1 工程大致完成，通過單元測試、lint、release AAB 檢查與 API 36 模擬器煙霧測試；**真機（含眼鏡）尚未測**，見 §6.1、§6.2）
-- **範圍**：只上架 `phone-app`（Play 版）；`glasses-app` 與舊 `app` 模組不上架
+- **狀態**：v0.6，2026-10-08（D1～D4 已決定；P1 工程大致完成；程式已在最新的 `main`（Apache-2.0、移除舊 `app` 模組、自動選模）上重做並重跑測試；新增 D10（自動選模的 Jev／Laya）待你確認；**真機（含眼鏡）尚未測**，見 §6.1、§6.2）
+- **範圍**：只上架 `phone-app`（Play 版）；`glasses-app` 不上架（舊 `app` 模組已於 2026-10 從 `main` 移除）
 - **目標**：2026 年底前在 Google Play 正式發布。這是**目標，不是承諾**，以第 7 節的驗收門檻為準
 - **公開 repo 注意**：本文不得出現法定姓名／地址、Console 帳號 ID、金鑰與密碼、Relay 信箱位址、審核用 API key。這些放在私人筆記
 
@@ -21,7 +21,7 @@
 | 項目 | 範圍 |
 |---|---|
 | 上架 | `phone-app` 的 `play` flavor（AAB，手動上傳 Console） |
-| 不上架 | `glasses-app`（走 GitHub／側載／Rokid 管道）、舊 `app` 模組 |
+| 不上架 | `glasses-app`（走 GitHub／側載／Rokid 管道）。舊 `app` 模組已從 `main` 移除 |
 | 持續發布 | `phone-app` 的 `github` flavor（保留舊 id、現有金鑰、CXR、完整服務商清單、Ko-fi） |
 
 ## 2. 已決定事項 ✅
@@ -52,8 +52,9 @@
 | D-22 | 商店語言 en-US（預設）＋ zh-TW；模擬器產生 13 種語言截圖存檔，v1.0 只上傳 2 套 |
 | D-23 | 眼鏡端安裝說明只放**網頁連結**（設定說明頁），App 內與商店不放 APK 直連、不寫「開啟未知來源」之類步驟 |
 | D-24 | `compileSdk`／`targetSdk` 升到 36，`minSdk` 維持 28；上傳 AAB；v1.0 手動上傳 Console |
-| D-25 | Play 版首版 `versionName 1.2.0`、`versionCode 1`；GitHub 版 `versionCode` 獨立（這是我提出的預設，你未反對） |
+| D-25 | ✅（2026-10-08 你已確認）Play 版首版 `versionName 1.2.0`、`versionCode 1`，`versionName` 與 GitHub 的 v1.2.0（roadmap #34「參考版」）對齊；`versionCode` 各自獨立（GitHub 預定 6、Play 從 1 起算）。GitHub 版的 `versionName`／`versionCode` 由 v1.2.0 發布清單（#34）一起調整，這裡不先動 |
 | D-26 | 封閉測試招募 ≥16 位測試者（網路招募），10/24 前完成，並持續追蹤到 20 位 |
+| D-27 | ✅（2026-10-08）貢獻規範（`CONTRIBUTING.md`）要求每個 commit 有 DCO `Signed-off-by`。本分支所有 commit 的作者、提交者與簽署身分統一為你指定的姓名與 `zero2005x@gmail.com`（姓名不在本文重複，見 git 紀錄）。這會使該姓名與 Gmail 出現在公開的 git 歷史 |
 
 ## 3. 更正紀錄 ❌
 
@@ -117,6 +118,27 @@ Gemini API 非付費服務條款允許 Google 將內容用於改善產品，且�
 ### D9 系統 TTS 是否可能連網
 Android `Voice.isNetworkConnectionRequired()` 顯示部分系統語音需要網路，所以「系統 TTS」不等於離線。選項：A 在隱私政策與卡片 3 揭露；B 提供「僅用離線語音」開關。建議 A 加 B。（目前隱私政策已揭露「文字轉語音可能由系統引擎提供者透過網路處理」，App 內尚無離線語音開關。）
 
+### D10 自動選模（`main` 新增）的 Jev 與 Laya ⚠️ 待你確認
+**事實（讀 `main` 的程式與 `doc/DECISION_ROUTING_AND_DISPLAY.md`，證據 B，見 E19）**
+- 「設定 → 自動選模」**預設關閉**。開啟後，每則文字問題（含錄音轉寫後的提問）先送到「決策後端」判斷難度（fast／balanced／quality），再依三個槽位挑模型回答。照片分析與 Gemini Live 不走這條路。
+- 決策後端有四種：
+  - **Gemini／OpenAI**：用你已設定的同一把 key，送**本次問題文字**（上限 4000 字元），不含對話歷史、照片、音訊；OpenAI 請求 `store=false`；多一次付費 API 請求；逾時 3.5 秒就改用主要模型。
+  - **Jev**：TypeSafe 的託管服務（`api.typesafe.ai`），使用者另外輸入 TypeSafe 的 API key，送本次問題文字（上限 4000 字元）。這是一個**新的第三方接收者**。專案的 `CONTRIBUTING.md` 把 Jev、Laya、Agents 標為實驗性、非積極開發。
+  - **Laya**：使用者自己架的伺服器，網址由使用者填；程式允許 HTTPS，或對 localhost／私有 IPv4 用 HTTP（實際上 `main` 的 APK 沒有為任何主機開放明文，HTTP 仍會被 Android 擋下）。送出的內容同 Jev。
+- 決策服務失敗、不確定或逾時時一律回到主要模型，不會自動換另一個決策後端。
+
+**對 Play 版的影響（推論，證據 D）**：Jev 要求資料安全表單、隱私政策與首次啟動卡片多列一個我沒有審閱過條款與隱私政策的公司；Laya 的目的地是任意網址，且它的位址規則（允許私有 IPv4 的 HTTP）與 D-10（只允許 localhost）不一致。Gemini／OpenAI 後端則是 App 本來就會連的服務。
+
+**我的預設（待你確認）**：Play 版只提供 Gemini 與 OpenAI 兩個決策後端，Jev 與 Laya 只在 GitHub 版。**已實作**：`DistributionRules.decisionBackends()`；設定畫面只列這兩個；載入設定時，Play 版若發現儲存的是 Jev／Laya，就改成 Gemini 並關閉自動選模（有單元測試）。資料流矩陣（§5）與隱私政策已照這個預設寫。
+- 若你希望 Play 版也提供 Jev：要先查 TypeSafe 的條款與隱私政策，並更新資料安全表單、隱私政策與首次啟動卡片。我不預設。
+- 🔍 未驗證：TypeSafe 與 Laya 的實際行為與條款（我只讀了本專案的程式與文件）。
+
+**與 `main` 合併後的其他注意事項（資訊，不是待決定）**
+- roadmap（#26 路由指標、#36–#41 串流、#43–#46 介面路由）都還沒實作。實作時各自要重新對照 §5 與隱私政策；路由指標預定只存本機（Room，保留 60 天，可匯出 CSV）。
+- 協定變更必須向下相容（`CONTRIBUTING.md`）。這條對 Play 版更重要：Play 版手機 App 會遇到使用者各種版本的側載眼鏡端 App。
+- 眼鏡顯示設定走既有的 SPP 訊息（`SYSTEM_CONFIG`、`DISPLAY_METRICS`），不經網路。
+- SPP 相機：眼鏡端 App 回報 `cameraTransport = spp` 時手機改用 SPP 拍照。這讓沒有 CXR 的 Play 版也有機會拍照，前提是眼鏡端 App 夠新。🔍 未在真機驗證。
+
 ## 5. 資料流矩陣（草稿；🔍 為待盤點）
 
 | 資料 | 離開裝置 → 接收者 | 本機保存 | 外部保留／次級用途 | Data safety 申報 | 刪除 |
@@ -126,6 +148,10 @@ Android `Voice.isNetworkConnectionRequired()` 顯示部分系統語音需要網�
 | 照片（眼鏡／相簿） | 是（影像分析時）→ 同上 | App 私有儲存 | 🔍 | 收集：照片 | App 內刪除 |
 | 錄音／語音 | 是（STT）→ Gemini／OpenAI／Groq | 錄音檔 | 🔍 | 收集：音訊 | App 內刪除錄音 |
 | STT 轉錄文字 | 是 → LLM 服務商 | 對話歷史 | 🔍 | 同文字訊息 | 同上 |
+| 自動選模的問題分類（預設關閉；D10） | 開啟時：是 → 使用者的 Gemini 或 OpenAI（同一把 key）。只送本次問題文字（≤4000 字元），不含歷史、照片、音訊；OpenAI 用 `store=false` | 設定中的開關與後端選擇；回答旁的選模理由存在本機對話資料 | 同「使用者文字訊息」（含 Gemini 免費層，見 D8） | 同使用者文字訊息（不新增資料類型，多一次請求） | 關閉開關即停止；對話內刪除理由 |
+| 自動選模：Jev／Laya | **Play 版不提供**（D10 預設）。GitHub 版：Jev＝TypeSafe 託管服務，Laya＝使用者填的任意伺服器 | — | 不適用於 Play | 不適用於 Play | — |
+| 路由指標（roadmap #26，尚未實作） | 否；預定只存本機（Room、60 天、使用者操作的 CSV 匯出） | 本機 | — | 實作時再評估 | 🔍 |
+| 眼鏡顯示設定、顯示尺寸回報 | 否；SPP 近距離 | 設定在手機與眼鏡 | — | 不收集 | 解除安裝／清除 |
 | TTS 文字 | 🔍 視系統語音引擎而定（D9） | — | 🔍 | 🔍 | — |
 | API key | 僅作為對所選服務商請求的憑證 | 加密儲存，備份排除，日誌遮罩 | 不傳給開發者 | 🔍 是否須申報 | 使用者可在設定刪除；解除安裝清除 |
 | AI 回報（D1） | 是 → 開發者的接收端 | — | 開發者保留（D7） | 收集：回報內容 | 🔍 依 D7 |
@@ -206,12 +232,15 @@ Android `Voice.isNetworkConnectionRequired()` 顯示部分系統語音需要網�
 ### P5 維護
 政策與服務商條款定期檢查；每年 8/31 前升 `targetSdk`（2027 年預期 API 37）；政策通知寄到帳戶擁有者 Gmail；`16 KB` 2027-02-01 前確認。
 
-### 6.1 工程進度（2026-10-03，分支 `play-release-prep`，尚未 commit）
+### 6.1 工程進度（2026-10-08，分支 `play-release-prep`，已在最新 `main` 之上重做為 8 個 commit，每個都有 DCO 簽署，**尚未 push**）
 
 | ID | 狀態 | 說明／證據 |
 |---|---|---|
 | P1-1 | ✅ | `play`／`github` flavor；CXR 經 `CxrGlassesBridge` 隔離，`client-m`、retrofit 等只進 `github`；`sn_auth_file.lc` 移到 `github`。Play 版 release runtime classpath 無 Rokid／retrofit |
-| P1-2 | 🟡 | `targetSdk`／`compileSdk` 已是 36。**Robolectric 4.14.1 最高支援 SDK 35**，目前用 `robolectric.properties` 把模擬 SDK 固定為 35；待升級 Robolectric 後改回 36。edge-to-edge、大螢幕、前景服務等行為變更**尚未在實機測過** |
+| P1-2 | 🟡 | `targetSdk`／`compileSdk` 已是 36。Robolectric 已升到 4.17，**不再固定模擬 SDK 35**，phone-app 測試改在 SDK 36 執行（需要 Robolectric 文件列出的 JDK `--add-opens` 參數，已加在 `phone-app/build.gradle.kts`）。edge-to-edge、大螢幕、前景服務等行為變更**尚未在實機測過** |
+| P1-17 | ✅ | 與最新 `main` 合併（2026-10-08）：Apache-2.0、移除舊 `app` 模組、決策路由與眼鏡顯示設定、SPP 相機協商、DCO 規範。做法：先在 `main` 上重做 package 改名，再逐個套用其餘 commit（比直接 merge 少一大批只因改名造成的衝突）；Play 版的 CXR 隔離介面新增 `onSppDisconnected()`／`companionCamera`，讓 `main` 的「SPP 相機優先、再啟動 CXR」流程在兩個 flavor 都成立；只依賴 CXR 或 Edge TTS 的測試搬到 `testGithub` 測試來源集 |
+| P1-18 | ✅ | `client-m` 升到 1.2.2（僅 `github` flavor）。對 `github` release APK 實測：所有 arm64-v8a／x86_64 原生函式庫 LOAD 對齊 `0x4000`，`zipalign -c -P 16` 通過。新介面 `onInActiveConnected()` 目前只記錄（不嘗試接管，以免中斷官方 Rokid App）；`connectBluetooth` 改用帶客戶端名稱的新多載（傳 `Build.DEVICE`，與舊多載預設相同）。**未在真眼鏡測試** |
+| P1-19 | ✅（預設待確認，D10） | Play 版自動選模只提供 Gemini／OpenAI 兩個後端；Jev／Laya 僅 GitHub 版 |
 | P1-3 | ✅ | namespace 改名（見 D4） |
 | P1-4 | 🟡 | `applicationId` 已設定；以該 id 的 release AAB 上傳 Console 尚未做 |
 | P1-5 | ✅ | `play` 的 `BuildConfig` key 永遠是空字串；`github` release 在 `local.properties` 有開發者 key 時建置失敗（`-PallowDeveloperKeysInRelease=true` 可繞過）。最終 AAB 掃描見 P2-1 |
@@ -232,11 +261,11 @@ Android `Voice.isNetworkConnectionRequired()` 顯示部分系統語音需要網�
 
 | 項目 | 結果 |
 |---|---|
-| 單元測試 | `play`、`github` 各 **832** 個全過、0 失敗（改動前 phone-app 為 782；新增 50 個）。Robolectric 仍固定模擬 SDK 35 |
-| Lint（debug，兩個 flavor） | **0 個未列入 baseline 的錯誤**。警告多為既有項目。與本次相關的 3 項已修（`Modifier` 參數順序、`%d days` 複數提示、`dataExtractionRules` 缺 `fullBackupContent`） |
-| 16 KB（lint） | `github` flavor 的 `com.rokid.cxr:client-m:1.0.4` 的 `libcaps.so` **不是** 16 KB 對齊（Play 版不含它）。若 GitHub 版要在 16 KB 裝置上使用，需升級 `client-m`（本機 cache 有 1.2.2，API 相容性未驗證）。`play` 的唯一警告來自測試用的 mockk，不會進 AAB |
-| Play 版 release AAB（重建後，R8 開啟） | `bundlePlayRelease` 成功。**不含** `com.rokid`、`sn_auth`／`.lc`、`res/raw`、Edge TTS 端點或權杖、`ko-fi`；沒有開發者 API key。原生函式庫只有 androidx 的 2 個（4 個 ABI，共 8 個檔案，LOAD 對齊全為 16384）。唯一命中的 `rokid` 字樣是內部的共用協定函式庫名稱（`com.example.rokidcommon`）、藍牙服務名稱與樣式名稱，使用者看不到。第一次建置曾發現 `ko-fi` 字串還在 dex 裡（按鈕被藏起來但程式碼還在），已改成 flavor 分離並重建確認 |
-| GitHub 版 release APK | 用既有 `RELEASE_*` 金鑰簽署成功，**簽署憑證 SHA-256 與 v1.1.0 發布說明一致**（`7ca3a3f7…e30b`），所以舊版使用者仍可原地升級。`github` 的 release 建置在 `local.properties` 有開發者 API key 時會失敗（守門） |
+| 單元測試（2026-10-08，重做後，Robolectric 4.17、SDK 36，嚴格依賴驗證） | `phone-app`：`github` **1406** 個、`play` **1374** 個，`glasses-app` 199 個、`common` 98 個，全過、0 失敗、0 略過。兩個 phone flavor 的差距來自只屬於 `github` 的測試（CXR 管理器、Edge TTS，共 32 個）。重做時修了 6 個因整合造成的測試差異：SDP 服務名稱、日誌匯出標頭改吃資源、Play 版 STT 預設值、CXR 介面改名 |
+| Lint（debug，兩個 flavor，2026-10-08） | 兩個 flavor 都 **0 個未列入 baseline 的錯誤**（`github` 27、`play` 24 個警告，其餘為 baseline 既有項目） |
+| 16 KB | `github` release APK（`client-m` 1.2.2）：9 個 64 位元原生函式庫 LOAD 全為 `0x4000`，`zipalign -c -P 16` 通過。`play` AAB：4 個 64 位元函式庫（皆為 androidx）全為 `0x4000`。「模擬 16 KB 頁面大小的裝置上實際執行」尚未做 |
+| Play 版 release AAB（2026-10-08，R8 開啟） | `bundlePlayRelease` 成功（8.2 MB）。**不含** `com.rokid`、`sn_auth`／`.lc`、`res/raw`、Edge TTS 端點或權杖、`ko-fi`；沒有開發者 API key。原生函式庫只有 androidx 的 2 個（4 個 ABI）。**含有** Jev／Laya 的程式字串（`typesafe.ai`、`/v1/systemone`）：這些後端在 Play 版的畫面不顯示，載入設定時也會被改回 Gemini（D10），但程式碼本身仍在 dex 裡。若要連字串都不出現，需要把 Jev／Laya 搬到 `github` source set，會讓之後合併 roadmap 的路由 PR 更難，所以我沒有這樣做 |
+| GitHub 版 release APK（2026-10-08 重測） | 用既有 `RELEASE_*` 金鑰簽署成功，**簽署憑證 SHA-256 前綴 `7ca3a3f7`、結尾 `e30b`，與 v1.1.0 一致**，所以舊版使用者仍可原地升級。`github` 的 release 建置在 `local.properties` 有開發者 API key 時會失敗（守門） |
 | Android 16 模擬器（API 36，x86_64，Play 版 debug） | **已驗證**：首次啟動畫面正常且啟動時沒有任何權限彈窗；接受後出現設定對話框，供應商清單只有 Gemini／OpenAI／Anthropic／自訂；離線示範可聊天；回報對話框正確顯示（原因未選時「送出」停用，端點不可達時可重試）；點「手機錄音」才詢問麥克風權限；錄音中按 Home 離開再回來，出現「錄音已停止」且錄音檔已儲存；點「啟動服務」才詢問「附近的裝置」與通知，兩者都拒絕後 App 仍可使用、無崩潰；設定頁沒有 Ko-fi。**注意**：模擬器使用軟體繪圖，很慢，曾出現系統 UI 的 ANR（非本 App） |
 | 實機（含眼鏡） | **尚未測試**：與真眼鏡的 SPP 連線、前景服務在 Android 14+ 實機上的行為、備份／還原／換機、16 KB 頁面大小的裝置（模擬器為 4 KB）、v1.1.0 覆蓋安裝後資料保留、各語系版面（RTL 阿拉伯文）、TalkBack |
 
@@ -273,6 +302,9 @@ Android `Voice.isNetworkConnectionRequired()` 顯示部分系統語音需要網�
 | R12 | 16 KB 合規 | P2-1；以最終 AAB 驗收 |
 | R13 | Android 開發者驗證對 GitHub 版的影響 🔍 | 另行查證；不阻擋 Play |
 | R14 | 單人維護 | 政策信件導到 Gmail；每年 targetSdk；定期檢查 |
+| R15 | `main` 的 roadmap（路由指標 #26、串流 #36–#41、介面路由 #43–#46）會改協定與資料處理，可能讓 Play 版的隱私政策、資料安全表單與眼鏡端相容性失準 | `CONTRIBUTING.md` 已要求協定向下相容；每個 roadmap PR 合併時重新對照 §5；Play 版手機 App 要能搭配 v1.1.0 之後的任何側載眼鏡端 App |
+| R16 | DCO 簽署讓你指定的姓名與 Gmail 公開在 git 歷史（D-27），與先前「公開開發人員名稱用 zero2005x」不同 | 已由你決定；之後的 commit 沿用同一身分。若要改身分，必須在 push 前改 |
+| R17 | 分支與 `main` 再度分歧，重做合併的成本隨 roadmap PR 增加 | 盡早以 PR 合併；之後每個 roadmap PR 合併前先同步 |
 
 ## 9. 證據清單
 
@@ -286,7 +318,7 @@ Android `Voice.isNetworkConnectionRequired()` 顯示部分系統語音需要網�
 | E6 | 16 KB 要求日期 2027-02-01、驗證步驟 | https://developer.android.com/guide/practices/page-sizes | A | 已查 |
 | E7 | 資料安全「收集」「分享」定義與例外 | https://support.google.com/googleplay/android-developer/answer/10787469 | A | 已查；例外的判讀屬我的解讀 |
 | E8 | Gemini 免費層內容用於改善、可能人工審閱；EEA／CH／UK 例外 | https://ai.google.dev/gemini-api/terms | A | 已查 |
-| E9 | `client-m` 1.0.4 arm64 `.so` LOAD 對齊 4096；1.2.2 為 16384 | 本機 Gradle cache 量測 | B | 🔍 僅 AAR 內檔案，非最終 AAB |
+| E9 | `client-m` 1.0.4 arm64 `.so` LOAD 對齊 4096；1.2.2 為 16384 | 先前在本機 Gradle cache 量測；2026-10-03 對 `github` release APK 重新量測：arm64-v8a 與 x86_64 全部 LOAD `0x4000`，`zipalign -c -P 16` 通過 | B | ✅ GitHub 版已升到 1.2.2；Play 版不含 CXR，仍需對最終 AAB 驗收（P2-1） |
 | E10 | phone-app 現況：`targetSdk 34`、`allowBackup true`、`BuildConfig` key fallback、`InitialSetupDialog`、權限一次要求 | repo 程式碼 | B | 已查 |
 | E11 | Pages 來源 `/`；`/docs/` 已上線且含 APK 連結；repo 公開、無 LICENSE | `gh api`、網頁擷取 | B | 已查 |
 | E12 | CXR-M 需開發者認證與 SN 鑑權檔；個人帳號綁定 10 台 | 本機私人 Rokid 文件（未入庫） | C | 🔍 未對照 Rokid 官方 SDK 頁 |
@@ -296,6 +328,8 @@ Android `Voice.isNetworkConnectionRequired()` 顯示部分系統語音需要網�
 | E16 | 個人帳號改顯示名稱後，法定姓名／國家／Email 的公開範圍 | 無 | — | 🔍 P0-2 |
 | E17 | 「交易者」定義 | 第三方（Apple 版）整理 | C | 🔍 以 Console 為準 |
 | E18 | Edge TTS 使用非公開端點，條款未驗證 | repo 程式碼 | B | 🔍 條款未驗證；Play 版已移除 |
+| E19 | 自動選模：預設關閉；Gemini／OpenAI 後端只送本次問題文字（≤4000 字元）；Jev＝`api.typesafe.ai` 託管服務、需另一把 TypeSafe key；Laya＝使用者填的任意伺服器網址；Jev／Laya／Agents 標為實驗性 | `main` 的 `DecisionRouter.kt`、`LlmDecisionClient.kt`、`doc/DECISION_ROUTING_AND_DISPLAY.md`、`CONTRIBUTING.md`（2026-10-08 讀取） | B | ✅ 程式與專案文件；🔍 TypeSafe 與 Laya 的實際行為與條款未驗證 |
+| E20 | Robolectric 4.16 起支援 SDK 36（需 JDK 21）；4.17（2026-09-10）為目前穩定版，支援到 SDK 37；JDK 17+ 需加 `--add-opens` | https://github.com/robolectric/robolectric/releases 、https://robolectric.org/getting-started/ | A | 已查（2026-10-08），並以 phone-app 測試實測 |
 
 ## 附錄 A：upload key 流程（不含任何密碼）
 
@@ -324,3 +358,4 @@ keytool -genkeypair -v -keystore play-upload.jks -alias play-upload -keyalg RSA 
 | v0.3 | 2026-10-03 | D1（App 內回報）、D2（A＋C）、D3（限定國家）、D4（照改）已決定；新增工程進度 §6.1。首次使用 play-release-prep 分支實作 |
 | v0.4 | 2026-10-03 | 日誌遮罩完成（P1-14）；Ko-fi 與 Edge TTS 改為 flavor 分離；新增 §6.2 驗證結果；CI 守門調整 |
 | v0.5 | 2026-10-03 | 新增 Play 專用的供應商／TTS 說明文字（13 語系）；重建 AAB 並確認 Ko-fi 已移除；GitHub 版簽署憑證與 v1.1.0 一致；新增 API 36 模擬器煙霧測試結果；upload key 改用中性 -dname |
+| v0.6 | 2026-10-08 | 已分成 commit 並在最新 `main` 上重做（P1-17）；`client-m` 升 1.2.2（P1-18，GitHub 版 16 KB）；Robolectric 升 4.17 並移除 SDK 35 固定（P1-2）；D-25 版本對齊與 D-27 DCO 身分已確認；新增 D10（自動選模的 Jev／Laya，Play 版預設只開 Gemini／OpenAI，待你確認）；資料流矩陣與隱私政策加入自動選模；重跑全部測試、lint、AAB 與 APK 檢查 |

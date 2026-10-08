@@ -12,7 +12,7 @@ permalink: /privacy/
 
 ## English
 
-**Last updated:** 3 October 2026
+**Last updated:** 8 October 2026
 
 **App:** Glasses AI Companion (an unofficial AI companion app for Rokid glasses; not affiliated with Rokid)
 **Developer:** zero2005x
@@ -34,6 +34,7 @@ This policy covers the **Google Play version** of the app. The separate build th
 | Text you type, and earlier messages of the same conversation | Getting an answer from the AI service | To the AI service you selected |
 | Photos (taken by your glasses, or ones you choose) | Describing or analysing the picture | To the AI service you selected, only when you ask for an analysis |
 | Voice and audio recordings | Turning speech into text, and summarising recordings | To the speech or AI service you selected |
+| The text of a question, for "automatic model selection" (off by default) | Deciding how strong a model your question needs | Only if you turn it on: to the Gemini or OpenAI service you picked as the decision model, using your own key. It contains that question only, not earlier messages, photos or audio |
 | Transcripts and AI answers | Showing them to you | Stored on your phone |
 | Your API keys | Authenticating with the AI service you chose | Stored on your phone in Android Keystore-protected storage. Sent only to the service they belong to, never to the developer |
 | Text to read aloud | Speech output | Handled by your phone's text-to-speech engine. Depending on the engine and voice you use, the engine's provider may process the text over the network |
@@ -55,6 +56,8 @@ Please read the terms of the service you use before sending anything sensitive. 
 
 If you enter a custom endpoint, the operator of that server receives your data. Only enter servers you trust.
 
+**Automatic model selection** is off by default. If you turn it on, every text question is first sent to the Gemini or OpenAI model you chose as the "decision model", which only labels it as easy, medium or hard. The answer then comes from the model you assigned to that level. This is an extra request to a service you already use, so it can count against your quota or be billed by that service. It contains the text of that one question and nothing else, and the service handles it under its own terms like any other request. If the decision service fails or is unsure, the app simply uses your main model. The Google Play version does not offer the other decision services that exist in the GitHub build.
+
 ### Reports (the only data the developer receives)
 
 Every AI response in the app has a flag button. If you use it and tap **Send report**, the app sends the developer:
@@ -70,7 +73,7 @@ Reports are used only to improve content filtering and fix problems. They are ke
 
 ### Data on your phone
 
-Conversations, photos, recordings, settings and logs are stored in the app's private storage on your phone. You can delete conversations, recordings and photos inside the app, and uninstalling the app removes everything. The Google Play version turns off Android cloud backup and device-to-device transfer, so this data is not copied to Google's servers by Android backup.
+Conversations, photos, recordings, settings and logs are stored in the app's private storage on your phone. Each answer also keeps a short note of which model produced it and why. You can delete conversations, recordings and photos inside the app, and uninstalling the app removes everything. The Google Play version turns off Android cloud backup and device-to-device transfer, so this data is not copied to Google's servers by Android backup.
 
 ### Permissions
 
@@ -99,7 +102,7 @@ Questions or deletion requests: 8jn6u1vhy@mozmail.com
 
 ## 繁體中文
 
-**最後更新：** 2026 年 10 月 3 日
+**最後更新：** 2026 年 10 月 8 日
 
 **App：** Glasses AI Companion（Rokid 眼鏡的非官方 AI 伴侶 App，與 Rokid 無隸屬關係）
 **開發者：** zero2005x
@@ -121,6 +124,7 @@ Questions or deletion requests: 8jn6u1vhy@mozmail.com
 | 您輸入的文字，以及同一段對話中先前的訊息 | 向 AI 服務取得回答 | 送到您選擇的 AI 服務 |
 | 照片（眼鏡拍攝或您自行選取） | 描述或分析圖片 | 僅在您要求分析時，送到您選擇的 AI 服務 |
 | 語音與錄音 | 將語音轉成文字、整理錄音摘要 | 送到您選擇的語音或 AI 服務 |
+| 問題文字，供「自動選模」使用（預設關閉） | 判斷您的問題需要多強的模型 | 僅在您開啟時：使用您自己的金鑰，送到您選為決策模型的 Gemini 或 OpenAI 服務。內容只有該則問題，不含先前的訊息、照片或音訊 |
 | 逐字稿與 AI 回答 | 顯示給您看 | 儲存在您的手機上 |
 | 您的 API 金鑰 | 向您選擇的 AI 服務驗證身分 | 儲存在手機上，受 Android Keystore 保護。只會送給該金鑰所屬的服務，絕不會送給開發者 |
 | 要朗讀的文字 | 語音輸出 | 由手機的文字轉語音引擎處理。視您使用的引擎與語音而定，該引擎的提供者可能透過網路處理這些文字 |
@@ -142,6 +146,8 @@ Google Play 版本可搭配 Google Gemini、OpenAI、Anthropic、Groq（語音�
 
 如果您輸入自訂端點，該伺服器的營運者會收到您的資料。請只輸入您信任的伺服器。
 
+**自動選模**預設關閉。若您開啟，每則文字問題會先送到您選為「決策模型」的 Gemini 或 OpenAI 模型，由它只把問題標成簡單、中等或困難；接著由您指派給該等級的模型作答。這是對您已在使用的服務多送一次請求，可能計入該服務的額度或被計費。內容只有那一則問題的文字，不含其他東西，該服務會和其他請求一樣依自己的條款處理。決策服務失敗或無法判斷時，App 會直接使用您的主要模型。Google Play 版本不提供 GitHub 版本中的其他決策服務。
+
 ### 檢舉（開發者唯一會收到的資料）
 
 App 中的每則 AI 回應都有一個旗標按鈕。如果您使用它並按下**送出檢舉**，App 會把以下內容傳送給開發者：
@@ -157,7 +163,7 @@ App 中的每則 AI 回應都有一個旗標按鈕。如果您使用它並按下
 
 ### 保存在手機上的資料
 
-對話、照片、錄音、設定與日誌都存放在 App 於您手機上的私有儲存空間。您可以在 App 內刪除對話、錄音與照片，解除安裝 App 則會移除所有資料。Google Play 版本已關閉 Android 雲端備份與裝置間轉移，因此這些資料不會經由 Android 備份複製到 Google 的伺服器。
+對話、照片、錄音、設定與日誌都存放在 App 於您手機上的私有儲存空間。每則回答也會保存一段簡短紀錄，說明是哪個模型產生、為什麼。您可以在 App 內刪除對話、錄音與照片，解除安裝 App 則會移除所有資料。Google Play 版本已關閉 Android 雲端備份與裝置間轉移，因此這些資料不會經由 Android 備份複製到 Google 的伺服器。
 
 ### 權限
 

@@ -105,6 +105,8 @@ android {
         create("play") {
             dimension = "distribution"
             applicationId = "io.github.zero2005x.glassesaicompanion"
+            // versionName follows the GitHub release built from the same source (v1.2.0, the
+            // reference release); versionCode is Play's own counter, independent of the GitHub one.
             versionCode = 1
             versionName = "1.2.0"
             buildConfigField("boolean", "PLAY_DISTRIBUTION", "true")
