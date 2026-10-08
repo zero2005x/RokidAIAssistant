@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Google Play flavor branding: overrides the Rokid-branded strings of the main source set. -->
+<resources>
+    <string name="app_name">Glasses AI Companion</string>
+    <string name="app_title">Glasses AI Companion</string>
+    <string name="home_welcome">ยินดีต้อนรับสู่ Glasses AI Companion</string>
+    <string name="initial_setup_message">เพื่อใช้งานผู้ช่วย AI เสียงและฟีเจอร์จดจำรูปภาพ คุณต้องกำหนดค่าคีย์ API อย่างน้อยหนึ่งรายการ\n\nบริการที่รองรับ:\n• Google Gemini\n• OpenAI\n• Anthropic Claude\n• เอ็นด์พอยต์แบบกำหนดเองที่เข้ากันได้กับ OpenAI</string>
+    <string name="initial_setup_hint">คุณสามารถรับคีย์ API ได้จากเว็บไซต์ของบริการ AI ที่คุณเลือก</string>
+    <string name="tts_settings_description">กำหนดค่าการแปลงข้อความเป็นเสียง (TTS) แอปใช้เครื่อง TTS ของโทรศัพท์คุณ</string>
+    <string name="tts_settings_note">คุณภาพเสียงและภาษาที่รองรับขึ้นอยู่กับเครื่องมือเสียงและเสียงพูดที่ติดตั้งในโทรศัพท์ของคุณ</string>
+</resources>

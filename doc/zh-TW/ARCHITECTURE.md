@@ -13,7 +13,7 @@
 ./gradlew installDebug
 
 # 執行元件特定建置
-./gradlew :phone-app:installDebug
+./gradlew :phone-app:installGithubDebug
 ./gradlew :glasses-app:installDebug
 ```
 
@@ -286,7 +286,7 @@ data class ChatUiState(
 ./gradlew test
 
 # 特定模組
-./gradlew :phone-app:testDebugUnitTest
+./gradlew :phone-app:testGithubDebugUnitTest
 ./gradlew :common:test
 ```
 
@@ -325,7 +325,7 @@ A: 1. 實作 AiProvider 介面
 
 ```bash
 # 檢查相依性樹
-./gradlew :phone-app:dependencies --configuration releaseRuntimeClasspath
+./gradlew :phone-app:dependencies --configuration githubReleaseRuntimeClasspath
 
 # 強制解析
 configurations.all {
@@ -380,7 +380,7 @@ A: 1. 檢查網路連接（AI API 需要）
 
 | 任務                   | 指令                                  |
 | ---------------------- | ------------------------------------- |
-| 建置並安裝 phone-app   | `./gradlew :phone-app:installDebug`   |
+| 建置並安裝 phone-app   | `./gradlew :phone-app:installGithubDebug`   |
 | 建置並安裝 glasses-app | `./gradlew :glasses-app:installDebug` |
 | 執行測試               | `./gradlew test`                      |
 | 清理建置               | `./gradlew clean`                     |

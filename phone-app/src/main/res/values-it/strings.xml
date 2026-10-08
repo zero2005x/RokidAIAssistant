@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Info -->
     <string name="app_name">Rokid AI Assistente</string>
@@ -579,4 +579,53 @@
     <string name="routing_llm_description">Usa la chiave esistente del fornitore. Viene inviata solo la domanda attuale per la classificazione, con una richiesta API a pagamento aggiuntiva. La certezza del LLM non è una probabilità calibrata. In caso di dubbio o timeout viene usato il modello principale.</string>
     <string name="routing_reason_selected_llm">%1$s ha scelto %2$s tramite classificazione strutturata.</string>
     <string name="glasses_preview_metrics">Area dell’applicazione: %1$d × %2$d px</string>
+    <!-- Distribution policy: HTTPS only, plain HTTP is allowed for localhost -->
+    <!-- Google Play release: first-launch notice, AI-response reporting, offline demo, permissions -->
+    <string name="custom_url_https_required">L’HTTP non cifrato è consentito solo per localhost. Usa un indirizzo HTTPS.</string>
+    <string name="bluetooth_permission_needed">Serve l’accesso al Bluetooth per collegarsi agli occhiali. Il resto dell’app funziona comunque senza.</string>
+    <string name="service_start_failed">Impossibile avviare il servizio di connessione agli occhiali.</string>
+    <string name="microphone_permission_denied">Serve l’accesso al microfono per registrare l’audio. Puoi concederlo nelle impostazioni di sistema.</string>
+    <string name="recording_stopped_background_title">Registrazione interrotta</string>
+    <string name="recording_stopped_background_message">La registrazione con il microfono del telefono funziona solo mentre l’app è aperta, quindi è stata interrotta quando sei uscito dall’app. Quanto registrato finora è stato salvato.</string>
+    <string name="onboarding_title">Prima di iniziare</string>
+    <string name="onboarding_subtitle">Quattro cose da sapere su questa app.</string>
+    <string name="onboarding_unofficial_title">Un’app indipendente</string>
+    <string name="onboarding_unofficial_body">Questa app è un progetto indipendente. Non è realizzata né approvata da Rokid e non ha alcun legame con Rokid.</string>
+    <string name="onboarding_glasses_title">Gli occhiali sono facoltativi</string>
+    <string name="onboarding_glasses_body">Per usare gli occhiali Rokid serve un’app complementare separata installata sugli occhiali. Senza occhiali puoi comunque chattare, analizzare foto e registrare audio sul telefono.</string>
+    <string name="onboarding_glasses_guide_button">Apri la guida alla configurazione degli occhiali</string>
+    <string name="onboarding_data_title">Dove vanno i tuoi dati</string>
+    <string name="onboarding_data_body">La tua voce, le tue foto e il tuo testo vengono inviati solo al servizio di IA che scegli, usando la tua chiave API. Lo sviluppatore di questa app non li riceve né li conserva. Quel servizio tratta i dati secondo le proprie condizioni, quindi consultale prima di inviare qualcosa di sensibile. Se scegli di segnalare una risposta dell’IA, quella risposta e il tuo motivo vengono inviati allo sviluppatore.</string>
+    <string name="onboarding_people_title">Rispetta la privacy degli altri</string>
+    <string name="onboarding_people_body">Chiedi il permesso prima di registrare l’audio o fotografare altre persone e rispetta le leggi del tuo paese.</string>
+    <string name="onboarding_accept">Ho capito</string>
+    <string name="report_content_description">Segnala questa risposta</string>
+    <string name="report_title">Segnala questa risposta</string>
+    <string name="report_intro">Dicci cosa non va in questa risposta dell’IA. Le segnalazioni aiutano lo sviluppatore a migliorare il filtro. Non inserire password o altri segreti.</string>
+    <string name="report_reason_harmful">Dannosa o offensiva</string>
+    <string name="report_reason_sexual">Sessuale o inappropriata</string>
+    <string name="report_reason_misleading">Inesatta o fuorviante</string>
+    <string name="report_reason_privacy">Rivela dati personali</string>
+    <string name="report_reason_other">Altro</string>
+    <string name="report_note_label">Dettagli (facoltativo)</string>
+    <string name="report_include_prompt">Invia anche il messaggio a cui risponde</string>
+    <string name="report_what_is_sent">Cosa verrà inviato</string>
+    <string name="report_what_is_sent_body">La risposta qui sotto, il tuo motivo e la tua nota, il fornitore e il nome del modello di IA, la versione dell’app e la tua lingua. Nessuna chiave API e nessun’altra conversazione.</string>
+    <string name="report_retention">Le segnalazioni vengono inviate allo sviluppatore dell’app e conservate fino a %1$d giorni.</string>
+    <string name="report_send">Invia segnalazione</string>
+    <string name="report_sending">Invio in corso…</string>
+    <string name="report_sent_title">Segnalazione inviata</string>
+    <string name="report_sent_message">Grazie. Lo sviluppatore ha ricevuto la tua segnalazione.</string>
+    <string name="report_failed_retry">Impossibile inviare la segnalazione. Controlla la connessione e riprova.</string>
+    <string name="report_failed_final">Impossibile inviare la segnalazione.</string>
+    <string name="demo_section_title">Provalo prima</string>
+    <string name="demo_try">Prova la demo offline</string>
+    <string name="demo_try_description">Guarda come appare la chat senza una chiave API. Le risposte sono scritte in anticipo e non viene inviato nulla in rete.</string>
+    <string name="demo_title">Demo (offline)</string>
+    <string name="demo_banner">Demo offline: le risposte sono scritte in anticipo. Nulla lascia il tuo telefono.</string>
+    <string name="demo_greeting">Ciao! Questa è una demo offline della chat. Non posso rispondere a domande vere, ma posso mostrarti come appaiono le risposte. Scrivi qualcosa per continuare. Per parlare con un vero servizio di IA, aggiungi la tua chiave API nelle Impostazioni.</string>
+    <string name="demo_reply_1">Ecco come appare una risposta vera: un testo breve e leggibile in un fumetto come questo. Con la tua chiave API, un servizio di IA la scrive per te.</string>
+    <string name="demo_reply_2">Puoi anche analizzare le foto dei tuoi occhiali, registrare audio per ottenere un riassunto e rivedere tutto più tardi nella cronologia.</string>
+    <string name="demo_reply_3">Ogni risposta dell’IA ha un piccolo pulsante con una bandierina. Toccalo per segnalare una risposta dannosa, sbagliata o inappropriata.</string>
+    <string name="demo_reply_4">Pronto per la versione vera? Apri le Impostazioni, scegli un servizio di IA e incolla la tua chiave API.</string>
 </resources>

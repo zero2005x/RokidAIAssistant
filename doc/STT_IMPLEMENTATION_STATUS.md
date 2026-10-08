@@ -15,8 +15,8 @@ This document reflects the **current code state** of STT provider support in `ph
 - **Total STT Providers**: 18
 - **Implemented in Factory**: 18
 - **Planned/Placeholder Providers**: 0
-- **Factory Source**: `phone-app/src/main/java/com/example/rokidphone/service/stt/SttServiceFactory.kt`
-- **Provider Enum Source**: `phone-app/src/main/java/com/example/rokidphone/service/stt/SttProvider.kt`
+- **Factory Source**: `phone-app/src/main/java/io/github/zero2005x/glassesaicompanion/service/stt/SttServiceFactory.kt`
+- **Provider Enum Source**: `phone-app/src/main/java/io/github/zero2005x/glassesaicompanion/service/stt/SttProvider.kt`
 
 ---
 
@@ -58,8 +58,8 @@ All providers are created through `SttServiceFactory.createService(...)` and con
 
 Key interfaces and base classes:
 
-- `phone-app/src/main/java/com/example/rokidphone/service/stt/SttService.kt`
-- `phone-app/src/main/java/com/example/rokidphone/service/stt/BaseSttService.kt`
+- `phone-app/src/main/java/io/github/zero2005x/glassesaicompanion/service/stt/SttService.kt`
+- `phone-app/src/main/java/io/github/zero2005x/glassesaicompanion/service/stt/BaseSttService.kt`
 
 ---
 
@@ -77,7 +77,7 @@ Key interfaces and base classes:
 
 Provider test classes exist under:
 
-- `phone-app/src/test/java/com/example/rokidphone/service/stt/`
+- `phone-app/src/test/java/io/github/zero2005x/glassesaicompanion/service/stt/`
 
 Includes tests for all 18 providers/adapters, covering at least:
 

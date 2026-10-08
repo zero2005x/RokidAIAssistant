@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Info -->
     <string name="app_name">Rokid AI Assistant</string>
@@ -579,4 +579,53 @@
     <string name="routing_llm_description">Utilise la clé existante du fournisseur. Seule la question actuelle est envoyée pour classification, avec un appel API payant supplémentaire. La certitude du LLM ne constitue pas une probabilité calibrée. En cas de doute ou de délai dépassé, le modèle principal est utilisé.</string>
     <string name="routing_reason_selected_llm">%1$s a choisi %2$s par classification structurée.</string>
     <string name="glasses_preview_metrics">Zone de l’application : %1$d × %2$d px</string>
+    <!-- Distribution policy: HTTPS only, plain HTTP is allowed for localhost -->
+    <!-- Google Play release: first-launch notice, AI-response reporting, offline demo, permissions -->
+    <string name="custom_url_https_required">Le HTTP non chiffré n’est autorisé que pour localhost. Utilisez une adresse HTTPS.</string>
+    <string name="bluetooth_permission_needed">L’accès au Bluetooth est nécessaire pour se connecter à vos lunettes. Le reste de l’application fonctionne sans lui.</string>
+    <string name="service_start_failed">Impossible de démarrer le service de connexion aux lunettes.</string>
+    <string name="microphone_permission_denied">L’accès au micro est nécessaire pour enregistrer de l’audio. Vous pouvez l’accorder dans les réglages du système.</string>
+    <string name="recording_stopped_background_title">Enregistrement arrêté</string>
+    <string name="recording_stopped_background_message">L’enregistrement avec le micro du téléphone ne fonctionne que lorsque l’application est ouverte ; il s’est donc arrêté quand vous l’avez quittée. Ce qui a déjà été enregistré est sauvegardé.</string>
+    <string name="onboarding_title">Avant de commencer</string>
+    <string name="onboarding_subtitle">Quatre choses à savoir sur cette application.</string>
+    <string name="onboarding_unofficial_title">Une application indépendante</string>
+    <string name="onboarding_unofficial_body">Cette application est un projet indépendant. Elle n’est ni conçue, ni approuvée par Rokid, et n’a aucun lien avec Rokid.</string>
+    <string name="onboarding_glasses_title">Les lunettes sont facultatives</string>
+    <string name="onboarding_glasses_body">Pour utiliser des lunettes Rokid, il faut installer une application compagnon distincte sur les lunettes. Sans lunettes, vous pouvez quand même discuter, analyser des photos et enregistrer de l’audio sur votre téléphone.</string>
+    <string name="onboarding_glasses_guide_button">Ouvrir le guide de configuration des lunettes</string>
+    <string name="onboarding_data_title">Où vont vos données</string>
+    <string name="onboarding_data_body">Votre voix, vos photos et votre texte sont envoyés uniquement au service d’IA que vous choisissez, avec votre propre clé d’API. Le développeur de cette application ne les reçoit ni ne les conserve. Ce service traite les données selon ses propres conditions : consultez-les avant d’envoyer quoi que ce soit de sensible. Si vous signalez une réponse de l’IA, cette réponse et votre motif sont envoyés au développeur.</string>
+    <string name="onboarding_people_title">Respectez la vie privée des autres</string>
+    <string name="onboarding_people_body">Demandez l’autorisation avant d’enregistrer ou de photographier d’autres personnes, et respectez la loi de votre pays.</string>
+    <string name="onboarding_accept">J’ai compris</string>
+    <string name="report_content_description">Signaler cette réponse</string>
+    <string name="report_title">Signaler cette réponse</string>
+    <string name="report_intro">Dites-nous ce qui ne va pas dans cette réponse de l’IA. Les signalements aident le développeur à améliorer le filtrage. N’indiquez ni mot de passe ni autre secret.</string>
+    <string name="report_reason_harmful">Nuisible ou offensante</string>
+    <string name="report_reason_sexual">Sexuelle ou inappropriée</string>
+    <string name="report_reason_misleading">Inexacte ou trompeuse</string>
+    <string name="report_reason_privacy">Révèle des données personnelles</string>
+    <string name="report_reason_other">Autre</string>
+    <string name="report_note_label">Détails (facultatif)</string>
+    <string name="report_include_prompt">Envoyer aussi le message auquel elle répond</string>
+    <string name="report_what_is_sent">Ce qui sera envoyé</string>
+    <string name="report_what_is_sent_body">La réponse ci-dessous, votre motif et votre note, le fournisseur et le nom du modèle d’IA, la version de l’application et votre langue. Aucune clé d’API et aucune autre conversation.</string>
+    <string name="report_retention">Les signalements sont envoyés au développeur de l’application et conservés jusqu’à %1$d jours.</string>
+    <string name="report_send">Envoyer le signalement</string>
+    <string name="report_sending">Envoi…</string>
+    <string name="report_sent_title">Signalement envoyé</string>
+    <string name="report_sent_message">Merci. Le développeur a bien reçu votre signalement.</string>
+    <string name="report_failed_retry">Le signalement n’a pas pu être envoyé. Vérifiez votre connexion et réessayez.</string>
+    <string name="report_failed_final">Le signalement n’a pas pu être envoyé.</string>
+    <string name="demo_section_title">À essayer d’abord</string>
+    <string name="demo_try">Essayer la démo hors ligne</string>
+    <string name="demo_try_description">Voyez à quoi ressemble le chat sans clé d’API. Les réponses sont écrites à l’avance et rien n’est envoyé sur le réseau.</string>
+    <string name="demo_title">Démo (hors ligne)</string>
+    <string name="demo_banner">Démo hors ligne : les réponses sont écrites à l’avance. Rien ne quitte votre téléphone.</string>
+    <string name="demo_greeting">Bonjour ! Ceci est une démo hors ligne du chat. Je ne peux pas répondre à de vraies questions, mais je peux vous montrer l’aspect des réponses. Écrivez ce que vous voulez pour continuer. Pour parler à un vrai service d’IA, ajoutez votre propre clé d’API dans les Réglages.</string>
+    <string name="demo_reply_1">Voici à quoi ressemble une vraie réponse : un texte court et lisible dans une bulle comme celle-ci. Avec votre propre clé d’API, un service d’IA l’écrit pour vous.</string>
+    <string name="demo_reply_2">Vous pouvez aussi analyser les photos de vos lunettes, enregistrer de l’audio pour en obtenir un résumé et tout retrouver ensuite dans l’historique.</string>
+    <string name="demo_reply_3">Chaque réponse de l’IA a un petit bouton en forme de drapeau. Touchez-le pour signaler une réponse nuisible, fausse ou inappropriée.</string>
+    <string name="demo_reply_4">Prêt pour la vraie version ? Ouvrez les Réglages, choisissez un service d’IA et collez votre clé d’API.</string>
 </resources>

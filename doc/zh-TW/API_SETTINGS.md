@@ -224,7 +224,7 @@ STT 與聊天服務商解耦。只有具備實際轉錄 endpoint 的服務商可
 **位置**: `phone-app/build.gradle.kts`
 
 ```kotlin
-implementation("com.rokid.cxr:client-m:1.0.4")
+implementation("com.rokid.cxr:client-m:1.2.2")
 ```
 
 **用途**:

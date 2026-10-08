@@ -12,18 +12,29 @@ plugins {
     jacoco
 }
 
+val localPropsFile = rootProject.file("local.properties")
+val localProps = Properties().apply {
+    if (localPropsFile.exists()) {
+        localPropsFile.inputStream().use { load(it) }
+    }
+}
+fun localProperty(name: String): String? = localProps.getProperty(name)?.takeIf { it.isNotBlank() }
+
+// Developer API keys (local.properties) are only ever baked into the `github` flavor.
+// The `play` flavor always compiles empty constants, see productFlavors below.
+val developerGeminiKey = localProps.getProperty("GEMINI_API_KEY", "")
+val developerOpenAiKey = localProps.getProperty("OPENAI_API_KEY", "")
+
+// Where in-app AI content reports are posted (HTTPS only). Not a secret, but environment specific, so it
+// comes from local.properties or -PREPORT_ENDPOINT_URL=... instead of the source tree.
+val reportEndpointUrl: String =
+    localProperty("REPORT_ENDPOINT_URL") ?: providers.gradleProperty("REPORT_ENDPOINT_URL").orNull ?: ""
+
 android {
-    namespace = "com.example.rokidphone"
+    namespace = "io.github.zero2005x.glassesaicompanion"
     compileSdk = 36
 
-    val localPropsFile = rootProject.file("local.properties")
-    val localProps = Properties().apply {
-        if (localPropsFile.exists()) {
-            localPropsFile.inputStream().use { load(it) }
-        }
-    }
-    fun localProperty(name: String): String? = localProps.getProperty(name)?.takeIf { it.isNotBlank() }
-
+    // GitHub APK signing (existing release key)
     val releaseStoreFile = localProperty("RELEASE_STORE_FILE")
     val releaseStorePassword = localProperty("RELEASE_STORE_PASSWORD")
     val releaseKeyAlias = localProperty("RELEASE_KEY_ALIAS")
@@ -35,36 +46,82 @@ android {
         releaseKeyPassword
     ).all { !it.isNullOrBlank() }
 
+    // Google Play upload key: a separate key from the GitHub release key on purpose,
+    // so that leaking one never affects the other distribution channel.
+    val playUploadStoreFile = localProperty("PLAY_UPLOAD_STORE_FILE")
+    val playUploadStorePassword = localProperty("PLAY_UPLOAD_STORE_PASSWORD")
+    val playUploadKeyAlias = localProperty("PLAY_UPLOAD_KEY_ALIAS")
+    val playUploadKeyPassword = localProperty("PLAY_UPLOAD_KEY_PASSWORD")
+    val hasPlayUploadSigning = listOf(
+        playUploadStoreFile,
+        playUploadStorePassword,
+        playUploadKeyAlias,
+        playUploadKeyPassword
+    ).all { !it.isNullOrBlank() }
+
     defaultConfig {
-        applicationId = "com.example.rokidphone"
         minSdk = 28
-        targetSdk = 34
-        versionCode = 5
-        versionName = "1.1.0"
+        targetSdk = 36
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        // API Keys - Read from local.properties, do not hardcode.
-        val geminiKey = localProps.getProperty("GEMINI_API_KEY", "")
-        val openaiKey = localProps.getProperty("OPENAI_API_KEY", "")
-        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiKey\"")
-        buildConfigField("String", "OPENAI_API_KEY", "\"$openaiKey\"")
     }
 
     signingConfigs {
         if (hasReleaseSigning) {
-            create("release") {
+            create("githubRelease") {
                 storeFile = rootProject.file(releaseStoreFile!!)
                 storePassword = releaseStorePassword
                 keyAlias = releaseKeyAlias
                 keyPassword = releaseKeyPassword
             }
         }
+        if (hasPlayUploadSigning) {
+            create("playUpload") {
+                storeFile = rootProject.file(playUploadStoreFile!!)
+                storePassword = playUploadStorePassword
+                keyAlias = playUploadKeyAlias
+                keyPassword = playUploadKeyPassword
+            }
+        }
+    }
+
+    flavorDimensions += "distribution"
+    productFlavors {
+        // Sideloaded APK distributed through GitHub releases. Keeps the legacy
+        // application id so existing installs keep upgrading in place.
+        create("github") {
+            dimension = "distribution"
+            applicationId = "com.example.rokidphone"
+            versionCode = 5
+            versionName = "1.1.0"
+            buildConfigField("boolean", "PLAY_DISTRIBUTION", "false")
+            buildConfigField("String", "REPORT_ENDPOINT_URL", "\"$reportEndpointUrl\"")
+            buildConfigField("String", "GEMINI_API_KEY", "\"$developerGeminiKey\"")
+            buildConfigField("String", "OPENAI_API_KEY", "\"$developerOpenAiKey\"")
+            signingConfig = signingConfigs.findByName("githubRelease")
+        }
+
+        // Google Play distribution: curated provider list, no CXR SDK, no developer keys.
+        create("play") {
+            dimension = "distribution"
+            applicationId = "io.github.zero2005x.glassesaicompanion"
+            // versionName follows the GitHub release built from the same source (v1.2.0, the
+            // reference release); versionCode is Play's own counter, independent of the GitHub one.
+            versionCode = 1
+            versionName = "1.2.0"
+            buildConfigField("boolean", "PLAY_DISTRIBUTION", "true")
+            buildConfigField("String", "REPORT_ENDPOINT_URL", "\"$reportEndpointUrl\"")
+            buildConfigField("String", "GEMINI_API_KEY", "\"\"")
+            buildConfigField("String", "OPENAI_API_KEY", "\"\"")
+            signingConfig = signingConfigs.findByName("playUpload")
+        }
     }
 
     buildTypes {
         debug {
             enableUnitTestCoverage = true
+            // A flavor-level signingConfig would otherwise leak into debug builds.
+            signingConfig = signingConfigs.getByName("debug")
         }
 
         release {
@@ -73,9 +130,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            if (hasReleaseSigning) {
-                signingConfig = signingConfigs.getByName("release")
-            } else {
+            if (!hasReleaseSigning && !hasPlayUploadSigning) {
                 logger.lifecycle("Release signing is not configured. Building unsigned release artifacts.")
             }
         }
@@ -123,6 +178,19 @@ kotlin {
 }
 
 tasks.withType<Test>().configureEach {
+    // Robolectric simulating SDK 36 reaches into JDK internals (jdk.internal.access, ...), which Java 17+
+    // blocks unless opened. List from https://robolectric.org/getting-started/ ("Running with Java 17 and higher").
+    jvmArgs(
+        "--add-opens=java.base/java.lang=ALL-UNNAMED",
+        "--add-opens=java.base/java.util=ALL-UNNAMED",
+        "--add-opens=java.base/java.io=ALL-UNNAMED",
+        "--add-opens=java.base/java.net=ALL-UNNAMED",
+        "--add-opens=java.base/java.security=ALL-UNNAMED",
+        "--add-opens=java.base/java.text=ALL-UNNAMED",
+        "--add-opens=java.base/jdk.internal.access=ALL-UNNAMED",
+        "--add-opens=java.desktop/java.awt.font=ALL-UNNAMED",
+        "--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED"
+    )
     extensions.configure(JacocoTaskExtension::class.java) {
         isIncludeNoLocationClasses = true
         excludes = listOf("jdk.internal.*")
@@ -164,13 +232,15 @@ dependencies {
     implementation("androidx.bluetooth:bluetooth:1.0.0-alpha02")
     
     // Rokid CXR-M SDK (Mobile SDK - via Maven)
-    // Used for connecting to glasses, device control, and photo capture
-    implementation("com.rokid.cxr:client-m:1.0.4")
-    
-    // CXR SDK required dependencies
-    implementation("com.squareup.retrofit2:retrofit:3.0.0")
-    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.3.2")
+    // Used for connecting to glasses, device control, and photo capture.
+    // Intentionally GitHub-flavor only: the Google Play flavor ships without the SDK
+    // (no CXR classes, no native libraries, no SN auth file).
+    "githubImplementation"("com.rokid.cxr:client-m:1.2.2")
+
+    // CXR SDK required dependencies (not used by app code itself)
+    "githubImplementation"("com.squareup.retrofit2:retrofit:3.0.0")
+    "githubImplementation"("com.squareup.retrofit2:converter-gson:3.0.0")
+    "githubImplementation"("com.squareup.okhttp3:logging-interceptor:5.3.2")
     implementation("com.squareup.okio:okio:3.16.4")
     
     // DataStore for preferences
@@ -214,6 +284,51 @@ dependencies {
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.okhttp.mockwebserver)
     androidTestImplementation("androidx.room:room-testing:2.8.4")
+}
+
+// Release guard: never ship a developer's personal API keys inside a release APK/AAB.
+// The play flavor compiles empty constants, so only the github flavor can trip this.
+// Opt out explicitly with -PallowDeveloperKeysInRelease=true for a private build.
+val verifyNoDeveloperKeysInRelease = tasks.register("verifyNoDeveloperKeysInRelease") {
+    group = "verification"
+    description = "Fails if local.properties developer API keys would be embedded in a release build."
+    val keysPresent = developerGeminiKey.isNotBlank() || developerOpenAiKey.isNotBlank()
+    val allowed = providers.gradleProperty("allowDeveloperKeysInRelease").orNull == "true"
+    doLast {
+        if (keysPresent && !allowed) {
+            throw GradleException(
+                "GEMINI_API_KEY / OPENAI_API_KEY are set in local.properties and would be embedded " +
+                    "in the release build. Remove them (users enter keys in the app), or pass " +
+                    "-PallowDeveloperKeysInRelease=true for a private build."
+            )
+        }
+    }
+}
+// Google Play policy: an app that generates content with AI must let users report it from inside
+// the app. The report dialog needs an endpoint, so a Play release without one must not be built.
+val verifyReportEndpointForPlayRelease = tasks.register("verifyReportEndpointForPlayRelease") {
+    group = "verification"
+    description = "Fails if the Play release would ship without an HTTPS AI-report endpoint."
+    val endpoint = reportEndpointUrl
+    doLast {
+        if (!endpoint.startsWith("https://", ignoreCase = true) || endpoint.length <= "https://".length) {
+            throw GradleException(
+                "REPORT_ENDPOINT_URL is not set to an https:// URL. The Play build needs it for the " +
+                    "in-app AI content report. Set it in local.properties or pass " +
+                    "-PREPORT_ENDPOINT_URL=https://..."
+            )
+        }
+    }
+}
+
+tasks.configureEach {
+    if (name.matches(Regex("(assemble|bundle|package)Github[A-Za-z]*Release"))) {
+        dependsOn(verifyNoDeveloperKeysInRelease)
+    }
+    // Only the bundle is what gets uploaded to Google Play; CI may still assemble a Play APK.
+    if (name.matches(Regex("bundlePlay[A-Za-z]*Release"))) {
+        dependsOn(verifyReportEndpointForPlayRelease)
+    }
 }
 
 // Room schema export location (required for exportSchema = true; commit the JSON schemas).

@@ -7,7 +7,7 @@
         errorLine1="            audioRecord = AudioRecord("
         errorLine2="                          ^">
         <location
-            file="src/main/java/com/example/rokidphone/service/ai/LiveAudioManager.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/service/ai/LiveAudioManager.kt"
             line="182"
             column="27"/>
     </issue>
@@ -18,7 +18,7 @@
         errorLine1="                                Log.d(TAG, &quot;Initializing CXR Bluetooth with device: ${device.name}&quot;)"
         errorLine2="                                                                                      ~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/service/PhoneAIService.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/service/PhoneAIService.kt"
             line="209"
             column="87"/>
     </issue>
@@ -29,7 +29,7 @@
         errorLine1="        else -> String.format(&quot;%.1f MB&quot;, bytes / (1024.0 * 1024.0))"
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/ui/recording/RecordingDetailScreen.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/ui/recording/RecordingDetailScreen.kt"
             line="640"
             column="17"/>
     </issue>
@@ -40,7 +40,7 @@
         errorLine1="        return String.format(&quot;%04d-%02d-%02d&quot;, year, month, day)"
         errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/service/ai/SystemToolsHandler.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/service/ai/SystemToolsHandler.kt"
             line="190"
             column="16"/>
     </issue>
@@ -84,7 +84,7 @@
         errorLine1="        configuration.setLocale(locale)"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/data/SettingsRepository.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/data/SettingsRepository.kt"
             line="351"
             column="9"/>
     </issue>
@@ -227,7 +227,7 @@
         errorLine1="                                    Toast.makeText(context, context.getString(R.string.log_logs_copied_clipboard), Toast.LENGTH_SHORT).show()"
         errorLine2="                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/ui/logs/LogViewerScreen.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/ui/logs/LogViewerScreen.kt"
             line="137"
             column="61"/>
     </issue>
@@ -238,7 +238,7 @@
         errorLine1="                        text = context.getString(R.string.log_entries_count, filteredLogs.size) +"
         errorLine2="                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/ui/logs/LogViewerScreen.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/ui/logs/LogViewerScreen.kt"
             line="190"
             column="32"/>
     </issue>
@@ -249,7 +249,7 @@
         errorLine1="                                context.getString(R.string.log_entries_total_suffix, stats?.totalCount ?: 0)"
         errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/ui/logs/LogViewerScreen.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/ui/logs/LogViewerScreen.kt"
             line="192"
             column="33"/>
     </issue>
@@ -260,7 +260,7 @@
         errorLine1="                                Toast.makeText(context, context.getString(R.string.log_log_copied), Toast.LENGTH_SHORT).show()"
         errorLine2="                                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/ui/logs/LogViewerScreen.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/ui/logs/LogViewerScreen.kt"
             line="250"
             column="57"/>
     </issue>
@@ -271,7 +271,7 @@
         errorLine1="                    Toast.makeText(context, context.getString(R.string.log_file_content_copied), Toast.LENGTH_SHORT).show()"
         errorLine2="                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/ui/logs/LogViewerScreen.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/ui/logs/LogViewerScreen.kt"
             line="303"
             column="45"/>
     </issue>
@@ -282,7 +282,7 @@
         errorLine1="    modifier: Modifier = Modifier"
         errorLine2="    ~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/ui/conversation/ChatScreen.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/ui/conversation/ChatScreen.kt"
             line="48"
             column="5"/>
     </issue>
@@ -293,7 +293,7 @@
         errorLine1="    modifier: Modifier = Modifier"
         errorLine2="    ~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/ui/home/HomeScreen.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/ui/home/HomeScreen.kt"
             line="61"
             column="5"/>
     </issue>
@@ -446,7 +446,7 @@
         errorLine1="        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/MainActivity.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/MainActivity.kt"
             line="112"
             column="13"/>
     </issue>
@@ -457,7 +457,7 @@
         errorLine1="        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/PhoneApplication.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/PhoneApplication.kt"
             line="17"
             column="13"/>
     </issue>
@@ -468,7 +468,7 @@
         errorLine1="            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N &amp;&amp; state.source == RecordingSource.PHONE) {"
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/data/db/RecordingRepository.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/data/db/RecordingRepository.kt"
             line="204"
             column="17"/>
     </issue>
@@ -486,7 +486,7 @@
         errorLine1="        @Volatile"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/example/rokidphone/data/AiRepository.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/data/AiRepository.kt"
             line="43"
             column="9"/>
     </issue>
@@ -497,7 +497,7 @@
         errorLine1="        @Volatile"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/example/rokidphone/service/EnhancedAIService.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/service/EnhancedAIService.kt"
             line="24"
             column="9"/>
     </issue>
@@ -508,7 +508,7 @@
         errorLine1="        @Volatile"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/example/rokidphone/data/log/LogManager.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/data/log/LogManager.kt"
             line="41"
             column="9"/>
     </issue>
@@ -519,7 +519,7 @@
         errorLine1="    private val context: Context = application.applicationContext"
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/viewmodel/PhotoGalleryViewModel.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/viewmodel/PhotoGalleryViewModel.kt"
             line="37"
             column="5"/>
     </issue>
@@ -530,7 +530,7 @@
         errorLine1="        @Volatile"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/example/rokidphone/ai/provider/ProviderManager.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/ai/provider/ProviderManager.kt"
             line="28"
             column="9"/>
     </issue>
@@ -541,7 +541,7 @@
         errorLine1="        @Volatile"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/example/rokidphone/data/db/RecordingRepository.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/data/db/RecordingRepository.kt"
             line="57"
             column="9"/>
     </issue>
@@ -1318,7 +1318,7 @@
         errorLine1="        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)"
         errorLine2="        ^">
         <location
-            file="src/main/java/com/example/rokidphone/data/LanguageManager.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/data/LanguageManager.kt"
             line="40"
             column="9"/>
     </issue>
@@ -1329,7 +1329,7 @@
         errorLine1="            prefs.edit().putString(KEY_SYSTEM_PROMPT, currentLocaleDefault).apply()"
         errorLine2="            ~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/data/SettingsRepository.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/data/SettingsRepository.kt"
             line="119"
             column="13"/>
     </issue>
@@ -1340,7 +1340,7 @@
         errorLine1="            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(&quot;https://ko-fi.com/liangtinglin&quot;))"
         errorLine2="                                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/ui/SettingsScreen.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/ui/SettingsScreen.kt"
             line="519"
             column="53"/>
     </issue>
@@ -1351,7 +1351,7 @@
         errorLine1="        prefs.edit().clear().apply()"
         errorLine2="        ~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/service/stt/SttCredentialsRepository.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/service/stt/SttCredentialsRepository.kt"
             line="224"
             column="9"/>
     </issue>
@@ -1362,7 +1362,7 @@
         errorLine1="                data = Uri.parse(&quot;tel:$resolvedNumber&quot;)"
         errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/service/ai/SystemToolsHandler.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/service/ai/SystemToolsHandler.kt"
             line="80"
             column="24"/>
     </issue>
@@ -1373,7 +1373,7 @@
         errorLine1="                data = Uri.parse(&quot;tel:$resolvedNumber&quot;)"
         errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/example/rokidphone/service/ai/SystemToolsHandler.kt"
+            file="src/main/java/io/github/zero2005x/glassesaicompanion/service/ai/SystemToolsHandler.kt"
             line="80"
             column="24"/>
     </issue>

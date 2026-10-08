@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Info -->
     <string name="app_name">Rokid AI アシスタント</string>
@@ -578,4 +578,53 @@
     <string name="routing_llm_description">既存のプロバイダーキーを使用します。分類のために今回の質問のみを送信し、有料の API リクエストが1回追加されます。LLM の確実性は校正済みの確率ではありません。不確実またはタイムアウトの場合はメインモデルを使用します。</string>
     <string name="routing_reason_selected_llm">%1$s が構造化分類で %2$s を選択しました。</string>
     <string name="glasses_preview_metrics">アプリ表示領域：%1$d × %2$d px</string>
+    <!-- Distribution policy: HTTPS only, plain HTTP is allowed for localhost -->
+    <!-- Google Play release: first-launch notice, AI-response reporting, offline demo, permissions -->
+    <string name="custom_url_https_required">プレーンな HTTP は localhost に対してのみ使用できます。HTTPS のアドレスを使用してください。</string>
+    <string name="bluetooth_permission_needed">メガネに接続するには Bluetooth へのアクセスが必要です。許可しなくても、アプリのその他の機能はそのまま使えます。</string>
+    <string name="service_start_failed">メガネ接続サービスを開始できませんでした。</string>
+    <string name="microphone_permission_denied">録音にはマイクへのアクセスが必要です。システム設定で許可できます。</string>
+    <string name="recording_stopped_background_title">録音を停止しました</string>
+    <string name="recording_stopped_background_message">スマートフォンのマイクでの録音は、アプリを開いている間のみ動作します。アプリを離れたため録音を停止しました。ここまでの録音は保存されています。</string>
+    <string name="onboarding_title">はじめに</string>
+    <string name="onboarding_subtitle">このアプリについて、あらかじめ知っておいていただきたい 4 つのことです。</string>
+    <string name="onboarding_unofficial_title">独立したアプリです</string>
+    <string name="onboarding_unofficial_body">このアプリは独立したプロジェクトです。Rokid が制作したものではなく、Rokid による承認や提携もありません。</string>
+    <string name="onboarding_glasses_title">メガネは必須ではありません</string>
+    <string name="onboarding_glasses_body">Rokid のメガネを使うには、メガネ側に別途コンパニオンアプリをインストールする必要があります。メガネがなくても、スマートフォン上でチャット、写真の分析、録音を利用できます。</string>
+    <string name="onboarding_glasses_guide_button">メガネのセットアップガイドを開く</string>
+    <string name="onboarding_data_title">データの送信先</string>
+    <string name="onboarding_data_body">音声、写真、テキストは、ご自身の API キーを使って、お選びの AI サービスにのみ送信されます。このアプリの開発者がそれらを受信・保存することはありません。サービス側では各社の規約に従ってデータが扱われるため、機密性の高い内容を送る前に規約をご確認ください。AI の回答を報告する場合は、その回答と理由が開発者に送信されます。</string>
+    <string name="onboarding_people_title">他の人のプライバシーを尊重してください</string>
+    <string name="onboarding_people_body">他の人の音声を録音したり写真を撮ったりする前に許可を得て、お住まいの地域の法律に従ってください。</string>
+    <string name="onboarding_accept">理解しました</string>
+    <string name="report_content_description">この回答を報告</string>
+    <string name="report_title">この回答を報告</string>
+    <string name="report_intro">この AI の回答のどこに問題があるかお知らせください。報告は開発者がフィルタリングを改善するのに役立ちます。パスワードなどの機密情報は含めないでください。</string>
+    <string name="report_reason_harmful">有害または攻撃的</string>
+    <string name="report_reason_sexual">性的または不適切</string>
+    <string name="report_reason_misleading">不正確または誤解を招く</string>
+    <string name="report_reason_privacy">個人情報が含まれている</string>
+    <string name="report_reason_other">その他</string>
+    <string name="report_note_label">詳細（任意）</string>
+    <string name="report_include_prompt">この回答の元になったメッセージも送信する</string>
+    <string name="report_what_is_sent">送信される内容</string>
+    <string name="report_what_is_sent_body">下に表示された回答、選択した理由とメモ、AI プロバイダーとモデル名、アプリのバージョン、言語。API キーや他の会話は含まれません。</string>
+    <string name="report_retention">報告はアプリの開発者に送信され、最長 %1$d 日間保管されます。</string>
+    <string name="report_send">報告を送信</string>
+    <string name="report_sending">送信中…</string>
+    <string name="report_sent_title">報告を送信しました</string>
+    <string name="report_sent_message">ありがとうございます。開発者が報告を受け取りました。</string>
+    <string name="report_failed_retry">報告を送信できませんでした。接続を確認してもう一度お試しください。</string>
+    <string name="report_failed_final">報告を送信できませんでした。</string>
+    <string name="demo_section_title">まず試してみる</string>
+    <string name="demo_try">オフラインデモを試す</string>
+    <string name="demo_try_description">API キーなしでチャットの見た目を確認できます。返信はあらかじめ用意されたもので、ネットワークには何も送信されません。</string>
+    <string name="demo_title">デモ（オフライン）</string>
+    <string name="demo_banner">オフラインデモ：返信はあらかじめ用意されたものです。内容がスマートフォンの外に出ることはありません。</string>
+    <string name="demo_greeting">こんにちは！これはチャットのオフラインデモです。実際の質問には答えられませんが、返信がどう見えるかをお見せできます。何か入力して続けてください。本物の AI サービスと話すには、設定でご自身の API キーを追加してください。</string>
+    <string name="demo_reply_1">本物の回答はこのように表示されます。このような吹き出しに、短くて読みやすい返信が入ります。ご自身の API キーを使えば、AI サービスがこの文章を作成します。</string>
+    <string name="demo_reply_2">メガネで撮影した写真の分析、録音の要約、履歴での振り返りもできます。</string>
+    <string name="demo_reply_3">すべての AI の返信に小さな旗のボタンがあります。有害・誤り・不適切な回答はここから報告できます。</string>
+    <string name="demo_reply_4">本物を試してみませんか？設定を開き、AI サービスを選んで API キーを貼り付けてください。</string>
 </resources>

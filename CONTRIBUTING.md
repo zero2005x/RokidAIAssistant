@@ -14,7 +14,7 @@ Thanks for your interest. This project aims to be a clear, working reference arc
 See [README.md](README.md) for build requirements (JDK 21, Android SDK 36) and `local.properties`. You can build and run all unit tests without any Rokid credentials:
 
 ```bash
-./gradlew :common:testDebugUnitTest :phone-app:testDebugUnitTest :glasses-app:testDebugUnitTest
+./gradlew :common:testDebugUnitTest :phone-app:testGithubDebugUnitTest :phone-app:testPlayDebugUnitTest :glasses-app:testDebugUnitTest
 ```
 
 A real glasses connection needs your own `ROKID_CLIENT_SECRET`. Never commit keys, `local.properties` or `sn_auth_file.*` files.

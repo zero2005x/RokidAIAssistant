@@ -7,6 +7,13 @@ plugins {
     id("org.sonarqube") version "6.0.1.5171"
 }
 
+// Module -> debug variant that produces the coverage report. phone-app has product flavors;
+// the `github` flavor is the superset of the code base (it also contains the CXR integration).
+val coverageVariants = linkedMapOf(
+    "common" to "debug",
+    "glasses-app" to "debug",
+    "phone-app" to "githubDebug"
+)
 sonar {
     properties {
         property("sonar.projectKey", "zero2005x_RokidAIAssistant")
@@ -49,8 +56,10 @@ sonar {
 
         property(
             "sonar.coverage.jacoco.xmlReportPaths",
-            listOf("common", "glasses-app", "phone-app").joinToString(",") {
-                file("$it/build/reports/coverage/test/debug/report.xml").absolutePath
+            coverageVariants.entries.joinToString(",") { (module, variant) ->
+                // AGP writes a flavored variant's report to <flavor>/<buildType>/ (githubDebug -> github/debug)
+                val reportDir = variant.replace(Regex("(?<=[a-z])(?=[A-Z])"), "/").lowercase()
+                file("$module/build/reports/coverage/test/$reportDir/report.xml").absolutePath
             }
         )
     }
@@ -60,7 +69,7 @@ sonar {
 tasks.register("testCoverage") {
     group = "verification"
     description = "Run debug unit tests and generate coverage for every Android module."
-    dependsOn(listOf("common", "glasses-app", "phone-app").map {
-        ":$it:createDebugUnitTestCoverageReport"
+    dependsOn(coverageVariants.map { (module, variant) ->
+        ":$module:create${variant.replaceFirstChar { it.uppercase() }}UnitTestCoverageReport"
     })
 }

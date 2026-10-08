@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Info -->
     <string name="app_name">Rokid AI 助手</string>
@@ -578,4 +578,53 @@
     <string name="routing_llm_description">使用既有供應商金鑰，只傳送本次問題進行分類，會增加一次付費 API 請求。LLM 的確定程度不是經校準的機率；不確定或逾時時使用主要模型。</string>
     <string name="routing_reason_selected_llm">%1$s 透過結構化分類選擇%2$s。</string>
     <string name="glasses_preview_metrics">APP 顯示範圍：%1$d × %2$d px</string>
+    <!-- Distribution policy: HTTPS only, plain HTTP is allowed for localhost -->
+    <!-- Google Play release: first-launch notice, AI-response reporting, offline demo, permissions -->
+    <string name="custom_url_https_required">僅允許對 localhost 使用純 HTTP，請改用 HTTPS 網址。</string>
+    <string name="bluetooth_permission_needed">需要藍牙權限才能連接眼鏡。沒有此權限，App 的其他功能仍可正常使用。</string>
+    <string name="service_start_failed">無法啟動眼鏡連線服務。</string>
+    <string name="microphone_permission_denied">錄音需要麥克風權限。您可以在系統設定中授予。</string>
+    <string name="recording_stopped_background_title">錄音已停止</string>
+    <string name="recording_stopped_background_message">使用手機麥克風錄音僅能在 App 開啟時進行，因此您離開 App 時錄音已停止。到目前為止錄到的內容已儲存。</string>
+    <string name="onboarding_title">開始之前</string>
+    <string name="onboarding_subtitle">關於這個 App，有四件事想先告訴您。</string>
+    <string name="onboarding_unofficial_title">獨立開發的 App</string>
+    <string name="onboarding_unofficial_body">這個 App 是獨立專案，並非由 Rokid 製作、背書，也與 Rokid 沒有任何隸屬關係。</string>
+    <string name="onboarding_glasses_title">眼鏡為選用</string>
+    <string name="onboarding_glasses_body">使用 Rokid 眼鏡需要在眼鏡上另外安裝配套 App。沒有眼鏡時，您仍可在手機上聊天、分析照片和錄音。</string>
+    <string name="onboarding_glasses_guide_button">開啟眼鏡設定說明</string>
+    <string name="onboarding_data_title">您的資料會送到哪裡</string>
+    <string name="onboarding_data_body">您的語音、照片和文字只會使用您自己的 API 金鑰，傳送到您所選擇的 AI 服務。本 App 的開發者不會接收或儲存這些內容。該服務會依其自身條款處理資料，因此在傳送敏感內容前，請先查看其條款。如果您選擇檢舉某則 AI 回應，該回應與您填寫的原因會傳送給開發者。</string>
+    <string name="onboarding_people_title">尊重他人隱私</string>
+    <string name="onboarding_people_body">錄音或拍攝他人之前，請先徵得對方同意，並遵守您所在地的法律。</string>
+    <string name="onboarding_accept">我了解</string>
+    <string name="report_content_description">檢舉這則回應</string>
+    <string name="report_title">檢舉這則回應</string>
+    <string name="report_intro">請告訴我們這則 AI 回應有什麼問題。檢舉有助於開發者改善內容過濾。請勿包含密碼或其他機密資訊。</string>
+    <string name="report_reason_harmful">有害或冒犯性內容</string>
+    <string name="report_reason_sexual">性相關或不適當內容</string>
+    <string name="report_reason_misleading">不正確或具誤導性</string>
+    <string name="report_reason_privacy">洩露個人資料</string>
+    <string name="report_reason_other">其他問題</string>
+    <string name="report_note_label">補充說明（選填）</string>
+    <string name="report_include_prompt">一併傳送這則回應所回答的訊息</string>
+    <string name="report_what_is_sent">將傳送的內容</string>
+    <string name="report_what_is_sent_body">下方的回應內容、您選擇的原因與補充說明、AI 服務商與模型名稱、App 版本以及您的語言。不包含 API 金鑰，也不包含其他對話。</string>
+    <string name="report_retention">檢舉內容會傳送給 App 開發者，最多保存 %1$d 天。</string>
+    <string name="report_send">送出檢舉</string>
+    <string name="report_sending">傳送中…</string>
+    <string name="report_sent_title">檢舉已送出</string>
+    <string name="report_sent_message">謝謝您。開發者已收到您的檢舉。</string>
+    <string name="report_failed_retry">無法送出檢舉。請檢查網路連線後再試一次。</string>
+    <string name="report_failed_final">無法送出檢舉。</string>
+    <string name="demo_section_title">先試用看看</string>
+    <string name="demo_try">試用離線示範</string>
+    <string name="demo_try_description">不需要 API 金鑰就能看到聊天的樣子。回覆都是預先寫好的，不會透過網路傳送任何內容。</string>
+    <string name="demo_title">示範（離線）</string>
+    <string name="demo_banner">離線示範：回覆皆為預先撰寫，內容不會離開您的手機。</string>
+    <string name="demo_greeting">嗨！這是聊天功能的離線示範。我無法回答真正的問題，但可以讓您看到回覆的樣子。輸入任何內容即可繼續。若要與真正的 AI 服務對話，請到「設定」加入您自己的 API 金鑰。</string>
+    <string name="demo_reply_1">真正的回答大概是這樣：一段簡短易讀、顯示在像這樣的對話框裡的回覆。使用您自己的 API 金鑰後，就會由 AI 服務為您撰寫。</string>
+    <string name="demo_reply_2">您還可以分析眼鏡拍下的照片、錄音後取得摘要，並在歷史紀錄中隨時回顧。</string>
+    <string name="demo_reply_3">每則 AI 回覆旁都有一個小旗標按鈕。如果回應有害、錯誤或不適當，請點它來檢舉。</string>
+    <string name="demo_reply_4">準備好試試真正的功能了嗎？請開啟「設定」，選擇 AI 服務並貼上您的 API 金鑰。</string>
 </resources>

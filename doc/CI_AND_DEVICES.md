@@ -8,10 +8,10 @@ Use JDK 21 and Android SDK 36. No Android device or AI provider key is needed:
 .\gradlew.bat --no-daemon build testCoverage
 ```
 
-`build` compiles, runs unit tests, and runs lint across all four modules. The Android
+`build` compiles, runs unit tests, and runs lint across all three modules (and, for the phone app, both product flavors). The Android
 Gradle plugin generates one report per module, including
-`phone-app/build/reports/coverage/test/debug/report.xml`. Sonar receives the
-absolute paths for all four reports so they resolve from every Gradle subproject.
+`phone-app/build/reports/coverage/test/github/debug/report.xml`. The phone app has product flavors, so its report comes from the `githubDebug` variant; Sonar receives the
+absolute paths for all three reports so they resolve from every Gradle subproject.
 Do not register a replacement task by looking up `testDebugUnitTest` during
 initial configuration: Android registers its variant tasks later.
 
@@ -33,7 +33,7 @@ remains in scope. The configured new-code baseline and 80% threshold are unchang
 Run a single class while iterating:
 
 ```powershell
-.\gradlew.bat --no-daemon :phone-app:testDebugUnitTest --tests 'com.example.rokidphone.service.SystemTextToSpeechTest'
+.\gradlew.bat --no-daemon :phone-app:testGithubDebugUnitTest --tests 'io.github.zero2005x.glassesaicompanion.service.SystemTextToSpeechTest'
 ```
 
 ### Do not mock a `Result`-returning function that has default arguments
@@ -149,14 +149,14 @@ Once the device is available, explicitly select it for every operation:
 
 ```powershell
 # Install only the intended APK; do not run an unqualified installDebug.
-adb -s eeaas88ts4kn6l8t install -r phone-app/build/outputs/apk/debug/phone-app-debug.apk
+adb -s eeaas88ts4kn6l8t install -r phone-app/build/outputs/apk/github/debug/phone-app-github-debug.apk
 adb -s 1901092544022855 install -r glasses-app/build/outputs/apk/debug/glasses-app-debug.apk
 
 # Gradle instrumentation: restrict this invocation, then restore the caller's selector.
 $previousSerial = $env:ANDROID_SERIAL
 try {
     $env:ANDROID_SERIAL = 'eeaas88ts4kn6l8t'
-    .\gradlew.bat :phone-app:connectedDebugAndroidTest
+    .\gradlew.bat :phone-app:connectedGithubDebugAndroidTest
 } finally {
     $env:ANDROID_SERIAL = $previousSerial
 }

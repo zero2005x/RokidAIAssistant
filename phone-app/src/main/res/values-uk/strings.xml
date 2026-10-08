@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Info -->
     <string name="app_name">Rokid AI Асистент</string>
@@ -579,4 +579,53 @@
     <string name="routing_llm_description">Використовується наявний ключ провайдера. Для класифікації надсилається лише поточне запитання; додається один платний запит API. Впевненість LLM не є каліброваною ймовірністю. За невизначеності або тайм-ауту використовується основна модель.</string>
     <string name="routing_reason_selected_llm">%1$s обрав %2$s за допомогою структурованої класифікації.</string>
     <string name="glasses_preview_metrics">Область застосунку: %1$d × %2$d px</string>
+    <!-- Distribution policy: HTTPS only, plain HTTP is allowed for localhost -->
+    <!-- Google Play release: first-launch notice, AI-response reporting, offline demo, permissions -->
+    <string name="custom_url_https_required">Незашифрований HTTP дозволено лише для localhost. Використовуйте адресу HTTPS.</string>
+    <string name="bluetooth_permission_needed">Для підключення до окулярів потрібен доступ до Bluetooth. Решта функцій застосунку працює й без нього.</string>
+    <string name="service_start_failed">Не вдалося запустити службу підключення до окулярів.</string>
+    <string name="microphone_permission_denied">Для запису звуку потрібен доступ до мікрофона. Його можна надати в налаштуваннях системи.</string>
+    <string name="recording_stopped_background_title">Запис зупинено</string>
+    <string name="recording_stopped_background_message">Запис із мікрофона телефона працює лише поки застосунок відкритий, тому його зупинено, коли ви вийшли із застосунку. Те, що записано досі, збережено.</string>
+    <string name="onboarding_title">Перш ніж почати</string>
+    <string name="onboarding_subtitle">Чотири короткі речі, які варто знати про цей застосунок.</string>
+    <string name="onboarding_unofficial_title">Незалежний застосунок</string>
+    <string name="onboarding_unofficial_body">Це незалежний проєкт. Його створено не компанією Rokid, вона його не схвалювала й жодним чином із ним не пов’язана.</string>
+    <string name="onboarding_glasses_title">Окуляри не обов’язкові</string>
+    <string name="onboarding_glasses_body">Для роботи з окулярами Rokid на них потрібно встановити окремий застосунок-компаньйон. Без окулярів ви все одно можете спілкуватися в чаті, аналізувати фото та записувати звук на телефоні.</string>
+    <string name="onboarding_glasses_guide_button">Відкрити посібник із налаштування окулярів</string>
+    <string name="onboarding_data_title">Куди потрапляють ваші дані</string>
+    <string name="onboarding_data_body">Ваш голос, фото й текст надсилаються лише до обраного вами ШІ-сервісу з використанням вашого власного API-ключа. Розробник застосунку не отримує й не зберігає їх. Сервіс обробляє дані за власними умовами, тож прочитайте їх, перш ніж надсилати щось конфіденційне. Якщо ви вирішите поскаржитися на відповідь ШІ, цю відповідь і вашу причину буде надіслано розробнику.</string>
+    <string name="onboarding_people_title">Поважайте приватність інших людей</string>
+    <string name="onboarding_people_body">Питайте дозволу, перш ніж записувати звук або фотографувати інших людей, і дотримуйтеся законів своєї країни.</string>
+    <string name="onboarding_accept">Зрозуміло</string>
+    <string name="report_content_description">Поскаржитися на цю відповідь</string>
+    <string name="report_title">Поскаржитися на цю відповідь</string>
+    <string name="report_intro">Розкажіть, що не так із цією відповіддю ШІ. Скарги допомагають розробнику покращувати фільтрацію. Не вказуйте паролі чи інші секретні дані.</string>
+    <string name="report_reason_harmful">Шкідлива або образлива</string>
+    <string name="report_reason_sexual">Сексуальна або недоречна</string>
+    <string name="report_reason_misleading">Неточна або оманлива</string>
+    <string name="report_reason_privacy">Розкриває особисті дані</string>
+    <string name="report_reason_other">Інше</string>
+    <string name="report_note_label">Подробиці (необов’язково)</string>
+    <string name="report_include_prompt">Також надіслати повідомлення, на яке це відповідь</string>
+    <string name="report_what_is_sent">Що буде надіслано</string>
+    <string name="report_what_is_sent_body">Відповідь нижче, ваша причина й примітка, постачальник і назва моделі ШІ, версія застосунку та ваша мова. Без API-ключів і без інших розмов.</string>
+    <string name="report_retention">Скарги надсилаються розробнику застосунку й зберігаються до %1$d дн.</string>
+    <string name="report_send">Надіслати скаргу</string>
+    <string name="report_sending">Надсилання…</string>
+    <string name="report_sent_title">Скаргу надіслано</string>
+    <string name="report_sent_message">Дякуємо. Розробник отримав вашу скаргу.</string>
+    <string name="report_failed_retry">Не вдалося надіслати скаргу. Перевірте з’єднання й спробуйте ще раз.</string>
+    <string name="report_failed_final">Не вдалося надіслати скаргу.</string>
+    <string name="demo_section_title">Спочатку спробуйте</string>
+    <string name="demo_try">Спробувати офлайн-демо</string>
+    <string name="demo_try_description">Подивіться, як виглядає чат без API-ключа. Відповіді написано заздалегідь, і мережею нічого не надсилається.</string>
+    <string name="demo_title">Демо (офлайн)</string>
+    <string name="demo_banner">Офлайн-демо: відповіді написано заздалегідь. Нічого не залишає ваш телефон.</string>
+    <string name="demo_greeting">Привіт! Це офлайн-демо чату. Я не можу відповідати на справжні запитання, але можу показати, як виглядають відповіді. Напишіть що завгодно, щоб продовжити. Щоб спілкуватися зі справжнім ШІ-сервісом, додайте власний API-ключ у налаштуваннях.</string>
+    <string name="demo_reply_1">Ось як виглядає справжня відповідь: короткий і зрозумілий текст у такій самій бульбашці. З вашим API-ключем її напише ШІ-сервіс.</string>
+    <string name="demo_reply_2">Ви також можете аналізувати фото з окулярів, записувати звук, щоб отримати короткий зміст, і пізніше переглядати все в історії.</string>
+    <string name="demo_reply_3">У кожної відповіді ШІ є маленька кнопка з прапорцем. Натисніть її, щоб поскаржитися на шкідливу, хибну або недоречну відповідь.</string>
+    <string name="demo_reply_4">Готові спробувати по-справжньому? Відкрийте налаштування, виберіть ШІ-сервіс і вставте свій API-ключ.</string>
 </resources>

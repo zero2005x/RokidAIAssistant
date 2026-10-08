@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Info -->
     <string name="app_name">Rokid AI Assistant</string>
@@ -579,4 +579,53 @@
     <string name="routing_llm_description">Dùng khóa nhà cung cấp hiện có. Chỉ gửi câu hỏi hiện tại để phân loại, thêm một yêu cầu API có tính phí. Độ chắc chắn của LLM không phải xác suất đã hiệu chỉnh. Khi không chắc chắn hoặc hết thời gian, dùng mô hình chính.</string>
     <string name="routing_reason_selected_llm">%1$s chọn %2$s bằng phân loại có cấu trúc.</string>
     <string name="glasses_preview_metrics">Vùng hiển thị ứng dụng: %1$d × %2$d px</string>
+    <!-- Distribution policy: HTTPS only, plain HTTP is allowed for localhost -->
+    <!-- Google Play release: first-launch notice, AI-response reporting, offline demo, permissions -->
+    <string name="custom_url_https_required">HTTP không mã hóa chỉ được phép với localhost. Vui lòng dùng địa chỉ HTTPS.</string>
+    <string name="bluetooth_permission_needed">Cần quyền truy cập Bluetooth để kết nối với kính. Các tính năng khác của ứng dụng vẫn hoạt động bình thường khi không có quyền này.</string>
+    <string name="service_start_failed">Không thể khởi động dịch vụ kết nối kính.</string>
+    <string name="microphone_permission_denied">Cần quyền truy cập micrô để ghi âm. Bạn có thể cấp quyền trong phần cài đặt hệ thống.</string>
+    <string name="recording_stopped_background_title">Đã dừng ghi âm</string>
+    <string name="recording_stopped_background_message">Việc ghi âm bằng micrô điện thoại chỉ hoạt động khi ứng dụng đang mở, nên bản ghi đã dừng khi bạn rời khỏi ứng dụng. Phần đã ghi cho đến lúc đó đã được lưu.</string>
+    <string name="onboarding_title">Trước khi bắt đầu</string>
+    <string name="onboarding_subtitle">Bốn điều ngắn gọn cần biết về ứng dụng này.</string>
+    <string name="onboarding_unofficial_title">Một ứng dụng độc lập</string>
+    <string name="onboarding_unofficial_body">Ứng dụng này là một dự án độc lập. Nó không do Rokid tạo ra, không được Rokid xác nhận và không có liên kết nào với Rokid.</string>
+    <string name="onboarding_glasses_title">Kính là tùy chọn</string>
+    <string name="onboarding_glasses_body">Để dùng kính Rokid cần cài thêm một ứng dụng đồng hành riêng trên kính. Khi không có kính, bạn vẫn có thể trò chuyện, phân tích ảnh và ghi âm trên điện thoại.</string>
+    <string name="onboarding_glasses_guide_button">Mở hướng dẫn thiết lập kính</string>
+    <string name="onboarding_data_title">Dữ liệu của bạn đi đâu</string>
+    <string name="onboarding_data_body">Giọng nói, ảnh và văn bản của bạn chỉ được gửi tới dịch vụ AI mà bạn chọn, bằng khóa API của chính bạn. Nhà phát triển ứng dụng này không nhận hay lưu trữ chúng. Dịch vụ đó xử lý dữ liệu theo điều khoản riêng, vì vậy hãy xem điều khoản trước khi gửi nội dung nhạy cảm. Nếu bạn chọn báo cáo một phản hồi của AI, phản hồi đó và lý do của bạn sẽ được gửi cho nhà phát triển.</string>
+    <string name="onboarding_people_title">Tôn trọng quyền riêng tư của người khác</string>
+    <string name="onboarding_people_body">Hãy xin phép trước khi ghi âm hoặc chụp ảnh người khác, và tuân thủ pháp luật nơi bạn sống.</string>
+    <string name="onboarding_accept">Tôi đã hiểu</string>
+    <string name="report_content_description">Báo cáo phản hồi này</string>
+    <string name="report_title">Báo cáo phản hồi này</string>
+    <string name="report_intro">Hãy cho chúng tôi biết phản hồi AI này có vấn đề gì. Báo cáo giúp nhà phát triển cải thiện bộ lọc. Vui lòng không đưa mật khẩu hoặc thông tin bí mật khác.</string>
+    <string name="report_reason_harmful">Có hại hoặc xúc phạm</string>
+    <string name="report_reason_sexual">Tình dục hoặc không phù hợp</string>
+    <string name="report_reason_misleading">Không chính xác hoặc gây hiểu lầm</string>
+    <string name="report_reason_privacy">Tiết lộ dữ liệu cá nhân</string>
+    <string name="report_reason_other">Lý do khác</string>
+    <string name="report_note_label">Chi tiết (không bắt buộc)</string>
+    <string name="report_include_prompt">Gửi kèm tin nhắn mà phản hồi này trả lời</string>
+    <string name="report_what_is_sent">Nội dung sẽ được gửi</string>
+    <string name="report_what_is_sent_body">Phản hồi bên dưới, lý do và ghi chú của bạn, nhà cung cấp và tên mô hình AI, phiên bản ứng dụng và ngôn ngữ của bạn. Không có khóa API và không có cuộc trò chuyện nào khác.</string>
+    <string name="report_retention">Báo cáo được gửi tới nhà phát triển ứng dụng và lưu tối đa %1$d ngày.</string>
+    <string name="report_send">Gửi báo cáo</string>
+    <string name="report_sending">Đang gửi…</string>
+    <string name="report_sent_title">Đã gửi báo cáo</string>
+    <string name="report_sent_message">Cảm ơn bạn. Nhà phát triển đã nhận được báo cáo của bạn.</string>
+    <string name="report_failed_retry">Không thể gửi báo cáo. Hãy kiểm tra kết nối và thử lại.</string>
+    <string name="report_failed_final">Không thể gửi báo cáo.</string>
+    <string name="demo_section_title">Dùng thử trước</string>
+    <string name="demo_try">Dùng thử bản demo ngoại tuyến</string>
+    <string name="demo_try_description">Xem trò chuyện trông thế nào mà không cần khóa API. Các phản hồi được viết sẵn và không có gì được gửi qua mạng.</string>
+    <string name="demo_title">Bản demo (ngoại tuyến)</string>
+    <string name="demo_banner">Demo ngoại tuyến: các phản hồi được viết sẵn. Không có gì rời khỏi điện thoại của bạn.</string>
+    <string name="demo_greeting">Xin chào! Đây là bản demo ngoại tuyến của tính năng trò chuyện. Tôi không thể trả lời câu hỏi thật, nhưng có thể cho bạn thấy phản hồi trông như thế nào. Hãy nhập bất kỳ nội dung nào để tiếp tục. Để trò chuyện với dịch vụ AI thật, hãy thêm khóa API của bạn trong Cài đặt.</string>
+    <string name="demo_reply_1">Một câu trả lời thật trông như thế này: một đoạn ngắn, dễ đọc trong khung chat như khung này. Khi dùng khóa API của bạn, một dịch vụ AI sẽ viết thay bạn.</string>
+    <string name="demo_reply_2">Bạn cũng có thể phân tích ảnh từ kính, ghi âm để nhận bản tóm tắt và xem lại mọi thứ sau trong lịch sử.</string>
+    <string name="demo_reply_3">Mỗi phản hồi của AI đều có một nút cờ nhỏ. Hãy chạm vào đó để báo cáo phản hồi có hại, sai hoặc không phù hợp.</string>
+    <string name="demo_reply_4">Sẵn sàng thử bản thật chưa? Hãy mở Cài đặt, chọn một dịch vụ AI và dán khóa API của bạn.</string>
 </resources>

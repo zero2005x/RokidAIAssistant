@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Info -->
     <string name="app_name">Rokid AI Assistant</string>
@@ -581,4 +581,53 @@
     <string name="routing_llm_description">ใช้คีย์ผู้ให้บริการที่มีอยู่ ส่งเฉพาะคำถามปัจจุบันเพื่อจัดประเภท โดยเพิ่มคำขอ API ที่มีค่าใช้จ่ายหนึ่งครั้ง ความมั่นใจของ LLM ไม่ใช่ความน่าจะเป็นที่ผ่านการปรับเทียบ หากไม่แน่ใจหรือหมดเวลา จะใช้โมเดลหลัก</string>
     <string name="routing_reason_selected_llm">%1$s เลือก %2$s ด้วยการจัดประเภทแบบมีโครงสร้าง</string>
     <string name="glasses_preview_metrics">พื้นที่แสดงผลแอป: %1$d × %2$d px</string>
+    <!-- Distribution policy: HTTPS only, plain HTTP is allowed for localhost -->
+    <!-- Google Play release: first-launch notice, AI-response reporting, offline demo, permissions -->
+    <string name="custom_url_https_required">อนุญาต HTTP แบบไม่เข้ารหัสเฉพาะกับ localhost เท่านั้น โปรดใช้ที่อยู่ HTTPS</string>
+    <string name="bluetooth_permission_needed">ต้องมีสิทธิ์เข้าถึงบลูทูธเพื่อเชื่อมต่อกับแว่น ส่วนฟีเจอร์อื่นของแอปยังใช้งานได้ตามปกติแม้ไม่มีสิทธิ์นี้</string>
+    <string name="service_start_failed">ไม่สามารถเริ่มบริการเชื่อมต่อแว่นได้</string>
+    <string name="microphone_permission_denied">ต้องมีสิทธิ์เข้าถึงไมโครโฟนเพื่อบันทึกเสียง คุณสามารถอนุญาตได้ในการตั้งค่าระบบ</string>
+    <string name="recording_stopped_background_title">หยุดบันทึกแล้ว</string>
+    <string name="recording_stopped_background_message">การบันทึกด้วยไมโครโฟนของโทรศัพท์ทำงานได้เฉพาะขณะที่เปิดแอปอยู่ จึงหยุดบันทึกเมื่อคุณออกจากแอป ส่วนที่บันทึกไว้จนถึงตอนนั้นถูกบันทึกแล้ว</string>
+    <string name="onboarding_title">ก่อนเริ่มต้น</string>
+    <string name="onboarding_subtitle">สี่เรื่องสั้น ๆ ที่ควรรู้เกี่ยวกับแอปนี้</string>
+    <string name="onboarding_unofficial_title">แอปอิสระ</string>
+    <string name="onboarding_unofficial_body">แอปนี้เป็นโครงการอิสระ ไม่ได้สร้างหรือรับรองโดย Rokid และไม่มีความเกี่ยวข้องกับ Rokid</string>
+    <string name="onboarding_glasses_title">แว่นเป็นตัวเลือก</string>
+    <string name="onboarding_glasses_body">การใช้แว่น Rokid ต้องติดตั้งแอปคู่หูแยกต่างหากบนแว่น หากไม่มีแว่น คุณยังแชท วิเคราะห์ภาพ และบันทึกเสียงบนโทรศัพท์ได้</string>
+    <string name="onboarding_glasses_guide_button">เปิดคู่มือตั้งค่าแว่น</string>
+    <string name="onboarding_data_title">ข้อมูลของคุณไปที่ไหน</string>
+    <string name="onboarding_data_body">เสียง ภาพถ่าย และข้อความของคุณจะถูกส่งไปยังบริการ AI ที่คุณเลือกเท่านั้น โดยใช้คีย์ API ของคุณเอง ผู้พัฒนาแอปนี้ไม่ได้รับและไม่ได้จัดเก็บข้อมูลเหล่านี้ บริการดังกล่าวจัดการข้อมูลตามข้อกำหนดของตนเอง ดังนั้นโปรดตรวจสอบข้อกำหนดก่อนส่งสิ่งที่ละเอียดอ่อน หากคุณเลือกรายงานคำตอบของ AI คำตอบนั้นและเหตุผลของคุณจะถูกส่งถึงผู้พัฒนา</string>
+    <string name="onboarding_people_title">เคารพความเป็นส่วนตัวของผู้อื่น</string>
+    <string name="onboarding_people_body">ขออนุญาตก่อนบันทึกเสียงหรือถ่ายภาพผู้อื่น และปฏิบัติตามกฎหมายในพื้นที่ของคุณ</string>
+    <string name="onboarding_accept">ฉันเข้าใจแล้ว</string>
+    <string name="report_content_description">รายงานคำตอบนี้</string>
+    <string name="report_title">รายงานคำตอบนี้</string>
+    <string name="report_intro">บอกเราว่าคำตอบของ AI นี้มีปัญหาอะไร รายงานช่วยให้ผู้พัฒนาปรับปรุงการกรองเนื้อหาได้ โปรดอย่าใส่รหัสผ่านหรือข้อมูลลับอื่น ๆ</string>
+    <string name="report_reason_harmful">เป็นอันตรายหรือไม่เหมาะสม</string>
+    <string name="report_reason_sexual">เกี่ยวกับเรื่องเพศหรือไม่เหมาะสม</string>
+    <string name="report_reason_misleading">ไม่ถูกต้องหรือชวนให้เข้าใจผิด</string>
+    <string name="report_reason_privacy">เปิดเผยข้อมูลส่วนบุคคล</string>
+    <string name="report_reason_other">เหตุผลอื่น</string>
+    <string name="report_note_label">รายละเอียด (ไม่บังคับ)</string>
+    <string name="report_include_prompt">ส่งข้อความที่คำตอบนี้ตอบกลับไปด้วย</string>
+    <string name="report_what_is_sent">สิ่งที่จะถูกส่ง</string>
+    <string name="report_what_is_sent_body">คำตอบด้านล่าง เหตุผลและหมายเหตุของคุณ ผู้ให้บริการและชื่อโมเดล AI เวอร์ชันของแอป และภาษาของคุณ ไม่รวมคีย์ API และไม่รวมการสนทนาอื่น</string>
+    <string name="report_retention">รายงานจะถูกส่งถึงผู้พัฒนาแอปและเก็บไว้นานสูงสุด %1$d วัน</string>
+    <string name="report_send">ส่งรายงาน</string>
+    <string name="report_sending">กำลังส่ง…</string>
+    <string name="report_sent_title">ส่งรายงานแล้ว</string>
+    <string name="report_sent_message">ขอบคุณ ผู้พัฒนาได้รับรายงานของคุณแล้ว</string>
+    <string name="report_failed_retry">ส่งรายงานไม่สำเร็จ โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง</string>
+    <string name="report_failed_final">ส่งรายงานไม่สำเร็จ</string>
+    <string name="demo_section_title">ลองใช้ก่อน</string>
+    <string name="demo_try">ลองใช้เดโมออฟไลน์</string>
+    <string name="demo_try_description">ดูว่าแชทหน้าตาเป็นอย่างไรโดยไม่ต้องมีคีย์ API คำตอบถูกเขียนไว้ล่วงหน้า และไม่มีอะไรถูกส่งผ่านเครือข่าย</string>
+    <string name="demo_title">เดโม (ออฟไลน์)</string>
+    <string name="demo_banner">เดโมออฟไลน์: คำตอบถูกเขียนไว้ล่วงหน้า ไม่มีอะไรออกจากโทรศัพท์ของคุณ</string>
+    <string name="demo_greeting">สวัสดี! นี่คือเดโมออฟไลน์ของแชท ฉันตอบคำถามจริงไม่ได้ แต่ช่วยให้คุณเห็นหน้าตาของคำตอบได้ พิมพ์อะไรก็ได้เพื่อไปต่อ หากต้องการคุยกับบริการ AI จริง ให้เพิ่มคีย์ API ของคุณเองในการตั้งค่า</string>
+    <string name="demo_reply_1">คำตอบจริงจะหน้าตาแบบนี้: ข้อความสั้น ๆ อ่านง่ายในกล่องข้อความแบบนี้ เมื่อใช้คีย์ API ของคุณเอง บริการ AI จะเขียนให้คุณ</string>
+    <string name="demo_reply_2">คุณยังวิเคราะห์ภาพจากแว่น บันทึกเสียงเพื่อรับสรุป และย้อนดูทุกอย่างในประวัติได้ภายหลัง</string>
+    <string name="demo_reply_3">ทุกคำตอบของ AI มีปุ่มรูปธงเล็ก ๆ แตะเพื่อรายงานคำตอบที่เป็นอันตราย ผิดพลาด หรือไม่เหมาะสม</string>
+    <string name="demo_reply_4">พร้อมลองของจริงหรือยัง เปิดการตั้งค่า เลือกบริการ AI แล้ววางคีย์ API ของคุณ</string>
 </resources>
