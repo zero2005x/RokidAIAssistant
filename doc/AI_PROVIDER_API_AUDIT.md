@@ -65,7 +65,7 @@ Gemini 內建轉寫走 generateContent 音訊輸入；OpenAI/Groq 內建轉寫�
 完整 CI 指令沿用 `.github/workflows/sonar.yml`：
 
 ```sh
-./gradlew --no-daemon clean build :phone-app:createDebugUnitTestCoverageReport --stacktrace
+./gradlew --no-daemon clean build :phone-app:createGithubDebugUnitTestCoverageReport --stacktrace
 ./gradlew --no-daemon sonar --info
 ```
 

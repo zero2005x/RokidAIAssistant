@@ -20,7 +20,7 @@ cp local.properties.template local.properties
 # Add any provider key — or skip this and enter keys later in the app's Settings screen.
 
 # 3. Build & Install
-ANDROID_SERIAL=PHONE_SERIAL ./gradlew :phone-app:installDebug    # Install phone app
+ANDROID_SERIAL=PHONE_SERIAL ./gradlew :phone-app:installGithubDebug    # Install phone app (GitHub flavor)
 ANDROID_SERIAL=GLASSES_SERIAL ./gradlew :glasses-app:installDebug  # Install glasses app (on Rokid device)
 ```
 
@@ -79,7 +79,7 @@ Phone Settings now includes optional [Jev / Laya difficulty-based model routing 
 ```
 RokidAIAssistant/
 ├── phone-app/                    # 📱 Phone app (main AI hub)
-│   └── src/main/java/.../rokidphone/
+│   └── src/main/java/.../glassesaicompanion/
 │       ├── MainActivity.kt       # Entry point
 │       ├── service/ai/           # AI provider implementations
 │       ├── service/stt/          # STT provider implementations
@@ -104,11 +104,26 @@ RokidAIAssistant/
 └── gradle/libs.versions.toml     # Version catalog
 ```
 
-| Module        | App ID                     | Purpose                               |
-| ------------- | -------------------------- | ------------------------------------- |
-| `phone-app`   | `com.example.rokidphone`   | AI processing, STT, CXR SDK, database |
-| `glasses-app` | `com.example.rokidglasses` | Display, camera, wake word            |
-| `common`      | (library)                  | Shared protocol & constants           |
+| Module        | App ID                                                                              | Purpose                               |
+| ------------- | ----------------------------------------------------------------------------------- | ------------------------------------- |
+| `phone-app`   | `io.github.zero2005x.glassesaicompanion` (`play` flavor), `com.example.rokidphone` (`github` flavor) | AI processing, STT, database, glasses link |
+| `glasses-app` | `com.example.rokidglasses`                                                        | Display, camera, wake word            |
+| `common`      | (library)                                                                           | Shared protocol & constants           |
+
+The phone app ships in two flavors from one code base:
+
+| | `github` (sideloaded APK) | `play` (Google Play) |
+| --- | --- | --- |
+| App name | Rokid AI Assistant | Glasses AI Companion (unofficial, for Rokid glasses) |
+| Rokid CXR SDK | included | **not** included (glasses link over classic Bluetooth SPP only) |
+| AI services | all | Gemini, OpenAI, Anthropic, custom OpenAI-compatible (HTTPS or localhost) |
+| Speech-to-text | all | Gemini, OpenAI Whisper, Groq Whisper |
+| Text-to-speech | Edge TTS + system | system TTS only |
+| Ko-fi link | yes | no |
+| Android cloud backup | on | off |
+| Signing key | `RELEASE_*` (release keystore) | `PLAY_UPLOAD_*` (Play upload key) |
+
+See [Google Play launch plan](doc/PLAY_STORE_LAUNCH_PLAN.md) and the [privacy policy](privacy.md).
 
 ---
 
@@ -167,16 +182,18 @@ ROKID_CLIENT_SECRET=your_rokid_secret_without_hyphens
 # Build all modules (debug)
 ./gradlew assembleDebug
 
-# Build specific module
-./gradlew :phone-app:assembleDebug
+# Build specific module (phone-app has two flavors: github / play)
+./gradlew :phone-app:assembleGithubDebug
+./gradlew :phone-app:assemblePlayDebug
 ./gradlew :glasses-app:assembleDebug
 
 # Install to connected device
-ANDROID_SERIAL=PHONE_SERIAL ./gradlew :phone-app:installDebug
+ANDROID_SERIAL=PHONE_SERIAL ./gradlew :phone-app:installGithubDebug
 ANDROID_SERIAL=GLASSES_SERIAL ./gradlew :glasses-app:installDebug
 
-# Build release APK
-./gradlew assembleRelease
+# Build release artifacts
+./gradlew :phone-app:assembleGithubRelease      # sideloaded APK (needs RELEASE_* signing, no developer API keys)
+./gradlew :phone-app:bundlePlayRelease          # Google Play AAB (needs PLAY_UPLOAD_* signing and REPORT_ENDPOINT_URL)
 
 # Clean build
 ./gradlew clean
@@ -185,8 +202,9 @@ ANDROID_SERIAL=GLASSES_SERIAL ./gradlew :glasses-app:installDebug
 ### APK Output Locations
 
 ```
-phone-app/build/outputs/apk/debug/phone-app-debug.apk
-phone-app/build/outputs/apk/release/phone-app-release.apk
+phone-app/build/outputs/apk/github/debug/phone-app-github-debug.apk
+phone-app/build/outputs/apk/github/release/phone-app-github-release.apk
+phone-app/build/outputs/bundle/playRelease/phone-app-play-release.aab
 glasses-app/build/outputs/apk/debug/glasses-app-debug.apk
 glasses-app/build/outputs/apk/release/glasses-app-release.apk
 ```
@@ -221,15 +239,15 @@ Unit and integration test suites are implemented for protocol, service, factory,
 
 ```bash
 # Cross-module unit tests
-./gradlew :common:testDebugUnitTest :phone-app:testDebugUnitTest :glasses-app:testDebugUnitTest
+./gradlew :common:testDebugUnitTest :phone-app:testGithubDebugUnitTest :phone-app:testPlayDebugUnitTest :glasses-app:testDebugUnitTest
 
 # Targeted suites
 ./gradlew :common:testDebugUnitTest --tests "com.example.rokidcommon.protocol.*"
-./gradlew :phone-app:testDebugUnitTest --tests "com.example.rokidphone.service.ai.*"
-./gradlew :phone-app:testDebugUnitTest --tests "com.example.rokidphone.service.stt.*"
+./gradlew :phone-app:testGithubDebugUnitTest --tests "io.github.zero2005x.glassesaicompanion.service.ai.*"
+./gradlew :phone-app:testGithubDebugUnitTest --tests "io.github.zero2005x.glassesaicompanion.service.stt.*"
 
 # Phone instrumented tests (Room/data-layer)
-./gradlew :phone-app:connectedDebugAndroidTest
+./gradlew :phone-app:connectedGithubDebugAndroidTest
 ```
 
 ### Manual Testing Checklist

@@ -96,7 +96,7 @@
 ```
 RokidAIAssistant/
 ├── phone-app/                    # 📱 Phone application
-│   └── src/main/java/.../rokidphone/
+│   └── src/main/java/.../glassesaicompanion/
 │       ├── MainActivity.kt       # Entry point, permission handling
 │       ├── PhoneApplication.kt   # Application class
 │       ├── ai/provider/           # Provider abstraction layer (RikkaHub-style)

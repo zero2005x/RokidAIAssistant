@@ -10,7 +10,7 @@ Use JDK 21 and Android SDK 36. No Android device or AI provider key is needed:
 
 `build` compiles, runs unit tests, and runs lint across all four modules. The Android
 Gradle plugin generates one report per module, including
-`phone-app/build/reports/coverage/test/debug/report.xml`. Sonar receives the
+`phone-app/build/reports/coverage/test/githubDebug/report.xml`. The phone app has product flavors, so its report comes from the `githubDebug` variant; Sonar receives the
 absolute paths for all four reports so they resolve from every Gradle subproject.
 Do not register a replacement task by looking up `testDebugUnitTest` during
 initial configuration: Android registers its variant tasks later.
@@ -149,14 +149,14 @@ Once the device is available, explicitly select it for every operation:
 
 ```powershell
 # Install only the intended APK; do not run an unqualified installDebug.
-adb -s eeaas88ts4kn6l8t install -r phone-app/build/outputs/apk/debug/phone-app-debug.apk
+adb -s eeaas88ts4kn6l8t install -r phone-app/build/outputs/apk/github/debug/phone-app-github-debug.apk
 adb -s 1901092544022855 install -r glasses-app/build/outputs/apk/debug/glasses-app-debug.apk
 
 # Gradle instrumentation: restrict this invocation, then restore the caller's selector.
 $previousSerial = $env:ANDROID_SERIAL
 try {
     $env:ANDROID_SERIAL = 'eeaas88ts4kn6l8t'
-    .\gradlew.bat :phone-app:connectedDebugAndroidTest
+    .\gradlew.bat :phone-app:connectedGithubDebugAndroidTest
 } finally {
     $env:ANDROID_SERIAL = $previousSerial
 }

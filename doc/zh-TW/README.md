@@ -19,7 +19,7 @@ cp local.properties.template local.properties
 # 金鑰可稍後在 App 設定中輸入；安裝與開啟設定不需要 AI 金鑰。
 
 # 3. 建置與安裝
-ANDROID_SERIAL=PHONE_SERIAL ./gradlew :phone-app:installDebug    # 安裝手機應用
+ANDROID_SERIAL=PHONE_SERIAL ./gradlew :phone-app:installGithubDebug    # 安裝手機應用
 ANDROID_SERIAL=GLASSES_SERIAL ./gradlew :glasses-app:installDebug  # 安裝眼鏡應用（在 Rokid 裝置上）
 ```
 
@@ -55,16 +55,16 @@ ANDROID_SERIAL=GLASSES_SERIAL ./gradlew :glasses-app:installDebug  # 安裝眼�
 
 ## 功能特色
 
-| 功能             | 說明                                                                                                                                                                                                                                      |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🎤 語音互動      | 透過眼鏡或手機與 AI 對話                                                                                                                                                                                                                  |
-| 📷 照片分析      | 使用眼鏡相機拍攝圖片，取得 AI 分析                                                                                                                                                                                                        |
-| 🎙️ 錄音與分析    | 透過手機或眼鏡錄音，自動進行 AI 語音辨識與分析                                                                                                                                                                                            |
-| 🤖 多 AI 服務商  | 14 個服務商：Gemini、OpenAI、Anthropic、DeepSeek、Groq、xAI、Alibaba (Qwen)、Zhipu (GLM)、Baidu、Perplexity、Moonshot (Kimi)、Mistral、Gemini Live、Custom（OpenAI 相容端點）                                                             |
-| 🎧 多 STT 服務商 | 18 個服務商：Gemini、OpenAI Whisper、Groq Whisper、Deepgram、AssemblyAI、Azure Speech、iFLYTEK、Google Cloud STT、AWS Transcribe、Alibaba ASR、Tencent ASR、Baidu ASR、IBM Watson、Huawei SIS、Volcengine、Rev.ai、Speechmatics、Otter.ai |
-| 📱 手機-眼鏡通訊 | 透過 Rokid CXR SDK 和藍牙 SPP                                                                                                                                                                                                             |
-| 💬 對話記錄      | Room 資料庫持久儲存                                                                                                                                                                                                                       |
-| 🌍 多語言支援    | 13 種語言：English、简体中文、繁體中文、日本語、한국어、Español、Français、Italiano、Русский、Українська、العربية、Tiếng Việt、ไทย                                                                                                        |
+  功能               說明                                                                                                                                                                                                                                       
+  ----------------   -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------  
+  🎤 語音互動        透過眼鏡或手機與 AI 對話                                                                                                                                                                                                                   
+  📷 照片分析        使用眼鏡相機拍攝圖片，取得 AI 分析                                                                                                                                                                                                         
+  🎙️ 錄音與分析      透過手機或眼鏡錄音，自動進行 AI 語音辨識與分析                                                                                                                                                                                             
+  🤖 多 AI 服務商    14 個服務商：Gemini、OpenAI、Anthropic、DeepSeek、Groq、xAI、Alibaba (Qwen)、Zhipu (GLM)、Baidu、Perplexity、Moonshot (Kimi)、Mistral、Gemini Live、Custom（OpenAI 相容端點）                                                              
+  🎧 多 STT 服務商   18 個服務商：Gemini、OpenAI Whisper、Groq Whisper、Deepgram、AssemblyAI、Azure Speech、iFLYTEK、Google Cloud STT、AWS Transcribe、Alibaba ASR、Tencent ASR、Baidu ASR、IBM Watson、Huawei SIS、Volcengine、Rev.ai、Speechmatics、Otter.ai  
+  📱 手機-眼鏡通訊   透過 Rokid CXR SDK 和藍牙 SPP                                                                                                                                                                                                              
+  💬 對話記錄        Room 資料庫持久儲存                                                                                                                                                                                                                        
+  🌍 多語言支援      13 種語言：English、简体中文、繁體中文、日本語、한국어、Español、Français、Italiano、Русский、Українська、العربية、Tiếng Việt、ไทย                                                                                                         
 
 ---
 
@@ -73,7 +73,7 @@ ANDROID_SERIAL=GLASSES_SERIAL ./gradlew :glasses-app:installDebug  # 安裝眼�
 ```
 RokidAIAssistant/
 ├── phone-app/                    # 📱 手機應用（主要 AI 中心）
-│   └── src/main/java/.../rokidphone/
+│   └── src/main/java/.../glassesaicompanion/
 │       ├── MainActivity.kt       # 進入點
 │       ├── service/ai/           # AI 服務商實作
 │       ├── service/stt/          # STT 服務商實作
@@ -98,28 +98,28 @@ RokidAIAssistant/
 └── gradle/libs.versions.toml     # 版本目錄
 ```
 
-| 模組          | App ID                     | 用途                          |
-| ------------- | -------------------------- | ----------------------------- |
-| `phone-app`   | `com.example.rokidphone`   | AI 處理、STT、CXR SDK、資料庫 |
-| `glasses-app` | `com.example.rokidglasses` | 顯示、相機、喚醒詞            |
-| `common`      | （函式庫）                 | 共用協定與常數                |
+  模組            App ID                       用途                           
+  -------------   --------------------------   -----------------------------  
+  `phone-app`     `com.example.rokidphone`     AI 處理、STT、CXR SDK、資料庫  
+  `glasses-app`   `com.example.rokidglasses`   顯示、相機、喚醒詞             
+  `common`        （函式庫）                   共用協定與常數                 
 
 ---
 
 ## 技術棧
 
-| 類別      | 技術                         | 版本                 |
-| --------- | ---------------------------- | -------------------- |
-| 程式語言  | Kotlin                       | 2.2.10               |
-| 最低 SDK  | Android                      | 28 (9.0 Pie)         |
-| 目標 SDK  | Android                      | 34 (14)              |
-| 編譯 SDK  | Android                      | 36                   |
-| 建置工具  | Gradle + Kotlin DSL          | AGP 9.0 / Gradle 9.3 |
-| UI        | Jetpack Compose + Material 3 | BOM 2026.01.00       |
-| 非同步    | Kotlin Coroutines            | 1.10.2               |
-| 資料庫    | Room                         | 2.8.4                |
-| 網路      | Retrofit + OkHttp            | 3.0 / 5.3            |
-| Rokid SDK | CXR client-m                 | 1.0.4                |
+  類別        技術                           版本                  
+  ---------   ----------------------------   --------------------  
+  程式語言    Kotlin                         2.2.10                
+  最低 SDK    Android                        28 (9.0 Pie)          
+  目標 SDK    Android                        34 (14)               
+  編譯 SDK    Android                        36                    
+  建置工具    Gradle + Kotlin DSL            AGP 9.0 / Gradle 9.3  
+  UI          Jetpack Compose + Material 3   BOM 2026.01.00        
+  非同步      Kotlin Coroutines              1.10.2                
+  資料庫      Room                           2.8.4                 
+  網路        Retrofit + OkHttp              3.0 / 5.3             
+  Rokid SDK   CXR client-m                   1.0.4                 
 
 ---
 
@@ -159,11 +159,11 @@ ANTHROPIC_API_KEY=your_anthropic_key
 ./gradlew assembleDebug
 
 # 建置特定模組
-./gradlew :phone-app:assembleDebug
+./gradlew :phone-app:assembleGithubDebug
 ./gradlew :glasses-app:assembleDebug
 
 # 安裝到連接的裝置
-ANDROID_SERIAL=PHONE_SERIAL ./gradlew :phone-app:installDebug
+ANDROID_SERIAL=PHONE_SERIAL ./gradlew :phone-app:installGithubDebug
 ANDROID_SERIAL=GLASSES_SERIAL ./gradlew :glasses-app:installDebug
 
 # 建置 release APK
@@ -176,8 +176,8 @@ ANDROID_SERIAL=GLASSES_SERIAL ./gradlew :glasses-app:installDebug
 ### APK 輸出位置
 
 ```
-phone-app/build/outputs/apk/debug/phone-app-debug.apk
-phone-app/build/outputs/apk/release/phone-app-release.apk
+phone-app/build/outputs/apk/github/debug/phone-app-github-debug.apk
+phone-app/build/outputs/apk/github/release/phone-app-github-release.apk
 glasses-app/build/outputs/apk/debug/glasses-app-debug.apk
 glasses-app/build/outputs/apk/release/glasses-app-release.apk
 ```
@@ -186,13 +186,13 @@ glasses-app/build/outputs/apk/release/glasses-app-release.apk
 
 ## Debug vs Release
 
-| 方面        | Debug          | Release                  |
-| ----------- | -------------- | ------------------------ |
-| 壓縮        | ❌ 停用        | ✅ 啟用（ProGuard）      |
-| 可除錯      | ✅ 是          | ❌ 否                    |
-| 簽署        | Debug keystore | Release keystore（必要） |
-| BuildConfig | API 金鑰可見   | API 金鑰可見（已混淆）   |
-| 效能        | 較慢           | 已最佳化                 |
+  方面          Debug            Release                   
+  -----------   --------------   ------------------------  
+  壓縮          ❌ 停用          ✅ 啟用（ProGuard）       
+  可除錯        ✅ 是            ❌ 否                     
+  簽署          Debug keystore   Release keystore（必要）  
+  BuildConfig   API 金鑰可見     API 金鑰可見（已混淆）    
+  效能          較慢             已最佳化                  
 
 ---
 
@@ -204,15 +204,15 @@ glasses-app/build/outputs/apk/release/glasses-app-release.apk
 
 ```bash
 # 跨模組單元測試
-./gradlew :common:testDebugUnitTest :phone-app:testDebugUnitTest :glasses-app:testDebugUnitTest
+./gradlew :common:testDebugUnitTest :phone-app:testGithubDebugUnitTest :glasses-app:testDebugUnitTest
 
 # 目標測試群組
 ./gradlew :common:testDebugUnitTest --tests "com.example.rokidcommon.protocol.*"
-./gradlew :phone-app:testDebugUnitTest --tests "com.example.rokidphone.service.ai.*"
-./gradlew :phone-app:testDebugUnitTest --tests "com.example.rokidphone.service.stt.*"
+./gradlew :phone-app:testGithubDebugUnitTest --tests "io.github.zero2005x.glassesaicompanion.service.ai.*"
+./gradlew :phone-app:testGithubDebugUnitTest --tests "io.github.zero2005x.glassesaicompanion.service.stt.*"
 
 # phone-app 儀器測試（Room / data layer）
-./gradlew :phone-app:connectedDebugAndroidTest
+./gradlew :phone-app:connectedGithubDebugAndroidTest
 ```
 
 ### 手動測試檢查清單
@@ -337,10 +337,10 @@ A: 在 proguard-rules.pro 加入 keep 規則：
 
 ## 文件
 
-| 文件                            | 說明                       |
-| ------------------------------- | -------------------------- |
-| [API 設定指南](API_SETTINGS.md) | 所有服務商的完整 API 設定  |
-| [架構概覽](ARCHITECTURE.md)     | 系統設計、資料流、元件詳情 |
+  文件                              說明                        
+  -------------------------------   --------------------------  
+  [API 設定指南](API_SETTINGS.md)   所有服務商的完整 API 設定   
+  [架構概覽](ARCHITECTURE.md)       系統設計、資料流、元件詳情  
 
 ---
 
