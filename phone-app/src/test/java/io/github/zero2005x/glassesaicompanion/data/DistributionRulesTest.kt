@@ -100,6 +100,8 @@ class DistributionRulesTest {
             aiProvider = AiProvider.ANTHROPIC,
             sttProvider = SttProvider.GROQ_WHISPER,
             ttsProvider = TtsProvider.SYSTEM_TTS,
+            decisionBackend = DecisionBackend.OPENAI,
+            decisionRoutingEnabled = true,
             anthropicApiKey = "sk-keep-me"
         )
 
@@ -111,10 +113,40 @@ class DistributionRulesTest {
         val settings = ApiSettings(
             aiProvider = AiProvider.GEMINI_LIVE,
             sttProvider = SttProvider.DEEPGRAM,
-            ttsProvider = TtsProvider.EDGE_TTS
+            ttsProvider = TtsProvider.EDGE_TTS,
+            decisionBackend = DecisionBackend.LAYA,
+            decisionRoutingEnabled = true
         )
 
         assertThat(github.coerce(settings)).isSameInstanceAs(settings)
+    }
+
+    // ==================== Model routing ====================
+
+    @Test
+    fun `play classifies questions only with the users own Gemini or OpenAI key`() {
+        assertThat(play.decisionBackends()).containsExactly(DecisionBackend.GEMINI, DecisionBackend.OPENAI)
+        assertThat(github.decisionBackends()).containsExactlyElementsIn(DecisionBackend.entries)
+    }
+
+    @Test
+    fun `coerce replaces a decision backend play does not offer and switches routing off`() {
+        for (backend in listOf(DecisionBackend.JEV, DecisionBackend.LAYA)) {
+            val coerced = play.coerce(ApiSettings(decisionBackend = backend, decisionRoutingEnabled = true))
+
+            assertThat(coerced.decisionBackend).isEqualTo(DecisionBackend.GEMINI)
+            assertThat(coerced.decisionRoutingEnabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `coerce leaves a stored Jev key and Laya address alone`() {
+        val settings = ApiSettings(jevApiKey = "typesafe-key", layaBaseUrl = "https://laya.example")
+
+        val coerced = play.coerce(settings)
+
+        assertThat(coerced.jevApiKey).isEqualTo("typesafe-key")
+        assertThat(coerced.layaBaseUrl).isEqualTo("https://laya.example")
     }
 
     // ==================== Tool declarations ====================

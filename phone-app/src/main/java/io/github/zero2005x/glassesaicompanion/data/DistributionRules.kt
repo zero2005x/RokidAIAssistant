@@ -35,6 +35,13 @@ class DistributionRules(val isPlay: Boolean) {
     /** Text-to-speech engines selectable in the Play build (no unofficial endpoints). */
     private val playTtsProviders = setOf(TtsProvider.SYSTEM_TTS)
 
+    /**
+     * Backends that may classify a question for model routing in the Play build: the user's own
+     * Gemini or OpenAI key, i.e. services the app already talks to. Jev (a hosted service of a
+     * further company) and Laya (a self-hosted server at any address) stay in the GitHub build.
+     */
+    private val playDecisionBackends = setOf(DecisionBackend.GEMINI, DecisionBackend.OPENAI)
+
     /** Engine used on a fresh install. */
     val defaultTtsProvider: TtsProvider =
         if (isPlay) TtsProvider.SYSTEM_TTS else TtsProvider.EDGE_TTS
@@ -57,16 +64,24 @@ class DistributionRules(val isPlay: Boolean) {
     fun ttsProviders(): List<TtsProvider> =
         if (isPlay) TtsProvider.entries.filter { it in playTtsProviders } else TtsProvider.entries.toList()
 
+    fun decisionBackends(): List<DecisionBackend> =
+        if (isPlay) DecisionBackend.entries.filter { it in playDecisionBackends } else DecisionBackend.entries.toList()
+
     /**
      * Replace stored selections this channel does not offer with the channel defaults.
      * Always a no-op for GitHub; protects the Play build from stale or restored settings.
      */
     fun coerce(settings: ApiSettings): ApiSettings {
         if (!isPlay) return settings
+        val backendAllowed = settings.decisionBackend in playDecisionBackends
         return settings.copy(
             aiProvider = if (settings.aiProvider in playAiProviders) settings.aiProvider else AiProvider.GEMINI,
             sttProvider = if (settings.sttProvider in playSttProviders) settings.sttProvider else SttProvider.GEMINI,
-            ttsProvider = if (settings.ttsProvider in playTtsProviders) settings.ttsProvider else defaultTtsProvider
+            ttsProvider = if (settings.ttsProvider in playTtsProviders) settings.ttsProvider else defaultTtsProvider,
+            decisionBackend = if (backendAllowed) settings.decisionBackend else DecisionBackend.GEMINI,
+            // Routing that was set up for a backend this channel lacks must not start sending
+            // questions to another service on its own; the user turns it on again knowingly.
+            decisionRoutingEnabled = settings.decisionRoutingEnabled && backendAllowed
         )
     }
 }

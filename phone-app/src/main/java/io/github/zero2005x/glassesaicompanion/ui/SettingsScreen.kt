@@ -810,7 +810,7 @@ private fun DecisionBackendFields(
 ) {
     Text(stringResource(R.string.routing_backend), style = MaterialTheme.typography.labelLarge)
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        DecisionBackend.entries.forEach { backend ->
+        distribution.decisionBackends().forEach { backend ->
             FilterChip(
                 selected = settings.decisionBackend == backend,
                 onClick = { onSettingsChange(settings.copy(decisionBackend = backend)) },
