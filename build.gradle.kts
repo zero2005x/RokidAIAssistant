@@ -57,7 +57,9 @@ sonar {
         property(
             "sonar.coverage.jacoco.xmlReportPaths",
             coverageVariants.entries.joinToString(",") { (module, variant) ->
-                file("$module/build/reports/coverage/test/$variant/report.xml").absolutePath
+                // AGP writes a flavored variant's report to <flavor>/<buildType>/ (githubDebug -> github/debug)
+                val reportDir = variant.replace(Regex("(?<=[a-z])(?=[A-Z])"), "/").lowercase()
+                file("$module/build/reports/coverage/test/$reportDir/report.xml").absolutePath
             }
         )
     }

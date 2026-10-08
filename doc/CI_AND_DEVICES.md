@@ -10,7 +10,7 @@ Use JDK 21 and Android SDK 36. No Android device or AI provider key is needed:
 
 `build` compiles, runs unit tests, and runs lint across all three modules (and, for the phone app, both product flavors). The Android
 Gradle plugin generates one report per module, including
-`phone-app/build/reports/coverage/test/githubDebug/report.xml`. The phone app has product flavors, so its report comes from the `githubDebug` variant; Sonar receives the
+`phone-app/build/reports/coverage/test/github/debug/report.xml`. The phone app has product flavors, so its report comes from the `githubDebug` variant; Sonar receives the
 absolute paths for all three reports so they resolve from every Gradle subproject.
 Do not register a replacement task by looking up `testDebugUnitTest` during
 initial configuration: Android registers its variant tasks later.
