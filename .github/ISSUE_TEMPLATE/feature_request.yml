@@ -1,0 +1,26 @@
+name: Feature or design proposal
+description: Propose a feature or an architecture change
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Provider and STT breadth is frozen, so please don't request new providers. Ideas about the wearable experience, the protocol or the architecture are very welcome.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is hard or missing today, and for whom?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What you'd change. For architecture changes, mention which ADR in doc/adr/ it touches, if any.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

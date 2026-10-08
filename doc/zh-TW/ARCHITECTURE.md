@@ -118,7 +118,6 @@ AI 服務採資料驅動架構（`phone-app/src/.../ai/catalog/`）：
 
 ```
 RokidAIAssistant/
-├── app/                  # 空殼模組（AGP 需要）
 ├── phone-app/            # 手機主應用
 │   └── src/main/
 │       ├── java/.../
@@ -148,7 +147,6 @@ RokidAIAssistant/
 | `phone-app`   | `common`             | 主 AI 處理應用  |
 | `glasses-app` | `common`             | AR 顯示與輸入   |
 | `common`      | -                    | 共用協定與工具  |
-| `app`         | `phone-app` (或其他) | 空殼/測試進入點 |
 
 ---
 

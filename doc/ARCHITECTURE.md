@@ -95,9 +95,6 @@
 
 ```
 RokidAIAssistant/
-├── app/                          # Original integrated app (dev only)
-│   └── src/main/java/.../rokidaiassistant/
-│
 ├── phone-app/                    # 📱 Phone application
 │   └── src/main/java/.../rokidphone/
 │       ├── MainActivity.kt       # Entry point, permission handling
@@ -167,7 +164,6 @@ RokidAIAssistant/
 ```
 phone-app ──────► common
 glasses-app ────► common
-app ────────────► common (dev only)
 ```
 
 ---

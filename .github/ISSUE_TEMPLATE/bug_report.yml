@@ -1,0 +1,49 @@
+name: Bug report
+description: Something in the phone app, glasses app or protocol doesn't work as expected
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Say "..." on the glasses
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: part
+    attributes:
+      label: Where does it happen?
+      options:
+        - Phone app
+        - Glasses app
+        - Phone ↔ glasses connection
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: App versions
+      description: Phone app and glasses app versions (Settings → About), plus glasses model.
+      placeholder: "phone 1.1.0, glasses 1.1.0, Rokid ..."
+  - type: input
+    id: provider
+    attributes:
+      label: AI / STT provider and model
+      placeholder: "Gemini / gemini-..., STT: Groq Whisper"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant Logcat lines. Remove API keys and personal data first.
+      render: text
