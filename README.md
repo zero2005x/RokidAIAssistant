@@ -100,7 +100,6 @@ RokidAIAssistant/
 │       ├── Constants.kt          # Shared constants
 │       └── protocol/             # Message, MessageType, ConnectionState
 │
-├── app/                          # 🧪 Original integrated app (dev only)
 ├── doc/                          # 📚 Documentation
 └── gradle/libs.versions.toml     # Version catalog
 ```
@@ -144,17 +143,6 @@ RokidAIAssistant/
 # Copy template and edit with your keys
 cp local.properties.template local.properties
 ```
-
-### Configure a Single `sn_auth_file.*` Resource
-
-The app enforces a single-source SN auth strategy in `app/src/main/res/raw/`.
-Place exactly one local file named `sn_auth_file.*` there (for example:
-`sn_auth_file.lc`).
-
-Notes:
-
-- Do not commit `sn_auth_file.*` into version control.
-- Build will fail fast if multiple `sn_auth_file.*` files exist.
 
 **Keys in `local.properties` (all optional at build time):**
 

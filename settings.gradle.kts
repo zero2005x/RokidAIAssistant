@@ -29,9 +29,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "RokidAIAssistant"
 
-// Original integrated version of the app (for development and testing purposes)
-include(":app")
-
 // Modular Architecture
 
 include(":common") // Shared Modules (Communication Protocol, Constants)

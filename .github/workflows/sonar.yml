@@ -59,20 +59,6 @@ jobs:
             printf '%s\n' "RELEASE_KEY_PASSWORD=${RELEASE_KEY_PASSWORD}"
           } >> local.properties
 
-      - name: Prepare SN auth resource (single source)
-        shell: bash
-        env:
-          SN_AUTH_FILE_BASE64: ${{ secrets.SN_AUTH_FILE_BASE64 }}
-        run: |
-          mkdir -p app/src/main/res/raw
-          rm -f app/src/main/res/raw/sn_auth_file.*
-
-          if [ -n "$SN_AUTH_FILE_BASE64" ]; then
-            printf '%s' "$SN_AUTH_FILE_BASE64" | base64 --decode > app/src/main/res/raw/sn_auth_file.lc
-          else
-            echo "sn_auth_placeholder_for_ci" > app/src/main/res/raw/sn_auth_file.lc
-          fi
-
       - name: Build and test all modules with coverage
         run: ./gradlew --no-daemon build testCoverage --stacktrace
         env:
@@ -83,7 +69,7 @@ jobs:
           python3 - <<'PY'
           import pathlib
           import xml.etree.ElementTree as ET
-          for module in ("app", "common", "glasses-app", "phone-app"):
+          for module in ("common", "glasses-app", "phone-app"):
               path = pathlib.Path(module) / "build/reports/coverage/test/debug/report.xml"
               report = ET.parse(path).getroot()
               covered = sum(int(line.get("ci", "0")) > 0

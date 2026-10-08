@@ -44,14 +44,12 @@ sonar {
             "**/*_Factory.java",
             "**/*_MembersInjector.java",
             "**/ui/**",
-            "**/MainActivity.kt",
-            "**/activities/aiassistant/AIAssistantActivity.kt",
-            "**/activities/bluetooth/BluetoothInitActivity.kt"
+            "**/MainActivity.kt"
         ).joinToString(","))
 
         property(
             "sonar.coverage.jacoco.xmlReportPaths",
-            listOf("app", "common", "glasses-app", "phone-app").joinToString(",") {
+            listOf("common", "glasses-app", "phone-app").joinToString(",") {
                 file("$it/build/reports/coverage/test/debug/report.xml").absolutePath
             }
         )
@@ -62,7 +60,7 @@ sonar {
 tasks.register("testCoverage") {
     group = "verification"
     description = "Run debug unit tests and generate coverage for every Android module."
-    dependsOn(listOf("app", "common", "glasses-app", "phone-app").map {
+    dependsOn(listOf("common", "glasses-app", "phone-app").map {
         ":$it:createDebugUnitTestCoverageReport"
     })
 }

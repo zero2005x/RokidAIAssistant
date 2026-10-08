@@ -94,7 +94,6 @@ RokidAIAssistant/
 │       ├── Constants.kt          # 共用常數
 │       └── protocol/             # Message, MessageType, ConnectionState
 │
-├── app/                          # 🧪 原始整合應用（僅開發用）
 ├── doc/                          # 📚 文件
 └── gradle/libs.versions.toml     # 版本目錄
 ```
@@ -138,16 +137,6 @@ RokidAIAssistant/
 # 複製範本並編輯您的金鑰
 cp local.properties.template local.properties
 ```
-
-### 設定唯一的 `sn_auth_file.*` 資源檔
-
-`app/src/main/res/raw/` 採用 SN 檔單一來源策略。請在該目錄放置且只保留一個
-本機 `sn_auth_file.*`（例如：`sn_auth_file.lc`）。
-
-說明：
-
-- 不要把 `sn_auth_file.*` 提交到版本控制。
-- 若同時存在多個 `sn_auth_file.*`，建置會快速失敗。
 
 **`local.properties` 中的必要金鑰：**
 
