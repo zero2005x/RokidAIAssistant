@@ -9,7 +9,10 @@ import androidx.lifecycle.viewModelScope
 import io.github.zero2005x.glassesaicompanion.ai.provider.ProviderManager
 import io.github.zero2005x.glassesaicompanion.data.SettingsRepository
 import com.example.rokidcommon.protocol.Message as ProtocolMessage
+import io.github.zero2005x.glassesaicompanion.data.db.AppDatabase
 import io.github.zero2005x.glassesaicompanion.data.db.Conversation
+import io.github.zero2005x.glassesaicompanion.data.db.RoutingMetricSource
+import io.github.zero2005x.glassesaicompanion.data.db.RoutingMetricsRecorder
 import io.github.zero2005x.glassesaicompanion.data.db.ConversationRepository
 import io.github.zero2005x.glassesaicompanion.data.db.Message
 import io.github.zero2005x.glassesaicompanion.data.db.MessageRole
@@ -36,7 +39,8 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
     private val settingsRepository = SettingsRepository.getInstance(application)
     private val providerManager = ProviderManager.getInstance(application)
     private val decisionRouter = DecisionRouter()
-    
+    private val routingMetrics by lazy { RoutingMetricsRecorder(AppDatabase.getInstance(application).routingMetricDao()) }
+
     // All conversations list
     val conversations: StateFlow<List<Conversation>> = conversationRepository
         .getAllConversations()
@@ -193,6 +197,7 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
      * Send a message to a specific conversation
      */
     private suspend fun sendMessageToConversation(conversationId: String, text: String) {
+        val receivedAt = System.currentTimeMillis()
         try {
             // Clear input
             _inputText.value = ""
@@ -217,6 +222,7 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
                 val errorText = io.github.zero2005x.glassesaicompanion.data.RoutingReason.failure(getApplication<Application>(), reply.error)
                 _uiState.update { it.copy(isLoading = false, error = errorText) }
                 if (settings.pushChatToGlasses) ServiceBridge.sendToGlasses(ProtocolMessage.aiError(errorText))
+                recordRoutingMetric(settings, reply, receivedAt, 0)
                 return
             }
             val response = reply.text
@@ -230,7 +236,8 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
             )
             
             pushResponseToGlasses(response)
-            
+            recordRoutingMetric(settings, reply, receivedAt, ServiceBridge.cleanMarkdown(response).length)
+
             // Auto-generate title (if this is the first message)
             val messageCount = conversationRepository.getMessageCount(conversationId)
             if (messageCount <= 2) {
@@ -247,6 +254,23 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
                     error = "Failed to send: ${e.message}"
                 )
             }
+        }
+    }
+
+    /** Writes the routing-metrics row for one chat question; a failure never affects the answer. */
+    private suspend fun recordRoutingMetric(
+        settings: io.github.zero2005x.glassesaicompanion.data.ApiSettings,
+        reply: io.github.zero2005x.glassesaicompanion.service.ai.RoutedReply,
+        receivedAt: Long,
+        answerChars: Int
+    ) {
+        try {
+            routingMetrics.record(RoutingMetricSource.PHONE_CHAT, settings, reply, receivedAt, answerChars,
+                settings.pushChatToGlasses)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to record routing metric", e)
         }
     }
 

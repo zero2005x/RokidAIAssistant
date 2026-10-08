@@ -627,4 +627,8 @@
     <string name="demo_reply_2">안경으로 찍은 사진을 분석하고, 녹음해서 요약을 받고, 기록에서 언제든 다시 볼 수도 있습니다.</string>
     <string name="demo_reply_3">모든 AI 답변에는 작은 깃발 버튼이 있습니다. 유해하거나 틀렸거나 부적절한 답변은 이 버튼으로 신고하세요.</string>
     <string name="demo_reply_4">진짜 기능을 써 볼 준비가 되셨나요? 설정을 열고 AI 서비스를 선택한 다음 API 키를 붙여 넣으세요.</string>
+    <string name="routing_metrics_title">라우팅 지표</string>
+    <string name="routing_metrics_description">질문마다 이 휴대폰에 한 행이 추가됩니다(시간, 입력 경로, 라우팅 선택, 모델, 소요 시간, 답변 길이). 질문과 답변 내용은 저장하지 않습니다. 60일이 지난 행은 삭제됩니다. 아무것도 업로드되지 않으며, 직접 공유할 때만 파일이 이 휴대폰을 벗어납니다.</string>
+    <string name="routing_metrics_export">지표 내보내기(CSV)</string>
+    <string name="routing_metrics_export_failed">CSV 파일을 만들 수 없습니다.</string>
 </resources>

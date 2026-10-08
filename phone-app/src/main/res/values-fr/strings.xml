@@ -628,4 +628,8 @@
     <string name="demo_reply_2">Vous pouvez aussi analyser les photos de vos lunettes, enregistrer de l’audio pour en obtenir un résumé et tout retrouver ensuite dans l’historique.</string>
     <string name="demo_reply_3">Chaque réponse de l’IA a un petit bouton en forme de drapeau. Touchez-le pour signaler une réponse nuisible, fausse ou inappropriée.</string>
     <string name="demo_reply_4">Prêt pour la vraie version ? Ouvrez les Réglages, choisissez un service d’IA et collez votre clé d’API.</string>
+    <string name="routing_metrics_title">Mesures de routage</string>
+    <string name="routing_metrics_description">Chaque question ajoute une ligne sur ce téléphone : heure, source, choix de routage, modèles, durées et longueur de la réponse. Le texte des questions et des réponses n\'est pas conservé. Les lignes de plus de 60 jours sont supprimées. Rien n\'est envoyé ; le fichier ne quitte ce téléphone que si vous le partagez.</string>
+    <string name="routing_metrics_export">Exporter les mesures (CSV)</string>
+    <string name="routing_metrics_export_failed">Impossible de créer le fichier CSV.</string>
 </resources>

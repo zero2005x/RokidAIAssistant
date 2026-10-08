@@ -73,7 +73,7 @@ Reports are used only to improve content filtering and fix problems. They are ke
 
 ### Data on your phone
 
-Conversations, photos, recordings, settings and logs are stored in the app's private storage on your phone. Each answer also keeps a short note of which model produced it and why. You can delete conversations, recordings and photos inside the app, and uninstalling the app removes everything. The Google Play version turns off Android cloud backup and device-to-device transfer, so this data is not copied to Google's servers by Android backup.
+Conversations, photos, recordings, settings and logs are stored in the app's private storage on your phone. Each answer also keeps a short note of which model produced it and why. The app also keeps one row of routing metrics per question (time, input source, routing choice, models, timings, answer length; never the question or answer text) for 60 days, only on your phone; they are never uploaded and leave the phone only if you export them as a CSV from Settings and share that file yourself. You can delete conversations, recordings and photos inside the app, and uninstalling the app removes everything. The Google Play version turns off Android cloud backup and device-to-device transfer, so this data is not copied to Google's servers by Android backup.
 
 ### Permissions
 

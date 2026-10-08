@@ -625,4 +625,8 @@
     <string name="demo_reply_2">您还可以分析眼镜拍下的照片、录音后获取摘要，并在历史记录中随时回顾。</string>
     <string name="demo_reply_3">每条 AI 回复旁都有一个小旗标按钮。如果回复有害、错误或不适当，请点击它进行举报。</string>
     <string name="demo_reply_4">准备好试试真正的功能了吗？请打开“设置”，选择 AI 服务并粘贴您的 API 密钥。</string>
+    <string name="routing_metrics_title">路由指标</string>
+    <string name="routing_metrics_description">每个问题会在本机新增一行：时间、来源、路由选择、模型、耗时和回答长度，不保存问题和回答内容。超过 60 天的数据会自动删除。不会上传任何数据；只有你主动分享时，文件才会离开本机。</string>
+    <string name="routing_metrics_export">导出指标（CSV）</string>
+    <string name="routing_metrics_export_failed">无法创建 CSV 文件。</string>
 </resources>
