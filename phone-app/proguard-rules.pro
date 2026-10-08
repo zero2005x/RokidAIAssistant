@@ -64,11 +64,11 @@
 -keepclasseswithmembers class ** {
     kotlinx.serialization.KSerializer serializer(...);
 }
--keep,includedescriptorclasses class com.example.rokidphone.**$$serializer { *; }
--keepclassmembers class com.example.rokidphone.** {
+-keep,includedescriptorclasses class io.github.zero2005x.glassesaicompanion.**$$serializer { *; }
+-keepclassmembers class io.github.zero2005x.glassesaicompanion.** {
     *** Companion;
 }
--keepclasseswithmembers class com.example.rokidphone.** {
+-keepclasseswithmembers class io.github.zero2005x.glassesaicompanion.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
 

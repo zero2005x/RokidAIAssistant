@@ -13,7 +13,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.rokidphone"
+    namespace = "io.github.zero2005x.glassesaicompanion"
     compileSdk = 36
 
     val localPropsFile = rootProject.file("local.properties")
