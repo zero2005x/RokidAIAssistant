@@ -1,7 +1,7 @@
 package io.github.zero2005x.glassesaicompanion.ui
 
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -27,7 +27,7 @@ fun DonationButton(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     Button(
         onClick = {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://ko-fi.com/liangtinglin"))
+            val intent = Intent(Intent.ACTION_VIEW, "https://ko-fi.com/liangtinglin".toUri())
             context.startActivity(intent)
         },
         modifier = modifier,

@@ -33,6 +33,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import io.github.zero2005x.glassesaicompanion.data.ApiSettings
 import io.github.zero2005x.glassesaicompanion.data.OnboardingStore
 import io.github.zero2005x.glassesaicompanion.data.SettingsRepository
 import io.github.zero2005x.glassesaicompanion.data.validateForChat
@@ -237,50 +238,8 @@ private fun PhoneMainContent(
         viewModel.checkInitialSetup(hasApiKey)
     }
     
-    // Show initial setup dialog when no API key is configured
-    if (uiState.showInitialSetup) {
-        InitialSetupDialog(
-            onGoToSettings = {
-                viewModel.dismissInitialSetup()
-                navController.navigate(NavRoutes.SETTINGS)
-            },
-            onTryDemo = {
-                viewModel.dismissInitialSetup()
-                navController.navigate(NavRoutes.DEMO_CHAT)
-            },
-            onDismiss = {
-                viewModel.dismissInitialSetup()
-            }
-        )
-    }
-    
-    if (uiState.recordingStoppedInBackground) {
-        AlertDialog(
-            onDismissRequest = { viewModel.dismissRecordingStoppedNotice() },
-            title = { Text(stringResource(R.string.recording_stopped_background_title)) },
-            text = { Text(stringResource(R.string.recording_stopped_background_message)) },
-            confirmButton = {
-                TextButton(onClick = { viewModel.dismissRecordingStoppedNotice() }) {
-                    Text(stringResource(R.string.close))
-                }
-            }
-        )
-    }
+    PhoneMainDialogs(viewModel, settings, navController)
 
-    // Show API key warning dialog when triggered by service
-    if (uiState.showApiKeyWarning) {
-        ApiKeyMissingDialog(
-            settings = settings,
-            onGoToSettings = {
-                viewModel.dismissApiKeyWarning()
-                navController.navigate(NavRoutes.SETTINGS)
-            },
-            onDismiss = {
-                viewModel.dismissApiKeyWarning()
-            }
-        )
-    }
-    
     Scaffold(
         topBar = {
             // Only show top bar on Home screen
@@ -757,4 +716,59 @@ fun InitialSetupDialog(
             }
         }
     )
+}
+
+/** The dialogs that can appear over the main screen. Kept apart so [PhoneMainContent] stays readable. */
+@Composable
+private fun PhoneMainDialogs(
+    viewModel: PhoneViewModel,
+    settings: ApiSettings,
+    navController: androidx.navigation.NavHostController
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Show initial setup dialog when no API key is configured
+    if (uiState.showInitialSetup) {
+        InitialSetupDialog(
+            onGoToSettings = {
+                viewModel.dismissInitialSetup()
+                navController.navigate(NavRoutes.SETTINGS)
+            },
+            onTryDemo = {
+                viewModel.dismissInitialSetup()
+                navController.navigate(NavRoutes.DEMO_CHAT)
+            },
+            onDismiss = {
+                viewModel.dismissInitialSetup()
+            }
+        )
+    }
+    
+    if (uiState.recordingStoppedInBackground) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissRecordingStoppedNotice() },
+            title = { Text(stringResource(R.string.recording_stopped_background_title)) },
+            text = { Text(stringResource(R.string.recording_stopped_background_message)) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.dismissRecordingStoppedNotice() }) {
+                    Text(stringResource(R.string.close))
+                }
+            }
+        )
+    }
+
+    // Show API key warning dialog when triggered by service
+    if (uiState.showApiKeyWarning) {
+        ApiKeyMissingDialog(
+            settings = settings,
+            onGoToSettings = {
+                viewModel.dismissApiKeyWarning()
+                navController.navigate(NavRoutes.SETTINGS)
+            },
+            onDismiss = {
+                viewModel.dismissApiKeyWarning()
+            }
+        )
+    }
+    
 }

@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import io.github.zero2005x.glassesaicompanion.BuildConfig
 import io.github.zero2005x.glassesaicompanion.R
 import io.github.zero2005x.glassesaicompanion.data.SettingsRepository
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -68,6 +69,7 @@ val LocalAiReport = staticCompositionLocalOf<((ReportTarget) -> Unit)?> { null }
 @Composable
 fun AiReportHost(
     client: ReportClient? = remember { ReportConfig.defaultClientOrNull() },
+    ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     content: @Composable () -> Unit
 ) {
     var target by remember { mutableStateOf<ReportTarget?>(null) }
@@ -77,7 +79,7 @@ fun AiReportHost(
 
     val current = target
     if (client != null && current != null) {
-        ReportDialog(target = current, client = client, onDismiss = { target = null })
+        ReportDialog(target = current, client = client, ioDispatcher = ioDispatcher, onDismiss = { target = null })
     }
 }
 
@@ -106,6 +108,7 @@ private sealed interface Phase {
 private fun ReportDialog(
     target: ReportTarget,
     client: ReportClient,
+    ioDispatcher: CoroutineDispatcher,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -247,7 +250,7 @@ private fun ReportDialog(
                         val selected = reason ?: return@TextButton
                         phase = Phase.Sending
                         scope.launch {
-                            val report = withContext(Dispatchers.IO) {
+                            val report = withContext(ioDispatcher) {
                                 buildReport(context, target, selected, note, includeUserMessage)
                             }
                             phase = when (val result = client.submit(report)) {

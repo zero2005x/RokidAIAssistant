@@ -2,7 +2,7 @@ package io.github.zero2005x.glassesaicompanion.ui.onboarding
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -91,7 +91,7 @@ fun OnboardingScreen(
                     onClick = {
                         // A plain web page; opening it never needs a permission.
                         try {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(guideUrl)))
+                            context.startActivity(Intent(Intent.ACTION_VIEW, guideUrl.toUri()))
                         } catch (_: ActivityNotFoundException) {
                             // No browser installed: nothing to do, the notice stays readable.
                         }

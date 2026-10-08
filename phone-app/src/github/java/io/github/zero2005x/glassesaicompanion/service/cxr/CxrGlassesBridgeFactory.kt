@@ -126,7 +126,7 @@ private class SdkCxrGlassesBridge(private val host: CxrHost) : CxrGlassesBridge 
             host.scope.launch {
                 when (resultStatus) {
                     ValueUtil.CxrStatus.RESPONSE_SUCCEED -> {
-                        if (photoData != null && photoData.isNotEmpty()) {
+                        if (photoData?.isNotEmpty() == true) {
                             Log.d(TAG, "CXR photo received: ${photoData.size} bytes")
                             host.onPhotoCaptured(photoData)
                         } else {

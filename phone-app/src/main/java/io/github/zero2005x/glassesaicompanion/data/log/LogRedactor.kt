@@ -31,7 +31,7 @@ object LogRedactor {
         // This is a redaction pattern, not a credential.
         Rule(
             Regex(
-                "\\b(?:api[_-]?key|apikey|key|access[_-]?token|token|secret|password)=[A-Za-z0-9._\\-]+",
+                "\\b(?:api[_-]?key|apikey|key|access[_-]?token|token|secret|password)=[a-z0-9._\\-]+",
                 RegexOption.IGNORE_CASE
             )
         ) { m -> m.value.substringBefore('=') + "=" + MASK },

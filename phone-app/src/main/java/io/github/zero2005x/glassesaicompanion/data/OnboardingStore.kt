@@ -2,6 +2,7 @@ package io.github.zero2005x.glassesaicompanion.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 
 /**
  * Remembers whether the user has read and accepted the first-launch notice
@@ -19,7 +20,7 @@ class OnboardingStore(private val prefs: SharedPreferences) {
     fun isAccepted(): Boolean = prefs.getInt(KEY_ACCEPTED_VERSION, 0) >= CURRENT_VERSION
 
     fun markAccepted() {
-        prefs.edit().putInt(KEY_ACCEPTED_VERSION, CURRENT_VERSION).apply()
+        prefs.edit { putInt(KEY_ACCEPTED_VERSION, CURRENT_VERSION) }
     }
 
     companion object {

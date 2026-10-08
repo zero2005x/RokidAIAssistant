@@ -570,7 +570,7 @@ private fun AiResponseSection(
                 }
                 ReportButton(
                     ReportTarget(
-                        assistantContent = recording.aiResponse!!,
+                        assistantContent = recording.aiResponse.orEmpty(),
                         userContent = recording.transcript,
                         modelId = recording.modelId
                     )

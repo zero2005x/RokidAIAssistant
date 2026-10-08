@@ -22,7 +22,7 @@ sealed interface ReportResult {
 }
 
 /** Delivers a report to the developer. */
-interface ReportClient {
+fun interface ReportClient {
     suspend fun submit(report: AiContentReport): ReportResult
 }
 
