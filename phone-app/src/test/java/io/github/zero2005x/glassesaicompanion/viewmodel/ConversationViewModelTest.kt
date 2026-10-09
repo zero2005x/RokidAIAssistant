@@ -9,10 +9,12 @@ import io.github.zero2005x.glassesaicompanion.data.AiProvider
 import io.github.zero2005x.glassesaicompanion.data.ApiSettings
 import io.github.zero2005x.glassesaicompanion.data.RoutingReason
 import io.github.zero2005x.glassesaicompanion.data.SettingsRepository
+import io.github.zero2005x.glassesaicompanion.data.db.AppDatabase
 import io.github.zero2005x.glassesaicompanion.data.db.Conversation
 import io.github.zero2005x.glassesaicompanion.data.db.ConversationRepository
 import io.github.zero2005x.glassesaicompanion.data.db.Message
 import io.github.zero2005x.glassesaicompanion.data.db.MessageRole
+import io.github.zero2005x.glassesaicompanion.data.db.RoutingMetricDao
 import io.github.zero2005x.glassesaicompanion.service.ServiceBridge
 import io.github.zero2005x.glassesaicompanion.service.ai.AiServiceProvider
 import io.github.zero2005x.glassesaicompanion.service.ai.DecisionRouter
@@ -57,6 +59,7 @@ class ConversationViewModelTest {
     private val settingsRepository = mockk<SettingsRepository>(relaxed = true)
     private val providerManager = mockk<ProviderManager>(relaxed = true)
     private val aiService = mockk<AiServiceProvider>(relaxed = true)
+    private val metricDao = mockk<RoutingMetricDao>(relaxed = true)
     private val allConversations = MutableStateFlow(emptyList<Conversation>())
     /** Unconfined so a collector registers synchronously before any emission. */
     private val collectors = CoroutineScope(UnconfinedTestDispatcher())
@@ -84,8 +87,12 @@ class ConversationViewModelTest {
         Dispatchers.setMain(dispatcher)
         application = ApplicationProvider.getApplicationContext()
         mockkObject(
-            ConversationRepository.Companion, SettingsRepository.Companion, ProviderManager.Companion
+            ConversationRepository.Companion, SettingsRepository.Companion, ProviderManager.Companion,
+            AppDatabase.Companion
         )
+        every { AppDatabase.getInstance(any()) } returns mockk<AppDatabase>(relaxed = true) {
+            every { routingMetricDao() } returns metricDao
+        }
         every { ConversationRepository.getInstance(any()) } returns repository
         every { SettingsRepository.getInstance(any()) } returns settingsRepository
         every { ProviderManager.getInstance(any()) } returns providerManager
@@ -221,6 +228,34 @@ class ConversationViewModelTest {
         coVerify { repository.addAssistantMessage("c-new", "hi", "gpt-4", any(), any()) }
         assertThat(model.inputText.value).isEmpty()
         assertThat(model.uiState.value.isLoading).isFalse()
+    }
+
+    @Test
+    fun `an answered chat question is recorded as a routing metric`() = scope.runTest {
+        coEvery { aiService.chat("hello there") } returns "hi"
+        val model = viewModel()
+
+        model.updateInputText("hello there")
+        model.sendMessage()
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) {
+            metricDao.insert(match { it.source == "phone_chat" && it.answerChars == 2 && it.reasonCode == "disabled" })
+        }
+    }
+
+    @Test
+    fun `a metric write failure never breaks the chat answer`() = scope.runTest {
+        coEvery { aiService.chat("hello there") } returns "hi"
+        coEvery { metricDao.insert(any()) } throws IOException("disk full")
+        val model = viewModel()
+
+        model.updateInputText("hello there")
+        model.sendMessage()
+        advanceUntilIdle()
+
+        coVerify { repository.addAssistantMessage("c-new", "hi", "gpt-4", any(), any()) }
+        assertThat(model.uiState.value.error).isNull()
     }
 
     @Test

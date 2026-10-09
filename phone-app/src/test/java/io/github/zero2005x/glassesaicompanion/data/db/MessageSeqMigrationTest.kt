@@ -129,7 +129,7 @@ class MessageSeqMigrationTest {
     /** Runs the migration by opening the database through Room, then reads it back. */
     private fun migrateAndRead(conversationId: String): List<Pair<String, Long>> {
         val database = Room.databaseBuilder(context, AppDatabase::class.java, DB_NAME)
-            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3)
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4)
             .allowMainThreadQueries()
             .build()
         return try {
@@ -191,7 +191,7 @@ class MessageSeqMigrationTest {
     }
 
     @Test
-    fun `the shared instance registers both migrations`() {
+    fun `the shared instance registers every migration`() {
         // getInstance is the path the app actually uses; it must carry every
         // migration, or an upgrade from version 1 falls back to a destructive open.
         val first = AppDatabase.getInstance(context)
@@ -199,7 +199,7 @@ class MessageSeqMigrationTest {
 
         assertThat(first).isSameInstanceAs(second)
         val configured = first.openHelper.writableDatabase.version
-        assertThat(configured).isEqualTo(3)
+        assertThat(configured).isEqualTo(4)
         first.close()
     }
 
@@ -219,7 +219,7 @@ class MessageSeqMigrationTest {
         }
 
         val database = Room.databaseBuilder(context, AppDatabase::class.java, DB_NAME)
-            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3)
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4)
             .allowMainThreadQueries()
             .build()
         try {
