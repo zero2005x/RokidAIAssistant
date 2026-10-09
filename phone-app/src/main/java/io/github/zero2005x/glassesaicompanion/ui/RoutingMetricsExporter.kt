@@ -7,6 +7,7 @@ import androidx.core.content.FileProvider
 import io.github.zero2005x.glassesaicompanion.data.db.AppDatabase
 import io.github.zero2005x.glassesaicompanion.data.db.RoutingMetricsCsv
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -17,7 +18,10 @@ object RoutingMetricsExporter {
     const val FILE_NAME = "routing_metrics.csv"
 
     /** The send intent for the CSV, or null when it could not be written. */
-    suspend fun createShareIntent(context: Context): Intent? = withContext(Dispatchers.IO) {
+    suspend fun createShareIntent(
+        context: Context,
+        ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    ): Intent? = withContext(ioDispatcher) {
         try {
             val rows = AppDatabase.getInstance(context).routingMetricDao().getAll()
             val dir = File(context.cacheDir, "exports").apply { mkdirs() }
