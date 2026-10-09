@@ -627,4 +627,8 @@
     <string name="demo_reply_2">メガネで撮影した写真の分析、録音の要約、履歴での振り返りもできます。</string>
     <string name="demo_reply_3">すべての AI の返信に小さな旗のボタンがあります。有害・誤り・不適切な回答はここから報告できます。</string>
     <string name="demo_reply_4">本物を試してみませんか？設定を開き、AI サービスを選んで API キーを貼り付けてください。</string>
+    <string name="routing_metrics_title">ルーティング指標</string>
+    <string name="routing_metrics_description">質問ごとにこのスマートフォンに 1 行を追加します（時刻、入力元、ルーティングの選択、モデル、所要時間、回答の長さ）。質問や回答の本文は保存しません。60 日より古い行は削除されます。何もアップロードされず、共有した場合のみファイルがこの端末から出ます。</string>
+    <string name="routing_metrics_export">指標を書き出す（CSV）</string>
+    <string name="routing_metrics_export_failed">CSV ファイルを作成できませんでした。</string>
 </resources>

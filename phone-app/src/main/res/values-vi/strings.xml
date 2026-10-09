@@ -628,4 +628,8 @@
     <string name="demo_reply_2">Bạn cũng có thể phân tích ảnh từ kính, ghi âm để nhận bản tóm tắt và xem lại mọi thứ sau trong lịch sử.</string>
     <string name="demo_reply_3">Mỗi phản hồi của AI đều có một nút cờ nhỏ. Hãy chạm vào đó để báo cáo phản hồi có hại, sai hoặc không phù hợp.</string>
     <string name="demo_reply_4">Sẵn sàng thử bản thật chưa? Hãy mở Cài đặt, chọn một dịch vụ AI và dán khóa API của bạn.</string>
+    <string name="routing_metrics_title">Chỉ số định tuyến</string>
+    <string name="routing_metrics_description">Mỗi câu hỏi thêm một dòng trên điện thoại này: thời gian, nguồn, lựa chọn định tuyến, mô hình, thời lượng và độ dài câu trả lời. Nội dung câu hỏi và câu trả lời không được lưu. Các dòng cũ hơn 60 ngày sẽ bị xóa. Không có gì được tải lên; tệp chỉ rời khỏi điện thoại nếu bạn chia sẻ.</string>
+    <string name="routing_metrics_export">Xuất chỉ số (CSV)</string>
+    <string name="routing_metrics_export_failed">Không thể tạo tệp CSV.</string>
 </resources>

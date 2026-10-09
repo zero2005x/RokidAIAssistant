@@ -20,7 +20,10 @@ import io.github.zero2005x.glassesaicompanion.data.ApiSettings
 import io.github.zero2005x.glassesaicompanion.data.AvailableModels
 import io.github.zero2005x.glassesaicompanion.data.SettingsRepository
 import io.github.zero2005x.glassesaicompanion.data.db.ConversationRepository
+import io.github.zero2005x.glassesaicompanion.data.db.AppDatabase
 import io.github.zero2005x.glassesaicompanion.data.db.RecordingRepository
+import io.github.zero2005x.glassesaicompanion.data.db.RoutingMetricSource
+import io.github.zero2005x.glassesaicompanion.data.db.RoutingMetricsRecorder
 import io.github.zero2005x.glassesaicompanion.service.ai.AiServiceFactory
 import io.github.zero2005x.glassesaicompanion.service.ai.AiServiceProvider
 import io.github.zero2005x.glassesaicompanion.service.ai.DecisionRouter
@@ -119,6 +122,9 @@ class PhoneAIService : Service() {
     
     // Recording repository for saving glasses recordings
     private var recordingRepository: RecordingRepository? = null
+
+    // On-device routing metrics (never uploaded; exported only by the user as CSV)
+    private var routingMetrics: RoutingMetricsRecorder? = null
     // ID of the in-flight glasses recording, so the saved row correlates with the ID
     // handed to the caller when recording started.
     private var pendingGlassesRecordingId: String? = null
@@ -173,7 +179,19 @@ class PhoneAIService : Service() {
             
             // Initialize conversation repository for persisting voice conversations
             conversationRepository = ConversationRepository.getInstance(this)
-            
+
+            // Drop routing metrics past their 60-day retention at every service start
+            routingMetrics = RoutingMetricsRecorder(AppDatabase.getInstance(this).routingMetricDao())
+            serviceScope.launch {
+                try {
+                    routingMetrics?.pruneExpired()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to prune routing metrics", e)
+                }
+            }
+
             // Create or get the current voice conversation session
             serviceScope.launch {
                 ensureVoiceConversationSession(settings)
@@ -709,6 +727,7 @@ class PhoneAIService : Service() {
      * Process voice data received from glasses
      */
     private suspend fun processVoiceData(audioData: ByteArray) {
+        val receivedAt = System.currentTimeMillis()
         try {
             // Check if any speech service is available
             if (sttService == null && speechService == null) {
@@ -787,10 +806,11 @@ class PhoneAIService : Service() {
                 val errorText = io.github.zero2005x.glassesaicompanion.data.RoutingReason.failure(this, routedReply.error)
                 bluetoothManager?.sendMessage(Message.aiError(errorText))
                 ServiceBridge.emitConversation(Message(type = MessageType.AI_ERROR, payload = errorText))
+                recordRoutingMetric(RoutingMetricSource.GLASSES_VOICE, settings, routedReply, receivedAt, 0, true)
                 return
             }
             val rawAiResponse = routedReply.text
-            
+
             // Clean markdown formatting for better display on glasses
             val aiResponse = cleanMarkdown(rawAiResponse)
             
@@ -803,7 +823,8 @@ class PhoneAIService : Service() {
                 type = MessageType.AI_RESPONSE_TEXT,
                 payload = aiResponse
             ))
-            
+            recordRoutingMetric(RoutingMetricSource.GLASSES_VOICE, settings, routedReply, receivedAt, aiResponse.length, true)
+
             // 6.1 Save AI response to database for history
             saveAssistantMessage(aiResponse, routedReply.modelId, if (settings.decisionRoutingEnabled) routedReply.reason else null)
             
@@ -1018,6 +1039,7 @@ class PhoneAIService : Service() {
             }
             
             Log.d(TAG, "Processing phone recording: $recordingId, path: $filePath")
+            val receivedAt = System.currentTimeMillis()
             
             // Check if any speech service is available
             if (sttService == null && speechService == null) {
@@ -1068,6 +1090,7 @@ class PhoneAIService : Service() {
             val routedReply = replyToTranscript(transcript, settings)
             if (routedReply.error != null) {
                 notifyProcessingError(recordingId, io.github.zero2005x.glassesaicompanion.data.RoutingReason.failure(this, routedReply.error))
+                recordRoutingMetric(RoutingMetricSource.RECORDING, settings, routedReply, receivedAt, 0, false)
                 return
             }
             val rawAiResponse = routedReply.text
@@ -1097,7 +1120,9 @@ class PhoneAIService : Service() {
                 type = MessageType.AI_RESPONSE_TEXT,
                 payload = aiResponse
             ))
-            
+            recordRoutingMetric(RoutingMetricSource.RECORDING, settings, routedReply, receivedAt,
+                aiResponse.length, settings.pushRecordingToGlasses)
+
             // 7. Save to conversation history
             saveUserMessage(transcript)
             saveAssistantMessage(aiResponse, routedReply.modelId, if (settings.decisionRoutingEnabled) routedReply.reason else null)
@@ -1316,6 +1341,24 @@ class PhoneAIService : Service() {
                 ?.map { (if (it.role == MessageRole.ASSISTANT) "assistant" else "user") to it.content }
         }.orEmpty()
         return decisionRouter.reply(transcript, settings, history, aiService)
+    }
+
+    /** Writes the routing-metrics row for one question; a failure here never affects the answer. */
+    private suspend fun recordRoutingMetric(
+        source: String,
+        settings: ApiSettings,
+        reply: RoutedReply,
+        receivedAt: Long,
+        answerChars: Int,
+        sentToGlasses: Boolean
+    ) {
+        try {
+            routingMetrics?.record(source, settings, reply, receivedAt, answerChars, sentToGlasses)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to record routing metric", e)
+        }
     }
 
     private suspend fun saveAssistantMessage(content: String, modelId: String?, routingReason: String? = null) {

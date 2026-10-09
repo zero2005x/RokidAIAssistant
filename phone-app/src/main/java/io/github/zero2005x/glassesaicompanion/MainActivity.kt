@@ -214,18 +214,7 @@ private fun PhoneMainContent(
     
     val uiState by viewModel.uiState.collectAsState()
 
-    // Phone-microphone recording is foreground-only: stop it when the app is hidden.
-    // A configuration change (rotation) also stops the activity, so it is excluded.
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_STOP && (context as? Activity)?.isChangingConfigurations != true) {
-                viewModel.onAppBackgrounded()
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
+    StopRecordingWhenBackgrounded(viewModel)
 
     // Microphone access is requested only when the user starts a phone recording
     val startPhoneRecordingWithPermission = rememberMicrophoneGate { viewModel.startPhoneRecording() }
@@ -716,6 +705,25 @@ fun InitialSetupDialog(
             }
         }
     )
+}
+
+/**
+ * Phone-microphone recording is foreground-only: stop it when the app is hidden.
+ * A configuration change (rotation) also stops the activity, so it is excluded.
+ */
+@Composable
+private fun StopRecordingWhenBackgrounded(viewModel: PhoneViewModel) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP && (context as? Activity)?.isChangingConfigurations != true) {
+                viewModel.onAppBackgrounded()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 }
 
 /** The dialogs that can appear over the main screen. Kept apart so [PhoneMainContent] stays readable. */

@@ -652,4 +652,8 @@
     <string name="routing_llm_description">Uses the existing provider key. Only the current question is sent for classification; this adds a paid API request. LLM certainty is not a calibrated probability. Uncertain or timed-out decisions use the primary model.</string>
     <string name="routing_reason_selected_llm">%1$s selected %2$s using structured classification.</string>
     <string name="glasses_preview_metrics">Application viewport: %1$d × %2$d px</string>
+    <string name="routing_metrics_title">Routing metrics</string>
+    <string name="routing_metrics_description">Each question adds one row on this phone: time, source, routing choice, models, timings and answer length. Question and answer text are not stored. Rows older than 60 days are deleted. Nothing is uploaded; the file leaves this phone only if you share it.</string>
+    <string name="routing_metrics_export">Export metrics (CSV)</string>
+    <string name="routing_metrics_export_failed">Could not create the CSV file.</string>
 </resources>

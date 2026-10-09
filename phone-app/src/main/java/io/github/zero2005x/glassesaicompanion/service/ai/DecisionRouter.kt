@@ -26,7 +26,13 @@ data class RoutedReply(
     val provider: AiProvider,
     val modelId: String,
     val reason: String,
-    val error: String? = null
+    val error: String? = null,
+    /** The stable reason code behind [reason], for metrics (see [RoutingReason.encode]). */
+    val code: String = "",
+    /** The difficulty tier the decision backend chose, or null when there was no usable decision. */
+    val tier: String? = null,
+    /** Time spent asking the decision backend; null when routing is off. */
+    val decisionMs: Long? = null
 )
 
 /** A Jev-compatible decision layer. Only text is sent to the decision endpoint. */
@@ -54,7 +60,9 @@ class DecisionRouter(
         primaryService: AiServiceProvider? = null
     ): RoutedReply {
         val primary = RoutingModel(settings.aiProvider, settings.getCurrentModelId())
+        val decisionStarted = System.nanoTime()
         val decision = if (settings.decisionRoutingEnabled) decide(question, settings) else null
+        val decisionMs = if (settings.decisionRoutingEnabled) (System.nanoTime() - decisionStarted) / NANOS_PER_MILLI else null
         val slot = when (decision?.first) {
             "fast" -> settings.fastRoutingModel
             "balanced" -> settings.balancedRoutingModel
@@ -62,29 +70,36 @@ class DecisionRouter(
             else -> null
         }
         val selected = slot?.takeIf { usable(it, settings) } ?: primary
-        val reason = when {
-            !settings.decisionRoutingEnabled -> RoutingReason.encode("disabled")
-            decision == null -> RoutingReason.encode("uncertain")
-            slot == null -> RoutingReason.encode("empty_slot", tier = decision.first)
-            selected == primary && !usable(slot, settings) ->
-                RoutingReason.encode("unconfigured_slot", tier = decision.first)
-            settings.decisionBackend in setOf(DecisionBackend.GEMINI, DecisionBackend.OPENAI) ->
-                RoutingReason.encode("selected_llm", settings.decisionBackend.name, decision.first)
-            else -> RoutingReason.encode("selected", settings.decisionBackend.name, decision.first,
-                (decision.second * 100).toInt())
+        val code = when {
+            !settings.decisionRoutingEnabled -> "disabled"
+            decision == null -> "uncertain"
+            slot == null -> "empty_slot"
+            selected == primary && !usable(slot, settings) -> "unconfigured_slot"
+            settings.decisionBackend in setOf(DecisionBackend.GEMINI, DecisionBackend.OPENAI) -> "selected_llm"
+            else -> "selected"
         }
+        val tier = decision?.first
+        val reason = when (code) {
+            "empty_slot", "unconfigured_slot" -> RoutingReason.encode(code, tier = tier.orEmpty())
+            "selected_llm" -> RoutingReason.encode(code, settings.decisionBackend.name, tier.orEmpty())
+            "selected" -> RoutingReason.encode(code, settings.decisionBackend.name, tier.orEmpty(),
+                ((decision?.second ?: 0.0) * 100).toInt())
+            else -> RoutingReason.encode(code)
+        }
+        fun reply(text: String, model: RoutingModel, why: String, whyCode: String, error: String? = null) =
+            RoutedReply(text, model.provider, model.modelId, why, error, whyCode, tier, decisionMs)
         val text = tryChat(selected, question, settings, history,
             if (selected == primary) primaryService else null)
-        if (text.error == null) return RoutedReply(text.text.orEmpty(), selected.provider, selected.modelId, reason)
+        if (text.error == null) return reply(text.text.orEmpty(), selected, reason, code)
         if (selected != primary) {
             val fallback = tryChat(primary, question, settings, history, primaryService)
             if (fallback.error == null) {
-                return RoutedReply(fallback.text.orEmpty(), primary.provider, primary.modelId,
-                    RoutingReason.encode("fallback", model = "${selected.provider.name} / ${selected.modelId}"))
+                return reply(fallback.text.orEmpty(), primary,
+                    RoutingReason.encode(CODE_FALLBACK, model = "${selected.provider.name} / ${selected.modelId}"), CODE_FALLBACK)
             }
-            return RoutedReply("", primary.provider, primary.modelId, RoutingReason.encode("failed"), fallback.error)
+            return reply("", primary, RoutingReason.encode(CODE_FAILED), CODE_FAILED, fallback.error)
         }
-        return RoutedReply("", primary.provider, primary.modelId, RoutingReason.encode("failed"), text.error)
+        return reply("", primary, RoutingReason.encode(CODE_FAILED), CODE_FAILED, text.error)
     }
 
     private data class ChatAttempt(val text: String? = null, val error: String? = null)
@@ -217,6 +232,9 @@ class DecisionRouter(
 
     companion object {
         private val TIERS = listOf("fast", "balanced", "quality")
+        const val CODE_FAILED = "failed"
+        private const val CODE_FALLBACK = "fallback"
+        private const val NANOS_PER_MILLI = 1_000_000L
         private const val MAX_QUESTION_CHARS = 4000
         private const val QUALITY_CONFIDENCE = 0.30
         private const val OTHER_CONFIDENCE = 0.50

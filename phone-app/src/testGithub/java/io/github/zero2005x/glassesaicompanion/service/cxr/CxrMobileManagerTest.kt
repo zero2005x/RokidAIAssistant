@@ -268,7 +268,8 @@ class CxrMobileManagerTest {
         assertThat(manager.bluetoothState.value)
             .isEqualTo(CxrMobileManager.BluetoothState.Disconnected)
         assertThat(retryCount()).isEqualTo(0)
-        verify { cxrApi.deinitBluetooth() }
+        // The SDK teardown is launched on the retry scope, so it can land after this returns.
+        verify(timeout = 5_000) { cxrApi.deinitBluetooth() }
     }
 
     @Test

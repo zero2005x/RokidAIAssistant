@@ -117,6 +117,7 @@ fun SettingsScreen(
                     if (detailPage == "routing") DecisionRoutingSection(settings, onSettingsChange, catalogRepository)
                     else GlassesDisplaySettingsSection(settings, onSettingsChange)
                 }
+                if (detailPage == "routing") item { RoutingMetricsSection() }
             } else {
             // Secure storage failure warning (never silently falls back to plaintext)
             item {
@@ -778,6 +779,31 @@ private fun DecisionRoutingSection(
     }
     editingSlot?.let { slot ->
         RoutingSlotDialogs(slot, settings, repository, onSettingsChange) { editingSlot = null }
+    }
+}
+
+/** Local-only routing metrics: explains what is kept and exports it as CSV through the share sheet. */
+@Composable
+private fun RoutingMetricsSection() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var message by remember { mutableStateOf<Int?>(null) }
+    SettingsSection(title = stringResource(R.string.routing_metrics_title)) {
+        Text(stringResource(R.string.routing_metrics_description), style = MaterialTheme.typography.bodySmall)
+        SettingsRow(
+            title = stringResource(R.string.routing_metrics_export),
+            subtitle = message?.let { stringResource(it) }.orEmpty(),
+            onClick = {
+                scope.launch {
+                    val intent = RoutingMetricsExporter.createShareIntent(context)
+                    if (intent == null) message = R.string.routing_metrics_export_failed
+                    else {
+                        message = null
+                        context.startActivity(Intent.createChooser(intent, null))
+                    }
+                }
+            }
+        )
     }
 }
 

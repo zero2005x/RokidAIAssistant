@@ -626,4 +626,8 @@
     <string name="demo_reply_2">También puedes analizar fotos de tus gafas, grabar audio para obtener un resumen y repasar todo después en tu historial.</string>
     <string name="demo_reply_3">Cada respuesta de la IA tiene un pequeño botón con una bandera. Púlsalo para denunciar una respuesta dañina, errónea o inapropiada.</string>
     <string name="demo_reply_4">¿Listo para probarlo de verdad? Abre Ajustes, elige un servicio de IA y pega tu clave de API.</string>
+    <string name="routing_metrics_title">Métricas de enrutamiento</string>
+    <string name="routing_metrics_description">Cada pregunta añade una fila en este teléfono: hora, origen, elección de enrutamiento, modelos, tiempos y longitud de la respuesta. No se guarda el texto de preguntas ni respuestas. Las filas de más de 60 días se eliminan. No se sube nada; el archivo solo sale del teléfono si lo compartes.</string>
+    <string name="routing_metrics_export">Exportar métricas (CSV)</string>
+    <string name="routing_metrics_export_failed">No se pudo crear el archivo CSV.</string>
 </resources>

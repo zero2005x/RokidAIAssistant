@@ -628,4 +628,8 @@
     <string name="demo_reply_2">يمكنك أيضًا تحليل صور نظارتك، وتسجيل الصوت للحصول على ملخص، ومراجعة كل شيء لاحقًا في السجل.</string>
     <string name="demo_reply_3">لكل رد من الذكاء الاصطناعي زر علم صغير. اضغط عليه للإبلاغ عن رد ضار أو خاطئ أو غير لائق.</string>
     <string name="demo_reply_4">هل أنت مستعد لتجربة النسخة الحقيقية؟ افتح الإعدادات، واختر خدمة ذكاء اصطناعي، والصق مفتاح API الخاص بك.</string>
+    <string name="routing_metrics_title">مقاييس التوجيه</string>
+    <string name="routing_metrics_description">كل سؤال يضيف صفا واحدا على هذا الهاتف: الوقت والمصدر واختيار التوجيه والنماذج والمدد وطول الإجابة. لا يتم حفظ نص الأسئلة أو الإجابات. تُحذف الصفوف الأقدم من 60 يوما. لا يتم رفع أي شيء، ولا يغادر الملف هذا الهاتف إلا إذا شاركته.</string>
+    <string name="routing_metrics_export">تصدير المقاييس (CSV)</string>
+    <string name="routing_metrics_export_failed">تعذر إنشاء ملف CSV.</string>
 </resources>

@@ -13,9 +13,10 @@ import kotlinx.coroutines.flow.Flow
     entities = [
         ConversationEntity::class,
         MessageEntity::class,
-        RecordingEntity::class
+        RecordingEntity::class,
+        RoutingMetricEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 @TypeConverters(Converters::class, RecordingConverters::class)
@@ -24,7 +25,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun conversationDao(): ConversationDao
     abstract fun messageDao(): MessageDao
     abstract fun recordingDao(): RecordingDao
-    
+    abstract fun routingMetricDao(): RoutingMetricDao
+
     companion object {
         const val DATABASE_NAME = "rokid_ai_database"
         
@@ -38,7 +40,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     DATABASE_NAME
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     .build()
                     .also { instance = it }
             }
@@ -75,6 +77,16 @@ abstract class AppDatabase : RoomDatabase() {
                     )
                     """.trimIndent()
                 )
+            }
+        }
+
+        /** Adds the on-device decision-routing metrics table; no existing table changes. */
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """CREATE TABLE IF NOT EXISTS `routing_metrics` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `received_at` INTEGER NOT NULL, `source` TEXT NOT NULL, `routing_enabled` INTEGER NOT NULL, `decision_backend` TEXT, `decision_latency_ms` INTEGER, `tier` TEXT, `reason_code` TEXT NOT NULL, `provider` TEXT NOT NULL, `model_id` TEXT NOT NULL, `total_ms` INTEGER NOT NULL, `answer_chars` INTEGER NOT NULL, `glasses_page_count` INTEGER, `asked_again_within_30s` INTEGER NOT NULL DEFAULT 0, `time_to_first_text_ms` INTEGER)"""
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_routing_metrics_received_at` ON `routing_metrics` (`received_at`)")
             }
         }
     }

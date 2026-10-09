@@ -628,4 +628,8 @@
     <string name="demo_reply_2">Puoi anche analizzare le foto dei tuoi occhiali, registrare audio per ottenere un riassunto e rivedere tutto più tardi nella cronologia.</string>
     <string name="demo_reply_3">Ogni risposta dell’IA ha un piccolo pulsante con una bandierina. Toccalo per segnalare una risposta dannosa, sbagliata o inappropriata.</string>
     <string name="demo_reply_4">Pronto per la versione vera? Apri le Impostazioni, scegli un servizio di IA e incolla la tua chiave API.</string>
+    <string name="routing_metrics_title">Metriche di instradamento</string>
+    <string name="routing_metrics_description">Ogni domanda aggiunge una riga su questo telefono: ora, origine, scelta di instradamento, modelli, tempi e lunghezza della risposta. Il testo di domande e risposte non viene salvato. Le righe più vecchie di 60 giorni vengono eliminate. Non viene caricato nulla; il file lascia il telefono solo se lo condividi.</string>
+    <string name="routing_metrics_export">Esporta metriche (CSV)</string>
+    <string name="routing_metrics_export_failed">Impossibile creare il file CSV.</string>
 </resources>
