@@ -559,6 +559,8 @@
     <string name="routing_enabled">الاختيار حسب صعوبة السؤال</string>
     <string name="routing_description">للنص والأسئلة المفرغة صوتيا فقط. الأولوية للجودة؛ يستخدم النموذج الرئيسي عند الشك.</string>
     <string name="routing_backend">خدمة التقييم</string>
+    <string name="routing_backend_experimental">%1$s (تجريبي)</string>
+    <string name="routing_experimental_note">تجريبي: لا يخضع Jev وLaya لتطوير نشط حتى تبرر مقاييس التوجيه مزيدا من العمل.</string>
     <string name="routing_jev_key">مفتاح API لـ TypeSafe</string>
     <string name="routing_laya_url">عنوان خادم Laya</string>
     <string name="routing_laya_url_hint">عنوان يصل إليه الهاتف دون /v1/systemone. يوصى بـ HTTPS؛ يتطلب HTTP الخاص مضيفا مسموحا.</string>

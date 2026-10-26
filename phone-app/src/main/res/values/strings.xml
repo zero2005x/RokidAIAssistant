@@ -632,6 +632,8 @@
     <string name="routing_enabled">Select models by question difficulty</string>
     <string name="routing_description">Text and transcribed questions only. Prioritize quality; use the primary model when uncertain.</string>
     <string name="routing_backend">Decision backend</string>
+    <string name="routing_backend_experimental">%1$s (Experimental)</string>
+    <string name="routing_experimental_note">Experimental: Jev and Laya are not under active development until routing metrics justify further work.</string>
     <string name="routing_jev_key">TypeSafe API key</string>
     <string name="routing_laya_url">Laya server URL</string>
     <string name="routing_laya_url_hint">Phone-accessible URL, without /v1/systemone. HTTPS recommended; private HTTP needs an allowed host.</string>

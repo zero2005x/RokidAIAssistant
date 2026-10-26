@@ -558,6 +558,8 @@
     <string name="routing_enabled">依問題難度選擇模型</string>
     <string name="routing_description">只用於文字與語音轉文字後的提問；品質優先，判斷不確定時使用主要模型。</string>
     <string name="routing_backend">判斷服務</string>
+    <string name="routing_backend_experimental">%1$s（實驗性）</string>
+    <string name="routing_experimental_note">實驗性功能：Jev 與 Laya 目前暫不繼續開發，直到路由指標證明有進一步投入的必要。</string>
     <string name="routing_jev_key">TypeSafe API 金鑰</string>
     <string name="routing_laya_url">Laya 伺服器網址</string>
     <string name="routing_laya_url_hint">填寫手機可連線的網址，不含 /v1/systemone。建議 HTTPS；私有 HTTP 需加入允許的主機。</string>

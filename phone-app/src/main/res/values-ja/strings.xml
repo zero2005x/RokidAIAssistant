@@ -558,6 +558,8 @@
     <string name="routing_enabled">質問の難易度でモデルを選択</string>
     <string name="routing_description">テキストと音声認識後の質問のみ。品質を優先し、不確かな場合はメインモデルを使用します。</string>
     <string name="routing_backend">判定サービス</string>
+    <string name="routing_backend_experimental">%1$s（実験的）</string>
+    <string name="routing_experimental_note">実験的機能：Jev と Laya は、ルーティング指標で必要性が確認されるまで積極的な開発を行っていません。</string>
     <string name="routing_jev_key">TypeSafe API キー</string>
     <string name="routing_laya_url">Laya サーバー URL</string>
     <string name="routing_laya_url_hint">スマートフォンから接続できる URL（/v1/systemone は不要）。HTTPS 推奨。プライベート HTTP はホストの許可が必要です。</string>

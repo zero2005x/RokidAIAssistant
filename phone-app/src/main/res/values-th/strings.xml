@@ -561,6 +561,8 @@
     <string name="routing_enabled">เลือกตามความยากของคำถาม</string>
     <string name="routing_description">ใช้กับข้อความและคำถามที่ถอดเสียงเท่านั้น เน้นคุณภาพและใช้รุ่นหลักเมื่อไม่แน่ใจ</string>
     <string name="routing_backend">บริการประเมิน</string>
+    <string name="routing_backend_experimental">%1$s (ทดลอง)</string>
+    <string name="routing_experimental_note">ฟีเจอร์ทดลอง: Jev และ Laya ยังไม่ได้พัฒนาต่ออย่างต่อเนื่องจนกว่าเมตริกการกำหนดเส้นทางจะแสดงว่าคุ้มค่า</string>
     <string name="routing_jev_key">คีย์ API TypeSafe</string>
     <string name="routing_laya_url">URL เซิร์ฟเวอร์ Laya</string>
     <string name="routing_laya_url_hint">URL ที่โทรศัพท์เข้าถึงได้ ไม่มี /v1/systemone แนะนำ HTTPS ส่วน HTTP ภายในต้องอนุญาตโฮสต์</string>

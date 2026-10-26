@@ -2,17 +2,23 @@
 
 ## 自動選模
 
-手機「設定 → 自動選模」可以啟用決策層，選擇既有 Gemini／OpenAI 金鑰、TypeSafe Jev 或自架 Laya，並指定快速、均衡、高品質三個模型槽位。每個槽位都可跨 AI 供應商選擇模型；若選中的供應商缺少憑證，就使用主要模型。模型路由只用於一般文字對話與錄音轉寫後的提問；照片分析及 Gemini Live 維持原有專用流程。目前使用者採 Gemini 決策，Laya 尚未準備服務網址。
+手機「設定 → 自動選模」可以啟用決策層，選擇既有 Gemini／OpenAI 金鑰、TypeSafe Jev（實驗性）或自架 Laya（實驗性），並指定快速、均衡、高品質三個模型槽位。每個槽位都可跨 AI 供應商選擇模型；若選中的供應商缺少憑證，就使用主要模型。模型路由只用於一般文字對話與錄音轉寫後的提問；照片分析及 Gemini Live 維持原有專用流程。目前使用者採 Gemini 決策，Laya 尚未準備服務網址。
+
+> **Experimental（實驗性）：** `Jev`、`Laya` 與多步驟 `Agents` 設計目前標記為**實驗性（Experimental）**，保留於程式碼與文件中，但在本機路由指標（`routing_metrics`）證明有進一步投入的必要前，暫不進行後續功能開發（參見 [`CONTRIBUTING.md`](../CONTRIBUTING.md) 與 [ADR 0004](adr/0004-decision-routing-before-generation.md)）。
 
 決策層會傳送**當前問題的文字**到所選服務。Jev／Laya 使用 `POST /v1/systemone` 的 `choice`；Gemini／OpenAI 使用結構化 JSON 分類。選中的生成模型會收到目前對話最近十則訊息。決策只回傳難度分類，**不會生成答案**，也不會觸發拍照或錄音。回答旁顯示實際生成模型及 App 的選模規則理由；LLM 分類不顯示自述信心百分比。
 
 若決策服務連線失敗、結果信心不足、槽位未設定或憑證缺失，App 使用原本主要模型。若已選槽位生成失敗，App 再試主要模型。連線失敗不會默默改用另一個決策後端。使用者可以關閉自動選模，恢復原有流程。
 
-### Jev
+### Jev（實驗性 / Experimental）
+
+> **實驗性（Experimental）：** Jev 決策後端目前為實驗性功能，在路由指標證明有進一步投入必要前暫不積極開發。
 
 在設定中輸入 TypeSafe API key。手機連到 `https://api.typesafe.ai/v1/systemone`，以 Bearer token 驗證，指定 `jev-latest`。參考 [TypeSafe API](https://docs.typesafe.ai/api)。
 
-### Laya
+### Laya（實驗性 / Experimental）
+
+> **實驗性（Experimental）：** Laya 自架決策後端目前為實驗性功能，在路由指標證明有進一步投入必要前暫不積極開發。
 
 在自己的伺服器安裝 Hugging Face 模型頁列出的 Python 套件 `laya[serve]`，以 `laya-serve` 提供 Jev 相容的 `/v1/systemone`。使用者提供的 [receptron/laya](https://github.com/receptron/laya) 是 Node 實作，本身沒有此 HTTP 伺服器。設定填入**可由手機連線的基底網址**，不要附加 `/v1/systemone`。需要驗證時設定 `LAYA_API_KEY`，並在手機輸入相同 key。建議使用 HTTPS；HTTP 僅接受私有 IPv4／本機位址，且 Android 網路政策必須明確允許實際主機。尚未取得使用者伺服器位址，因此目前 APK 未開放 HTTP 主機；不可將全域明文流量開啟。HTTP 會未加密傳送問題和選填金鑰，設定頁有說明。`localhost` 指向手機本身。繁中問題應使用 multilingual checkpoint。參考 [Laya 模型與自架說明](https://huggingface.co/convaiinnovations/laya)。
 

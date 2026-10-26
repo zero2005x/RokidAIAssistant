@@ -59,7 +59,7 @@ ANDROID_SERIAL=GLASSES_SERIAL ./gradlew :glasses-app:installDebug  # Install gla
 
 ## Features
 
-Phone Settings now includes optional [Jev / Laya difficulty-based model routing and a glasses display preview](doc/DECISION_ROUTING_AND_DISPLAY.md). Routing is limited to text and transcribed speech. Glasses font, text size, and safe display area are saved when you tap Apply and sync over Bluetooth, including after reconnecting.
+Phone Settings now includes optional [difficulty-based model routing (Gemini / OpenAI, plus experimental Jev / Laya) and a glasses display preview](doc/DECISION_ROUTING_AND_DISPLAY.md). Routing is limited to text and transcribed speech. Glasses font, text size, and safe display area are saved when you tap Apply and sync over Bluetooth, including after reconnecting.
 
 | Feature                 | Description                                                                                                                                                                                                                                |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

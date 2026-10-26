@@ -559,6 +559,8 @@
     <string name="routing_enabled">Scegli in base alla difficoltà</string>
     <string name="routing_description">Solo testo e domande trascritte. Qualità prioritaria; modello principale in caso di dubbio.</string>
     <string name="routing_backend">Servizio decisionale</string>
+    <string name="routing_backend_experimental">%1$s (Sperimentale)</string>
+    <string name="routing_experimental_note">Sperimentale: Jev e Laya non sono in sviluppo attivo finché le metriche di instradamento non lo giustificano.</string>
     <string name="routing_jev_key">Chiave API TypeSafe</string>
     <string name="routing_laya_url">URL server Laya</string>
     <string name="routing_laya_url_hint">URL accessibile al telefono senza /v1/systemone. HTTPS consigliato; HTTP privato richiede un host consentito.</string>

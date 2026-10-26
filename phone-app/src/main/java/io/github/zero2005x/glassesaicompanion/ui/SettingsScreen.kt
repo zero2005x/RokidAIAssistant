@@ -840,16 +840,29 @@ private fun DecisionBackendFields(
             FilterChip(
                 selected = settings.decisionBackend == backend,
                 onClick = { onSettingsChange(settings.copy(decisionBackend = backend)) },
-                label = { Text(backend.name) }
+                label = { Text(decisionBackendLabel(backend)) }
             )
         }
     }
     when (settings.decisionBackend) {
-        DecisionBackend.JEV -> ApiKeyField(stringResource(R.string.routing_jev_key), settings.jevApiKey,
-            { onSettingsChange(settings.copy(jevApiKey = it)) }, true)
-        DecisionBackend.LAYA -> LayaFields(settings, onSettingsChange)
+        DecisionBackend.JEV -> {
+            Text(stringResource(R.string.routing_experimental_note), style = MaterialTheme.typography.bodySmall)
+            ApiKeyField(stringResource(R.string.routing_jev_key), settings.jevApiKey,
+                { onSettingsChange(settings.copy(jevApiKey = it)) }, true)
+        }
+        DecisionBackend.LAYA -> {
+            Text(stringResource(R.string.routing_experimental_note), style = MaterialTheme.typography.bodySmall)
+            LayaFields(settings, onSettingsChange)
+        }
         DecisionBackend.GEMINI, DecisionBackend.OPENAI -> LlmDecisionFields(settings, onPickDecisionModel)
     }
+}
+
+@Composable
+private fun decisionBackendLabel(backend: DecisionBackend): String = when (backend) {
+    DecisionBackend.JEV, DecisionBackend.LAYA ->
+        stringResource(R.string.routing_backend_experimental, backend.name)
+    DecisionBackend.GEMINI, DecisionBackend.OPENAI -> backend.name
 }
 
 @Composable

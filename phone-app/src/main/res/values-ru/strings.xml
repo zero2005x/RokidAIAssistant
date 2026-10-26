@@ -559,6 +559,8 @@
     <string name="routing_enabled">Выбирать по сложности вопроса</string>
     <string name="routing_description">Только текст и расшифрованные вопросы. Приоритет качества; при сомнениях используется основная модель.</string>
     <string name="routing_backend">Сервис оценки</string>
+    <string name="routing_backend_experimental">%1$s (Экспериментально)</string>
+    <string name="routing_experimental_note">Экспериментально: Jev и Laya активно не разрабатываются, пока метрики маршрутизации не подтвердят необходимость доработки.</string>
     <string name="routing_jev_key">API-ключ TypeSafe</string>
     <string name="routing_laya_url">URL сервера Laya</string>
     <string name="routing_laya_url_hint">URL, доступный с телефона, без /v1/systemone. Рекомендуется HTTPS; частный HTTP требует разрешённого узла.</string>

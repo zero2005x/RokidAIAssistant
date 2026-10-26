@@ -559,6 +559,8 @@
     <string name="routing_enabled">Chọn theo độ khó câu hỏi</string>
     <string name="routing_description">Chỉ dùng cho chữ và câu hỏi đã nhận dạng giọng nói. Ưu tiên chất lượng; khi không chắc dùng mô hình chính.</string>
     <string name="routing_backend">Dịch vụ đánh giá</string>
+    <string name="routing_backend_experimental">%1$s (Thử nghiệm)</string>
+    <string name="routing_experimental_note">Thử nghiệm: Jev và Laya hiện không được phát triển tích cực cho đến khi chỉ số định tuyến cho thấy cần tiếp tục.</string>
     <string name="routing_jev_key">Khóa API TypeSafe</string>
     <string name="routing_laya_url">URL máy chủ Laya</string>
     <string name="routing_laya_url_hint">URL điện thoại truy cập được, không có /v1/systemone. Nên dùng HTTPS; HTTP nội bộ cần cho phép máy chủ.</string>

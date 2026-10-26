@@ -2,6 +2,8 @@
 
 研究日期：2026-10-01（Asia/Taipei）。本文件保留方案研究；後續已依使用者同意範圍加入 Gemini／OpenAI 決策並執行實機 API 測試，結果見 [實機測試](DEVICE_SMOKE_TEST.md)。Agents 尚未實作。
 
+> **Experimental（實驗性）：** TypeSafe `Jev`、自架 `Laya` 與本文件中的多步驟 `Agents` 架構設計均標記為**實驗性（Experimental）**，目前暫不進行後續功能開發，直到本機路由指標（`routing_metrics`）證明有進一步投入的必要（參見 [`CONTRIBUTING.md`](../CONTRIBUTING.md) 與 [ADR 0004](adr/0004-decision-routing-before-generation.md)）。
+
 ## 使用者最新條件
 
 - 使用者在手機更換 Gemini 金鑰後，Gemini 對話、決策與照片分析成功；OpenAI 對話與決策亦通過手機端 API 測試。沒有擷取舊金鑰，因此不推論舊金鑰失敗的確切原因。
@@ -22,7 +24,9 @@ Laya 作者明確指出基礎模型在部分決策測試的零樣本表現有限
 
 System One 的輸出符合格式，不代表難度分類一定正確。信心門檻需依實際資料與錯誤代價驗證。[TypeSafe 信心說明](https://docs.typesafe.ai/confidence)
 
-## 後續 Agents 架構建議
+## 後續 Agents 架構建議（實驗性 / Experimental）
+
+> **實驗性（Experimental）：** 以下 Agents 多步驟任務流程僅為設計評估，目前未納入積極開發，待路由指標證明有實際需求後才會評估試作。
 
 ```mermaid
 flowchart TD

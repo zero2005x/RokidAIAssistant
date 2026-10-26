@@ -81,4 +81,15 @@ class RoutingReasonDisplayTest {
         assertEquals(string(R.string.routing_error, "Invalid API key (HTTP 401)"), raw)
         assertTrue(raw.contains("HTTP 401"))
     }
+
+    @Test
+    fun experimentalBackendLabelsAndNoteArePresent() {
+        val jevLabel = string(R.string.routing_backend_experimental, DecisionBackend.JEV.name)
+        val layaLabel = string(R.string.routing_backend_experimental, DecisionBackend.LAYA.name)
+        val note = string(R.string.routing_experimental_note)
+
+        assertTrue(jevLabel.contains("JEV"))
+        assertTrue(layaLabel.contains("LAYA"))
+        assertTrue(note.isNotBlank())
+    }
 }

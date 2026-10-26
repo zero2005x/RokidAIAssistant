@@ -556,6 +556,8 @@
     <string name="routing_enabled">按问题难度选择模型</string>
     <string name="routing_description">仅用于文字及语音转写后的提问；质量优先，不确定时使用主要模型。</string>
     <string name="routing_backend">判断服务</string>
+    <string name="routing_backend_experimental">%1$s（实验性）</string>
+    <string name="routing_experimental_note">实验性功能：Jev 与 Laya 目前暂不继续开发，直到路由指标证明有进一步投入的必要。</string>
     <string name="routing_jev_key">TypeSafe API 密钥</string>
     <string name="routing_laya_url">Laya 服务器网址</string>
     <string name="routing_laya_url_hint">手机可连接的网址，不含 /v1/systemone。建议 HTTPS；私有 HTTP 需要允许该主机。</string>

@@ -558,6 +558,8 @@
     <string name="routing_enabled">질문 난이도로 모델 선택</string>
     <string name="routing_description">텍스트 및 음성 인식 질문에만 적용됩니다. 품질 우선이며 불확실하면 기본 모델을 사용합니다.</string>
     <string name="routing_backend">판단 서비스</string>
+    <string name="routing_backend_experimental">%1$s (실험적)</string>
+    <string name="routing_experimental_note">실험적 기능: Jev와 Laya는 라우팅 지표로 추가 작업의 필요성이 확인될 때까지 적극적으로 개발하지 않습니다.</string>
     <string name="routing_jev_key">TypeSafe API 키</string>
     <string name="routing_laya_url">Laya 서버 URL</string>
     <string name="routing_laya_url_hint">휴대폰에서 접속 가능한 URL, /v1/systemone 제외. HTTPS 권장; 사설 HTTP는 호스트 허용이 필요합니다.</string>
