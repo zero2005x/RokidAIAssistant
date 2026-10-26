@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 package io.github.zero2005x.glassesaicompanion.ui.theme
 
 import androidx.compose.material3.Typography

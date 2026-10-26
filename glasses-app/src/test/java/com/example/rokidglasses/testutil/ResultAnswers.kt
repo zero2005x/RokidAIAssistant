@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 package com.example.rokidglasses.testutil
 
 import io.mockk.MockKStubScope

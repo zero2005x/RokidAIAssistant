@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 import org.gradle.api.tasks.testing.Test
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 import java.util.Properties

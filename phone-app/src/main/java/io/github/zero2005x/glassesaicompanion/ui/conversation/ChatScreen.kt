@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 package io.github.zero2005x.glassesaicompanion.ui.conversation
 
 import androidx.compose.foundation.background

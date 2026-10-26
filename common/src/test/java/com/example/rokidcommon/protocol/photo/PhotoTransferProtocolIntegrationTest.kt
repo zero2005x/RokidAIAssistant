@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 package com.example.rokidcommon.protocol.photo
 
 import com.google.common.truth.Truth.assertThat

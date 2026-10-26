@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 package io.github.zero2005x.glassesaicompanion.testutil
 
 import mockwebserver3.MockWebServer
