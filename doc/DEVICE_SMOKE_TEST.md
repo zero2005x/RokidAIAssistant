@@ -1,71 +1,73 @@
-# Windows 實機測試（2026-09-30）
+# Windows Device Smoke Test (2026-09-30)
 
-本節保留 9 月 30 日受測版本的結果；最新修正與更換金鑰後的測試見下方「2026-10-01」。先前的 401、預覽及 CXR 結果不可當作最新版本的結論。
+> 📖 [繁體中文版](zh-TW/DEVICE_SMOKE_TEST.md)
 
-## 裝置與版本
+This section preserves the results of the build tested on September 30; see **2026-10-01** below for the latest fixes and tests after replacing the API key. The earlier 401, preview, and CXR results should not be treated as conclusions for the latest build.
 
-- Windows ADB；手機 `eeaas88ts4kn6l8t`（21091116UG，Android 13），眼鏡 `1901092544022855`（RG_glasses，Android 12L）。
-- 手機 `com.example.rokidphone`、眼鏡 `com.example.rokidglasses`：1.1.0 / versionCode 5。
-- 使用先前已安裝、以原有 release 憑證重簽的 debug APK。安裝雜湊與資料保留證據見 `DEVICE_INSTALLATION.md`。
-- 本次實測約 21:57–22:15（Asia/Taipei）。本次未重新編譯、安裝或修改 App 程式碼。
+## Devices and Versions
 
-## 避免干擾其他除錯工作
+- Windows ADB; phone `eeaas88ts4kn6l8t` (21091116UG, Android 13), glasses `1901092544022855` (RG_glasses, Android 12L).
+- Phone `com.example.rokidphone`, glasses `com.example.rokidglasses`: 1.1.0 / versionCode 5.
+- Using the previously installed debug APKs re-signed with the existing release certificate. See `DEVICE_INSTALLATION.md` for installation hashes and data-preservation evidence.
+- Tested around 21:57–22:15 (Asia/Taipei). No recompilation, installation, or app code changes were performed during this run.
 
-另一個 Claude Desktop 正在處理 RideFlux。每次輸入或啟動前讀取裝置前景套件；僅對本 App 操作，啟動時另允許裝置原有 launcher。未操作 RideFlux、停止其他 adb 程序、重啟 adb server、清空 logcat、重設藍牙配對或清除 App 資料。這項檢查能降低衝突，無法保證另一個程序不在檢查後同時操作裝置。
+## Avoiding Interference with Other Debugging Work
 
-## 已驗證
+Another Claude Desktop session was working on RideFlux. Before each input or launch, we read the device foreground package and operated only on this app, additionally allowing the device's native launcher when starting up. We did not touch RideFlux, stop other adb processes, restart the adb server, clear logcat, reset Bluetooth pairing, or clear app data. This check reduces conflicts, though it cannot guarantee another process will not interact with the device immediately after the check.
 
-| 項目 | 實測結果 |
+## Verified Items
+
+| Item | Measured Result |
 | --- | --- |
-| 啟動與導覽 | 兩個 App 可啟動；手機首頁、設定、獨立選模頁、獨立顯示頁、聊天頁可進入。 |
-| 手機／眼鏡文字通道 | 手機開始監聽後，在眼鏡裝置清單選取 Redmi Note 11 Pro+ 5G，兩端顯示已連線；SPP 於 22:05:20 連線。 |
-| 儲存的顯示設定 | 連線後眼鏡收到既有設定：等寬字體、17 sp、寬 51%、高 46%、水平 23%、垂直 45%。畫面內容位於此範圍。 |
-| 套用才同步 | 手機改選系統字體，未套用時眼鏡文字節點與位置不變；按套用後裝置名称的排版寬度改變，並有 SYSTEM_CONFIG 傳送紀錄。 |
-| 字級同步 | 暫時將 17 sp 改成 24 sp 並套用，眼鏡主文字、連線提示、手機名稱與底部提示一起放大；接著套用還原為 17 sp。 |
-| 重設草稿 | 按重設後手機預覽改為預設值，眼鏡維持原設定；離開未套用的草稿並重新進入，讀回原有儲存值。 |
-| 設定還原 | 最後確認全部六項值均為測試前的值；套用按鈕回到停用狀態，眼鏡文字大小也還原。 |
-| AI 錯誤處理 | 實際文字請求收到 Gemini HTTP 401（金鑰無效）。手機顯示「AI 請求失敗」及原始原因，聊天中沒有新增 assistant 回答；眼鏡收到 AI_ERROR 並顯示重試提示。 |
-| 崩潰紀錄 | 21:57 起可取得的 AndroidRuntime 紀錄未找到這兩個套件的崩潰標記；不代表所有功能或長時間穩定性都通過。 |
+| Launch and navigation | Both apps launch; phone home screen, Settings, dedicated model routing page, dedicated display page, and chat screen are accessible. |
+| Phone / glasses text channel | After the phone started listening, selecting Redmi Note 11 Pro+ 5G from the glasses device list showed connected on both ends; SPP connected at 22:05:20. |
+| Saved display settings | Upon connection, the glasses received the existing settings: monospace font, 17 sp, width 51%, height 46%, horizontal 23%, vertical 45%. Screen content rendered within this viewport. |
+| Sync only on Apply | Switching to the system font on the phone without tapping Apply left the glasses text nodes and positions unchanged; after tapping Apply, the layout width of the device name changed and a `SYSTEM_CONFIG` transmission was logged. |
+| Font size sync | Temporarily changing 17 sp to 24 sp and tapping Apply scaled up the glasses main text, connection prompt, phone name, and bottom hint together; applying 17 sp afterward restored the original size. |
+| Reset draft | Tapping Reset changed the phone preview back to default values while the glasses kept their applied settings; leaving the unapplied draft and re-entering read back the saved values. |
+| Settings restoration | Confirmed all six values matched their pre-test state at the end; the Apply button returned to disabled and the glasses text size was restored. |
+| AI error handling | A live text request received Gemini HTTP 401 (invalid key). The phone displayed "AI request failed" with the original reason and did not add an assistant reply to the chat; the glasses received `AI_ERROR` and showed the retry hint. |
+| Crash logs | `AndroidRuntime` logs available since 21:57 showed no crash markers for either package; this does not imply all features or long-term stability are verified. |
 
-## 發現問題與阻礙
+## Issues and Blockers Found
 
-1. **AI 憑證阻礙：** Gemini 回傳 HTTP 401。設定頁顯示 Jev 已啟用、三個槽位已填，但未成功取得回答，因此不能宣稱 Jev 難度判斷、跨供應商成功回答、選模理由或對話脈絡實測通過。沒有修改、顯示或擷取金鑰。請使用者在手機確認憑證後再測。
-2. **Rokid CXR BLE：** 22:07:30、22:09:44、22:12:04 等時間記錄 `Failed(error=BLE connect failed)`，之後持續重試；SPP 文字／設定通道仍正常。尚未定位原因，不能以 SPP 連線成功推論相機通道可用，也不能將失敗歸因於 Claude。未執行拍照。
-3. **手機預覽文字重疊：** 在寬 51%、高 46%、24 sp 時，示意預覽的回答文字與右上狀態、底部提示重疊。這是手機預覽的實測排版問題；眼鏡使用不同排版，不能由此推論眼鏡回答分頁也失敗。本次僅記錄，未更換受測 APK。
-4. **ADB 輸入法限制：** 第一筆合成英文題目被手機注音輸入法轉成混合文字；請求有實際送出，但不能當作「7 + 5」正確性測試。未修改使用者輸入法或把此問題列為 App 輸入缺陷。
+1. **AI credential blocker:** Gemini returned HTTP 401. Although Settings showed Jev enabled and all three slots populated, no answer was obtained, so we cannot claim live verification of Jev difficulty classification, cross-provider answers, routing reasons, or multi-turn context. Keys were not modified, displayed, or extracted. The user was asked to check the credentials on the phone before re-testing.
+2. **Rokid CXR BLE:** `Failed(error=BLE connect failed)` was logged at 22:07:30, 22:09:44, 22:12:04, etc., followed by continuous retries while the SPP text / config channel remained healthy. The root cause was not yet isolated; SPP connection success does not imply camera channel availability, nor can the failure be attributed to Claude. Photo capture was not executed.
+3. **Phone preview text overlap:** At width 51%, height 46%, and 24 sp, the answer text in the illustrative preview overlapped with the top-right status and bottom hint. This was a measured layout issue in the phone preview; the glasses use a different layout, so this does not imply pagination on the glasses failed. Recorded without replacing the APK under test.
+4. **ADB IME limitation:** The first synthetic English prompt was converted into mixed text by the phone's Zhuyin IME; the request was sent, but it cannot be counted as a correctness test for "7 + 5". We did not modify the user's IME or classify this as an app input defect.
 
-## 尚未通過的項目
+## Items Not Yet Verified
 
-- 成功 AI 回答、Jev/Laya 分級、跨模型脈絡、實際選模理由；Laya 尚需服務網址與有效設定。
-- 正常 AI 長回答的眼鏡分頁／逐頁完整性、最大字級與最小範圍的完整組合。
-- 語音收音／轉錄／TTS、照片分析、Gemini Live、其他供應商及 13 語系實機檢查。
-- 眼鏡實際光學可視範圍與配戴舒適度；ADB 截圖為 480×640，不能取代使用者配戴確認。
+- Successful AI answers, Jev/Laya tiering, cross-model context, and live routing reasons; Laya still requires a server URL and valid configuration.
+- Glasses pagination and page-by-page completeness on long AI answers, plus the full matrix of maximum font size and minimum viewport bounds.
+- Voice capture / transcription / TTS, photo analysis, Gemini Live, other providers, and on-device checks across all 13 languages.
+- Actual optical field of view and wearing comfort on the glasses; ADB screenshots are 480×640 and cannot replace wearing confirmation by the user.
 
-## 本機證據
+## Local Evidence
 
-截圖與 UI XML 在忽略目錄 `build/device-smoke-20260930/`，未把使用者聊天清單截圖加入版本控制：
+Screenshots and UI XML dumps are stored in the ignored directory `build/device-smoke-20260930/`; screenshots of the user's chat list were not committed to version control:
 
-- `phone-display-current`、`phone-display-draft`、`phone-reset-draft`、`phone-restored-final`。
-- `glasses-unapplied`、`glasses-applied-system`、`glasses-size-24-applied`、`glasses-restored-final`。
-- `phone-text-first-response`：原始 HTTP 401 顯示；`phone-size-draft`：預覽重疊。
-- `log-summary.json`：僅保留連線／訊息類型／例外類別，不保留金鑰、題目或原始請求內容。
+- `phone-display-current`, `phone-display-draft`, `phone-reset-draft`, `phone-restored-final`.
+- `glasses-unapplied`, `glasses-applied-system`, `glasses-size-24-applied`, `glasses-restored-final`.
+- `phone-text-first-response`: raw HTTP 401 display; `phone-size-draft`: preview overlap.
+- `log-summary.json`: retains only connection / message types / exception classes, without keys, prompts, or raw request payloads.
 
-截圖與 UI XML 為連續兩次讀取，轉場時可能不完全同時；判斷連線／套用結果另以後续穩定畫面與日誌核對。
+Screenshots and UI XML dumps were captured in two consecutive reads and may not be at the exact same instant during transitions; connection and apply results were cross-checked against subsequent stable screens and logs.
 
-## 2026-10-01：修正版本與新 Gemini 金鑰
+## 2026-10-01: Fixed Build and New Gemini Key
 
-以 Windows ADB 對同兩台裝置操作，使用保留資料的 APK 更新。使用者同意辦公室拍攝，並在手機更換 Gemini 金鑰。每次輸入前同時檢查 resumed activity 與目前焦點視窗，遇到 LINE／Chrome 前景時停止；未操作 RideFlux 或共用 adb server。
+Operated on the same two devices over Windows ADB using a data-preserving APK update. The user approved office photo capture and replaced the Gemini API key on the phone. Before each input, both the resumed activity and current focused window were checked, stopping whenever LINE or Chrome was in the foreground; RideFlux and the shared adb server were not disturbed.
 
-| 項目 | 本次結果 |
+| Item | Result |
 | --- | --- |
-| 新 Gemini 金鑰 | 使用者自行提出 `123&321=?`，App 成功回答 65；畫面顯示 `gemini-3.8-flash` 及 Gemini 結構化分類選擇快速的理由。這筆題目由使用者提出，非自動化合成測試。 |
-| 真實供應商連線 | 手機端 opt-in Android instrumentation：Gemini／OpenAI 各一筆合成 `7 + 5` 對話與一筆繁中多步驟架構分類，`OK (4 tests)`，18.417 秒。金鑰讀取手機內加密設定，未移出手機。 |
-| 決策時限的差別 | 原生 App 的 Gemini 選模已觀察到成功；instrumentation 的分類契約測試用 60 秒總時限，不能據此宣稱兩個後端均能在正式 3.5 秒預算內完成。 |
-| 辦公室拍照與分析 | 更換金鑰後重新拍照，照片經 SPP 傳到手機，Gemini 成功分析，眼鏡顯示 4 頁回答；本次沒有 401。另一次更換前的拍照傳输成功但分析 401，不能混算成分析成功。 |
-| 相機能力與比例 | 日誌顯示收到 `DISPLAY_METRICS`，`SPP; display 480x640`。原生眼鏡伴隨 App 使用 SPP 相機，未觀察到此前 CXR BLE 重試。此結果不代表舊裝置的 SDK 路徑已修復。 |
-| 新手機預覽 | 顯示 `APP 顯示範圍：480 × 640 px`，採實際 APP 畫面比例。24 sp、51%×46%、等寬字體下，狀態、主文字與底部提示無重疊；主文字可捲動。 |
-| 套用與還原 | 24 sp 草稿尚未套用時眼鏡維持 17 sp；套用後所有文字一起放大。最後套用還原 17 sp、等寬、寬 51%、高 46%、水平 23%、垂直 45%，手機套用按鈕停用，兩端重連成功。 |
+| New Gemini key | The user asked `123&321=?` directly; the app answered 65 and displayed `gemini-3.8-flash` along with the reason that Gemini structured classification selected the Fast tier. This prompt was entered by the user rather than an automated synthetic test. |
+| Live provider connectivity | On-device opt-in Android instrumentation: one synthetic `7 + 5` chat and one Traditional Chinese multi-step architecture classification each for Gemini and OpenAI, `OK (4 tests)` in 18.417 s. Keys were read from encrypted on-device storage and never left the phone. |
+| Decision timeout difference | Native app Gemini model routing was observed succeeding; the instrumentation classification contract test uses a 60-second total timeout, so it alone does not prove both backends always finish within the production 3.5-second budget. |
+| Office photo capture and analysis | After replacing the key, a new photo was captured on the glasses, transferred over SPP to the phone, analyzed by Gemini, and displayed across 4 pages on the glasses with no 401 error. An earlier photo before the key change transferred over SPP but failed analysis with 401 and is not counted as an analysis success. |
+| Camera capability and aspect ratio | Logs confirmed receipt of `DISPLAY_METRICS`, `SPP; display 480x640`. The native glasses companion app used the SPP camera and no longer triggered the earlier CXR BLE retries. This does not imply the legacy SDK path on older devices is fixed. |
+| New phone preview | Displayed `APP 顯示範圍：480 × 640 px`, matching the actual app aspect ratio. At 24 sp, 51%×46%, monospace font, status, main text, and bottom hint did not overlap, and the main text scrolled properly. |
+| Apply and restore | While the 24 sp draft was unapplied, the glasses stayed at 17 sp; after tapping Apply, all text scaled up together. Finally, applying 17 sp, monospace, width 51%, height 46%, horizontal 23%, vertical 45% restored the baseline, disabled the Apply button on the phone, and reconnected both ends cleanly. |
 
-證據位於忽略目錄 `build/device-smoke-20260930/`：`glasses-new-key-photo`、`glasses-photo-page-3`、`glasses-photo-page-4`、`phone-preview-size-24-draft`、`glasses-reconnected-before-apply`、`glasses-current-size-24-applied`、`phone-baseline-restored-final`、`glasses-current-restored-baseline`。未保存 API key 畫面；有可見非密碼輸入欄時跳過截圖，XML 的輸入欄均遮罩。
+Evidence is stored in the ignored directory `build/device-smoke-20260930/`: `glasses-new-key-photo`, `glasses-photo-page-3`, `glasses-photo-page-4`, `phone-preview-size-24-draft`, `glasses-reconnected-before-apply`, `glasses-current-size-24-applied`, `phone-baseline-restored-final`, `glasses-current-restored-baseline`. No API key screens were saved; screenshots were skipped whenever non-password input fields were visible, and input fields in XML dumps were masked.
 
-仍未實測：Jev／Laya 真實分類品質（Laya 未提供網址）、所有字級與範圍組合、跨模型多輪脈絡、語音收音／轉錄／TTS、Gemini Live、其餘供應商、13 語系及實際光學配戴範圍。Agents 依使用者指示延後。
+Still untested: live Jev / Laya classification quality (no Laya URL provided), all font-size and viewport combinations, cross-model multi-turn context, voice capture / transcription / TTS, Gemini Live, remaining providers, all 13 languages, and actual optical wearing field of view. Agents remain deferred per user direction.
