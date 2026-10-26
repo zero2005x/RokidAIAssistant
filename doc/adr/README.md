@@ -12,9 +12,9 @@ This directory records the key architectural decisions of **Rokid AI Assistant**
 | [0004](0004-decision-routing-before-generation.md) | Decision routing happens before generation, outside the AI session (3.5 s budget, fallback to primary) | Accepted |
 | [0005](0005-layout-and-pagination-measured-on-glasses.md) | Layout belongs to the device: pagination is measured on the glasses | Accepted |
 | [0006](0006-errors-never-shown-or-spoken-as-answers.md) | Errors are never shown or spoken as answers | Accepted |
+| [0007](0007-streaming-to-the-glasses.md) | Streaming to the glasses | Proposed |
+| [0008](0008-surface-routing.md) | Surface routing | Proposed |
 | [0009](0009-apache-2-0-and-dco.md) | Apache-2.0 + DCO | Accepted |
-
-> **Note:** Numbers `0007` (streaming to the glasses) and `0008` (surface routing) are reserved for upcoming proposals on the roadmap.
 
 ## Related Documentation
 
