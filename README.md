@@ -386,6 +386,7 @@ A: Add keep rules to proguard-rules.pro:
 | ------------------------------------------------------------- | -------------------------------------------- |
 | [API Settings Guide](doc/API_SETTINGS.md)                     | Complete API configuration for all providers |
 | [Architecture Overview](doc/ARCHITECTURE.md)                  | System design, data flow, component details  |
+| [Architecture Decision Records](doc/adr/README.md)            | Key architectural decisions (ADRs)           |
 | [STT Implementation Status](doc/STT_IMPLEMENTATION_STATUS.md) | Complete status of all 18 STT providers      |
 
 ---

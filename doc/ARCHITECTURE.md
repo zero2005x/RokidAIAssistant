@@ -14,6 +14,7 @@
 | How to add a new AI provider?   | Implement `AiServiceProvider` interface | [AI Provider Interface](#ai-service-provider-interface) |
 | Where is conversation stored?   | Room database in phone-app              | [Data Flow](#data-flow)                                 |
 | How are messages formatted?     | Binary protocol in `common/protocol/`   | [Message Protocol](#message-protocol)                   |
+| Where are design decisions kept?| Nygard-style ADRs in `doc/adr/`         | [Architecture Decision Records](adr/README.md)          |
 
 ---
 
@@ -634,6 +635,8 @@ enum class MessageType(val code: Int) {
 ---
 
 ## Technology Decisions
+
+Key architectural decisions are recorded as short Nygard-style ADRs in [`doc/adr/README.md`](adr/README.md).
 
 | Decision                  | Rationale                                    | Trade-offs                   |
 | ------------------------- | -------------------------------------------- | ---------------------------- |

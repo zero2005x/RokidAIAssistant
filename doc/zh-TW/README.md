@@ -341,6 +341,7 @@ A: 在 proguard-rules.pro 加入 keep 規則：
   -------------------------------   --------------------------  
   [API 設定指南](API_SETTINGS.md)   所有服務商的完整 API 設定   
   [架構概覽](ARCHITECTURE.md)       系統設計、資料流、元件詳情  
+  [架構決策紀錄](../adr/README.md)  核心架構決策與取捨 (ADR)
 
 ---
 
